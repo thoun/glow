@@ -92,12 +92,28 @@ $playerActionsGameStates = [
         "description" => clienttranslate('${actplayer} must recruit a companion'),
         "descriptionmyturn" => clienttranslate('${you} must recruit a companion'),
         "type" => "activeplayer",
-        //"args" => "argLoadAnimal",
+        //"args" => "argRecuitCompanion",
         "possibleactions" => [ 
             "recruitCompanion",
         ],
         "transitions" => [
             "recruitCompanion" => ST_NEXT_PLAYER,
+            "recruitCompanion2players" => ST_PLAYER_REMOVE_COMPANION,
+            "zombiePass" => ST_NEXT_PLAYER,
+        ]
+    ],
+
+    ST_PLAYER_REMOVE_COMPANION => [
+        "name" => "removeCompanion",
+        "description" => clienttranslate('${actplayer} must remove a companion'),
+        "descriptionmyturn" => clienttranslate('${you} must remove a companion'),
+        "type" => "activeplayer",
+        //"args" => "argRemoveCompanion",
+        "possibleactions" => [ 
+            "removeCompanion",
+        ],
+        "transitions" => [
+            "removeCompanion" => ST_NEXT_PLAYER,
             "zombiePass" => ST_NEXT_PLAYER,
         ]
     ],
