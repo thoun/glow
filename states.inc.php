@@ -69,8 +69,7 @@ $basicGameStates = [
         "action" => "stNextPlayer",
         "transitions" => [
             "nextPlayer" => ST_START_ROUND, 
-            "endRound" => ST_END_ROUND,
-            "endGame" => ST_END_GAME, // for solo mode
+            "endRecruit" => ST_MULTIPLAYER_ROLL_DICE,
         ],
     ],
    
@@ -88,137 +87,72 @@ $basicGameStates = [
 
 $playerActionsGameStates = [
 
- /*   ST_PLAYER_LOAD_ANIMAL => [
-        "name" => "loadAnimal",
-        "description" => clienttranslate('${actplayer} must load an animal'),
-        "descriptionmyturn" => clienttranslate('${you} must load an animal'),
-        "descriptionimpossible" => clienttranslate('${actplayer} must take back all animals present on the ferry'),
-        "descriptionmyturnimpossible" => clienttranslate('${you} must take back all animals present on the ferry'),
+    ST_PLAYER_RECRUIT_COMPANION => [
+        "name" => "recruitCompanion",
+        "description" => clienttranslate('${actplayer} must recruit a companion'),
+        "descriptionmyturn" => clienttranslate('${you} must recruit a companion'),
         "type" => "activeplayer",
-        "args" => "argLoadAnimal",
+        //"args" => "argLoadAnimal",
         "possibleactions" => [ 
-            "loadAnimal",
-            "takeAllAnimals",
+            "recruitCompanion",
         ],
         "transitions" => [
-            "loadAnimal" => ST_PLAYER_LOAD_ANIMAL,
-            "chooseGender" => ST_PLAYER_CHOOSE_GENDER,
-            "chooseWeight" => ST_PLAYER_CHOOSE_WEIGHT,
-            "chooseOpponent" => ST_PLAYER_CHOOSE_OPPONENT,
-            "moveNoah" => ST_PLAYER_MOVE_NOAH,
+            "recruitCompanion" => ST_NEXT_PLAYER,
             "zombiePass" => ST_NEXT_PLAYER,
         ]
     ],
 
-    ST_PLAYER_CHOOSE_GENDER => [
-        "name" => "chooseGender",
-        "description" => clienttranslate('${actplayer} must choose gender'),
-        "descriptionmyturn" => clienttranslate('${you} must choose gender'),
-        "type" => "activeplayer",  
+    ST_MULTIPLAYER_ROLL_DICE => [
+        "name" => "rollDice",
+        "description" => clienttranslate('Players can reroll their dice'),
+        "descriptionmyturn" => clienttranslate('${you} can reroll their dice'),
+        "type" => "multipleactiveplayer",
+        //"action" => "stLeaveTokyo",
+        //"args" => "argLeaveTokyo",
         "possibleactions" => [ 
-            "setGender",
+            "reroll", 
+            "keep" 
         ],
         "transitions" => [
-            "moveNoah" => ST_PLAYER_MOVE_NOAH,
-            "zombiePass" => ST_NEXT_PLAYER,
-        ]
+            "keep" => ST_MULTIPLAYER_RESOLVE_CARDS,
+            "zombiePass" => ST_MULTIPLAYER_RESOLVE_CARDS,
+        ],
     ],
 
-    ST_PLAYER_CHOOSE_WEIGHT => [
-        "name" => "chooseWeight",
-        "description" => clienttranslate('${actplayer} must choose weight'),
-        "descriptionmyturn" => clienttranslate('${you} must choose weight'),
-        "type" => "activeplayer",    
-        "args" => "argChooseWeight",  
+    ST_MULTIPLAYER_RESOLVE_CARDS => [
+        "name" => "resolveCards",
+        "description" => clienttranslate('Players must resolve their cards'),
+        "descriptionmyturn" => clienttranslate('${you} must resolve their cards'),
+        "type" => "multipleactiveplayer",
+        //"action" => "stLeaveTokyo",
+        //"args" => "argLeaveTokyo",
         "possibleactions" => [ 
-            "setWeight",
+            "resolve", 
         ],
         "transitions" => [
-            "moveNoah" => ST_PLAYER_MOVE_NOAH,
-            "zombiePass" => ST_NEXT_PLAYER,
-        ]
+            "resolve" => ST_MULTIPLAYER_MOVE,
+            "zombiePass" => ST_MULTIPLAYER_MOVE,
+        ],
     ],
 
-    ST_PLAYER_CHOOSE_OPPONENT => [
-        "name" => "chooseOpponent",
-        "description" => clienttranslate('${actplayer} must choose a player to look cards'),
-        "descriptionmyturn" => clienttranslate('${you} must choose a player to look cards'),
-        "descriptionexchange" => clienttranslate('${actplayer} must choose a player to exchange card'),
-        "descriptionmyturnexchange" => clienttranslate('${you} must choose a player to exchange card'),
-        "descriptiongive" => clienttranslate('${actplayer} must choose a player to give card'),
-        "descriptionmyturngive" => clienttranslate('${you} must choose a player to give card'),
-        "type" => "activeplayer",   
-        "action" => "stChooseOpponent",      
-        "args" => "argChooseOpponent",
+    ST_MULTIPLAYER_MOVE => [
+        "name" => "move",
+        "description" => clienttranslate('Players must move their company'),
+        "descriptionmyturn" => clienttranslate('${you} must move their company'),
+        "descriptionboat" => clienttranslate('Players must move their boats'),
+        "descriptionmyturnboat" => clienttranslate('${you} must move their boats'),
+        "type" => "multipleactiveplayer",
+        //"action" => "stLeaveTokyo",
+        //"args" => "argLeaveTokyo",
         "possibleactions" => [ 
-            "lookCards",
-            "exchangeCard",
-            "giveCardFromFerry",
+            "move", 
         ],
         "transitions" => [
-            "look" => ST_PLAYER_VIEW_CARDS,
-            "exchange" => ST_PLAYER_GIVE_CARD,
-            "moveNoah" => ST_PLAYER_MOVE_NOAH,
-            "zombiePass" => ST_NEXT_PLAYER,
-        ]
-    ],
-
-    ST_PLAYER_VIEW_CARDS =>  [
-        "name" => "viewCards",
-    	"description" => clienttranslate('${actplayer} looks to chosen opponent cards'),
-    	"descriptionmyturn" => clienttranslate('${you} look to chosen opponent cards'),
-    	"type" => "activeplayer",
-        "args" => "argViewCards",
-    	"possibleactions" => [ "seen" ],
-    	"transitions" => [ 
-            "seen" => ST_PLAYER_MOVE_NOAH,
-        ]
-    ],
-
-    ST_PLAYER_GIVE_CARD =>  [
-        "name" => "giveCard",
-    	"description" => clienttranslate('${actplayer} must give back a card to chosen opponent'),
-    	"descriptionmyturn" => clienttranslate('${you} must give back a card to chosen opponent'),
-    	"type" => "activeplayer",
-        "action" => "stGiveCard",
-    	"possibleactions" => [ "giveCard" ],
-    	"transitions" => [ 
-            "giveCard" => ST_PLAYER_MOVE_NOAH,
-        ]
-    ],
-
-    ST_PLAYER_MOVE_NOAH => [
-        "name" => "moveNoah",
-        "description" => clienttranslate('${actplayer} must move Noah'),
-        "descriptionmyturn" => clienttranslate('${you} must move Noah'),
-        "type" => "activeplayer",  
-        "action" => "stMoveNoah",      
-        "args" => "argMoveNoah",
-        "possibleactions" => [ 
-            "moveNoah",
+            "resolve" => ST_END_ROUND,
+            "zombiePass" => ST_END_ROUND,
         ],
-        "transitions" => [
-            "checkOptimalLoading" => ST_PLAYER_OPTIMAL_LOADING,
-            "zombiePass" => ST_NEXT_PLAYER,
-        ]
     ],
 
-    ST_PLAYER_OPTIMAL_LOADING => [
-        "name" => "optimalLoading",
-        "description" => clienttranslate('${actplayer} must give ${number} card(s) from your hand to opponents'),
-        "descriptionmyturn" => clienttranslate('${you} must give ${number} card(s) from your hand to opponents'),
-        "type" => "activeplayer",  
-        "action" => "stOptimalLoading",      
-        "args" => "argOptimalLoading",
-        "possibleactions" => [ 
-            "giveCards",
-        ],
-        "transitions" => [
-            "drawCards" => ST_DRAW_CARDS,
-            "nextPlayer" => ST_NEXT_PLAYER,
-            "zombiePass" => ST_NEXT_PLAYER,
-        ]
-    ],*/
 ];
 
 
@@ -229,20 +163,9 @@ $gameGameStates = [
         "type" => "game",
         "action" => "stStartRound",
         "transitions" => [ 
-            "" => ST_END_ROUND,
+            "morning" => ST_PLAYER_RECRUIT_COMPANION,
         ],
     ],
-
- /*   ST_DRAW_CARDS => [
-        "name" => "drawCards",
-        "description" => "",
-        "type" => "game",
-        "action" => "stDrawCards",
-        "transitions" => [ 
-            "nextPlayer" => ST_NEXT_PLAYER,
-            "zombiePass" => ST_NEXT_PLAYER,
-        ],
-    ],*/
 
     ST_END_ROUND => [
         "name" => "endRound",

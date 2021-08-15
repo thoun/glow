@@ -21,9 +21,11 @@ require_once(APP_GAMEMODULE_PATH.'module/table/table.game.php');
 
 require_once('modules/php/constants.inc.php');
 require_once('modules/php/utils.php');
+require_once('modules/php/states.php');
 
 class Glow extends Table {
     use UtilTrait;
+    use StateTrait;
 
 	function __construct() {
         // Your global variables labels:
@@ -81,7 +83,7 @@ class Glow extends Table {
         /************ Start the game initialization *****/
 
         // Init global values with their initial values
-        self::setGameStateInitialValue('DAY', 1);
+        self::setGameStateInitialValue('DAY', 0);
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -197,28 +199,6 @@ class Glow extends Table {
             'variable2' => $value2,
             ...
         );
-    }    
-    */
-
-//////////////////////////////////////////////////////////////////////////////
-//////////// Game state actions
-////////////
-
-    /*
-        Here, you can create methods defined as "game state actions" (see "action" property in states.inc.php).
-        The action method of state X is called everytime the current game state is set to X.
-    */
-    
-    /*
-    
-    Example for game state "MyGameState":
-
-    function stMyGameState()
-    {
-        // Do some stuff ...
-        
-        // (very often) go to another gamestate
-        $this->gamestate->nextState( 'some_gamestate_transition' );
     }    
     */
 
