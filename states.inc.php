@@ -49,63 +49,211 @@
 
 //    !! It is not a good idea to modify this file when a game is running !!
 
- 
-$machinestates = array(
+require_once("modules/php/constants.inc.php");
+
+$basicGameStates = [
 
     // The initial state. Please do not modify.
-    1 => array(
+    ST_BGA_GAME_SETUP => [
         "name" => "gameSetup",
-        "description" => "",
+        "description" => clienttranslate("Game setup"),
         "type" => "manager",
         "action" => "stGameSetup",
-        "transitions" => array( "" => 2 )
-    ),
-    
-    // Note: ID=2 => your first state
+        "transitions" => [ "" => ST_START_ROUND ]
+    ],
 
-    2 => array(
-    		"name" => "playerTurn",
-    		"description" => clienttranslate('${actplayer} must play a card or pass'),
-    		"descriptionmyturn" => clienttranslate('${you} must play a card or pass'),
-    		"type" => "activeplayer",
-    		"possibleactions" => array( "playCard", "pass" ),
-    		"transitions" => array( "playCard" => 2, "pass" => 2 )
-    ),
-    
-/*
-    Examples:
-    
-    2 => array(
+    ST_NEXT_PLAYER => [
         "name" => "nextPlayer",
-        "description" => '',
+        "description" => "",
         "type" => "game",
         "action" => "stNextPlayer",
-        "updateGameProgression" => true,   
-        "transitions" => array( "endGame" => 99, "nextPlayer" => 10 )
-    ),
-    
-    10 => array(
-        "name" => "playerTurn",
-        "description" => clienttranslate('${actplayer} must play a card or pass'),
-        "descriptionmyturn" => clienttranslate('${you} must play a card or pass'),
-        "type" => "activeplayer",
-        "possibleactions" => array( "playCard", "pass" ),
-        "transitions" => array( "playCard" => 2, "pass" => 2 )
-    ), 
-
-*/    
+        "transitions" => [
+            "nextPlayer" => ST_START_ROUND, 
+            "endRound" => ST_END_ROUND,
+            "endGame" => ST_END_GAME, // for solo mode
+        ],
+    ],
    
     // Final state.
-    // Please do not modify (and do not overload action/args methods).
-    99 => array(
+    // Please do not modify.
+    ST_END_GAME => [
         "name" => "gameEnd",
         "description" => clienttranslate("End of game"),
         "type" => "manager",
         "action" => "stGameEnd",
-        "args" => "argGameEnd"
-    )
-
-);
-
+        "args" => "argGameEnd",
+    ],
+];
 
 
+$playerActionsGameStates = [
+
+ /*   ST_PLAYER_LOAD_ANIMAL => [
+        "name" => "loadAnimal",
+        "description" => clienttranslate('${actplayer} must load an animal'),
+        "descriptionmyturn" => clienttranslate('${you} must load an animal'),
+        "descriptionimpossible" => clienttranslate('${actplayer} must take back all animals present on the ferry'),
+        "descriptionmyturnimpossible" => clienttranslate('${you} must take back all animals present on the ferry'),
+        "type" => "activeplayer",
+        "args" => "argLoadAnimal",
+        "possibleactions" => [ 
+            "loadAnimal",
+            "takeAllAnimals",
+        ],
+        "transitions" => [
+            "loadAnimal" => ST_PLAYER_LOAD_ANIMAL,
+            "chooseGender" => ST_PLAYER_CHOOSE_GENDER,
+            "chooseWeight" => ST_PLAYER_CHOOSE_WEIGHT,
+            "chooseOpponent" => ST_PLAYER_CHOOSE_OPPONENT,
+            "moveNoah" => ST_PLAYER_MOVE_NOAH,
+            "zombiePass" => ST_NEXT_PLAYER,
+        ]
+    ],
+
+    ST_PLAYER_CHOOSE_GENDER => [
+        "name" => "chooseGender",
+        "description" => clienttranslate('${actplayer} must choose gender'),
+        "descriptionmyturn" => clienttranslate('${you} must choose gender'),
+        "type" => "activeplayer",  
+        "possibleactions" => [ 
+            "setGender",
+        ],
+        "transitions" => [
+            "moveNoah" => ST_PLAYER_MOVE_NOAH,
+            "zombiePass" => ST_NEXT_PLAYER,
+        ]
+    ],
+
+    ST_PLAYER_CHOOSE_WEIGHT => [
+        "name" => "chooseWeight",
+        "description" => clienttranslate('${actplayer} must choose weight'),
+        "descriptionmyturn" => clienttranslate('${you} must choose weight'),
+        "type" => "activeplayer",    
+        "args" => "argChooseWeight",  
+        "possibleactions" => [ 
+            "setWeight",
+        ],
+        "transitions" => [
+            "moveNoah" => ST_PLAYER_MOVE_NOAH,
+            "zombiePass" => ST_NEXT_PLAYER,
+        ]
+    ],
+
+    ST_PLAYER_CHOOSE_OPPONENT => [
+        "name" => "chooseOpponent",
+        "description" => clienttranslate('${actplayer} must choose a player to look cards'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a player to look cards'),
+        "descriptionexchange" => clienttranslate('${actplayer} must choose a player to exchange card'),
+        "descriptionmyturnexchange" => clienttranslate('${you} must choose a player to exchange card'),
+        "descriptiongive" => clienttranslate('${actplayer} must choose a player to give card'),
+        "descriptionmyturngive" => clienttranslate('${you} must choose a player to give card'),
+        "type" => "activeplayer",   
+        "action" => "stChooseOpponent",      
+        "args" => "argChooseOpponent",
+        "possibleactions" => [ 
+            "lookCards",
+            "exchangeCard",
+            "giveCardFromFerry",
+        ],
+        "transitions" => [
+            "look" => ST_PLAYER_VIEW_CARDS,
+            "exchange" => ST_PLAYER_GIVE_CARD,
+            "moveNoah" => ST_PLAYER_MOVE_NOAH,
+            "zombiePass" => ST_NEXT_PLAYER,
+        ]
+    ],
+
+    ST_PLAYER_VIEW_CARDS =>  [
+        "name" => "viewCards",
+    	"description" => clienttranslate('${actplayer} looks to chosen opponent cards'),
+    	"descriptionmyturn" => clienttranslate('${you} look to chosen opponent cards'),
+    	"type" => "activeplayer",
+        "args" => "argViewCards",
+    	"possibleactions" => [ "seen" ],
+    	"transitions" => [ 
+            "seen" => ST_PLAYER_MOVE_NOAH,
+        ]
+    ],
+
+    ST_PLAYER_GIVE_CARD =>  [
+        "name" => "giveCard",
+    	"description" => clienttranslate('${actplayer} must give back a card to chosen opponent'),
+    	"descriptionmyturn" => clienttranslate('${you} must give back a card to chosen opponent'),
+    	"type" => "activeplayer",
+        "action" => "stGiveCard",
+    	"possibleactions" => [ "giveCard" ],
+    	"transitions" => [ 
+            "giveCard" => ST_PLAYER_MOVE_NOAH,
+        ]
+    ],
+
+    ST_PLAYER_MOVE_NOAH => [
+        "name" => "moveNoah",
+        "description" => clienttranslate('${actplayer} must move Noah'),
+        "descriptionmyturn" => clienttranslate('${you} must move Noah'),
+        "type" => "activeplayer",  
+        "action" => "stMoveNoah",      
+        "args" => "argMoveNoah",
+        "possibleactions" => [ 
+            "moveNoah",
+        ],
+        "transitions" => [
+            "checkOptimalLoading" => ST_PLAYER_OPTIMAL_LOADING,
+            "zombiePass" => ST_NEXT_PLAYER,
+        ]
+    ],
+
+    ST_PLAYER_OPTIMAL_LOADING => [
+        "name" => "optimalLoading",
+        "description" => clienttranslate('${actplayer} must give ${number} card(s) from your hand to opponents'),
+        "descriptionmyturn" => clienttranslate('${you} must give ${number} card(s) from your hand to opponents'),
+        "type" => "activeplayer",  
+        "action" => "stOptimalLoading",      
+        "args" => "argOptimalLoading",
+        "possibleactions" => [ 
+            "giveCards",
+        ],
+        "transitions" => [
+            "drawCards" => ST_DRAW_CARDS,
+            "nextPlayer" => ST_NEXT_PLAYER,
+            "zombiePass" => ST_NEXT_PLAYER,
+        ]
+    ],*/
+];
+
+
+$gameGameStates = [
+    ST_START_ROUND => [
+        "name" => "startRound",
+        "description" => "",
+        "type" => "game",
+        "action" => "stStartRound",
+        "transitions" => [ 
+            "" => ST_END_ROUND,
+        ],
+    ],
+
+ /*   ST_DRAW_CARDS => [
+        "name" => "drawCards",
+        "description" => "",
+        "type" => "game",
+        "action" => "stDrawCards",
+        "transitions" => [ 
+            "nextPlayer" => ST_NEXT_PLAYER,
+            "zombiePass" => ST_NEXT_PLAYER,
+        ],
+    ],*/
+
+    ST_END_ROUND => [
+        "name" => "endRound",
+        "description" => "",
+        "type" => "game",
+        "action" => "stEndRound",
+        "transitions" => [ 
+            "newRound" => ST_START_ROUND,
+            "endGame" => ST_END_GAME
+        ],
+    ],
+];
+ 
+$machinestates = $basicGameStates + $playerActionsGameStates + $gameGameStates;
