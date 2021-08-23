@@ -68,12 +68,9 @@ interface GlowGamedatas {
     tablespeed: string;
 
     // Add here variables you set up in getAllDatas
-    handMachines: Machine[];
-    tableMachines: Machine[];
-    tableProjects: Project[];
-    resources: Resource[][];
-    remainingMachines: number;
-    remainingProjects: number;
+    firstPlayer: number;
+    side: number;
+    day: number;
 
     endTurn: boolean;
 }

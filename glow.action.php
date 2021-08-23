@@ -37,31 +37,37 @@
             $this->view = "glow_glow";
             self::trace( "Complete reinitialization of board game" );
       }
-  	} 
+  	}
   	
-  	// TODO: defines your action entry points there
-
-
-    /*
-    
-    Example:
-  	
-    public function myAction()
-    {
+    public function chooseAdventurer() {
         self::setAjaxMode();     
 
-        // Retrieve arguments
-        // Note: these arguments correspond to what has been sent through the javascript "ajaxcall" method
-        $arg1 = self::getArg( "myArgument1", AT_posint, true );
-        $arg2 = self::getArg( "myArgument2", AT_posint, true );
+        $id = self::getArg('id', AT_posint, true);
 
-        // Then, call the appropriate method in your game logic, like "playCard" or "myAction"
-        $this->game->myAction( $arg1, $arg2 );
+        $this->game->chooseAdventurer($id);
 
-        self::ajaxResponse( );
+        self::ajaxResponse();
     }
-    
-    */
+  	
+    public function recruitCompanion() {
+        self::setAjaxMode();     
+
+        $spot = self::getArg('spot', AT_posint, true);
+
+        $this->game->recruitCompanion($spot);
+
+        self::ajaxResponse();
+    }
+  	
+    public function removeCompanion() {
+        self::setAjaxMode();     
+
+        $spot = self::getArg('spot', AT_posint, true);
+
+        $this->game->removeCompanion($spot);
+
+        self::ajaxResponse();
+    }
 
   }
   

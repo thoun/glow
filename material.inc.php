@@ -19,19 +19,14 @@
  *
  */
 
-
-/*
-
-Example:
-
-$this->card_types = array(
-    1 => array( "card_name" => ...,
-                ...
-              )
-);
-
-*/
-
-
-
-
+$this->DICES = [
+  // color is the key, then large number and small number
+  1 => [3, 2], // green
+  2 => [3, 2], // blue
+  3 => [3, 2], // azure
+  4 => [4, 1], // red
+  5 => [3, 1], // orange
+  6 => [2, 1], // purple
+  7 => [2, 0], // yellow
+  8 => [0, 1], // black
+];

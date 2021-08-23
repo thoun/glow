@@ -23,6 +23,8 @@ CREATE TABLE IF NOT EXISTS `dice` (
   `die_value` TINYINT unsigned NOT NULL DEFAULT 0,
   `color` TINYINT unsigned NOT NULL DEFAULT 0,
   `small` TINYINT unsigned NOT NULL DEFAULT false,
+  `location` varchar(16) NOT NULL DEFAULT 'deck',
+  `location_arg` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`die_id`)
 ) ENGINE=InnoDB;
 
@@ -47,3 +49,5 @@ CREATE TABLE IF NOT EXISTS `companion` (
 ALTER TABLE `player` ADD `player_reroll_tokens` TINYINT UNSIGNED NOT NULL DEFAULT '0';
 ALTER TABLE `player` ADD `player_firefly_tokens` TINYINT UNSIGNED NOT NULL DEFAULT '0';
 ALTER TABLE `player` ADD `player_footprint_tokens` TINYINT UNSIGNED NOT NULL DEFAULT '0';
+
+-- TODO spell tokens

@@ -31,6 +31,24 @@ trait StateTrait {
     
 
     function stEndRound() {
+
+        $this->placeCompanionsOnMeetingTrack();
+
+        $nextPlayerTable = self::createNextPlayerTable(array_keys(self::loadPlayersBasicInfos()));
+        $newFirstPlayer = intval($nextPlayerTable[intval($this->getGameStateValue(FIRST_PLAYER))]);
+        $this->setGameStateValue(FIRST_PLAYER, $newFirstPlayer);
+
+        self::notifyAllPlayers('newFirstPlayer', clienttranslate('${player_name} is the new First player'), [
+            'playerId' => $newFirstPlayer,
+            'player_name' => $this->getPlayerName($newFirstPlayer),
+        ]);
+
+        if (intval($this->companions->countCardInLocation('deck')) == 0 || intval($this->getGameStateValue(DAY)) == 8) {
+            $this->gamestate->nextState('endGame');
+        } else {
+            $this->gamestate->nextState('newRound');
+        }
+
         /*// count points remaining in hands
         $playersIds = $this->getPlayersIds();
         foreach($playersIds as $playerId) {

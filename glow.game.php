@@ -22,10 +22,16 @@ require_once(APP_GAMEMODULE_PATH.'module/table/table.game.php');
 require_once('modules/php/constants.inc.php');
 require_once('modules/php/utils.php');
 require_once('modules/php/states.php');
+require_once('modules/php/args.php');
+require_once('modules/php/actions.php');
+require_once('modules/php/debug-util.php');
 
 class Glow extends Table {
     use UtilTrait;
+    use ActionTrait;
     use StateTrait;
+    use ArgsTrait;
+    use DebugUtilTrait;
 
 	function __construct() {
         // Your global variables labels:
@@ -41,7 +47,13 @@ class Glow extends Table {
             FIRST_PLAYER => 11,
             
             BOARD_SIDE => 100,
-        ]);        
+        ]); 
+		
+        $this->adventurers = self::getNew("module.common.deck");
+        $this->adventurers->init("adventurer");
+		
+        $this->companions = self::getNew("module.common.deck");
+        $this->companions->init("companion");
 	}
 	
     protected function getGameName() {
@@ -91,10 +103,34 @@ class Glow extends Table {
         //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
 
         // TODO: setup the initial game situation here
-       
+        
+        $this->createDice();
+        $this->createAdventurers();
+        $this->createCompanions();
+        $this->createSpells();
+
+        $this->placeCompanionsOnMeetingTrack();
+
+        // The player on the right of first player receives 2 reroll tokens.
+        if (count($players) > 1) {
+            $this->addPlayerReroll($players[count($players) - 1]['player_id'], 2);
+        }
+        
+        /*TODO The first player rolls the 9 small dice (2 green, 2 azure,
+        2 blue, 1 red, 1 orange and 1 purple). They are then placed,
+        according to their result, on the corresponding spaces on
+        the meeting track. If the purple die indicates the footprint
+        symbol, it is rerolled by the first player.
+
+        /* TODO It may be that one or more of the spaces on the track do not
+        receive a small die. In this case, a footprint token is placed
+        on each space without a die.*/
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
+
+        // TODO TEMP card to test
+        //$this->debugSetup();
 
         /************ End of the game initialization *****/
     }
@@ -118,7 +154,9 @@ class Glow extends Table {
         $sql = "SELECT player_id id, player_score score FROM player ";
         $result['players'] = self::getCollectionFromDb($sql);
   
-        // TODO: Gather all information about current game situation (visible by player $current_player_id).
+        $result['firstPlayer'] = intval(self::getGameStateValue(FIRST_PLAYER));
+        $result['side'] = intval(self::getGameStateValue(BOARD_SIDE));
+        $result['day'] = intval(self::getGameStateValue(DAY));
   
         return $result;
     }
@@ -136,7 +174,7 @@ class Glow extends Table {
     function getGameProgression() {
         // TODO: compute and return the game progression
 
-        return (intval(self::getGameStateValue('DAY')) - 1) * 12.5;
+        return (intval(self::getGameStateValue(DAY)) - 1) * 12.5;
     }
 
 //////////////////////////////////////////////////////////////////////////////

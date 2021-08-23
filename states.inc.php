@@ -59,17 +59,28 @@ $basicGameStates = [
         "description" => clienttranslate("Game setup"),
         "type" => "manager",
         "action" => "stGameSetup",
-        "transitions" => [ "" => ST_START_ROUND ]
+        "transitions" => [ "" => ST_PLAYER_CHOOSE_ADVENTURER ]
     ],
 
-    ST_NEXT_PLAYER => [
-        "name" => "nextPlayer",
+    ST_NEXT_PLAYER_CHOOSE_ADVENTURER => [
+        "name" => "nextPlayerChooseAdventurer",
         "description" => "",
         "type" => "game",
-        "action" => "stNextPlayer",
+        "action" => "stNextPlayerChooseAdventurer",
+        "transitions" => [
+            "nextPlayer" => ST_PLAYER_CHOOSE_ADVENTURER, 
+            "end" => ST_START_ROUND,
+        ],
+    ],
+
+    ST_NEXT_PLAYER_RECRUIT => [
+        "name" => "nextPlayerRecruit",
+        "description" => "",
+        "type" => "game",
+        "action" => "stNextPlayerRecruit",
         "transitions" => [
             "nextPlayer" => ST_START_ROUND, 
-            "endRecruit" => ST_MULTIPLAYER_ROLL_DICE,
+            "end" => ST_MULTIPLAYER_ROLL_DICE,
         ],
     ],
    
@@ -87,6 +98,21 @@ $basicGameStates = [
 
 $playerActionsGameStates = [
 
+    ST_PLAYER_CHOOSE_ADVENTURER => [
+        "name" => "chooseAdventurer",
+        "description" => clienttranslate('${actplayer} must choose an adventurer'),
+        "descriptionmyturn" => clienttranslate('${you} must choose an adventurer'),
+        "type" => "activeplayer",
+        "args" => "argChooseAdventurer",
+        "possibleactions" => [ 
+            "chooseAdventurer",
+        ],
+        "transitions" => [
+            "nextPlayer" => ST_NEXT_PLAYER_CHOOSE_ADVENTURER,
+            "zombiePass" => ST_NEXT_PLAYER_CHOOSE_ADVENTURER,
+        ]
+    ],
+
     ST_PLAYER_RECRUIT_COMPANION => [
         "name" => "recruitCompanion",
         "description" => clienttranslate('${actplayer} must recruit a companion'),
@@ -97,9 +123,9 @@ $playerActionsGameStates = [
             "recruitCompanion",
         ],
         "transitions" => [
-            "recruitCompanion" => ST_NEXT_PLAYER,
-            "recruitCompanion2players" => ST_PLAYER_REMOVE_COMPANION,
-            "zombiePass" => ST_NEXT_PLAYER,
+            "nextPlayer" => ST_NEXT_PLAYER_RECRUIT,
+            "removeCompanion" => ST_PLAYER_REMOVE_COMPANION,
+            "zombiePass" => ST_NEXT_PLAYER_RECRUIT,
         ]
     ],
 
@@ -113,8 +139,8 @@ $playerActionsGameStates = [
             "removeCompanion",
         ],
         "transitions" => [
-            "removeCompanion" => ST_NEXT_PLAYER,
-            "zombiePass" => ST_NEXT_PLAYER,
+            "nextPlayer" => ST_NEXT_PLAYER_RECRUIT,
+            "zombiePass" => ST_NEXT_PLAYER_RECRUIT,
         ]
     ],
 
