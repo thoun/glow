@@ -11,6 +11,20 @@ trait StateTrait {
         The action method of state X is called everytime the current game state is set to X.
     */
 
+    
+
+    function stNextPlayerChooseAdventurer() {     
+        $playerId = self::getActivePlayerId();
+
+        $this->activeNextPlayer();
+    
+        $playerId = self::getActivePlayerId();
+        self::giveExtraTime($playerId);
+
+        $startRound = intval(self::getUniqueValueFromDB("SELECT count(*) FROM player where not exists(select * from adventurer where adventurer.card_location_arg = player.player_id)")) == 0;
+        $this->gamestate->nextState($startRound ? 'end' : 'nextPlayer');
+    }
+
     function stStartRound() {   
         self::setGameStateValue(DAY, intval($this->getGameStateValue(DAY)) + 1);
 

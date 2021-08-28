@@ -58,8 +58,8 @@ const PROJECTS_IDS = [
   38,
 ];
 
-const MACHINE_WIDTH = 190;
-const MACHINE_HEIGHT = 190;
+const CARD_WIDTH = 129;
+const CARD_HEIGHT = 240;
 
 const PROJECT_WIDTH = 134;
 const PROJECT_HEIGHT = 93;
@@ -68,19 +68,17 @@ function getUniqueId(object: { type: number, subType: number }): number {
     return object.type * 10 + object.subType;
 }
 
-function setupMachineCards(machineStocks: Stock[]) {
-    const cardsurl = `${g_gamethemeurl}img/cards.jpg`;
+function setupAdventurersCards(machineStock: Stock) {
+    const cardsurl = `${g_gamethemeurl}img/adventurers.png`;
 
-    machineStocks.forEach(machineStock => 
-            MACHINES_IDS.forEach((cardId, index) =>
-                machineStock.addItemType(
-                    cardId, 
-                    0, 
-                    cardsurl, 
-                    index
-                )
-        )
-    );
+    for (let i=1; i<=7;i++) {
+        machineStock.addItemType(
+            i, 
+            i, 
+            cardsurl, 
+            i-1
+        );
+    }
 }
 
 function setupProjectCards(projectStocks: Stock[]) {

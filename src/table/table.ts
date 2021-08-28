@@ -7,8 +7,8 @@ class Table {
     constructor(
         private game: GlowGame, 
         players: GlowPlayer[],
-        projects: Project[],
-        machines: Machine[],
+        projects: Companion[],
+        machines: Adventurer[],
         resources: Resource[][],
     ) {
         let html = '';
@@ -72,23 +72,17 @@ class Table {
             this.machineStocks[i] = new ebg.stock() as Stock;
             this.machineStocks[i].setSelectionAppearance('class');
             this.machineStocks[i].selectionClass = 'selected';
-            this.machineStocks[i].create(this.game, $(`table-machine-spot-${i}`), MACHINE_WIDTH, MACHINE_HEIGHT);
+            this.machineStocks[i].create(this.game, $(`table-machine-spot-${i}`), CARD_WIDTH, CARD_HEIGHT);
             this.machineStocks[i].setSelectionMode(0);
             this.machineStocks[i].onItemCreate = (cardDiv: HTMLDivElement, type: number) => {
                 setupMachineCard(game, cardDiv, type);
-
-                const id = Number(cardDiv.id.split('_')[2]);
-                const machine = machines.find(m => m.id == id);
-                if (machine?.resources?.length) {
-                    this.addResources(0, machine.resources);
-                }
             }
             dojo.connect(this.machineStocks[i], 'onChangeSelection', this, () => this.onMachineSelectionChanged(this.machineStocks[i].getSelectedItems(), this.machineStocks[i].container_div.id));
         }
-        setupMachineCards(this.machineStocks);
+        //setupAdventurersCards(this.machineStocks);
 
         for (let i=1; i<=10; i++) {
-            machines.filter(machine => machine.location_arg == i).forEach(machine => this.machineStocks[i].addToStockWithId(getUniqueId(machine), ''+machine.id));
+            machines.filter(machine => machine.location_arg == i).forEach(machine => this.machineStocks[i].addToStockWithId(0, ''+machine.id));
         }
 
         // resources
@@ -118,7 +112,7 @@ class Table {
 
             const datasetPayments = document.getElementById(`${stockId}_item_${cardId}`).dataset.payments;
             const payments = datasetPayments?.length && datasetPayments[0] == '[' ? JSON.parse(datasetPayments) : undefined;
-            this.game.machineClick(cardId, 'table', payments);
+            this.game.chooseAdventurer(cardId, 'table', payments);
         }
     }
 
@@ -163,10 +157,10 @@ class Table {
         }
     }
 
-    public machinePlayed(playerId: number, machine: Machine) {
+    public machinePlayed(playerId: number, machine: Adventurer) {
         const fromHandId = `my-machines_item_${machine.id}`;
         const from = document.getElementById(fromHandId) ? fromHandId : `player-icon-${playerId}`;
-        this.machineStocks[machine.location_arg].addToStockWithId(getUniqueId(machine), ''+machine.id, from);
+        this.machineStocks[machine.location_arg].addToStockWithId(0, ''+machine.id, from);
         dojo.addClass(`table-machine-spot-${machine.location_arg}_item_${machine.id}`, 'selected');
     }
 

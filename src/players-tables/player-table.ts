@@ -54,7 +54,7 @@ class PlayerTable {
         });
         setupProjectCards([this.projectStock]);
 
-        player.projects.forEach(project => this.projectStock.addToStockWithId(getUniqueId(project), ''+project.id));
+        player.companions.forEach(project => this.projectStock.addToStockWithId(getUniqueId(project), ''+project.id));
         this.setProjectStockVisibility();
 
         // machines
@@ -62,19 +62,13 @@ class PlayerTable {
         this.machineStock = new ebg.stock() as Stock;
         this.machineStock.setSelectionAppearance('class');
         this.machineStock.selectionClass = 'selected';
-        this.machineStock.create(this.game, $(`player-table-${this.playerId}-machines`), MACHINE_WIDTH, MACHINE_HEIGHT);
+        this.machineStock.create(this.game, $(`player-table-${this.playerId}-machines`), CARD_WIDTH, CARD_HEIGHT);
         this.machineStock.setSelectionMode(0);
         this.machineStock.centerItems = true;
         this.machineStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupMachineCard(game, cardDiv, type);
-        setupMachineCards([this.machineStock]);
+        //([this.machineStock]);
 
-        player.machines.forEach(machine => this.machineStock.addToStockWithId(getUniqueId(machine), ''+machine.id));
-
-        // resources
-        for (let i=0; i<=3; i++) {
-            const resourcesToPlace = player.resources[i];
-            this.addResources(i, resourcesToPlace);
-        }
+        player.companions.forEach(machine => this.machineStock.addToStockWithId(getUniqueId(machine), ''+machine.id));
     }
 
     private onProjectSelectionChanged() {
@@ -142,7 +136,7 @@ class PlayerTable {
         div.dataset.placed = JSON.stringify(placed);
     }
 
-    public addWorkshopProjects(projects: Project[]) {
+    public addWorkshopProjects(projects: Companion[]) {
         projects.forEach(project => addToStockWithId(this.projectStock, getUniqueId(project), ''+project.id, 'page-title'));
         this.setProjectStockVisibility();
     }

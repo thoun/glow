@@ -1,7 +1,7 @@
 @import url(../../../css/csslayer.css);
 
-/*@import 'table/table';
-@import 'players-tables/players-tables';
+@import 'table/table';
+/*@import 'players-tables/players-tables';
 @import 'discarded-machines-selector/discarded-machines-selector';
 @import 'help';
 }*/
@@ -15,4 +15,35 @@ html {
 .mode_3d #game_play_area_background {
     background: url('img/background.jpg');
     background-repeat: repeat;
+}
+
+.stockitem {
+  border-radius: 10px;
+  margin: 5px;
+  border: 1px solid gray;
+}
+
+.icon {
+  display: inline-block;
+  position: relative;
+  width: 32px;
+  height: 32px;
+  background-image: url('img/icons.png');
+  background-size: auto 100%;
+
+  &.reroll {
+    background-position: 0% 0%;
+  }
+
+  &.footprint {
+    background-position: 50% 0%;
+  }
+
+  &.firefly {
+    background-position: 100% 0%;
+  }
+}
+
+#adventurers-stock {
+    margin-bottom: 20px;
 }

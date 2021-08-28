@@ -1,5 +1,9 @@
 <?php
 
+require_once(__DIR__.'/objects/adventurer.php');
+require_once(__DIR__.'/objects/companion.php');
+require_once(__DIR__.'/objects/dice.php');
+
 trait UtilTrait {
 
     //////////////////////////////////////////////////////////////////////////////
@@ -51,7 +55,7 @@ trait UtilTrait {
     }
     
     function getDiceByColorAndSize(int $color, bool $small = false, int $limit = 0) {
-        $sql = "SELECT * FROM dice WHERE `color` = $color AND `small` = $small";
+        $sql = "SELECT * FROM dice WHERE `color` = $color AND `small` = ".json_encode($small);
         if ($limit > 0) {
             $sql .= " LIMIT $limit";
         }
@@ -60,14 +64,14 @@ trait UtilTrait {
     }
 
     function getDieById(int $id) {
-        $sql = "SELECT * FROM dice WHERE `dice_id` = $id";
+        $sql = "SELECT * FROM dice WHERE `die_id` = $id";
         $dbDices = self::getCollectionFromDB($sql);
         return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices))[0];
     }
 
     function moveDiceToPlayer(array $dice, int $playerId) {
         $ids = array_map(function ($idie) { return $idie->id; }, $dice);
-        self::DbQuery("UPDATE dice SET `location` = 'player', `location_arg` = $playerId WHERE `dice_id` IN (".implode(',', $ids).")");
+        self::DbQuery("UPDATE dice SET `location` = 'player', `location_arg` = $playerId WHERE `die_id` IN (".implode(',', $ids).")");
     }
 
     function getPlayerCount() {
@@ -106,8 +110,11 @@ trait UtilTrait {
         return $newValue;
     }
 
-    function createAdventurers() {
-        // TODO
+    function createAdventurers() {        
+        foreach($this->ADVENTURERS as $type => $adventurer) {
+            $adventurers[] = [ 'type' => $type, 'type_arg' => null, 'nbr' => 1];
+        }
+        $this->adventurers->createCards($adventurers, 'deck');
     }
 
     function createCompanions() {
@@ -135,13 +142,16 @@ trait UtilTrait {
         // TODO notif
     }
 
-    function getAdventurerName(int $type) {
+    function getAdventurerName(int $color) {
         $colorName = null;
-        switch ($type) {
-            case 1: $colorName = _('Production'); break;
-            case 2: $colorName = _('Transformation'); break;
-            case 3: $colorName = _('Attack'); break;
-            case 4: $colorName = _('Special'); break;
+        switch ($color) {
+            case 1: $colorName = 'Braccio'; break;
+            case 2: $colorName = 'Taetyss'; break;
+            case 3: $colorName = 'Eoles'; break;
+            case 4: $colorName = 'Pocana'; break;
+            case 5: $colorName = 'Moloc\'h'; break;
+            case 6: $colorName = 'Noctiluca'; break;
+            case 7: $colorName = 'Orium'; break;
         }
         return $colorName;
     }

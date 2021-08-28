@@ -46,8 +46,8 @@ CREATE TABLE IF NOT EXISTS `companion` (
   PRIMARY KEY (`card_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
-ALTER TABLE `player` ADD `player_reroll_tokens` TINYINT UNSIGNED NOT NULL DEFAULT '0';
-ALTER TABLE `player` ADD `player_firefly_tokens` TINYINT UNSIGNED NOT NULL DEFAULT '0';
-ALTER TABLE `player` ADD `player_footprint_tokens` TINYINT UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `player` ADD `player_rerolls` TINYINT UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `player` ADD `player_footprints` TINYINT UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `player` ADD `player_fireflies` TINYINT UNSIGNED NOT NULL DEFAULT '0';
 
 -- TODO spell tokens

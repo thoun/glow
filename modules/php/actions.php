@@ -16,8 +16,7 @@ trait ActionTrait {
         
         $playerId = intval(self::getActivePlayerId());
 
-        // set companion
-        $adventurer = $this->getAdventurersFromDb($this->adventurers->getCardsInLocation('table', $spot))[0];
+        $adventurer = $this->getAdventurerFromDb($this->adventurers->getCard($id));
 
         if ($adventurer->location != 'deck') {
             throw new BgaUserException("Adventurer not available");
@@ -26,13 +25,13 @@ trait ActionTrait {
         $this->adventurers->moveCard($adventurer->id, 'player', $playerId);
 
         // take big dice
-        $dice = $this->getDiceByColorAndSize($adventurer->color, false, $adventurer->diceNumber);
+        $dice = $this->getDiceByColorAndSize($adventurer->color, false, $adventurer->dice);
         $this->moveDiceToPlayer($dice, $playerId);
 
         self::notifyAllPlayers('chosenAdventurer', clienttranslate('${player_name} chooses adventurer ${adventurerName}'), [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
-            'adventurerName' => $this->getAdventurerName($adventurer->type),
+            'adventurerName' => $this->getAdventurerName($adventurer->color),
             'dice' => $dice,
         ]);
 

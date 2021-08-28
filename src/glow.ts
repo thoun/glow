@@ -18,15 +18,14 @@ const log = isDebug ? console.log.bind(window.console) : function () { };
 
 class Glow implements GlowGame {
     private gamedatas: GlowGamedatas;
-    private charcoaliumCounters: Counter[] = [];
-    private woodCounters: Counter[] = [];
-    private copperCounters: Counter[] = [];
-    private crystalCounters: Counter[] = [];
-    private machineCounter: Counter;
+    private rerollCounters: Counter[] = [];
+    private footprintCounters: Counter[] = [];
+    private fireflyCounters: Counter[] = [];
+    private companionCounter: Counter;
     private projectCounter: Counter;
     private helpDialog: any;
 
-    private playerMachineHand: Stock;
+    private adventurersStock: Stock;
     private table: Table;
     private playersTables: PlayerTable[] = [];
 
@@ -58,15 +57,18 @@ class Glow implements GlowGame {
     */
 
     public setup(gamedatas: GlowGamedatas) {
+        (this as any).dontPreloadImage('publisher.png');
+        (this as any).dontPreloadImage(`side${gamedatas.side == 2 ? 1 : 2}.png`);
+
         log( "Starting game setup" );
         
         this.gamedatas = gamedatas;
 
         log('gamedatas', gamedatas);
 
-        /*this.createPlayerPanels(gamedatas);
-        this.setHand(gamedatas.handMachines);
-        this.table = new Table(this, Object.values(gamedatas.players), gamedatas.tableProjects, gamedatas.tableMachines, gamedatas.resources);
+        dojo.addClass('board', `side${gamedatas.side}`);
+        this.createPlayerPanels(gamedatas);
+        /*this.table = new Table(this, Object.values(gamedatas.players), gamedatas.tableProjects, gamedatas.tableMachines, gamedatas.resources);
         this.table.onTableProjectSelectionChanged = selectProjectsIds => {
             this.selectedTableProjectsIds = selectProjectsIds;
             this.onProjectSelectionChanged();
@@ -109,22 +111,13 @@ class Glow implements GlowGame {
         log( 'Entering state: '+stateName , args.args );
 
         switch (stateName) {
-            case 'chooseAction':
-                this.clickAction = 'play';
-                this.onEnteringStateChooseAction(args.args as ChooseActionArgs);
+            case 'chooseAdventurer':
+                this.onEnteringStateChooseAdventurer(args.args);
                 break;
-            case 'choosePlayAction':
-                this.onEnteringStateChoosePlayAction(args.args as ChoosePlayActionArgs);
-                break;
-            case 'selectMachine':
-                this.clickAction = 'select';
-                this.onEnteringStateSelectMachine(args.args as SelectMachineArgs);
-                break;
-            case 'selectProject': case 'chooseProject':
-                this.onEnteringStateChooseProject(args.args as SelectProjectArgs);
-                break;
-            case 'chooseProjectDiscardedMachine':
-                this.onEnteringStateChooseProjectDiscardedMachine(args.args as ChooseProjectDiscardedMachineArgs);
+            case 'startRound':
+                if (document.getElementById('adventurers-stock')) {
+                    dojo.destroy('adventurers-stock');
+                }
                 break;
             case 'gameEnd':
                 const lastTurnBar = document.getElementById('last-round');
@@ -135,56 +128,30 @@ class Glow implements GlowGame {
         }
     }
 
-    private onEnteringStateChooseAction(args: ChooseActionArgs) {
-        if((this as any).isCurrentPlayerActive()) {
-            this.setHandSelectable(true);
-            this.table.setMachineSelectable(true);
+    private onEnteringStateChooseAdventurer(args: ChooseAdventurerArgs) {
+        const adventurers = args.adventurers;
+        if (!document.getElementById('adventurers-stock')) {
+            dojo.place(`<div id="adventurers-stock"></div>`, 'board', 'before');
+            
+            this.adventurersStock = new ebg.stock() as Stock;
+            this.adventurersStock.create(this, $('adventurers-stock'), CARD_WIDTH, CARD_HEIGHT);
+            this.adventurersStock.setSelectionMode(1);            
+            this.adventurersStock.setSelectionAppearance('class');
+            this.adventurersStock.selectionClass = 'nothing';
+            this.adventurersStock.centerItems = true;
+            this.adventurersStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupMachineCard(this, cardDiv, type);
+            dojo.connect(this.adventurersStock, 'onChangeSelection', this, () => this.onAdventurerSelection(this.adventurersStock.getSelectedItems()));
 
-            this.getMachineStocks().forEach(stock => stock.items.forEach(item => {
-                const machine = args.selectableMachines.find(machine => machine.id === Number(item.id));
-                const divId = `${stock.container_div.id}_item_${item.id}`;
-                if (machine) {
-                    document.getElementById(divId).dataset.payments = JSON.stringify(machine.payments);
-                } else {
-                    dojo.addClass(divId, 'disabled');
-                }
-            }));
-        }
-    }
+            setupAdventurersCards(this.adventurersStock);
 
-    private onEnteringStateChoosePlayAction(args: ChoosePlayActionArgs) {
-        dojo.addClass(`table-machine-spot-${args.machine.location_arg}_item_${args.machine.id}`, 'selected');
-    }
-    
-    private onEnteringStateSelectMachine(args: SelectMachineArgs) {
-        const stocks = this.getMachineStocks();
-        stocks.forEach(stock => stock.items
-            .filter(item => !args.selectableMachines.some(machine => machine.id === Number(item.id)))
-            .forEach(item => dojo.addClass(`${stock.container_div.id}_item_${item.id}`, 'disabled'))
-        );
-        stocks.forEach(stock => stock.setSelectionMode(1));
-    }
-
-    private onEnteringStateChooseProject(args: SelectProjectArgs) {
-        if (args.remainingProjects !== undefined) {
-            this.setRemainingProjects(args.remainingProjects);
+            adventurers.forEach(adventurer => this.adventurersStock.addToStockWithId(adventurer.color, ''+adventurer.id));
+        } else {
+            this.adventurersStock.items.filter(item => !adventurers.some(adventurer => adventurer.color == item.type)).forEach(item => this.adventurersStock.removeFromStockById(item.id));
         }
 
+        
         if((this as any).isCurrentPlayerActive()) {
-            this.setHandSelectable(true);
-            this.getPlayerTable(this.getPlayerId()).setProjectSelectable(true);
-            this.table.setProjectSelectable(true);
-
-            this.getProjectStocks().forEach(stock => stock.items
-                .filter(item => !args.projects.some(project => project.id === Number(item.id)))
-                .forEach(item => dojo.addClass(`${stock.container_div.id}_item_${item.id}`, 'disabled'))
-            );
-        }
-    }
-
-    private onEnteringStateChooseProjectDiscardedMachine(args: ChooseProjectDiscardedMachineArgs) {
-        if((this as any).isCurrentPlayerActive()) {
-            //this.discardedMachineSelector = new DiscardedMachineSelector(this, args.completeProjects);
+            this.adventurersStock.setSelectionMode(1);
         }
     }
 
@@ -195,47 +162,14 @@ class Glow implements GlowGame {
         log( 'Leaving state: '+stateName );
 
         switch (stateName) {
-            case 'chooseAction':
-                this.onLeavingChooseAction();
-                break;
-            case 'choosePlayAction':
-                this.onLeavingChoosePlayAction();
-                break;
-            case 'selectMachine':
-                this.clickAction = 'select';
-                this.onLeavingStateSelectMachine();
-            case 'selectProject': case 'chooseProject':
-                this.onLeavingChooseProject();
-                break;
-            case 'chooseProjectDiscardedMachine':
-                //this.discardedMachineSelector?.destroy();
+            case 'chooseAdventurer':
+                this.onLeavingChooseAdventurer();
                 break;
         }
     }
 
-    onLeavingChooseAction() {
-        this.setHandSelectable(false);
-        this.table.setMachineSelectable(false);
-        dojo.query('.stockitem').removeClass('disabled');
-        dojo.query('.stockitem').forEach(div => div.dataset.payments = '');
-    }
-
-    onLeavingChoosePlayAction() {
-        dojo.query('.stockitem').removeClass('selected');
-    }
-    
-    private onLeavingStateSelectMachine() {
-        const stocks = this.getMachineStocks();
-        stocks.forEach(stock => stock.items
-            .forEach(item => dojo.removeClass(`${stock.container_div.id}_item_${item.id}`, 'disabled'))
-        );
-        stocks.forEach(stock => stock.setSelectionMode(0));
-    }
-
-    onLeavingChooseProject() {
-        this.table.setProjectSelectable(false);
-        this.getPlayerTable(this.getPlayerId())?.setProjectSelectable(false);
-        dojo.query('.stockitem').removeClass('disabled');
+    onLeavingChooseAdventurer() {
+        this.adventurersStock.setSelectionMode(0);
     }
 
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
@@ -247,23 +181,23 @@ class Glow implements GlowGame {
                 case 'choosePlayAction': 
                     const choosePlayActionArgs = args as ChoosePlayActionArgs;
                     (this as any).addActionButton('getCharcoalium-button', _('Get charcoalium') + formatTextIcons(` (${choosePlayActionArgs.machine.points} [resource0])`), () => this.getCharcoalium());
-                    if (choosePlayActionArgs.machine.produce == 9) {
+                    if (choosePlayActionArgs.machine.dice == 9) {
                         for (let i=1; i<=3; i++) {
                             (this as any).addActionButton(`getResource${i}-button`, _('Get resource') + formatTextIcons(` ([resource${i}])`), () => this.getResource(i));
                         }
                     } else {
-                        (this as any).addActionButton('getResource-button', _('Get resource') + formatTextIcons(` ([resource${choosePlayActionArgs.machine.produce}])`), () => this.getResource(choosePlayActionArgs.machine.produce));
-                        if (choosePlayActionArgs.machine.type == 1 || choosePlayActionArgs.machine.produce == 0) {
+                        (this as any).addActionButton('getResource-button', _('Get resource') + formatTextIcons(` ([resource${choosePlayActionArgs.machine.dice}])`), () => this.getResource(choosePlayActionArgs.machine.dice));
+                        if (choosePlayActionArgs.machine.color == 1 || choosePlayActionArgs.machine.dice == 0) {
                             // for those machines, getting 1 resource is not the best option, so we "unlight" them
                             dojo.removeClass('getResource-button', 'bgabutton_blue');
                             dojo.addClass('getResource-button', 'bgabutton_gray');
                         }
                     }
-                    (this as any).addActionButton('applyEffect-button', _('Apply effect') + ` <div class="effect effect${MACHINES_IDS.indexOf(getUniqueId(choosePlayActionArgs.machine))}"></div>`, () => this.applyEffect());
+                    (this as any).addActionButton('applyEffect-button', _('Apply effect') + ` <div class="effect effect${MACHINES_IDS.indexOf(0)}"></div>`, () => this.applyEffect());
                     if (!choosePlayActionArgs.canApplyEffect) {
                         dojo.addClass('applyEffect-button', 'disabled');
                     }
-                    (this as any).addTooltipHtml('applyEffect-button', getMachineTooltip(getUniqueId(choosePlayActionArgs.machine)));
+                    (this as any).addTooltipHtml('applyEffect-button', getMachineTooltip(0));
                     break;
 
                 case 'selectResource':
@@ -325,7 +259,7 @@ class Glow implements GlowGame {
             div.style.margin = `0 ${ZOOM_LEVELS_MARGIN[newIndex]}% ${(1-zoom)*-100}% 0`;
         }
 
-        [this.playerMachineHand,  ...this.playersTables.map(pt => pt.machineStock)].forEach(stock => stock.updateDisplay());
+        [this.adventurersStock,  ...this.playersTables.map(pt => pt.machineStock)].forEach(stock => stock.updateDisplay());
 
         document.getElementById('zoom-wrapper').style.height = `${div.getBoundingClientRect().height}px`;
     }
@@ -383,45 +317,19 @@ class Glow implements GlowGame {
         dojo.toggleClass('selectProjects-button', 'disabled', !selectionLength);
         dojo.toggleClass('skipProjects-button', 'disabled', !!selectionLength);
     }
-
-    public setHand(machines: Machine[]) {
-        this.playerMachineHand = new ebg.stock() as Stock;
-        this.playerMachineHand.create(this, $('my-machines'), MACHINE_WIDTH, MACHINE_HEIGHT);
-        this.playerMachineHand.setSelectionMode(1);            
-        this.playerMachineHand.setSelectionAppearance('class');
-        this.playerMachineHand.selectionClass = 'selected';
-        this.playerMachineHand.centerItems = true;
-        this.playerMachineHand.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupMachineCard(this, cardDiv, type);
-        dojo.connect(this.playerMachineHand, 'onChangeSelection', this, () => this.onPlayerMachineHandSelectionChanged(this.playerMachineHand.getSelectedItems()));
-
-        setupMachineCards([this.playerMachineHand]);
-
-        machines.forEach(machine => this.playerMachineHand.addToStockWithId(getUniqueId(machine), ''+machine.id));
-
-        const player = Object.values(this.gamedatas.players).find(player => Number(player.id) === this.getPlayerId());
-        if (player) {
-            const color = player.color.startsWith('00') ? 'blue' : 'red';
-            dojo.addClass('my-hand-label', color);
-            // document.getElementById('myhand-wrap').style.backgroundColor = `#${player.color}40`;
-        }
-    }
     
     private getProjectStocks() {
         return [...this.table.projectStocks.slice(1), ...this.playersTables.map(pt => pt.projectStock)];
     }
-    
-    private getMachineStocks() {
-        return [this.playerMachineHand, ...this.table.machineStocks.slice(1), ...this.playersTables.map(pt => pt.machineStock)];
-    }
 
     public setHandSelectable(selectable: boolean) {
-        this.playerMachineHand.setSelectionMode(selectable ? 1 : 0);
+        this.adventurersStock.setSelectionMode(selectable ? 1 : 0);
     }
 
-    public onPlayerMachineHandSelectionChanged(items: any) {
+    public onAdventurerSelection(items: any) {
         if (items.length == 1) {
             const card = items[0];
-            this.machineClick(card.id, 'hand');
+            this.chooseAdventurer(card.id);
         }
     }
 
@@ -447,46 +355,36 @@ class Glow implements GlowGame {
             const playerId = Number(player.id);     
 
             // charcoalium & resources counters
-            dojo.place(`<div class="counters">
-                <div id="charcoalium-counter-wrapper-${player.id}" class="charcoalium-counter">
-                    <div class="icon charcoalium"></div> 
-                    <span id="charcoalium-counter-${player.id}"></span>
-                </div>
-            </div>
+            dojo.place(`
             <div class="counters">
-                <div id="wood-counter-wrapper-${player.id}" class="wood-counter">
-                    <div class="icon wood"></div> 
-                    <span id="wood-counter-${player.id}"></span>
+                <div id="reroll-counter-wrapper-${player.id}" class="reroll-counter">
+                    <div class="icon reroll"></div> 
+                    <span id="reroll-counter-${player.id}"></span>
                 </div>
-                <div id="copper-counter-wrapper-${player.id}" class="copper-counter">
-                    <div class="icon copper"></div> 
-                    <span id="copper-counter-${player.id}"></span>
+                <div id="footprint-counter-wrapper-${player.id}" class="footprint-counter">
+                    <div class="icon footprint"></div> 
+                    <span id="footprint-counter-${player.id}"></span>
                 </div>
-                <div id="crystal-counter-wrapper-${player.id}" class="crystal-counter">
-                    <div class="icon crystal"></div> 
-                    <span id="crystal-counter-${player.id}"></span>
+                <div id="firefly-counter-wrapper-${player.id}" class="firefly-counter">
+                    <div class="icon firefly"></div> 
+                    <span id="firefly-counter-${player.id}"></span>
                 </div>
             </div>`, `player_board_${player.id}`);
 
-            const charcoaliumCounter = new ebg.counter();
-            charcoaliumCounter.create(`charcoalium-counter-${playerId}`);
-            charcoaliumCounter.setValue(player.resources[0].length);
-            this.charcoaliumCounters[playerId] = charcoaliumCounter;
+            const rerollCounter = new ebg.counter();
+            rerollCounter.create(`reroll-counter-${playerId}`);
+            rerollCounter.setValue(player.rerolls);
+            this.rerollCounters[playerId] = rerollCounter;
 
-            const woodCounter = new ebg.counter();
-            woodCounter.create(`wood-counter-${playerId}`);
-            woodCounter.setValue(player.resources[1].length);
-            this.woodCounters[playerId] = woodCounter;
+            const footprintCounter = new ebg.counter();
+            footprintCounter.create(`footprint-counter-${playerId}`);
+            footprintCounter.setValue(player.footprints);
+            this.footprintCounters[playerId] = footprintCounter;
 
-            const copperCounter = new ebg.counter();
-            copperCounter.create(`copper-counter-${playerId}`);
-            copperCounter.setValue(player.resources[2].length);
-            this.copperCounters[playerId] = copperCounter;
-
-            const crystalCounter = new ebg.counter();
-            crystalCounter.create(`crystal-counter-${playerId}`);
-            crystalCounter.setValue(player.resources[3].length);
-            this.crystalCounters[playerId] = crystalCounter;
+            const fireflyCounter = new ebg.counter();
+            fireflyCounter.create(`firefly-counter-${playerId}`);
+            fireflyCounter.setValue(player.fireflies);
+            this.fireflyCounters[playerId] = fireflyCounter;
 
             if (player.playerNo == 1) {
                 dojo.place(`<div id="player-icon-first-player" class="player-icon first-player"></div>`, `player_board_${player.id}`);
@@ -494,10 +392,9 @@ class Glow implements GlowGame {
             }
         });
 
-        (this as any).addTooltipHtmlToClass('charcoalium-counter', _("Charcoalium"));
-        (this as any).addTooltipHtmlToClass('wood-counter', _("Wood"));
-        (this as any).addTooltipHtmlToClass('copper-counter', _("Copper"));
-        (this as any).addTooltipHtmlToClass('crystal-counter', _("Crystal"));
+        (this as any).addTooltipHtmlToClass('reroll-counter', _("Rerolls"));
+        (this as any).addTooltipHtmlToClass('footprint-counter', _("Footprints"));
+        (this as any).addTooltipHtmlToClass('firefly-counter', _("Fireflies"));
     }
 
     private createPlayerTables(gamedatas: GlowGamedatas) {
@@ -519,43 +416,12 @@ class Glow implements GlowGame {
         };
     }
 
-    public machineClick(id: number, from: 'hand' | 'table', payments?: Payment[]) {
-        if (this.clickAction === 'select') {
-            this.selectMachine(id);
-        } else if (this.clickAction === 'play') {
-            /*const paymentDiv = document.getElementById('paymentButtons');
-            if (paymentDiv) {
-                paymentDiv.innerHTML = '';
-            } else {
-                dojo.place(`<div id="paymentButtons"></div>`, 'generalactions')
-            }*/
-            document.querySelectorAll(`[id^='selectPaymentButton']`).forEach(elem => dojo.destroy(elem.id));
-
-            if (from === 'hand') {
-                this.playMachine(id);
-            } else if (from === 'table') {
-                if (payments.length > 1) {
-                    payments.forEach((payment, index) => {
-                        const label = dojo.string.substitute(_('Use ${jokers} as ${unpaidResources} and pay ${paidResources}'), {
-                            jokers: payment.jokers.map(_ => '[resource9]').join(''),
-                            unpaidResources: payment.jokers.map(joker => `[resource${joker}]`).join(''),
-                            paidResources: payment.remainingCost.filter(resource => resource > 0).map(resource => `[resource${resource}]`).join(''),
-                        });
-                        (this as any).addActionButton(`selectPaymentButton${index}-button`, formatTextIcons(label), () => this.repairMachine(id, payment))
-                    });
-                } else {
-                    this.repairMachine(id, payments[0]);
-                }
-            }
-        }
-    }
-
-    private playMachine(id: number) {
-        if(!(this as any).checkAction('playMachine')) {
+    public chooseAdventurer(id: number) {
+        if(!(this as any).checkAction('chooseAdventurer')) {
             return;
         }
 
-        this.takeAction('playMachine', {
+        this.takeAction('chooseAdventurer', {
             id
         });
     }
@@ -685,11 +551,6 @@ class Glow implements GlowGame {
         (this as any).scoreCtrl[playerId]?.toValue(points);
         this.table.setPoints(playerId, points);
     }
-    
-    private setResourceCount(playerId: number, resource: number, number: number) {
-        const counters = [this.charcoaliumCounters, this.woodCounters, this.copperCounters, this.crystalCounters];
-        counters[resource][playerId].toValue(number);
-    }
 
     private addHelp() {
         dojo.place(`<button id="glow-help-button">?</button>`, 'left-side');
@@ -731,7 +592,7 @@ class Glow implements GlowGame {
     }
 
     private setRemainingMachines(remainingMachines: number) {
-        this.machineCounter.setValue(remainingMachines);
+        this.companionCounter.setValue(remainingMachines);
         const visibility = remainingMachines > 0 ? 'visible' : 'hidden';
         document.getElementById('machine-deck').style.visibility = visibility;
         document.getElementById('remaining-machine-counter').style.visibility = visibility;
@@ -782,7 +643,7 @@ class Glow implements GlowGame {
     }
 
     notif_machinePlayed(notif: Notif<NotifMachinePlayedArgs>) {        
-        this.playerMachineHand.removeFromStockById(''+notif.args.machine.id);
+        this.adventurersStock.removeFromStockById(''+notif.args.machine.id);
         this.table.machinePlayed(notif.args.playerId, notif.args.machine);
     }
 
@@ -790,7 +651,7 @@ class Glow implements GlowGame {
         moveToAnotherStock(
             this.table.machineStocks[notif.args.machineSpot], 
             this.getPlayerTable(notif.args.playerId).machineStock, 
-            getUniqueId(notif.args.machine), 
+            0,//getUniqueId(notif.args.machine), 
             ''+notif.args.machine.id
         );
     }
@@ -798,18 +659,14 @@ class Glow implements GlowGame {
     notif_tableMove(notif: Notif<NotifTableMoveArgs>) {
         Object.keys(notif.args.moved).forEach(key => {
             const originalSpot = Number(key);
-            const machine: Machine = notif.args.moved[key];
+            const machine: Adventurer = notif.args.moved[key];
 
             moveToAnotherStock(
                 this.table.machineStocks[originalSpot], 
                 this.table.machineStocks[machine.location_arg], 
-                getUniqueId(machine), 
+                0,//getUniqueId(machine), 
                 ''+machine.id
             );
-
-            if (machine.resources?.length) {
-                this.table.addResources(0, machine.resources);
-            }
         });
     }
 
@@ -820,7 +677,7 @@ class Glow implements GlowGame {
         } else if (notif.args.from > 0) {
             from = `player-icon-${notif.args.from}`;
         }
-        notif.args.machines.forEach(machine => addToStockWithId(this.playerMachineHand, getUniqueId(machine), ''+machine.id, from));
+        notif.args.machines.forEach(machine => addToStockWithId(this.adventurersStock, 0, ''+machine.id, from));
 
         if (notif.args.remainingMachines !== undefined) {
             this.setRemainingMachines(notif.args.remainingMachines);
@@ -836,20 +693,20 @@ class Glow implements GlowGame {
     }
 
     notif_addResources(notif: Notif<NotifResourcesArgs>) {
-        this.setResourceCount(notif.args.playerId, notif.args.resourceType, notif.args.count);
-        this.setResourceCount(notif.args.opponentId, notif.args.resourceType, notif.args.opponentCount);
+        //this.setResourceCount(notif.args.playerId, notif.args.resourceType, notif.args.count);
+        //this.setResourceCount(notif.args.opponentId, notif.args.resourceType, notif.args.opponentCount);
 
         this.getPlayerTable(notif.args.playerId).addResources(notif.args.resourceType, notif.args.resources);
     }
 
     notif_removeResources(notif: Notif<NotifResourcesArgs>) {
-        this.setResourceCount(notif.args.playerId, notif.args.resourceType, notif.args.count);
+        //this.setResourceCount(notif.args.playerId, notif.args.resourceType, notif.args.count);
 
         this.table.addResources(notif.args.resourceType, notif.args.resources);
     }
 
     notif_discardHandMachines(notif: Notif<NotifDiscardMachinesArgs>) {
-        notif.args.machines.forEach(machine => this.playerMachineHand.removeFromStockById(''+machine.id));
+        notif.args.machines.forEach(machine => this.adventurersStock.removeFromStockById(''+machine.id));
     }
 
     notif_discardPlayerMachines(notif: Notif<NotifDiscardMachinesArgs>) {
@@ -873,16 +730,6 @@ class Glow implements GlowGame {
             ${_("This is the last round of the game!")}
         </div>`, 'page-title');
     }
-    
-    private getMachineColor(color: number) {
-        switch (color) {
-            case 1: return '#006fa1';
-            case 2: return '#702c91';
-            case 3: return '#a72c32';
-            case 4: return '#c48b10';
-        }
-        return null;
-    }
 
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */
@@ -890,34 +737,8 @@ class Glow implements GlowGame {
         try {
             if (log && args && !args.processed) {
                 // Representation of the color of a card
-                if (typeof args.machine_type == 'string' && args.machine_type[0] != '<' && typeof args.machine == 'object') {
-                    args.machine_type = `<strong style="color: ${this.getMachineColor(args.machine.type)}">${_(args.machine_type)}</strong>`;
-                }
-
-                ['resource', 'resourceFrom', 'resourceTo'].forEach(argNameStart => {
-                    if (typeof args[`${argNameStart}Name`] == 'string' && typeof args[`${argNameStart}Type`] == 'number' && args[`${argNameStart}Name`][0] != '<') {
-                        args[`${argNameStart}Name`] = formatTextIcons(`[resource${args[`${argNameStart}Type`]}]`);
-                    }
-                });
-                if (typeof args.machineImage == 'number') {
-                    args.machineImage = `<div class="machine machine${MACHINES_IDS.indexOf(args.machineImage)}"></div>`;
-                }
-
-                if (typeof args.projectImage == 'number') {
-                    args.projectImage = `<div class="project project${PROJECTS_IDS.indexOf(args.projectImage)}"></div>`;
-                }
-
-                if (typeof args.machineEffect == 'object') {
-                    const uniqueId = getUniqueId(args.machineEffect);
-                    const id = `action-bar-effect${uniqueId}`;
-                    args.machineEffect = `<div id="${id}" class="effect-in-text effect effect${MACHINES_IDS.indexOf(uniqueId)}"></div>`;
-                    
-                    setTimeout(() => {
-                        const effectImage = document.getElementById(id);
-                        if (effectImage) {
-                            (this as any).addTooltipHtml(id, getMachineTooltip(uniqueId));
-                        }
-                    }, 200);
+                if (typeof args.adventurerName == 'string' && args.adventurerName[0] != '<') {
+                    args.adventurerName = `<strong >${args.adventurerName}</strong>`;
                 }
             }
         } catch (e) {

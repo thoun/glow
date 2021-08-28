@@ -2,13 +2,13 @@
 
 class AdventurerCard {
     public /*int*/ $points;
-    public /*int*/ $produce; // 0 = charcoalium, 1 = wood, 2 = copper, 3 = crystal, 9 = *
-    public /*array*/ $cost;
+    public /*int*/ $dice;
+    public /*int*/ $effect;
   
-    public function __construct(int $points, int $produce, array $cost) {
+    public function __construct(int $points, int $dice, int $effect) {
         $this->points = $points;
-        $this->produce = $produce;
-        $this->cost = $cost;
+        $this->dice = $dice;
+        $this->effect = $effect;
     } 
 }
 
@@ -16,22 +16,18 @@ class Adventurer extends AdventurerCard {
     public $id;
     public $location;
     public $location_arg;
-    public $type; // color : 1 = blue, 2 = purple, 3 = red, 4 = yellow
-    public $subType; // index (1-based) on rulebook
-    public $resources; //array?
-    public $payments; //array?
+    public $color; // = type
 
-    public function __construct($dbCard, $AdventurerS) {
+    public function __construct($dbCard, $ADVENTURERS) {
         $this->id = intval($dbCard['id']);
         $this->location = $dbCard['location'];
         $this->location_arg = intval($dbCard['location_arg']);
-        $this->type = intval($dbCard['type']);
-        $this->subType = intval($dbCard['type_arg']);
+        $this->color = intval($dbCard['type']);
 
-        $AdventurerCard = $AdventurerS[$this->type * 10 + $this->subType];
+        $AdventurerCard = $ADVENTURERS[$this->color];
         $this->points = $AdventurerCard->points;
-        $this->produce = $AdventurerCard->produce;
-        $this->cost = $AdventurerCard->cost;
+        $this->dice = $AdventurerCard->dice;
+        $this->effect = $AdventurerCard->effect;
     } 
 }
 ?>

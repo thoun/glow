@@ -1,3 +1,19 @@
 .player-board {
   background-color: white;
+
+  .counters {
+    display: flex;
+    align-items: center;
+    margin: 5px 0;
+
+    .reroll-counter, .footprint-counter, .firefly-counter {
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    .icon {
+      margin-right: 5px;
+    }
+  }
 }

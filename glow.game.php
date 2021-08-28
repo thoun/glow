@@ -113,7 +113,8 @@ class Glow extends Table {
 
         // The player on the right of first player receives 2 reroll tokens.
         if (count($players) > 1) {
-            $this->addPlayerReroll($players[count($players) - 1]['player_id'], 2);
+            $lastPlayer = array_keys($players)[count($players) - 1];
+            //$this->addPlayerReroll($lastPlayer, 2);
         }
         
         /*TODO The first player rolls the 9 small dice (2 green, 2 azure,
@@ -151,12 +152,24 @@ class Glow extends Table {
     
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = "SELECT player_id id, player_score score FROM player ";
+        $sql = "SELECT player_id id, player_score score, player_no playerNo, player_rerolls rerolls, player_footprints footprints, player_fireflies fireflies FROM player ";
         $result['players'] = self::getCollectionFromDb($sql);
+
+        
   
         $result['firstPlayer'] = intval(self::getGameStateValue(FIRST_PLAYER));
         $result['side'] = intval(self::getGameStateValue(BOARD_SIDE));
         $result['day'] = intval(self::getGameStateValue(DAY));
+
+        foreach($result['players'] as $playerId => &$player) {
+            $player['playerNo'] = intval($player['playerNo']);
+            $adventurers = $this->getAdventurersFromDb($this->adventurers->getCardsInLocation('player', $playerId));
+            $player['adventurer'] = count($adventurers) > 0 ? $adventurers[0] : null;
+            $player['companions'] = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+            $player['rerolls'] = intval($player['rerolls']);
+            $player['footprints'] = intval($player['footprints']);
+            $player['fireflies'] = intval($player['fireflies']);
+        }
   
         return $result;
     }

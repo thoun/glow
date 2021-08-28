@@ -10,19 +10,17 @@ interface Payment {
     jokers: number[];
 }
 
-interface Machine {
+interface Adventurer {
     id: number;
-    type: number;
-    subType: number;
+    color: number;
     location: string;
     location_arg: number;
     points: number;
-    produce: number;
-    resources?: Resource[];
-    payments?: Payment[];
+    dice: number;
+    effect: number;
 }
 
-interface Project {
+interface Companion {
     id: number;
     type: number;
     subType: number;
@@ -31,9 +29,9 @@ interface Project {
 }
 
 interface CompleteProject {    
-    project: Project;
-    mandatoryMachine: Machine;
-    machines: Machine[];
+    project: Companion;
+    mandatoryMachine: Adventurer;
+    machines: Adventurer[];
     machinesNumber: number;
     selectedMachinesIds?: number[];
 }
@@ -46,9 +44,11 @@ interface PlacedTokens {
 
 interface GlowPlayer extends Player {
     playerNo: number;
-    machines: Machine[];
-    projects: Project[];
-    resources: Resource[][];
+    adventurer: Adventurer;
+    companions: Companion[];
+    rerolls: number;
+    footprints: number;
+    fireflies: number;
 }
 
 /**
@@ -79,20 +79,20 @@ interface GlowGame extends Game {
     getPlayerId(): number;
     getOpponentId(playerId: number): number;
     getPlayerScore(playerId: number): number;
-    machineClick(id: number, from: 'hand' | 'table', payments?: Payment[]): void;
+    chooseAdventurer(id: number, from: 'hand' | 'table', payments?: Payment[]): void;
 }
 
-interface ChooseActionArgs {
-    selectableMachines: Machine[];
+interface ChooseAdventurerArgs {
+    adventurers: Adventurer[];
 }
 
 interface ChoosePlayActionArgs {
-    machine: Machine;
+    machine: Adventurer;
     canApplyEffect: boolean;
 }
 
 interface SelectMachineArgs {
-    selectableMachines: Machine[];
+    selectableMachines: Adventurer[];
 }
 
 interface SelectResourceArgs {
@@ -100,7 +100,7 @@ interface SelectResourceArgs {
 }
 
 interface SelectProjectArgs {
-    projects: Project[];
+    projects: Companion[];
     remainingProjects?: number;
 }
 
@@ -120,17 +120,17 @@ interface ChooseProjectDiscardedMachineArgs {
 
 interface NotifMachinePlayedArgs {
     playerId: number;
-    machine: Machine;
+    machine: Adventurer;
 }
 
 interface NotifMachineRepairedArgs {
     playerId: number;
-    machine: Machine;
+    machine: Adventurer;
     machineSpot: number;
 }
 
 interface NotifTableMoveArgs {
-    moved: { [originalSpot: number]: Machine };
+    moved: { [originalSpot: number]: Adventurer };
 }
 
 interface NotifPointsArgs {
@@ -148,21 +148,21 @@ interface NotifResourcesArgs {
 }
 
 interface NotifAddMachinesToHandArgs {
-    machines: Machine[];
+    machines: Adventurer[];
     from: number;
     remainingMachines?: number;
 }
 
 interface NotifDiscardMachinesArgs {
-    machines: Machine[];
+    machines: Adventurer[];
 }
 
 interface NotifAddWorkshopProjectsArgs {
     playerId: number;
-    projects: Project[];
+    projects: Companion[];
 }
 
 interface NotifRemoveProjectArgs {
     playerId: number;
-    project: Project;
+    project: Companion;
 }

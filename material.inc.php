@@ -30,3 +30,13 @@ $this->DICES = [
   7 => [2, 0], // yellow
   8 => [0, 1], // black
 ];
+
+$this->ADVENTURERS = [ // (int $points, int $dice, int $effect) TODO effects 
+  1 => new AdventurerCard(1, 2, 0),
+  2 => new AdventurerCard(0, 2, 0),
+  3 => new AdventurerCard(4, 2, 0),
+  4 => new AdventurerCard(4, 3, 0),
+  5 => new AdventurerCard(3, 2, 0),
+  6 => new AdventurerCard(0, 2, 0),
+  7 => new AdventurerCard(0, 2, 0),
+];
