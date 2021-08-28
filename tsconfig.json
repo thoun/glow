@@ -15,9 +15,8 @@
         "src/slide-utils.ts",
         "src/stock-utils.ts",
         "src/text-icons-formatter.ts",
-        "src/table/table.ts",
+        "src/board/board.ts",
         "src/players-tables/player-table.ts",
-        "src/discarded-machines-selector/discarded-machines-selector.ts",
         "src/glow.ts",
         "src/define.ts"
     ]

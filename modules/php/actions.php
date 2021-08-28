@@ -31,6 +31,7 @@ trait ActionTrait {
         self::notifyAllPlayers('chosenAdventurer', clienttranslate('${player_name} chooses adventurer ${adventurerName}'), [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
+            'adventurer' => $adventurer,
             'adventurerName' => $this->getAdventurerName($adventurer->color),
             'dice' => $dice,
         ]);

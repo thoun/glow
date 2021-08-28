@@ -1,15 +1,3 @@
-interface Resource {
-    id: number;
-    type: number;
-    location: string;
-    location_arg: number;
-}
-
-interface Payment {
-    remainingCost: number[];
-    jokers: number[];
-}
-
 interface Adventurer {
     id: number;
     color: number;
@@ -28,18 +16,12 @@ interface Companion {
     location_arg: number;
 }
 
-interface CompleteProject {    
-    project: Companion;
-    mandatoryMachine: Adventurer;
-    machines: Adventurer[];
-    machinesNumber: number;
-    selectedMachinesIds?: number[];
-}
-
-interface PlacedTokens {
-    resourceId: number;
-    x: number;
-    y: number;
+interface Die {
+    id: number;
+    value: number;
+    extra: boolean;
+    locked: boolean;
+    rolled: boolean;
 }
 
 interface GlowPlayer extends Player {
@@ -76,10 +58,10 @@ interface GlowGamedatas {
 }
 
 interface GlowGame extends Game {
+    adventurersStock: Stock;
+    
     getPlayerId(): number;
-    getOpponentId(playerId: number): number;
-    getPlayerScore(playerId: number): number;
-    chooseAdventurer(id: number, from: 'hand' | 'table', payments?: Payment[]): void;
+    chooseAdventurer(id: number): void;
 }
 
 interface ChooseAdventurerArgs {
@@ -114,8 +96,10 @@ interface SelectExchangeArgs {
     possibleExchanges: Exchange[];
 }
 
-interface ChooseProjectDiscardedMachineArgs {
-    completeProjects: CompleteProject[];
+interface NotifChosenAdventurerArgs {
+    playerId: number;
+    adventurer: Adventurer;
+    dice: Die[];
 }
 
 interface NotifMachinePlayedArgs {
@@ -141,7 +125,6 @@ interface NotifPointsArgs {
 interface NotifResourcesArgs {
     playerId: number;
     resourceType: number;
-    resources: Resource[];
     count: number;
     opponentId: number;
     opponentCount: number;

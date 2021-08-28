@@ -25,8 +25,8 @@ class Glow implements GlowGame {
     private projectCounter: Counter;
     private helpDialog: any;
 
-    private adventurersStock: Stock;
-    private table: Table;
+    public adventurersStock: Stock;
+    private board: Board;
     private playersTables: PlayerTable[] = [];
 
     private selectedPlayerProjectsIds: number[] = []; 
@@ -68,26 +68,22 @@ class Glow implements GlowGame {
 
         dojo.addClass('board', `side${gamedatas.side}`);
         this.createPlayerPanels(gamedatas);
-        /*this.table = new Table(this, Object.values(gamedatas.players), gamedatas.tableProjects, gamedatas.tableMachines, gamedatas.resources);
-        this.table.onTableProjectSelectionChanged = selectProjectsIds => {
-            this.selectedTableProjectsIds = selectProjectsIds;
-            this.onProjectSelectionChanged();
-        };
+        this.board = new Board(this, Object.values(gamedatas.players));
         this.createPlayerTables(gamedatas);
 
-        this.machineCounter = new ebg.counter();
+        /*this.machineCounter = new ebg.counter();
         this.machineCounter.create('remaining-machine-counter');
         this.setRemainingMachines(gamedatas.remainingMachines);
 
         this.projectCounter = new ebg.counter();
         this.projectCounter.create('remaining-project-counter');
-        this.setRemainingProjects(gamedatas.remainingProjects);
+        this.setRemainingProjects(gamedatas.remainingProjects);*/
 
         if (gamedatas.endTurn) {
             this.notif_lastTurn();
         }
 
-        this.addHelp();*/
+        this.addHelp();
         this.setupNotifications();
 
         /*this.setupPreferences();
@@ -222,13 +218,6 @@ class Glow implements GlowGame {
                     (this as any).addActionButton('skipExchange-button', _('Skip'), () => this.skipExchange(), null, null, 'red');
                     break;
 
-                case 'chooseProject':
-                    (this as any).addActionButton('selectProjects-button', _('Complete projects'), () => this.selectProjects(this.selectedPlayerProjectsIds.concat(this.selectedTableProjectsIds)));
-                    (this as any).addActionButton('skipProjects-button', _('Skip'), () => this.skipSelectProjects(), null, null, 'red');
-                    dojo.toggleClass('selectProjects-button', 'disabled', !this.table.getSelectedProjectsIds().length);
-                    dojo.toggleClass('skipProjects-button', 'disabled', !!this.table.getSelectedProjectsIds().length);
-                    break;
-
                 case 'chooseProjectDiscardedMachine':
                     (this as any).addActionButton('selectProjectDiscardedMachine-button', _('Discard selected machines'), () => this.discardSelectedMachines());
                     break;
@@ -259,7 +248,7 @@ class Glow implements GlowGame {
             div.style.margin = `0 ${ZOOM_LEVELS_MARGIN[newIndex]}% ${(1-zoom)*-100}% 0`;
         }
 
-        [this.adventurersStock,  ...this.playersTables.map(pt => pt.machineStock)].forEach(stock => stock.updateDisplay());
+        [this.adventurersStock,  ...this.playersTables.map(pt => pt.companionsStock)].forEach(stock => stock.updateDisplay());
 
         document.getElementById('zoom-wrapper').style.height = `${div.getBoundingClientRect().height}px`;
     }
@@ -310,16 +299,6 @@ class Glow implements GlowGame {
                 document.getElementById('full-table').appendChild(document.getElementById(prefValue == 2 ? 'table-wrapper' : 'playerstables'));
                 break;
         }
-    }
-
-    private onProjectSelectionChanged() {
-        const selectionLength = this.selectedPlayerProjectsIds.length + this.selectedTableProjectsIds.length;
-        dojo.toggleClass('selectProjects-button', 'disabled', !selectionLength);
-        dojo.toggleClass('skipProjects-button', 'disabled', !!selectionLength);
-    }
-    
-    private getProjectStocks() {
-        return [...this.table.projectStocks.slice(1), ...this.playersTables.map(pt => pt.projectStock)];
     }
 
     public setHandSelectable(selectable: boolean) {
@@ -403,17 +382,13 @@ class Glow implements GlowGame {
         const orderedPlayers = playerIndex > 0 ? [...players.slice(playerIndex), ...players.slice(0, playerIndex)] : players;
 
         orderedPlayers.forEach((player, index) => 
-            this.createPlayerTable(gamedatas, Number(player.id), index ? 'right' : 'left')
+            this.createPlayerTable(gamedatas, Number(player.id))
         );
     }
 
-    private createPlayerTable(gamedatas: GlowGamedatas, playerId: number, side: 'left' | 'right') {
-        const playerTable = new PlayerTable(this, gamedatas.players[playerId], side);
+    private createPlayerTable(gamedatas: GlowGamedatas, playerId: number) {
+        const playerTable = new PlayerTable(this, gamedatas.players[playerId]);
         this.playersTables.push(playerTable);
-        playerTable.onPlayerProjectSelectionChanged = selectProjectsIds => {
-            this.selectedPlayerProjectsIds = selectProjectsIds;
-            this.onProjectSelectionChanged();
-        };
     }
 
     public chooseAdventurer(id: number) {
@@ -423,19 +398,6 @@ class Glow implements GlowGame {
 
         this.takeAction('chooseAdventurer', {
             id
-        });
-    }
-
-    private repairMachine(id: number, payment: Payment) {
-        if(!(this as any).checkAction('repairMachine')) {
-            return;
-        }
-
-        const base64 = btoa(JSON.stringify(payment));
-
-        this.takeAction('repairMachine', {
-            id,
-            payment: base64
         });
     }
 
@@ -549,7 +511,7 @@ class Glow implements GlowGame {
     
     private setPoints(playerId: number, points: number) {
         (this as any).scoreCtrl[playerId]?.toValue(points);
-        this.table.setPoints(playerId, points);
+        this.board.setPoints(playerId, points);
     }
 
     private addHelp() {
@@ -621,19 +583,9 @@ class Glow implements GlowGame {
         //log( 'notifications subscriptions setup' );
 
         const notifs = [
-            ['machinePlayed', ANIMATION_MS],
-            ['machineRepaired', ANIMATION_MS],
-            ['tableMove', ANIMATION_MS],
-            ['addMachinesToHand', ANIMATION_MS],
+            ['chosenAdventurer', ANIMATION_MS],
             ['points', 1],
             ['lastTurn', 1],
-            ['addResources', ANIMATION_MS],
-            ['removeResources', ANIMATION_MS],
-            ['discardHandMachines', ANIMATION_MS],
-            ['discardPlayerMachines', ANIMATION_MS],
-            ['discardTableMachines', ANIMATION_MS],
-            ['removeProject', ANIMATION_MS],
-            ['addWorkshopProjects', ANIMATION_MS],
         ];
 
         notifs.forEach((notif) => {
@@ -642,83 +594,13 @@ class Glow implements GlowGame {
         });
     }
 
-    notif_machinePlayed(notif: Notif<NotifMachinePlayedArgs>) {        
-        this.adventurersStock.removeFromStockById(''+notif.args.machine.id);
-        this.table.machinePlayed(notif.args.playerId, notif.args.machine);
-    }
 
-    notif_machineRepaired(notif: Notif<NotifMachineRepairedArgs>) {
-        moveToAnotherStock(
-            this.table.machineStocks[notif.args.machineSpot], 
-            this.getPlayerTable(notif.args.playerId).machineStock, 
-            0,//getUniqueId(notif.args.machine), 
-            ''+notif.args.machine.id
-        );
-    }
-
-    notif_tableMove(notif: Notif<NotifTableMoveArgs>) {
-        Object.keys(notif.args.moved).forEach(key => {
-            const originalSpot = Number(key);
-            const machine: Adventurer = notif.args.moved[key];
-
-            moveToAnotherStock(
-                this.table.machineStocks[originalSpot], 
-                this.table.machineStocks[machine.location_arg], 
-                0,//getUniqueId(machine), 
-                ''+machine.id
-            );
-        });
-    }
-
-    notif_addMachinesToHand(notif: Notif<NotifAddMachinesToHandArgs>) {
-        let from = undefined;
-        if (notif.args.from === 0) {
-            from = 'machine-deck';
-        } else if (notif.args.from > 0) {
-            from = `player-icon-${notif.args.from}`;
-        }
-        notif.args.machines.forEach(machine => addToStockWithId(this.adventurersStock, 0, ''+machine.id, from));
-
-        if (notif.args.remainingMachines !== undefined) {
-            this.setRemainingMachines(notif.args.remainingMachines);
-        }
-    }
-
-    notif_addWorkshopProjects(notif: Notif<NotifAddWorkshopProjectsArgs>) {
-        this.getPlayerTable(notif.args.playerId).addWorkshopProjects(notif.args.projects);
+    notif_chosenAdventurer(notif: Notif<NotifChosenAdventurerArgs>) {
+        this.getPlayerTable(notif.args.playerId).setAdventurer(notif.args.adventurer);
     }
 
     notif_points(notif: Notif<NotifPointsArgs>) {
         this.setPoints(notif.args.playerId, notif.args.points);
-    }
-
-    notif_addResources(notif: Notif<NotifResourcesArgs>) {
-        //this.setResourceCount(notif.args.playerId, notif.args.resourceType, notif.args.count);
-        //this.setResourceCount(notif.args.opponentId, notif.args.resourceType, notif.args.opponentCount);
-
-        this.getPlayerTable(notif.args.playerId).addResources(notif.args.resourceType, notif.args.resources);
-    }
-
-    notif_removeResources(notif: Notif<NotifResourcesArgs>) {
-        //this.setResourceCount(notif.args.playerId, notif.args.resourceType, notif.args.count);
-
-        this.table.addResources(notif.args.resourceType, notif.args.resources);
-    }
-
-    notif_discardHandMachines(notif: Notif<NotifDiscardMachinesArgs>) {
-        notif.args.machines.forEach(machine => this.adventurersStock.removeFromStockById(''+machine.id));
-    }
-
-    notif_discardPlayerMachines(notif: Notif<NotifDiscardMachinesArgs>) {
-        notif.args.machines.forEach(machine => this.getPlayerTable(machine.location_arg).machineStock.removeFromStockById(''+machine.id));
-    }
-
-    notif_discardTableMachines(notif: Notif<NotifDiscardMachinesArgs>) {
-        notif.args.machines.forEach(machine => this.table.machineStocks[machine.location_arg].removeFromStockById(''+machine.id));
-    }
-
-    notif_removeProject(notif: Notif<NotifRemoveProjectArgs>) {
-            this.getProjectStocks().forEach(stock => stock.removeFromStockById(''+notif.args.project.id));
     }
 
     notif_lastTurn() {

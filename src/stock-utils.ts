@@ -68,33 +68,30 @@ function getUniqueId(object: { type: number, subType: number }): number {
     return object.type * 10 + object.subType;
 }
 
-function setupAdventurersCards(machineStock: Stock) {
+function setupAdventurersCards(adventurerStock: Stock) {
     const cardsurl = `${g_gamethemeurl}img/adventurers.png`;
 
-    for (let i=1; i<=7;i++) {
-        machineStock.addItemType(
+    for (let i=0; i<=7;i++) {
+        adventurerStock.addItemType(
             i, 
             i, 
             cardsurl, 
-            i-1
+            i
         );
     }
 }
 
-function setupProjectCards(projectStocks: Stock[]) {
-    const cardsurl = `${g_gamethemeurl}img/projects.jpg`;
+function setupCompanionCards(companionsStock: Stock) {
+    const cardsurl = `${g_gamethemeurl}img/companions.png`;
 
-    projectStocks.forEach(projectStock => {
-
-        PROJECTS_IDS.forEach((cardId, index) =>
-            projectStock.addItemType(
-                cardId, 
-                0, 
-                cardsurl, 
-                index
-            )
-        );
-    });
+    PROJECTS_IDS.forEach((cardId, index) =>
+        companionsStock.addItemType(
+            cardId, 
+            0, 
+            cardsurl, 
+            index
+        )
+    );
 }
 
 function getMachineTooltip(type: number) {

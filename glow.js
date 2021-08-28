@@ -86,18 +86,16 @@ var PROJECT_HEIGHT = 93;
 function getUniqueId(object) {
     return object.type * 10 + object.subType;
 }
-function setupAdventurersCards(machineStock) {
+function setupAdventurersCards(adventurerStock) {
     var cardsurl = g_gamethemeurl + "img/adventurers.png";
-    for (var i = 1; i <= 7; i++) {
-        machineStock.addItemType(i, i, cardsurl, i - 1);
+    for (var i = 0; i <= 7; i++) {
+        adventurerStock.addItemType(i, i, cardsurl, i);
     }
 }
-function setupProjectCards(projectStocks) {
-    var cardsurl = g_gamethemeurl + "img/projects.jpg";
-    projectStocks.forEach(function (projectStock) {
-        PROJECTS_IDS.forEach(function (cardId, index) {
-            return projectStock.addItemType(cardId, 0, cardsurl, index);
-        });
+function setupCompanionCards(companionsStock) {
+    var cardsurl = g_gamethemeurl + "img/companions.png";
+    PROJECTS_IDS.forEach(function (cardId, index) {
+        return companionsStock.addItemType(cardId, 0, cardsurl, index);
     });
 }
 function getMachineTooltip(type) {
@@ -187,326 +185,78 @@ function formatTextIcons(rawText) {
         .replace(/\[resource3\]/ig, '<span class="icon crystal"></span>')
         .replace(/\[resource9\]/ig, '<span class="icon joker"></span>');
 }
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-var Table = /** @class */ (function () {
-    function Table(game, players, projects, machines, resources) {
+var POINT_CASE_SIZE = 49;
+var Board = /** @class */ (function () {
+    function Board(game, players) {
         var _this = this;
         this.game = game;
-        this.projectStocks = [];
-        this.machineStocks = [];
+        this.points = new Map();
         var html = '';
         // points
         players.forEach(function (player) {
-            return html += "<div id=\"player-" + player.id + "-point-marker\" class=\"point-marker " + (player.color.startsWith('00') ? 'blue' : 'red') + "\"></div>";
+            return html += "<div id=\"player-" + player.id + "-point-marker\" class=\"point-marker\" style=\"background: #" + player.color + ";\"></div>";
         });
-        dojo.place(html, 'table');
-        players.forEach(function (player) { return _this.setPoints(Number(player.id), Number(player.score)); });
-        // projects
-        html = '';
-        for (var i = 1; i <= 6; i++) {
-            html += "<div id=\"table-project-" + i + "\" class=\"table-project-stock\" style=\"left: " + 181 * (i - 1) + "px\"></div>";
-        }
-        dojo.place(html, 'table-projects');
-        var _loop_1 = function (i) {
-            this_1.projectStocks[i] = new ebg.stock();
-            this_1.projectStocks[i].setSelectionAppearance('class');
-            this_1.projectStocks[i].selectionClass = 'selected';
-            this_1.projectStocks[i].create(this_1.game, $("table-project-" + i), PROJECT_WIDTH, PROJECT_HEIGHT);
-            this_1.projectStocks[i].setSelectionMode(0);
-            this_1.projectStocks[i].onItemCreate = function (cardDiv, type) { return setupProjectCard(game, cardDiv, type); };
-            dojo.connect(this_1.projectStocks[i], 'onChangeSelection', this_1, function () {
-                _this.projectStocks[i].getSelectedItems()
-                    .filter(function (item) { return document.getElementById("table-project-" + i + "_item_" + item.id).classList.contains('disabled'); })
-                    .forEach(function (item) { return _this.projectStocks[i].unselectItem(item.id); });
-                _this.onProjectSelectionChanged();
-            });
-        };
-        var this_1 = this;
-        for (var i = 1; i <= 6; i++) {
-            _loop_1(i);
-        }
-        setupProjectCards(this.projectStocks);
-        var _loop_2 = function (i) {
-            projects.filter(function (project) { return project.location_arg == i; }).forEach(function (project) { return _this.projectStocks[i].addToStockWithId(getUniqueId(project), '' + project.id); });
-        };
-        for (var i = 1; i <= 6; i++) {
-            _loop_2(i);
-        }
-        // machines
-        html = "<div id=\"table-machines\" class=\"machines\">";
-        for (var i = 1; i <= 10; i++) {
-            var firstRow = i <= 5;
-            var left = (firstRow ? 204 : 0) + (i - (firstRow ? 1 : 6)) * 204;
-            var top_1 = firstRow ? 0 : 210;
-            html += "<div id=\"table-machine-spot-" + i + "\" class=\"machine-spot\" style=\"left: " + left + "px; top: " + top_1 + "px\"></div>";
-        }
-        html += "\n            <div id=\"machine-deck\" class=\"stockitem deck\"></div>\n            <div id=\"remaining-machine-counter\" class=\"remaining-counter\"></div>\n        </div>";
-        dojo.place(html, 'table');
-        var _loop_3 = function (i) {
-            this_2.machineStocks[i] = new ebg.stock();
-            this_2.machineStocks[i].setSelectionAppearance('class');
-            this_2.machineStocks[i].selectionClass = 'selected';
-            this_2.machineStocks[i].create(this_2.game, $("table-machine-spot-" + i), CARD_WIDTH, CARD_HEIGHT);
-            this_2.machineStocks[i].setSelectionMode(0);
-            this_2.machineStocks[i].onItemCreate = function (cardDiv, type) {
-                setupMachineCard(game, cardDiv, type);
-            };
-            dojo.connect(this_2.machineStocks[i], 'onChangeSelection', this_2, function () { return _this.onMachineSelectionChanged(_this.machineStocks[i].getSelectedItems(), _this.machineStocks[i].container_div.id); });
-        };
-        var this_2 = this;
-        for (var i = 1; i <= 10; i++) {
-            _loop_3(i);
-        }
-        var _loop_4 = function (i) {
-            machines.filter(function (machine) { return machine.location_arg == i; }).forEach(function (machine) { return _this.machineStocks[i].addToStockWithId(0, '' + machine.id); });
-        };
-        //setupAdventurersCards(this.machineStocks);
-        for (var i = 1; i <= 10; i++) {
-            _loop_4(i);
-        }
-        // resources
-        for (var i = 0; i <= 3; i++) {
-            var resourcesToPlace = resources[i];
-            this.addResources(i, resourcesToPlace);
-        }
+        dojo.place(html, 'board');
+        players.forEach(function (player) { return _this.points.set(Number(player.id), Number(player.score)); });
+        this.movePoints();
     }
-    Table.prototype.getSelectedProjectsIds = function () {
-        var selectedIds = [];
-        for (var i = 1; i <= 6; i++) {
-            selectedIds.push.apply(selectedIds, this.projectStocks[i].getSelectedItems().map(function (item) { return Number(item.id); }));
-        }
-        return selectedIds;
+    Board.prototype.setPoints = function (playerId, points) {
+        this.points.set(playerId, points);
+        this.movePoints();
     };
-    Table.prototype.onProjectSelectionChanged = function () {
-        var _a;
-        (_a = this.onTableProjectSelectionChanged) === null || _a === void 0 ? void 0 : _a.call(this, this.getSelectedProjectsIds());
-    };
-    Table.prototype.onMachineSelectionChanged = function (items, stockId) {
-        if (items.length == 1) {
-            var cardId = Number(items[0].id);
-            var datasetPayments = document.getElementById(stockId + "_item_" + cardId).dataset.payments;
-            var payments = (datasetPayments === null || datasetPayments === void 0 ? void 0 : datasetPayments.length) && datasetPayments[0] == '[' ? JSON.parse(datasetPayments) : undefined;
-            this.game.chooseAdventurer(cardId, 'table', payments);
-        }
-    };
-    Table.prototype.setProjectSelectable = function (selectable) {
-        this.projectStocks.forEach(function (stock) { return stock.setSelectionMode(selectable ? 2 : 0); });
-        if (!selectable) {
-            this.projectStocks.forEach(function (stock) { return stock.unselectAll(); });
-        }
-    };
-    Table.prototype.setMachineSelectable = function (selectable) {
-        this.machineStocks.forEach(function (stock) { return stock.setSelectionMode(selectable ? 1 : 0); });
-        if (!selectable) {
-            this.machineStocks.forEach(function (stock) { return stock.unselectAll(); });
-        }
-    };
-    Table.prototype.setPoints = function (playerId, points) {
-        var opponentId = this.game.getOpponentId(playerId);
-        var opponentScore = this.game.getPlayerScore(opponentId);
-        var equality = opponentScore === points;
-        var playerShouldShift = equality && playerId > opponentId;
-        var opponentShouldShift = equality && !playerShouldShift;
-        var markerDiv = document.getElementById("player-" + playerId + "-point-marker");
-        var top = points % 2 ? 40 : 52;
-        var left = 16 + points * 46.2;
-        if (playerShouldShift) {
-            top -= 5;
-            left -= 5;
-        }
-        markerDiv.style.transform = "translateX(" + left + "px) translateY(" + top + "px)";
-        if (opponentShouldShift) {
-            var opponentMarkerDiv = document.getElementById("player-" + opponentId + "-point-marker");
-            if (opponentMarkerDiv) {
-                opponentMarkerDiv.style.transform = "translateX(" + (left - 5) + "px) translateY(" + (top - 5) + "px)";
-            }
-        }
-    };
-    Table.prototype.machinePlayed = function (playerId, machine) {
-        var fromHandId = "my-machines_item_" + machine.id;
-        var from = document.getElementById(fromHandId) ? fromHandId : "player-icon-" + playerId;
-        this.machineStocks[machine.location_arg].addToStockWithId(0, '' + machine.id, from);
-        dojo.addClass("table-machine-spot-" + machine.location_arg + "_item_" + machine.id, 'selected');
-    };
-    Table.prototype.getDistance = function (p1, p2) {
-        return Math.sqrt(Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2));
-    };
-    Table.prototype.getPlaceOnTable = function (placed) {
+    Board.prototype.movePoints = function () {
         var _this = this;
-        var newPlace = {
-            x: Math.random() * 228 + 16,
-            y: Math.random() * 38 + 16,
-        };
-        var protection = 0;
-        while (protection < 1000 && placed.some(function (place) { return _this.getDistance(newPlace, place) < 32; })) {
-            newPlace.x = Math.random() * 228 + 16;
-            newPlace.y = Math.random() * 38 + 16;
-            protection++;
-        }
-        return newPlace;
-    };
-    Table.prototype.getPlaceOnMachine = function (placed) {
-        return {
-            x: 166,
-            y: 166 - (32 * placed.length)
-        };
-    };
-    Table.prototype.addResources = function (type, resources) {
-        var _this = this;
-        var toMachine = type == 0 && resources.length && resources[0].location === 'machine';
-        var divId = "table-resources" + type;
-        if (toMachine) {
-            var machineId_1 = resources[0].location_arg;
-            var stock = this.machineStocks.find(function (stock) { return stock === null || stock === void 0 ? void 0 : stock.items.find(function (item) { return Number(item.id) == machineId_1; }); });
-            divId = stock.container_div.id + "_item_" + machineId_1;
-        }
-        var div = document.getElementById(divId);
-        if (!div) {
-            return;
-        }
-        var placed = div.dataset.placed ? JSON.parse(div.dataset.placed) : [];
-        // add tokens
-        resources.filter(function (resource) { return !placed.some(function (place) { return place.resourceId == resource.id; }); }).forEach(function (resource) {
-            var newPlace = toMachine ? _this.getPlaceOnMachine(placed) : _this.getPlaceOnTable(placed);
-            placed.push(__assign(__assign({}, newPlace), { resourceId: resource.id }));
-            var resourceDivId = "resource" + type + "-" + resource.id;
-            var resourceDiv = document.getElementById("resource" + type + "-" + resource.id);
-            if (resourceDiv) {
-                var originDiv = resourceDiv.parentElement;
-                var originPlaced = originDiv.dataset.placed ? JSON.parse(originDiv.dataset.placed) : [];
-                originDiv.dataset.placed = JSON.stringify(originPlaced.filter(function (place) { return place.resourceId != resource.id; }));
-                var tableMachinesDiv = document.getElementById('table-machines');
-                if ((tableMachinesDiv.contains(originDiv) && tableMachinesDiv.contains(div)) || originDiv.classList.contains('to_be_destroyed')) {
-                    div.appendChild(resourceDiv);
-                    console.log('outer', div.outerHTML);
+        this.points.forEach(function (points, playerId) {
+            console.log(points, playerId);
+            var markerDiv = document.getElementById("player-" + playerId + "-point-marker");
+            var top = 19 + (points < 84 ? Math.max(points - 32, 0) * POINT_CASE_SIZE : (100 - points) * POINT_CASE_SIZE);
+            var left = 24 + (points < 50 ? Math.min(points, 32) * POINT_CASE_SIZE : 32 * POINT_CASE_SIZE - Math.max(50 - points, 0));
+            var topShift = 0;
+            var leftShift = 0;
+            _this.points.forEach(function (iPoints, iPlayerId) {
+                if (iPoints === points && iPlayerId < playerId) {
+                    topShift += 5;
+                    leftShift += 5;
                 }
-                else {
-                    slideToObjectAndAttach(resourceDiv, divId, newPlace.x - 16, newPlace.y - 16);
-                }
-            }
-            else {
-                var html = "<div id=\"" + resourceDivId + "\"\n                    class=\"cube resource" + type + " aspect" + resource.id % (type == 0 ? 8 : 4) + "\" \n                    style=\"left: " + (newPlace.x - 16) + "px; top: " + (newPlace.y - 16) + "px;\"\n                ></div>";
-                dojo.place(html, divId);
-            }
+            });
+            markerDiv.style.transform = "translateX(" + (left + leftShift) + "px) translateY(" + (top + topShift) + "px)";
         });
-        div.dataset.placed = JSON.stringify(placed);
     };
-    return Table;
+    return Board;
 }());
 var PlayerTable = /** @class */ (function () {
-    function PlayerTable(game, player, side) {
+    function PlayerTable(game, player) {
         var _this = this;
         this.game = game;
         this.playerId = Number(player.id);
-        var color = player.color.startsWith('00') ? 'blue' : 'red';
-        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock " + side + "\" style=\"background-color: #" + player.color + "40;\">\n            <div class=\"name-column " + color + " " + side + "\">\n                <div class=\"player-name\">" + player.name + "</div>\n                <div id=\"player-icon-" + this.playerId + "\" class=\"player-icon " + color + "\"></div>\n\n                <div class=\"player-resources " + side + "\">\n                    <div id=\"player" + this.playerId + "-resources1\"></div>\n                    <div id=\"player" + this.playerId + "-resources2\"></div>\n                    <div id=\"player" + this.playerId + "-resources3\"></div>\n                    <div id=\"player" + this.playerId + "-resources0\" class=\"top\"></div>\n                </div>\n            </div>\n            <div class=\"machines-and-projects\">\n                <div id=\"player-table-" + this.playerId + "-projects\"></div>\n                <div id=\"player-table-" + this.playerId + "-machines\"></div>\n            </div>\n        </div>";
+        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock\" >\n            <div class=\"name-column\">\n                <div class=\"player-name\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n            </div>\n            <div class=\"adventurer-and-companions\">\n                <div id=\"player-table-" + this.playerId + "-adventurer\"></div>\n                <div id=\"player-table-" + this.playerId + "-companions\"></div>\n            </div>\n        </div>";
         dojo.place(html, 'playerstables');
-        // projects        
-        this.projectStock = new ebg.stock();
-        this.projectStock.setSelectionAppearance('class');
-        this.projectStock.selectionClass = 'selected';
-        this.projectStock.create(this.game, $("player-table-" + this.playerId + "-projects"), PROJECT_WIDTH, PROJECT_HEIGHT);
-        this.projectStock.setSelectionMode(0);
-        //this.projectStock.centerItems = true;
-        this.projectStock.onItemCreate = function (cardDiv, type) { return setupProjectCard(game, cardDiv, type); };
-        dojo.connect(this.projectStock, 'onChangeSelection', this, function () {
-            _this.projectStock.getSelectedItems()
-                .filter(function (item) { return document.getElementById("player-table-" + _this.playerId + "-projects_item_" + item.id).classList.contains('disabled'); })
-                .forEach(function (item) { return _this.projectStock.unselectItem(item.id); });
-            _this.onProjectSelectionChanged();
-        });
-        setupProjectCards([this.projectStock]);
-        player.companions.forEach(function (project) { return _this.projectStock.addToStockWithId(getUniqueId(project), '' + project.id); });
-        this.setProjectStockVisibility();
-        // machines
-        this.machineStock = new ebg.stock();
-        this.machineStock.setSelectionAppearance('class');
-        this.machineStock.selectionClass = 'selected';
-        this.machineStock.create(this.game, $("player-table-" + this.playerId + "-machines"), CARD_WIDTH, CARD_HEIGHT);
-        this.machineStock.setSelectionMode(0);
-        this.machineStock.centerItems = true;
-        this.machineStock.onItemCreate = function (cardDiv, type) { return setupMachineCard(game, cardDiv, type); };
-        //([this.machineStock]);
-        player.companions.forEach(function (machine) { return _this.machineStock.addToStockWithId(getUniqueId(machine), '' + machine.id); });
+        // adventurer        
+        this.adventurerStock = new ebg.stock();
+        this.adventurerStock.setSelectionAppearance('class');
+        this.adventurerStock.selectionClass = 'selected';
+        this.adventurerStock.create(this.game, $("player-table-" + this.playerId + "-adventurer"), CARD_WIDTH, CARD_HEIGHT);
+        this.adventurerStock.setSelectionMode(0);
+        this.adventurerStock.onItemCreate = function (cardDiv, type) { return setupProjectCard(game, cardDiv, type); };
+        setupAdventurersCards(this.adventurerStock);
+        if (player.adventurer) {
+            this.adventurerStock.addToStockWithId(player.adventurer.color, '' + player.adventurer.id);
+        }
+        else {
+            this.adventurerStock.addToStockWithId(0, '0');
+        }
+        // companions
+        this.companionsStock = new ebg.stock();
+        this.companionsStock.setSelectionAppearance('class');
+        this.companionsStock.selectionClass = 'selected';
+        this.companionsStock.create(this.game, $("player-table-" + this.playerId + "-companions"), CARD_WIDTH, CARD_HEIGHT);
+        this.companionsStock.setSelectionMode(0);
+        setupCompanionCards(this.companionsStock);
+        player.companions.forEach(function (companion) { return _this.companionsStock.addToStockWithId(getUniqueId(companion), '' + companion.id); });
     }
-    PlayerTable.prototype.onProjectSelectionChanged = function () {
-        var _a;
-        (_a = this.onPlayerProjectSelectionChanged) === null || _a === void 0 ? void 0 : _a.call(this, this.projectStock.getSelectedItems().map(function (item) { return Number(item.id); }));
-    };
-    PlayerTable.prototype.getDistance = function (p1, p2) {
-        return Math.sqrt(Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2));
-    };
-    PlayerTable.prototype.getPlaceOnPlayerBoard = function (placed, type) {
-        var _this = this;
-        var xMaxShift = type ? 28 : 148;
-        var yMaxShift = type ? 84 : 32;
-        var newPlace = {
-            x: Math.random() * xMaxShift,
-            y: Math.random() * yMaxShift,
-        };
-        var protection = 0;
-        while (protection < 1000 && placed.some(function (place) { return _this.getDistance(newPlace, place) < 32; })) {
-            newPlace.x = Math.random() * xMaxShift;
-            newPlace.y = Math.random() * yMaxShift;
-            protection++;
-        }
-        return newPlace;
-    };
-    PlayerTable.prototype.addResources = function (type, resources) {
-        var _this = this;
-        var divId = "player" + this.playerId + "-resources" + type;
-        var div = document.getElementById(divId);
-        if (!div) {
-            return;
-        }
-        var placed = div.dataset.placed ? JSON.parse(div.dataset.placed) : [];
-        // add tokens
-        resources.filter(function (resource) { return !placed.some(function (place) { return place.resourceId == resource.id; }); }).forEach(function (resource) {
-            var newPlace = _this.getPlaceOnPlayerBoard(placed, type);
-            placed.push(__assign(__assign({}, newPlace), { resourceId: resource.id }));
-            var resourceDivId = "resource" + type + "-" + resource.id;
-            var resourceDiv = document.getElementById("resource" + type + "-" + resource.id);
-            if (resourceDiv) {
-                var originDiv = resourceDiv.parentElement;
-                var originPlaced = originDiv.dataset.placed ? JSON.parse(originDiv.dataset.placed) : [];
-                originDiv.dataset.placed = JSON.stringify(originPlaced.filter(function (place) { return place.resourceId != resource.id; }));
-                if (originDiv.classList.contains('to_be_destroyed')) {
-                    div.appendChild(resourceDiv);
-                }
-                else {
-                    slideToObjectAndAttach(resourceDiv, divId, newPlace.x, newPlace.y);
-                }
-            }
-            else {
-                var html = "<div id=\"" + resourceDivId + "\"\n                    class=\"cube resource" + type + " aspect" + resource.id % (type == 0 ? 8 : 4) + "\" \n                    style=\"left: " + newPlace.x + "px; top: " + newPlace.y + "px;\"\n                ></div>";
-                dojo.place(html, divId);
-            }
-        });
-        div.dataset.placed = JSON.stringify(placed);
-    };
-    PlayerTable.prototype.addWorkshopProjects = function (projects) {
-        var _this = this;
-        projects.forEach(function (project) { return addToStockWithId(_this.projectStock, getUniqueId(project), '' + project.id, 'page-title'); });
-        this.setProjectStockVisibility();
-    };
-    PlayerTable.prototype.setProjectStockVisibility = function () {
-        dojo.toggleClass("player-table-" + this.playerId + "-projects", 'empty', !this.projectStock.items.length);
-    };
-    PlayerTable.prototype.setProjectSelectable = function (selectable) {
-        this.projectStock.setSelectionMode(selectable ? 2 : 0);
-        if (!selectable) {
-            this.projectStock.unselectAll();
-        }
+    PlayerTable.prototype.setAdventurer = function (adventurer) {
+        this.adventurerStock.removeAll();
+        moveToAnotherStock(this.game.adventurersStock, this.adventurerStock, adventurer.color, '' + adventurer.id);
     };
     return PlayerTable;
 }());
@@ -556,26 +306,19 @@ var Glow = /** @class */ (function () {
         log('gamedatas', gamedatas);
         dojo.addClass('board', "side" + gamedatas.side);
         this.createPlayerPanels(gamedatas);
-        /*this.table = new Table(this, Object.values(gamedatas.players), gamedatas.tableProjects, gamedatas.tableMachines, gamedatas.resources);
-        this.table.onTableProjectSelectionChanged = selectProjectsIds => {
-            this.selectedTableProjectsIds = selectProjectsIds;
-            this.onProjectSelectionChanged();
-        };
+        this.board = new Board(this, Object.values(gamedatas.players));
         this.createPlayerTables(gamedatas);
-
-        this.machineCounter = new ebg.counter();
+        /*this.machineCounter = new ebg.counter();
         this.machineCounter.create('remaining-machine-counter');
         this.setRemainingMachines(gamedatas.remainingMachines);
 
         this.projectCounter = new ebg.counter();
         this.projectCounter.create('remaining-project-counter');
-        this.setRemainingProjects(gamedatas.remainingProjects);
-
+        this.setRemainingProjects(gamedatas.remainingProjects);*/
         if (gamedatas.endTurn) {
             this.notif_lastTurn();
         }
-
-        this.addHelp();*/
+        this.addHelp();
         this.setupNotifications();
         /*this.setupPreferences();
 
@@ -658,12 +401,12 @@ var Glow = /** @class */ (function () {
                     var choosePlayActionArgs_1 = args;
                     this.addActionButton('getCharcoalium-button', _('Get charcoalium') + formatTextIcons(" (" + choosePlayActionArgs_1.machine.points + " [resource0])"), function () { return _this.getCharcoalium(); });
                     if (choosePlayActionArgs_1.machine.dice == 9) {
-                        var _loop_5 = function (i) {
-                            this_3.addActionButton("getResource" + i + "-button", _('Get resource') + formatTextIcons(" ([resource" + i + "])"), function () { return _this.getResource(i); });
+                        var _loop_1 = function (i) {
+                            this_1.addActionButton("getResource" + i + "-button", _('Get resource') + formatTextIcons(" ([resource" + i + "])"), function () { return _this.getResource(i); });
                         };
-                        var this_3 = this;
+                        var this_1 = this;
                         for (var i = 1; i <= 3; i++) {
-                            _loop_5(i);
+                            _loop_1(i);
                         }
                     }
                     else {
@@ -699,12 +442,6 @@ var Glow = /** @class */ (function () {
                     });
                     this.addActionButton('skipExchange-button', _('Skip'), function () { return _this.skipExchange(); }, null, null, 'red');
                     break;
-                case 'chooseProject':
-                    this.addActionButton('selectProjects-button', _('Complete projects'), function () { return _this.selectProjects(_this.selectedPlayerProjectsIds.concat(_this.selectedTableProjectsIds)); });
-                    this.addActionButton('skipProjects-button', _('Skip'), function () { return _this.skipSelectProjects(); }, null, null, 'red');
-                    dojo.toggleClass('selectProjects-button', 'disabled', !this.table.getSelectedProjectsIds().length);
-                    dojo.toggleClass('skipProjects-button', 'disabled', !!this.table.getSelectedProjectsIds().length);
-                    break;
                 case 'chooseProjectDiscardedMachine':
                     this.addActionButton('selectProjectDiscardedMachine-button', _('Discard selected machines'), function () { return _this.discardSelectedMachines(); });
                     break;
@@ -730,7 +467,7 @@ var Glow = /** @class */ (function () {
             div.style.transform = "scale(" + zoom + ")";
             div.style.margin = "0 " + ZOOM_LEVELS_MARGIN[newIndex] + "% " + (1 - zoom) * -100 + "% 0";
         }
-        __spreadArray([this.adventurersStock], this.playersTables.map(function (pt) { return pt.machineStock; })).forEach(function (stock) { return stock.updateDisplay(); });
+        __spreadArray([this.adventurersStock], this.playersTables.map(function (pt) { return pt.companionsStock; })).forEach(function (stock) { return stock.updateDisplay(); });
         document.getElementById('zoom-wrapper').style.height = div.getBoundingClientRect().height + "px";
     };
     Glow.prototype.zoomIn = function () {
@@ -772,14 +509,6 @@ var Glow = /** @class */ (function () {
                 document.getElementById('full-table').appendChild(document.getElementById(prefValue == 2 ? 'table-wrapper' : 'playerstables'));
                 break;
         }
-    };
-    Glow.prototype.onProjectSelectionChanged = function () {
-        var selectionLength = this.selectedPlayerProjectsIds.length + this.selectedTableProjectsIds.length;
-        dojo.toggleClass('selectProjects-button', 'disabled', !selectionLength);
-        dojo.toggleClass('skipProjects-button', 'disabled', !!selectionLength);
-    };
-    Glow.prototype.getProjectStocks = function () {
-        return __spreadArray(__spreadArray([], this.table.projectStocks.slice(1)), this.playersTables.map(function (pt) { return pt.projectStock; }));
     };
     Glow.prototype.setHandSelectable = function (selectable) {
         this.adventurersStock.setSelectionMode(selectable ? 1 : 0);
@@ -836,17 +565,12 @@ var Glow = /** @class */ (function () {
         var playerIndex = players.findIndex(function (player) { return Number(player.id) === Number(_this.player_id); });
         var orderedPlayers = playerIndex > 0 ? __spreadArray(__spreadArray([], players.slice(playerIndex)), players.slice(0, playerIndex)) : players;
         orderedPlayers.forEach(function (player, index) {
-            return _this.createPlayerTable(gamedatas, Number(player.id), index ? 'right' : 'left');
+            return _this.createPlayerTable(gamedatas, Number(player.id));
         });
     };
-    Glow.prototype.createPlayerTable = function (gamedatas, playerId, side) {
-        var _this = this;
-        var playerTable = new PlayerTable(this, gamedatas.players[playerId], side);
+    Glow.prototype.createPlayerTable = function (gamedatas, playerId) {
+        var playerTable = new PlayerTable(this, gamedatas.players[playerId]);
         this.playersTables.push(playerTable);
-        playerTable.onPlayerProjectSelectionChanged = function (selectProjectsIds) {
-            _this.selectedPlayerProjectsIds = selectProjectsIds;
-            _this.onProjectSelectionChanged();
-        };
     };
     Glow.prototype.chooseAdventurer = function (id) {
         if (!this.checkAction('chooseAdventurer')) {
@@ -854,16 +578,6 @@ var Glow = /** @class */ (function () {
         }
         this.takeAction('chooseAdventurer', {
             id: id
-        });
-    };
-    Glow.prototype.repairMachine = function (id, payment) {
-        if (!this.checkAction('repairMachine')) {
-            return;
-        }
-        var base64 = btoa(JSON.stringify(payment));
-        this.takeAction('repairMachine', {
-            id: id,
-            payment: base64
         });
     };
     Glow.prototype.getCharcoalium = function () {
@@ -953,7 +667,7 @@ var Glow = /** @class */ (function () {
     Glow.prototype.setPoints = function (playerId, points) {
         var _a;
         (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.toValue(points);
-        this.table.setPoints(playerId, points);
+        this.board.setPoints(playerId, points);
     };
     Glow.prototype.addHelp = function () {
         var _this = this;
@@ -1006,85 +720,20 @@ var Glow = /** @class */ (function () {
         //log( 'notifications subscriptions setup' );
         var _this = this;
         var notifs = [
-            ['machinePlayed', ANIMATION_MS],
-            ['machineRepaired', ANIMATION_MS],
-            ['tableMove', ANIMATION_MS],
-            ['addMachinesToHand', ANIMATION_MS],
+            ['chosenAdventurer', ANIMATION_MS],
             ['points', 1],
             ['lastTurn', 1],
-            ['addResources', ANIMATION_MS],
-            ['removeResources', ANIMATION_MS],
-            ['discardHandMachines', ANIMATION_MS],
-            ['discardPlayerMachines', ANIMATION_MS],
-            ['discardTableMachines', ANIMATION_MS],
-            ['removeProject', ANIMATION_MS],
-            ['addWorkshopProjects', ANIMATION_MS],
         ];
         notifs.forEach(function (notif) {
             dojo.subscribe(notif[0], _this, "notif_" + notif[0]);
             _this.notifqueue.setSynchronous(notif[0], notif[1]);
         });
     };
-    Glow.prototype.notif_machinePlayed = function (notif) {
-        this.adventurersStock.removeFromStockById('' + notif.args.machine.id);
-        this.table.machinePlayed(notif.args.playerId, notif.args.machine);
-    };
-    Glow.prototype.notif_machineRepaired = function (notif) {
-        moveToAnotherStock(this.table.machineStocks[notif.args.machineSpot], this.getPlayerTable(notif.args.playerId).machineStock, 0, //getUniqueId(notif.args.machine), 
-        '' + notif.args.machine.id);
-    };
-    Glow.prototype.notif_tableMove = function (notif) {
-        var _this = this;
-        Object.keys(notif.args.moved).forEach(function (key) {
-            var originalSpot = Number(key);
-            var machine = notif.args.moved[key];
-            moveToAnotherStock(_this.table.machineStocks[originalSpot], _this.table.machineStocks[machine.location_arg], 0, //getUniqueId(machine), 
-            '' + machine.id);
-        });
-    };
-    Glow.prototype.notif_addMachinesToHand = function (notif) {
-        var _this = this;
-        var from = undefined;
-        if (notif.args.from === 0) {
-            from = 'machine-deck';
-        }
-        else if (notif.args.from > 0) {
-            from = "player-icon-" + notif.args.from;
-        }
-        notif.args.machines.forEach(function (machine) { return addToStockWithId(_this.adventurersStock, 0, '' + machine.id, from); });
-        if (notif.args.remainingMachines !== undefined) {
-            this.setRemainingMachines(notif.args.remainingMachines);
-        }
-    };
-    Glow.prototype.notif_addWorkshopProjects = function (notif) {
-        this.getPlayerTable(notif.args.playerId).addWorkshopProjects(notif.args.projects);
+    Glow.prototype.notif_chosenAdventurer = function (notif) {
+        this.getPlayerTable(notif.args.playerId).setAdventurer(notif.args.adventurer);
     };
     Glow.prototype.notif_points = function (notif) {
         this.setPoints(notif.args.playerId, notif.args.points);
-    };
-    Glow.prototype.notif_addResources = function (notif) {
-        //this.setResourceCount(notif.args.playerId, notif.args.resourceType, notif.args.count);
-        //this.setResourceCount(notif.args.opponentId, notif.args.resourceType, notif.args.opponentCount);
-        this.getPlayerTable(notif.args.playerId).addResources(notif.args.resourceType, notif.args.resources);
-    };
-    Glow.prototype.notif_removeResources = function (notif) {
-        //this.setResourceCount(notif.args.playerId, notif.args.resourceType, notif.args.count);
-        this.table.addResources(notif.args.resourceType, notif.args.resources);
-    };
-    Glow.prototype.notif_discardHandMachines = function (notif) {
-        var _this = this;
-        notif.args.machines.forEach(function (machine) { return _this.adventurersStock.removeFromStockById('' + machine.id); });
-    };
-    Glow.prototype.notif_discardPlayerMachines = function (notif) {
-        var _this = this;
-        notif.args.machines.forEach(function (machine) { return _this.getPlayerTable(machine.location_arg).machineStock.removeFromStockById('' + machine.id); });
-    };
-    Glow.prototype.notif_discardTableMachines = function (notif) {
-        var _this = this;
-        notif.args.machines.forEach(function (machine) { return _this.table.machineStocks[machine.location_arg].removeFromStockById('' + machine.id); });
-    };
-    Glow.prototype.notif_removeProject = function (notif) {
-        this.getProjectStocks().forEach(function (stock) { return stock.removeFromStockById('' + notif.args.project.id); });
     };
     Glow.prototype.notif_lastTurn = function () {
         if (document.getElementById('last-round')) {

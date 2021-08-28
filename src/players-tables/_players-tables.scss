@@ -1,77 +1,20 @@
-$blue: #006e7d;
-$red: #a1311f;
 
 #playerstables {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-column-gap: 10px;
 
     .whiteblock {
         padding: 0;
     }
 
     .player-table {
-        display: flex;
 
         .name-column {
             position: relative;
-            width: 150px;
-            text-overflow: ellipsis;
             padding: 5px;
-            color: white;
-            text-align: center;
-
-            &.blue.left {
-                background: linear-gradient(0.25turn, $blue 60%, transparent);
-            }
-            &.blue.right {
-                background: linear-gradient(0.75turn, $blue 60%, transparent);
-            }
-
-            &.red.left {
-                background: linear-gradient(0.25turn, $red 60%, transparent);
-            }
-            &.red.right {
-                background: linear-gradient(0.75turn, $red 60%, transparent);
-            }
         }
 
-        .player-resources {
-            position: absolute;
-            top: 20px;
-            left: 0;
+        .adventurer-and-companions {
             display: grid;
-            grid-template-columns: repeat(3, 50px);
-            grid-template-rows: 115px 60px;
-
-            .top {
-                grid-column: 1 / 4;
-            }
-
-            &>div {
-                position: relative;
-            }
-
-            
-
-            .cube {
-                background-color: #FFFFFFAA;
-                box-shadow: 0 0 5px 6px #ffffffAA;
-                border-radius: 50%;
-                z-index: 12;
-            }
-        }
-
-        &.right {
-            flex-direction: row-reverse;
-        }
-
-        .machines-and-projects {
-            flex: 1;
-
-            .empty {
-                display: none;
-            }
+            grid-template-columns: 200px auto;
         }
     }
 }
