@@ -101,12 +101,12 @@ trait UtilTrait {
     }
 
     function addPlayerReroll(int $playerId, int $rerolls) {
-        self::DbQuery("UPDATE player SET `player_reroll_tokens` = `player_reroll_tokens` + $rerolls WHERE `playerId` = $playerId");
+        self::DbQuery("UPDATE player SET `player_rerolls` = `player_rerolls` + $rerolls WHERE `playerId` = $playerId");
     }
 
     function removePlayerReroll(int $playerId, int $dec) {
         $newValue = max(0, $this->getPlayerReroll($playerId) - $dec);
-        self::DbQuery("UPDATE player SET `player_reroll_tokens` = $newValue WHERE player_id = $playerId");
+        self::DbQuery("UPDATE player SET `player_rerolls` = $newValue WHERE player_id = $playerId");
         return $newValue;
     }
 
