@@ -54,6 +54,9 @@ class Glow extends Table {
 		
         $this->companions = self::getNew("module.common.deck");
         $this->companions->init("companion");
+		
+        $this->effects = self::getNew("module.common.deck");
+        $this->effects->init("effect");
 	}
 	
     protected function getGameName() {

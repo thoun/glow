@@ -1,5 +1,6 @@
 <?php
 
+require_once(__DIR__.'/objects/effect.php');
 require_once(__DIR__.'/objects/adventurer.php');
 require_once(__DIR__.'/objects/companion.php');
 require_once(__DIR__.'/objects/dice.php');

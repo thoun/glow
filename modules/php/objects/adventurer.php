@@ -3,9 +3,9 @@
 class AdventurerCard {
     public /*int*/ $points;
     public /*int*/ $dice;
-    public /*int*/ $effect;
+    public /*EffectCard|null*/ $effect;
   
-    public function __construct(int $points, int $dice, int $effect) {
+    public function __construct(int $points, int $dice, /*object|null*/ $effect) {
         $this->points = $points;
         $this->dice = $dice;
         $this->effect = $effect;

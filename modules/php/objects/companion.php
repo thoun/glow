@@ -4,6 +4,7 @@ class CompanionCard {
     public /*int*/ $points;
     public /*int*/ $produce; // 0 = charcoalium, 1 = wood, 2 = copper, 3 = crystal, 9 = *
     public /*array*/ $cost;
+    public /*EffectCard|null*/ $effect;
   
     public function __construct(int $points, int $produce, array $cost) {
         $this->points = $points;
