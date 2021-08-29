@@ -1,4 +1,4 @@
-const POINT_CASE_SIZE = 49;
+const POINT_CASE_SIZE = 46;
 
 class Board {
     private points = new Map<number, number>();
@@ -25,11 +25,13 @@ class Board {
 
     private movePoints() {
         this.points.forEach((points, playerId) => {
-            console.log(points, playerId);
             const markerDiv = document.getElementById(`player-${playerId}-point-marker`);
 
-            const top = 19 + (points < 84 ? Math.max(points - 32, 0) * POINT_CASE_SIZE : (100 - points) * POINT_CASE_SIZE);
-            const left = 24 + (points < 50 ? Math.min(points, 32) * POINT_CASE_SIZE : 32*POINT_CASE_SIZE - Math.max(50 - points, 0));
+            const cases = points === 10 ? 11 :
+                (points > 10 ? points + 2 : points);
+
+            const top = 19 + (cases < 86 ? Math.min(Math.max(cases - 34, 0), 17) * POINT_CASE_SIZE : (102 - cases) * POINT_CASE_SIZE);
+            const left = 24 + (cases < 52 ? Math.min(cases, 34) * POINT_CASE_SIZE : (33 - Math.max(cases - 52, 0))*POINT_CASE_SIZE);
     
             let topShift = 0;
             let leftShift = 0;

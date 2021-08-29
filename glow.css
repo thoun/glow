@@ -3,6 +3,7 @@
   position: relative;
   width: 1656px;
   height: 862px;
+  margin-bottom: 20px;
 }
 #board.side1 {
   background-image: url("img/side1.png");

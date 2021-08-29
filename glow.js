@@ -185,7 +185,7 @@ function formatTextIcons(rawText) {
         .replace(/\[resource3\]/ig, '<span class="icon crystal"></span>')
         .replace(/\[resource9\]/ig, '<span class="icon joker"></span>');
 }
-var POINT_CASE_SIZE = 49;
+var POINT_CASE_SIZE = 46;
 var Board = /** @class */ (function () {
     function Board(game, players) {
         var _this = this;
@@ -207,10 +207,11 @@ var Board = /** @class */ (function () {
     Board.prototype.movePoints = function () {
         var _this = this;
         this.points.forEach(function (points, playerId) {
-            console.log(points, playerId);
             var markerDiv = document.getElementById("player-" + playerId + "-point-marker");
-            var top = 19 + (points < 84 ? Math.max(points - 32, 0) * POINT_CASE_SIZE : (100 - points) * POINT_CASE_SIZE);
-            var left = 24 + (points < 50 ? Math.min(points, 32) * POINT_CASE_SIZE : 32 * POINT_CASE_SIZE - Math.max(50 - points, 0));
+            var cases = points === 10 ? 11 :
+                (points > 10 ? points + 2 : points);
+            var top = 19 + (cases < 86 ? Math.min(Math.max(cases - 34, 0), 17) * POINT_CASE_SIZE : (102 - cases) * POINT_CASE_SIZE);
+            var left = 24 + (cases < 52 ? Math.min(cases, 34) * POINT_CASE_SIZE : (33 - Math.max(cases - 52, 0)) * POINT_CASE_SIZE);
             var topShift = 0;
             var leftShift = 0;
             _this.points.forEach(function (iPoints, iPlayerId) {
@@ -241,10 +242,9 @@ var PlayerTable = /** @class */ (function () {
         setupAdventurersCards(this.adventurerStock);
         if (player.adventurer) {
             this.adventurerStock.addToStockWithId(player.adventurer.color, '' + player.adventurer.id);
-        }
-        else {
+        } /* else {
             this.adventurerStock.addToStockWithId(0, '0');
-        }
+        }*/
         // companions
         this.companionsStock = new ebg.stock();
         this.companionsStock.setSelectionAppearance('class');
@@ -255,7 +255,7 @@ var PlayerTable = /** @class */ (function () {
         player.companions.forEach(function (companion) { return _this.companionsStock.addToStockWithId(getUniqueId(companion), '' + companion.id); });
     }
     PlayerTable.prototype.setAdventurer = function (adventurer) {
-        this.adventurerStock.removeAll();
+        //this.adventurerStock.removeAll();
         moveToAnotherStock(this.game.adventurersStock, this.adventurerStock, adventurer.color, '' + adventurer.id);
     };
     return PlayerTable;

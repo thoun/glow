@@ -34,9 +34,9 @@ class PlayerTable {
 
         if (player.adventurer) {
             this.adventurerStock.addToStockWithId(player.adventurer.color, ''+player.adventurer.id);
-        } else {
+        }/* else {
             this.adventurerStock.addToStockWithId(0, '0');
-        }
+        }*/
 
         // companions
 
@@ -51,7 +51,7 @@ class PlayerTable {
     }
 
     public setAdventurer(adventurer: Adventurer) {
-        this.adventurerStock.removeAll();
+        //this.adventurerStock.removeAll();
         moveToAnotherStock(this.game.adventurersStock, this.adventurerStock, adventurer.color, ''+adventurer.id);
     }
 }
