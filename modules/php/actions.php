@@ -48,7 +48,22 @@ trait ActionTrait {
         
         $playerId = intval(self::getActivePlayerId());
 
-        // TODO get companion & stuff with it
+        $companion = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting', $spot))[0];
+
+        if ($companion->location != 'meeting') {
+            throw new BgaUserException("Companion not available");
+        }
+
+        $this->companions->moveCard($companion->id, 'player', $playerId);
+
+        self::notifyAllPlayers('chosenCompanion', clienttranslate('${player_name} chooses companion ${companionName}'), [
+            'playerId' => $playerId,
+            'player_name' => self::getActivePlayerName(),
+            'companion' => $companion,
+            'companionName' => $companion->name,
+        ]);
+
+        // TODO get stuff with it
 
         $this->gamestate->nextState($this->getPlayerCount() == 2 ? 'removeCompanion' : 'nextPlayer');
     }
@@ -59,8 +74,21 @@ trait ActionTrait {
         if ($spot < 1 || $spot > 5) {
             throw new BgaUserException("Not a valid spot");
         }
-        
-        $playerId = intval(self::getActivePlayerId());
+
+        $companion = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting', $spot))[0];
+
+        if ($companion->location != 'meeting') {
+            throw new BgaUserException("Companion not available");
+        }
+
+        $this->companions->moveCard($companion->id, 'cemetery');
+
+        self::notifyAllPlayers('removedCompanion', clienttranslate('${player_name} removes companion ${companionName}'), [
+            'playerId' => self::getActivePlayerId(),
+            'player_name' => self::getActivePlayerName(),
+            'companion' => $companion,
+            'companionName' => $companion->name,
+        ]);
 
         // TODO remove companion leave stuff with it
         

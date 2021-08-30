@@ -16,6 +16,7 @@
         "src/stock-utils.ts",
         "src/text-icons-formatter.ts",
         "src/board/board.ts",
+        "src/meeting-track/meeting-track.ts",
         "src/players-tables/player-table.ts",
         "src/glow.ts",
         "src/define.ts"

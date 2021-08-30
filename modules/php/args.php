@@ -21,4 +21,34 @@ trait ArgsTrait {
            'adventurers' => $adventurers,
         ];
     }
+
+    function argRecuitCompanion() {
+        $companions = [];
+        $companions[0] = null;
+
+        for ($i=1;$i<=5;$i++) {
+            $companions[$i] = new stdClass();
+            $companionsFromDb = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting', $i));
+            $companions[$i]->companion = count($companionsFromDb) > 0 ? $companionsFromDb[0] : null;
+        }
+
+        return [
+           'companions' => $companions,
+        ];
+    }
+
+    function argRemoveCompanion() {
+        $companions = [];
+        $companions[0] = null;
+        
+        for ($i=1;$i<=5;$i++) {
+            $companions[$i] = new stdClass();
+            $companionsFromDb = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting', $i));
+            $companions[$i]->companion = count($companionsFromDb) > 0 ? $companionsFromDb[0] : null;
+        }
+
+        return [
+           'companions' => $companions,
+        ];
+    }
 }

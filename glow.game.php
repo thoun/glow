@@ -158,12 +158,20 @@ class Glow extends Table {
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
         $sql = "SELECT player_id id, player_score score, player_no playerNo, player_rerolls rerolls, player_footprints footprints, player_fireflies fireflies FROM player ";
         $result['players'] = self::getCollectionFromDb($sql);
-
-        
   
         $result['firstPlayer'] = intval(self::getGameStateValue(FIRST_PLAYER));
         $result['side'] = intval(self::getGameStateValue(BOARD_SIDE));
         $result['day'] = intval(self::getGameStateValue(DAY));
+
+        $meetingTrack = [];
+        $meetingTrack[0] = new stdClass();
+        for ($i=1;$i<=5;$i++) {
+            $meetingTrack[$i] = new stdClass();
+            $companions = $this->getCompanionsFromDb($this->adventurers->getCardsInLocation('meeting', $i));
+            $meetingTrack[$i]->companion = count($companions) > 0 ? $companions[0] : null;
+        }
+
+        $result['meetingTrack'] = $meetingTrack;
 
         foreach($result['players'] as $playerId => &$player) {
             $player['playerNo'] = intval($player['playerNo']);

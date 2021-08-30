@@ -27,14 +27,12 @@ class Glow implements GlowGame {
 
     public adventurersStock: Stock;
     private board: Board;
+    private meetingTrack: MeetingTrack;
     private playersTables: PlayerTable[] = [];
-
-    private selectedPlayerProjectsIds: number[] = []; 
-    private selectedTableProjectsIds: number[] = [];
 
     public zoom: number = 1;
 
-    public clickAction: 'play' | 'select' = 'play';
+    private meetingTrackClickAction: 'recruit' | 'remove';
 
     constructor() {    
         const zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
@@ -69,6 +67,7 @@ class Glow implements GlowGame {
         dojo.addClass('board', `side${gamedatas.side}`);
         this.createPlayerPanels(gamedatas);
         this.board = new Board(this, Object.values(gamedatas.players));
+        this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack);
         this.createPlayerTables(gamedatas);
 
         /*this.machineCounter = new ebg.counter();
@@ -115,6 +114,12 @@ class Glow implements GlowGame {
                     dojo.destroy('adventurers-stock');
                 }
                 break;
+            case 'recruitCompanion':
+                this.onEnteringStateRecruitCompanion(args.args);
+                break;
+            case 'removeCompanion':
+                this.onEnteringStateRemoveCompanion(args.args);
+                break;
             case 'gameEnd':
                 const lastTurnBar = document.getElementById('last-round');
                 if (lastTurnBar) {
@@ -151,6 +156,34 @@ class Glow implements GlowGame {
         }
     }
 
+    private onEnteringStateRecruitCompanion(args: RecruitCompanionArgs) {
+        this.meetingTrackClickAction = 'recruit';
+
+        args.companions.forEach((companion, spot) =>  {
+            if (spot >=1 && spot <=5) {
+                this.meetingTrack.setCompanion(companion, spot);
+            }
+        });
+        
+        if((this as any).isCurrentPlayerActive()) {
+            this.meetingTrack.setSelectionMode(1);
+        }
+    }
+
+    private onEnteringStateRemoveCompanion(args: RecruitCompanionArgs) {
+        this.meetingTrackClickAction = 'remove';
+
+        args.companions.forEach((companion, spot) =>  {
+            if (spot >=1 && spot <=5) {
+                this.meetingTrack.setCompanion(companion, spot);
+            }
+        });
+        
+        if((this as any).isCurrentPlayerActive()) {
+            this.meetingTrack.setSelectionMode(1);
+        }
+    }
+
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
@@ -161,6 +194,9 @@ class Glow implements GlowGame {
             case 'chooseAdventurer':
                 this.onLeavingChooseAdventurer();
                 break;
+            case 'recruitCompanion':
+                this.onLeavingRecruitCompanion();
+                break;
         }
     }
 
@@ -168,59 +204,22 @@ class Glow implements GlowGame {
         this.adventurersStock.setSelectionMode(0);
     }
 
+    onLeavingRecruitCompanion() {
+        this.meetingTrack.setSelectionMode(0);
+    }
+
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
     //
     public onUpdateActionButtons(stateName: string, args: any) {
         if((this as any).isCurrentPlayerActive()) {
-            switch (stateName) {                
-                case 'choosePlayAction': 
-                    const choosePlayActionArgs = args as ChoosePlayActionArgs;
-                    (this as any).addActionButton('getCharcoalium-button', _('Get charcoalium') + formatTextIcons(` (${choosePlayActionArgs.machine.points} [resource0])`), () => this.getCharcoalium());
-                    if (choosePlayActionArgs.machine.dice == 9) {
-                        for (let i=1; i<=3; i++) {
-                            (this as any).addActionButton(`getResource${i}-button`, _('Get resource') + formatTextIcons(` ([resource${i}])`), () => this.getResource(i));
-                        }
-                    } else {
-                        (this as any).addActionButton('getResource-button', _('Get resource') + formatTextIcons(` ([resource${choosePlayActionArgs.machine.dice}])`), () => this.getResource(choosePlayActionArgs.machine.dice));
-                        if (choosePlayActionArgs.machine.color == 1 || choosePlayActionArgs.machine.dice == 0) {
-                            // for those machines, getting 1 resource is not the best option, so we "unlight" them
-                            dojo.removeClass('getResource-button', 'bgabutton_blue');
-                            dojo.addClass('getResource-button', 'bgabutton_gray');
-                        }
-                    }
-                    (this as any).addActionButton('applyEffect-button', _('Apply effect') + ` <div class="effect effect${MACHINES_IDS.indexOf(0)}"></div>`, () => this.applyEffect());
-                    if (!choosePlayActionArgs.canApplyEffect) {
-                        dojo.addClass('applyEffect-button', 'disabled');
-                    }
-                    (this as any).addTooltipHtml('applyEffect-button', getMachineTooltip(0));
-                    break;
-
-                case 'selectResource':
+            switch (stateName) {
+                /*case 'selectResource':
                     const selectResourceArgs = args as SelectResourceArgs;
                     selectResourceArgs.possibleCombinations.forEach((combination, index) => 
                         (this as any).addActionButton(`selectResourceCombination${index}-button`, formatTextIcons(combination.map(type => `[resource${type}]`).join('')), () => this.selectResource(combination))
                     );
-                    break;
-
-                case 'selectProject':
-                    const selectProjectArgs = args as SelectProjectArgs;
-                    selectProjectArgs.projects.forEach(project => 
-                        (this as any).addActionButton(`selectProject${project.id}-button`, `<div class="project project${PROJECTS_IDS.indexOf(getUniqueId(project))}"></div>`, () => this.selectProject(project.id))
-                    );
-                    break;
-
-                case 'selectExchange':
-                    const selectExchangeArgs = args as SelectExchangeArgs;
-                    selectExchangeArgs.possibleExchanges.forEach((possibleExchange, index) => 
-                        (this as any).addActionButton(`selectExchange${index}-button`, formatTextIcons(`[resource${possibleExchange.from}] &#x21E8; [resource${possibleExchange.to}]`), () => this.selectExchange(possibleExchange))
-                    );
-                    (this as any).addActionButton('skipExchange-button', _('Skip'), () => this.skipExchange(), null, null, 'red');
-                    break;
-
-                case 'chooseProjectDiscardedMachine':
-                    (this as any).addActionButton('selectProjectDiscardedMachine-button', _('Discard selected machines'), () => this.discardSelectedMachines());
-                    break;
+                    break;*/
             }
         }
     }    
@@ -391,6 +390,14 @@ class Glow implements GlowGame {
         this.playersTables.push(playerTable);
     }
 
+    public selectMeetingTrackCompanion(spot: number) {
+        if (this.meetingTrackClickAction === 'remove') {
+            this.removeCompanion(spot);
+        } else {
+            this.recruitCompanion(spot);
+        }
+    }
+
     public chooseAdventurer(id: number) {
         if(!(this as any).checkAction('chooseAdventurer')) {
             return;
@@ -401,107 +408,37 @@ class Glow implements GlowGame {
         });
     }
 
-    public getCharcoalium() {
-        if(!(this as any).checkAction('getCharcoalium')) {
+    public recruitCompanion(spot: number) {
+        if(!(this as any).checkAction('recruitCompanion')) {
             return;
         }
 
-        this.takeAction('getCharcoalium');
-    }
-
-    public getResource(resource: number) {
-        if(!(this as any).checkAction('getResource')) {
-            return;
-        }
-
-        this.takeAction('getResource', {
-            resource
+        this.takeAction('recruitCompanion', {
+            spot
         });
     }
 
-    public applyEffect() {
-        if(!(this as any).checkAction('applyEffect')) {
+    public removeCompanion(spot: number) {
+        if(!(this as any).checkAction('removeCompanion')) {
             return;
         }
 
-        this.takeAction('applyEffect');
-    }
-
-    private selectProjects(ids: number[]) {
-        if(!(this as any).checkAction('selectProjects')) {
-            return;
-        }
-
-        this.takeAction('selectProjects', { 
-            ids: ids.join(',')
+        this.takeAction('removeCompanion', {
+            spot
         });
     }
 
-    public skipSelectProjects() {
-        if(!(this as any).checkAction('skipSelectProjects')) {
-            return;
-        }
-
-        this.takeAction('skipSelectProjects');
-    }
-
-    public selectResource(resourcesTypes: number[]) {
-        if(!(this as any).checkAction('selectResource')) {
-            return;
-        }
-
-        this.takeAction('selectResource', { 
-            resourcesTypes: resourcesTypes.join(',')
-        });
-    }
-
-    public selectMachine(id: number) {
-        if(!(this as any).checkAction('selectMachine')) {
-            return;
-        }
-
-        this.takeAction('selectMachine', {
-            id
-        });
-    }
-
-    public selectProject(id: number) {
-        if(!(this as any).checkAction('selectProject')) {
-            return;
-        }
-
-        this.takeAction('selectProject', {
-            id
-        });
-    }
-
-    public selectExchange(exchange: Exchange) {
-        if(!(this as any).checkAction('selectExchange')) {
-            return;
-        }
-
-        this.takeAction('selectExchange', exchange);
-    }
-
-    public skipExchange() {
-        if(!(this as any).checkAction('skipExchange')) {
-            return;
-        }
-
-        this.takeAction('skipExchange');
-    }
-
-    public discardSelectedMachines() {
+    /*public discardSelectedMachines() {
         if(!(this as any).checkAction('discardSelectedMachines')) {
             return;
         }
 
-        const base64 = btoa(JSON.stringify(/*this.discardedMachineSelector.getCompleteProjects()*/'TODO'));
+        const base64 = btoa(JSON.stringify(/*this.discardedMachineSelector.getCompleteProjects()*-/'TODO'));
 
         this.takeAction('discardSelectedMachines', {
             completeProjects: base64
         });        
-    }
+    }*/
 
     public takeAction(action: string, data?: any) {
         data = data || {};
@@ -529,7 +466,7 @@ class Glow implements GlowGame {
                 <h1>${_("Machines effects")}</h1>
                 <div id="help-machines" class="help-section">
                     <table>`;
-                MACHINES_IDS.forEach((number, index) => html += `<tr><td><div id="machine${index}" class="machine"></div></td><td>${getMachineTooltip(number)}</td></tr>`);
+                /*.forEach((number, index) => html += `<tr><td><div id="machine${index}" class="machine"></div></td><td>${getMachineTooltip(number)}</td></tr>`);
                 html += `</table>
                 </div>
                 <h1>${_("Projects")}</h1>
@@ -541,7 +478,7 @@ class Glow implements GlowGame {
                 PROJECTS_IDS.slice(6, 9).forEach((number, index) => html += `<div id="project${index + 6}" class="project"></div>`);
                 html += `</td></tr><tr><td>${getProjectTooltip(21)}</td></tr>
                 <tr><td><div id="project5" class="project"></div></td></tr><tr><td>${getProjectTooltip(20)}</td></tr><tr><td class="grid">`;
-                PROJECTS_IDS.slice(9).forEach((number, index) => html += `<div id="project${index + 9}" class="project"></div>`);
+                PROJECTS_IDS.slice(9).forEach((number, index) => html += `<div id="project${index + 9}" class="project"></div>`);*/
                 html += `</td></tr><tr><td>${getProjectTooltip(31)}</td></tr></table>
                 </div>
             </div>`;
@@ -618,9 +555,11 @@ class Glow implements GlowGame {
     public format_string_recursive(log: string, args: any) {
         try {
             if (log && args && !args.processed) {
-                // Representation of the color of a card
                 if (typeof args.adventurerName == 'string' && args.adventurerName[0] != '<') {
-                    args.adventurerName = `<strong >${args.adventurerName}</strong>`;
+                    args.adventurerName = `<strong>${args.adventurerName}</strong>`; // TODO add dice color ?
+                }
+                if (typeof args.companionName == 'string' && args.companionName[0] != '<') {
+                    args.companionName = `<strong>${args.companionName}</strong>`;
                 }
             }
         } catch (e) {

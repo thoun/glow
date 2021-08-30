@@ -180,6 +180,53 @@ var Board = /** @class */ (function () {
     };
     return Board;
 }());
+var MeetingTrack = /** @class */ (function () {
+    function MeetingTrack(game, meetingTrackSpot) {
+        var _this = this;
+        this.game = game;
+        this.companionsStocks = [];
+        var _loop_1 = function (i) {
+            var html = "<div id=\"meeting-track-companion-" + i + "\" class=\"meeting-track-stock\" style=\"left: " + (490 + 243 * (i - 1)) + "px;\"></div>";
+            dojo.place(html, 'meeting-track');
+            var spot = meetingTrackSpot[i];
+            this_1.companionsStocks[i] = new ebg.stock();
+            this_1.companionsStocks[i].setSelectionAppearance('class');
+            this_1.companionsStocks[i].selectionClass = 'selected';
+            this_1.companionsStocks[i].create(this_1.game, $("meeting-track-companion-" + i), CARD_WIDTH, CARD_HEIGHT);
+            this_1.companionsStocks[i].setSelectionMode(0);
+            dojo.connect(this_1.companionsStocks[i], 'onChangeSelection', this_1, function () { return _this.game.selectMeetingTrackCompanion(i); });
+            setupCompanionCards(this_1.companionsStocks[i]);
+            if (spot.companion) {
+                this_1.companionsStocks[i].addToStockWithId(spot.companion.subType, '' + spot.companion.id);
+            }
+        };
+        var this_1 = this;
+        for (var i = 1; i <= 5; i++) {
+            _loop_1(i);
+        }
+    }
+    MeetingTrack.prototype.setCompanion = function (companion, spot) {
+        var _a;
+        if (!companion) {
+            this.companionsStocks[spot].removeAll();
+            return;
+        }
+        var currentId = (_a = this.companionsStocks[spot].items[0]) === null || _a === void 0 ? void 0 : _a.id;
+        if (currentId && Number(currentId) === companion.id) {
+            return;
+        }
+        if (currentId && Number(currentId) != companion.id) {
+            this.companionsStocks[spot].removeAll();
+        }
+        this.companionsStocks[spot].addToStockWithId(companion.subType, '' + companion.id);
+    };
+    MeetingTrack.prototype.setSelectionMode = function (mode) {
+        for (var i = 1; i <= 5; i++) {
+            this.companionsStocks[i].setSelectionMode(mode);
+        }
+    };
+    return MeetingTrack;
+}());
 var PlayerTable = /** @class */ (function () {
     function PlayerTable(game, player) {
         var _this = this;
@@ -232,10 +279,7 @@ var Glow = /** @class */ (function () {
         this.footprintCounters = [];
         this.fireflyCounters = [];
         this.playersTables = [];
-        this.selectedPlayerProjectsIds = [];
-        this.selectedTableProjectsIds = [];
         this.zoom = 1;
-        this.clickAction = 'play';
         var zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
             this.zoom = Number(zoomStr);
@@ -262,6 +306,7 @@ var Glow = /** @class */ (function () {
         dojo.addClass('board', "side" + gamedatas.side);
         this.createPlayerPanels(gamedatas);
         this.board = new Board(this, Object.values(gamedatas.players));
+        this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack);
         this.createPlayerTables(gamedatas);
         /*this.machineCounter = new ebg.counter();
         this.machineCounter.create('remaining-machine-counter');
@@ -300,6 +345,12 @@ var Glow = /** @class */ (function () {
                     dojo.destroy('adventurers-stock');
                 }
                 break;
+            case 'recruitCompanion':
+                this.onEnteringStateRecruitCompanion(args.args);
+                break;
+            case 'removeCompanion':
+                this.onEnteringStateRemoveCompanion(args.args);
+                break;
             case 'gameEnd':
                 var lastTurnBar = document.getElementById('last-round');
                 if (lastTurnBar) {
@@ -331,6 +382,30 @@ var Glow = /** @class */ (function () {
             this.adventurersStock.setSelectionMode(1);
         }
     };
+    Glow.prototype.onEnteringStateRecruitCompanion = function (args) {
+        var _this = this;
+        this.meetingTrackClickAction = 'recruit';
+        args.companions.forEach(function (companion, spot) {
+            if (spot >= 1 && spot <= 5) {
+                _this.meetingTrack.setCompanion(companion, spot);
+            }
+        });
+        if (this.isCurrentPlayerActive()) {
+            this.meetingTrack.setSelectionMode(1);
+        }
+    };
+    Glow.prototype.onEnteringStateRemoveCompanion = function (args) {
+        var _this = this;
+        this.meetingTrackClickAction = 'remove';
+        args.companions.forEach(function (companion, spot) {
+            if (spot >= 1 && spot <= 5) {
+                _this.meetingTrack.setCompanion(companion, spot);
+            }
+        });
+        if (this.isCurrentPlayerActive()) {
+            this.meetingTrack.setSelectionMode(1);
+        }
+    };
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
@@ -340,66 +415,29 @@ var Glow = /** @class */ (function () {
             case 'chooseAdventurer':
                 this.onLeavingChooseAdventurer();
                 break;
+            case 'recruitCompanion':
+                this.onLeavingRecruitCompanion();
+                break;
         }
     };
     Glow.prototype.onLeavingChooseAdventurer = function () {
         this.adventurersStock.setSelectionMode(0);
     };
+    Glow.prototype.onLeavingRecruitCompanion = function () {
+        this.meetingTrack.setSelectionMode(0);
+    };
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
     //
     Glow.prototype.onUpdateActionButtons = function (stateName, args) {
-        var _this = this;
         if (this.isCurrentPlayerActive()) {
             switch (stateName) {
-                case 'choosePlayAction':
-                    var choosePlayActionArgs_1 = args;
-                    this.addActionButton('getCharcoalium-button', _('Get charcoalium') + formatTextIcons(" (" + choosePlayActionArgs_1.machine.points + " [resource0])"), function () { return _this.getCharcoalium(); });
-                    if (choosePlayActionArgs_1.machine.dice == 9) {
-                        var _loop_1 = function (i) {
-                            this_1.addActionButton("getResource" + i + "-button", _('Get resource') + formatTextIcons(" ([resource" + i + "])"), function () { return _this.getResource(i); });
-                        };
-                        var this_1 = this;
-                        for (var i = 1; i <= 3; i++) {
-                            _loop_1(i);
-                        }
-                    }
-                    else {
-                        this.addActionButton('getResource-button', _('Get resource') + formatTextIcons(" ([resource" + choosePlayActionArgs_1.machine.dice + "])"), function () { return _this.getResource(choosePlayActionArgs_1.machine.dice); });
-                        if (choosePlayActionArgs_1.machine.color == 1 || choosePlayActionArgs_1.machine.dice == 0) {
-                            // for those machines, getting 1 resource is not the best option, so we "unlight" them
-                            dojo.removeClass('getResource-button', 'bgabutton_blue');
-                            dojo.addClass('getResource-button', 'bgabutton_gray');
-                        }
-                    }
-                    this.addActionButton('applyEffect-button', _('Apply effect') + (" <div class=\"effect effect" + MACHINES_IDS.indexOf(0) + "\"></div>"), function () { return _this.applyEffect(); });
-                    if (!choosePlayActionArgs_1.canApplyEffect) {
-                        dojo.addClass('applyEffect-button', 'disabled');
-                    }
-                    this.addTooltipHtml('applyEffect-button', getMachineTooltip(0));
-                    break;
-                case 'selectResource':
-                    var selectResourceArgs = args;
-                    selectResourceArgs.possibleCombinations.forEach(function (combination, index) {
-                        return _this.addActionButton("selectResourceCombination" + index + "-button", formatTextIcons(combination.map(function (type) { return "[resource" + type + "]"; }).join('')), function () { return _this.selectResource(combination); });
-                    });
-                    break;
-                case 'selectProject':
-                    var selectProjectArgs = args;
-                    selectProjectArgs.projects.forEach(function (project) {
-                        return _this.addActionButton("selectProject" + project.id + "-button", "<div class=\"project project" + PROJECTS_IDS.indexOf(getUniqueId(project)) + "\"></div>", function () { return _this.selectProject(project.id); });
-                    });
-                    break;
-                case 'selectExchange':
-                    var selectExchangeArgs = args;
-                    selectExchangeArgs.possibleExchanges.forEach(function (possibleExchange, index) {
-                        return _this.addActionButton("selectExchange" + index + "-button", formatTextIcons("[resource" + possibleExchange.from + "] &#x21E8; [resource" + possibleExchange.to + "]"), function () { return _this.selectExchange(possibleExchange); });
-                    });
-                    this.addActionButton('skipExchange-button', _('Skip'), function () { return _this.skipExchange(); }, null, null, 'red');
-                    break;
-                case 'chooseProjectDiscardedMachine':
-                    this.addActionButton('selectProjectDiscardedMachine-button', _('Discard selected machines'), function () { return _this.discardSelectedMachines(); });
-                    break;
+                /*case 'selectResource':
+                    const selectResourceArgs = args as SelectResourceArgs;
+                    selectResourceArgs.possibleCombinations.forEach((combination, index) =>
+                        (this as any).addActionButton(`selectResourceCombination${index}-button`, formatTextIcons(combination.map(type => `[resource${type}]`).join('')), () => this.selectResource(combination))
+                    );
+                    break;*/
             }
         }
     };
@@ -527,6 +565,14 @@ var Glow = /** @class */ (function () {
         var playerTable = new PlayerTable(this, gamedatas.players[playerId]);
         this.playersTables.push(playerTable);
     };
+    Glow.prototype.selectMeetingTrackCompanion = function (spot) {
+        if (this.meetingTrackClickAction === 'remove') {
+            this.removeCompanion(spot);
+        }
+        else {
+            this.recruitCompanion(spot);
+        }
+    };
     Glow.prototype.chooseAdventurer = function (id) {
         if (!this.checkAction('chooseAdventurer')) {
             return;
@@ -535,85 +581,33 @@ var Glow = /** @class */ (function () {
             id: id
         });
     };
-    Glow.prototype.getCharcoalium = function () {
-        if (!this.checkAction('getCharcoalium')) {
+    Glow.prototype.recruitCompanion = function (spot) {
+        if (!this.checkAction('recruitCompanion')) {
             return;
         }
-        this.takeAction('getCharcoalium');
-    };
-    Glow.prototype.getResource = function (resource) {
-        if (!this.checkAction('getResource')) {
-            return;
-        }
-        this.takeAction('getResource', {
-            resource: resource
+        this.takeAction('recruitCompanion', {
+            spot: spot
         });
     };
-    Glow.prototype.applyEffect = function () {
-        if (!this.checkAction('applyEffect')) {
+    Glow.prototype.removeCompanion = function (spot) {
+        if (!this.checkAction('removeCompanion')) {
             return;
         }
-        this.takeAction('applyEffect');
-    };
-    Glow.prototype.selectProjects = function (ids) {
-        if (!this.checkAction('selectProjects')) {
-            return;
-        }
-        this.takeAction('selectProjects', {
-            ids: ids.join(',')
+        this.takeAction('removeCompanion', {
+            spot: spot
         });
     };
-    Glow.prototype.skipSelectProjects = function () {
-        if (!this.checkAction('skipSelectProjects')) {
+    /*public discardSelectedMachines() {
+        if(!(this as any).checkAction('discardSelectedMachines')) {
             return;
         }
-        this.takeAction('skipSelectProjects');
-    };
-    Glow.prototype.selectResource = function (resourcesTypes) {
-        if (!this.checkAction('selectResource')) {
-            return;
-        }
-        this.takeAction('selectResource', {
-            resourcesTypes: resourcesTypes.join(',')
-        });
-    };
-    Glow.prototype.selectMachine = function (id) {
-        if (!this.checkAction('selectMachine')) {
-            return;
-        }
-        this.takeAction('selectMachine', {
-            id: id
-        });
-    };
-    Glow.prototype.selectProject = function (id) {
-        if (!this.checkAction('selectProject')) {
-            return;
-        }
-        this.takeAction('selectProject', {
-            id: id
-        });
-    };
-    Glow.prototype.selectExchange = function (exchange) {
-        if (!this.checkAction('selectExchange')) {
-            return;
-        }
-        this.takeAction('selectExchange', exchange);
-    };
-    Glow.prototype.skipExchange = function () {
-        if (!this.checkAction('skipExchange')) {
-            return;
-        }
-        this.takeAction('skipExchange');
-    };
-    Glow.prototype.discardSelectedMachines = function () {
-        if (!this.checkAction('discardSelectedMachines')) {
-            return;
-        }
-        var base64 = btoa(JSON.stringify(/*this.discardedMachineSelector.getCompleteProjects()*/ 'TODO'));
+
+        const base64 = btoa(JSON.stringify(/*this.discardedMachineSelector.getCompleteProjects()*-/'TODO'));
+
         this.takeAction('discardSelectedMachines', {
             completeProjects: base64
         });
-    };
+    }*/
     Glow.prototype.takeAction = function (action, data) {
         data = data || {};
         data.lock = true;
@@ -635,13 +629,19 @@ var Glow = /** @class */ (function () {
             this.helpDialog.create('glowHelpDialog');
             this.helpDialog.setTitle(_("Cards help"));
             var html = "<div id=\"help-popin\">\n                <h1>" + _("Machines effects") + "</h1>\n                <div id=\"help-machines\" class=\"help-section\">\n                    <table>";
-            MACHINES_IDS.forEach(function (number, index) { return html += "<tr><td><div id=\"machine" + index + "\" class=\"machine\"></div></td><td>" + getMachineTooltip(number) + "</td></tr>"; });
-            html += "</table>\n                </div>\n                <h1>" + _("Projects") + "</h1>\n                <div id=\"help-projects\" class=\"help-section\">\n                    <table><tr><td class=\"grid\">";
-            PROJECTS_IDS.slice(1, 5).forEach(function (number, index) { return html += "<div id=\"project" + (index + 1) + "\" class=\"project\"></div>"; });
-            html += "</td></tr><tr><td>" + getProjectTooltip(11) + "</td></tr>\n                <tr><td><div id=\"project0\" class=\"project\"></div></td></tr><tr><td>" + getProjectTooltip(10) + "</td></tr><tr><td class=\"grid\">";
-            PROJECTS_IDS.slice(6, 9).forEach(function (number, index) { return html += "<div id=\"project" + (index + 6) + "\" class=\"project\"></div>"; });
-            html += "</td></tr><tr><td>" + getProjectTooltip(21) + "</td></tr>\n                <tr><td><div id=\"project5\" class=\"project\"></div></td></tr><tr><td>" + getProjectTooltip(20) + "</td></tr><tr><td class=\"grid\">";
-            PROJECTS_IDS.slice(9).forEach(function (number, index) { return html += "<div id=\"project" + (index + 9) + "\" class=\"project\"></div>"; });
+            /*.forEach((number, index) => html += `<tr><td><div id="machine${index}" class="machine"></div></td><td>${getMachineTooltip(number)}</td></tr>`);
+            html += `</table>
+            </div>
+            <h1>${_("Projects")}</h1>
+            <div id="help-projects" class="help-section">
+                <table><tr><td class="grid">`;
+            PROJECTS_IDS.slice(1, 5).forEach((number, index) => html += `<div id="project${index + 1}" class="project"></div>`);
+            html += `</td></tr><tr><td>${getProjectTooltip(11)}</td></tr>
+            <tr><td><div id="project0" class="project"></div></td></tr><tr><td>${getProjectTooltip(10)}</td></tr><tr><td class="grid">`;
+            PROJECTS_IDS.slice(6, 9).forEach((number, index) => html += `<div id="project${index + 6}" class="project"></div>`);
+            html += `</td></tr><tr><td>${getProjectTooltip(21)}</td></tr>
+            <tr><td><div id="project5" class="project"></div></td></tr><tr><td>${getProjectTooltip(20)}</td></tr><tr><td class="grid">`;
+            PROJECTS_IDS.slice(9).forEach((number, index) => html += `<div id="project${index + 9}" class="project"></div>`);*/
             html += "</td></tr><tr><td>" + getProjectTooltip(31) + "</td></tr></table>\n                </div>\n            </div>";
             // Show the dialog
             this.helpDialog.setContent(html);
@@ -701,9 +701,11 @@ var Glow = /** @class */ (function () {
     Glow.prototype.format_string_recursive = function (log, args) {
         try {
             if (log && args && !args.processed) {
-                // Representation of the color of a card
                 if (typeof args.adventurerName == 'string' && args.adventurerName[0] != '<') {
-                    args.adventurerName = "<strong >" + args.adventurerName + "</strong>";
+                    args.adventurerName = "<strong>" + args.adventurerName + "</strong>"; // TODO add dice color ?
+                }
+                if (typeof args.companionName == 'string' && args.companionName[0] != '<') {
+                    args.companionName = "<strong>" + args.companionName + "</strong>";
                 }
             }
         }

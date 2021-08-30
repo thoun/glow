@@ -119,14 +119,14 @@ trait UtilTrait {
     }
 
     function createCompanions() {
-        foreach($this->COMPANION as $type => $companion) {
-            $companions[] = [ 'type' => $type->subType > 23 ? 2 : 1, 'type_arg' => $type->subType, 'nbr' => 1];
+        foreach($this->COMPANIONS as $subType => $companion) {
+            $companions[] = [ 'type' => $subType > 23 ? 2 : 1, 'type_arg' => $subType, 'nbr' => 1];
         }
         $this->companions->createCards($companions, 'deck');
 
         // remove 3 of each face
         for ($face=1; $face<=2; $face++) {
-            $removed = $this->getCompanionsFromDb($this->companions->getCardsOfTypeInLocation($face, null, 'deck'));
+            $removed = array_slice($this->getCompanionsFromDb($this->companions->getCardsOfTypeInLocation($face, null, 'deck')), 0, 3);
             $this->companions->moveCards(array_map(function ($companion) { return $companion->id; }, $removed), 'discard');
 
         }
@@ -135,13 +135,15 @@ trait UtilTrait {
     }
 
     function createSpells() {
-        // TODO
+        foreach($this->EFFECTS as $type => $effect) {
+            $effects[] = [ 'type' => $type, 'type_arg' => null, 'nbr' => 1];
+        }
+        $this->effects->createCards($effects, 'deck');
     }
 
     function placeCompanionsOnMeetingTrack() {
         for ($i=1;$i<=5;$i++) {
             $this->companions->pickCardForLocation('deck', 'meeting', $i);
         }
-        // TODO notif
     }
 }

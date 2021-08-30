@@ -24,6 +24,11 @@ interface Die {
     rolled: boolean;
 }
 
+interface MeetingTrackSpot {
+    companion: Companion;
+    // TODO
+}
+
 interface GlowPlayer extends Player {
     playerNo: number;
     adventurer: Adventurer;
@@ -54,6 +59,8 @@ interface GlowGamedatas {
     side: number;
     day: number;
 
+    meetingTrack: MeetingTrackSpot[];
+
     endTurn: boolean;
 }
 
@@ -62,10 +69,15 @@ interface GlowGame extends Game {
     
     getPlayerId(): number;
     chooseAdventurer(id: number): void;
+    selectMeetingTrackCompanion(spot: number): void;
 }
 
 interface ChooseAdventurerArgs {
     adventurers: Adventurer[];
+}
+
+interface RecruitCompanionArgs {
+    companions: Companion[];
 }
 
 interface ChoosePlayActionArgs {
