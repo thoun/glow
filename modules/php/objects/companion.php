@@ -1,15 +1,22 @@
 <?php
 
 class CompanionCard {
+    public /*string*/ $name;
     public /*int*/ $points;
-    public /*int*/ $produce; // 0 = charcoalium, 1 = wood, 2 = copper, 3 = crystal, 9 = *
-    public /*array*/ $cost;
     public /*EffectCard|null*/ $effect;
+    public /*bool*/ $reroll;
+    public /*int*/ $fireflies;
+    public /*bool*/ $die;
+    public /*int*/ $dieColor;
   
-    public function __construct(int $points, int $produce, array $cost) {
+    public function __construct(string $name, int $points, /*object|null*/ $effect = null, bool $reroll = false, int $fireflies = 0, bool $die = false, int $dieColor = 0) {
+        $this->name = $name;
         $this->points = $points;
-        $this->produce = $produce;
-        $this->cost = $cost;
+        $this->effect = $effect;
+        $this->reroll = $reroll;
+        $this->fireflies = $fireflies;
+        $this->die = $die;
+        $this->dieColor = $dieColor;
     } 
 }
 
@@ -17,22 +24,24 @@ class Companion extends CompanionCard {
     public $id;
     public $location;
     public $location_arg;
-    public $type; // color : 1 = blue, 2 = purple, 3 = red, 4 = yellow
-    public $subType; // index (1-based) on rulebook
-    public $resources; //array?
-    public $payments; //array?
+    public $type; // 1 = A, 2 = B
+    public $subType; // index (1-23)
 
-    public function __construct($dbCard, $CompanionS) {
+    public function __construct($dbCard, $COMPANIONS) {
         $this->id = intval($dbCard['id']);
         $this->location = $dbCard['location'];
         $this->location_arg = intval($dbCard['location_arg']);
         $this->type = intval($dbCard['type']);
         $this->subType = intval($dbCard['type_arg']);
 
-        $CompanionCard = $CompanionS[$this->type * 10 + $this->subType];
-        $this->points = $CompanionCard->points;
-        $this->produce = $CompanionCard->produce;
-        $this->cost = $CompanionCard->cost;
+        $companionCard = $COMPANIONS[$this->subType];
+        $this->name = $companionCard->name;
+        $this->points = $companionCard->points;
+        $this->effect = $companionCard->effect;
+        $this->reroll = $companionCard->reroll;
+        $this->fireflies = $companionCard->fireflies;
+        $this->die = $companionCard->die;
+        $this->dieColor = $companionCard->dieColor;
     } 
 }
 ?>

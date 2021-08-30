@@ -7,66 +7,11 @@ declare const g_gamethemeurl;
 
 declare const board: HTMLDivElement;*/
 
-const MACHINES_IDS = [
-  // blue
-  11,
-  12,
-  13,
-  14,
-  15,
-
-  // purple
-  21,
-  22,
-  23,
-  24,
-  25,
-
-  // red
-  31,
-  32,
-  33,
-  34,
-
-  // yellow
-  41,
-  42,
-];
-
-const PROJECTS_IDS = [
-  // colors
-  10,
-  11,
-  12,
-  13,
-  14,
-
-  // points
-  20,
-  21,
-  22,
-  23,
-
-  // resources
-  31,
-  32,
-  33,
-  34,
-  35,
-  36,
-  37,
-  38,
-];
-
 const CARD_WIDTH = 129;
 const CARD_HEIGHT = 240;
 
 const PROJECT_WIDTH = 134;
 const PROJECT_HEIGHT = 93;
-
-function getUniqueId(object: { type: number, subType: number }): number {
-    return object.type * 10 + object.subType;
-}
 
 function setupAdventurersCards(adventurerStock: Stock) {
     const cardsurl = `${g_gamethemeurl}img/adventurers.png`;
@@ -84,14 +29,16 @@ function setupAdventurersCards(adventurerStock: Stock) {
 function setupCompanionCards(companionsStock: Stock) {
     const cardsurl = `${g_gamethemeurl}img/companions.png`;
 
-    PROJECTS_IDS.forEach((cardId, index) =>
-        companionsStock.addItemType(
-            cardId, 
-            0, 
-            cardsurl, 
-            index
-        )
-    );
+    for (let type=1; type<=2;type++) {
+        for (let subType=1; subType<=23;subType++) {
+            companionsStock.addItemType(
+                subType, 
+                0, 
+                cardsurl, 
+                type + (subType - 1)
+            );
+        }
+    }
 }
 
 function getMachineTooltip(type: number) {

@@ -35,57 +35,10 @@ declare const _;
 declare const g_gamethemeurl;
 
 declare const board: HTMLDivElement;*/
-var MACHINES_IDS = [
-    // blue
-    11,
-    12,
-    13,
-    14,
-    15,
-    // purple
-    21,
-    22,
-    23,
-    24,
-    25,
-    // red
-    31,
-    32,
-    33,
-    34,
-    // yellow
-    41,
-    42,
-];
-var PROJECTS_IDS = [
-    // colors
-    10,
-    11,
-    12,
-    13,
-    14,
-    // points
-    20,
-    21,
-    22,
-    23,
-    // resources
-    31,
-    32,
-    33,
-    34,
-    35,
-    36,
-    37,
-    38,
-];
 var CARD_WIDTH = 129;
 var CARD_HEIGHT = 240;
 var PROJECT_WIDTH = 134;
 var PROJECT_HEIGHT = 93;
-function getUniqueId(object) {
-    return object.type * 10 + object.subType;
-}
 function setupAdventurersCards(adventurerStock) {
     var cardsurl = g_gamethemeurl + "img/adventurers.png";
     for (var i = 0; i <= 7; i++) {
@@ -94,9 +47,11 @@ function setupAdventurersCards(adventurerStock) {
 }
 function setupCompanionCards(companionsStock) {
     var cardsurl = g_gamethemeurl + "img/companions.png";
-    PROJECTS_IDS.forEach(function (cardId, index) {
-        return companionsStock.addItemType(cardId, 0, cardsurl, index);
-    });
+    for (var type = 1; type <= 2; type++) {
+        for (var subType = 1; subType <= 23; subType++) {
+            companionsStock.addItemType(subType, 0, cardsurl, type + (subType - 1));
+        }
+    }
 }
 function getMachineTooltip(type) {
     switch (type) {
@@ -252,7 +207,7 @@ var PlayerTable = /** @class */ (function () {
         this.companionsStock.create(this.game, $("player-table-" + this.playerId + "-companions"), CARD_WIDTH, CARD_HEIGHT);
         this.companionsStock.setSelectionMode(0);
         setupCompanionCards(this.companionsStock);
-        player.companions.forEach(function (companion) { return _this.companionsStock.addToStockWithId(getUniqueId(companion), '' + companion.id); });
+        player.companions.forEach(function (companion) { return _this.companionsStock.addToStockWithId(companion.subType, '' + companion.id); });
     }
     PlayerTable.prototype.setAdventurer = function (adventurer) {
         //this.adventurerStock.removeAll();

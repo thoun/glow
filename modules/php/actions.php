@@ -32,7 +32,7 @@ trait ActionTrait {
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
             'adventurer' => $adventurer,
-            'adventurerName' => $this->getAdventurerName($adventurer->color),
+            'adventurerName' => $adventurer->name,
             'dice' => $dice,
         ]);
 

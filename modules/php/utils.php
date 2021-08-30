@@ -119,17 +119,19 @@ trait UtilTrait {
     }
 
     function createCompanions() {
-        // TODO
+        foreach($this->COMPANION as $type => $companion) {
+            $companions[] = [ 'type' => $type->subType > 23 ? 2 : 1, 'type_arg' => $type->subType, 'nbr' => 1];
+        }
+        $this->companions->createCards($companions, 'deck');
 
         // remove 3 of each face
         for ($face=1; $face<=2; $face++) {
             $removed = $this->getCompanionsFromDb($this->companions->getCardsOfTypeInLocation($face, null, 'deck'));
             $this->companions->moveCards(array_map(function ($companion) { return $companion->id; }, $removed), 'discard');
 
-            // set face 1 (A) before face 2 (B)
-            self::DbQuery("UPDATE companion SET `card_location_arg` = `card_location_arg` + ".(100 * $face)." WHERE `card_location` = 'deck' ");
         }
-
+        // set face 1 (A) before face 2 (B)
+        self::DbQuery("UPDATE companion SET `card_location_arg` = `card_location_arg` + (100 * `card_type`) WHERE `card_location` = 'deck' ");
     }
 
     function createSpells() {
@@ -141,19 +143,5 @@ trait UtilTrait {
             $this->companions->pickCardForLocation('deck', 'meeting', $i);
         }
         // TODO notif
-    }
-
-    function getAdventurerName(int $color) {
-        $colorName = null;
-        switch ($color) {
-            case 1: $colorName = 'Braccio'; break;
-            case 2: $colorName = 'Taetyss'; break;
-            case 3: $colorName = 'Eoles'; break;
-            case 4: $colorName = 'Pocana'; break;
-            case 5: $colorName = 'Moloc\'h'; break;
-            case 6: $colorName = 'Noctiluca'; break;
-            case 7: $colorName = 'Orium'; break;
-        }
-        return $colorName;
     }
 }

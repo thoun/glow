@@ -47,7 +47,7 @@ class PlayerTable {
         this.companionsStock.setSelectionMode(0);
         setupCompanionCards(this.companionsStock);
 
-        player.companions.forEach(companion => this.companionsStock.addToStockWithId(getUniqueId(companion), ''+companion.id));
+        player.companions.forEach(companion => this.companionsStock.addToStockWithId(companion.subType, ''+companion.id));
     }
 
     public setAdventurer(adventurer: Adventurer) {

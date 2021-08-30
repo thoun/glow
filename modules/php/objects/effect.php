@@ -4,7 +4,7 @@
 // 1/5 : color, -1/-5 : forbidden color
 // +1x, -1x : points
 // +2x, -2x : footprints
-// 30 : reroll, 31 firefly, 32 skull, 33 spell, 34 black die, 35 resurect
+// 30 : reroll, 31 firefly, 32 fireflies, 33 skull, 34 black die, 35 resurect, 36 spell
 
 class Effect {
     public /*int[]*/ $conditions;
