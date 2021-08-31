@@ -154,8 +154,8 @@ var Board = /** @class */ (function () {
         players.forEach(function (player) { return _this.points.set(Number(player.id), Number(player.score)); });
         this.movePoints();
     }
-    Board.prototype.setPoints = function (playerId, points) {
-        this.points.set(playerId, points);
+    Board.prototype.incPoints = function (playerId, points) {
+        this.points.set(playerId, this.points.get(playerId) + points);
         this.movePoints();
     };
     Board.prototype.movePoints = function () {
@@ -639,10 +639,22 @@ var Glow = /** @class */ (function () {
         data.lock = true;
         this.ajaxcall("/glow/glow/" + action + ".html", data, this, function () { });
     };
-    Glow.prototype.setPoints = function (playerId, points) {
+    Glow.prototype.incPoints = function (playerId, points) {
         var _a;
-        (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.toValue(points);
-        this.board.setPoints(playerId, points);
+        (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.incValue(points);
+        this.board.incPoints(playerId, points);
+    };
+    Glow.prototype.incRerolls = function (playerId, footprints) {
+        var _a;
+        (_a = this.rerollCounters[playerId]) === null || _a === void 0 ? void 0 : _a.incValue(footprints);
+    };
+    Glow.prototype.incFootprints = function (playerId, footprints) {
+        var _a;
+        (_a = this.footprintCounters[playerId]) === null || _a === void 0 ? void 0 : _a.incValue(footprints);
+    };
+    Glow.prototype.incFireflies = function (playerId, fireflies) {
+        var _a;
+        (_a = this.fireflyCounters[playerId]) === null || _a === void 0 ? void 0 : _a.incValue(fireflies);
     };
     Glow.prototype.addHelp = function () {
         var _this = this;
@@ -694,6 +706,9 @@ var Glow = /** @class */ (function () {
             ['removeCompanion', ANIMATION_MS],
             ['removeCompanions', ANIMATION_MS],
             ['points', 1],
+            ['rerolls', 1],
+            ['footprints', 1],
+            ['fireflies', 1],
             ['lastTurn', 1],
             ['newFirstPlayer', 1],
             ['newDay', 1],
@@ -716,7 +731,16 @@ var Glow = /** @class */ (function () {
         this.meetingTrack.removeCompanions();
     };
     Glow.prototype.notif_points = function (notif) {
-        this.setPoints(notif.args.playerId, notif.args.points);
+        this.incPoints(notif.args.playerId, notif.args.points);
+    };
+    Glow.prototype.notif_rerolls = function (notif) {
+        this.incFootprints(notif.args.playerId, notif.args.rerolls);
+    };
+    Glow.prototype.notif_footprints = function (notif) {
+        this.incFootprints(notif.args.playerId, notif.args.footprints);
+    };
+    Glow.prototype.notif_fireflies = function (notif) {
+        this.incFootprints(notif.args.playerId, notif.args.fireflies);
     };
     Glow.prototype.notif_newFirstPlayer = function (notif) {
         this.placeFirstPlayerToken(notif.args.playerId);

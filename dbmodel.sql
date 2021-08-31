@@ -28,6 +28,12 @@ CREATE TABLE IF NOT EXISTS `dice` (
   PRIMARY KEY (`die_id`)
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS `meetingtrack` (
+  `spot` TINYINT unsigned NOT NULL,
+  `footprints` TINYINT unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`spot`)
+) ENGINE=InnoDB;
+
 CREATE TABLE IF NOT EXISTS `adventurer` (
   `card_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `card_type` int(1) NOT NULL,

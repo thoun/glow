@@ -18,8 +18,8 @@ class Board {
         this.movePoints();
     }
 
-    public setPoints(playerId: number, points: number) {
-        this.points.set(playerId, points);
+    public incPoints(playerId: number, points: number) {
+        this.points.set(playerId, this.points.get(playerId) + points);
         this.movePoints();
     }
 

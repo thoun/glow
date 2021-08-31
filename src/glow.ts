@@ -460,9 +460,21 @@ class Glow implements GlowGame {
         (this as any).ajaxcall(`/glow/glow/${action}.html`, data, this, () => {});
     }
     
-    private setPoints(playerId: number, points: number) {
-        (this as any).scoreCtrl[playerId]?.toValue(points);
-        this.board.setPoints(playerId, points);
+    private incPoints(playerId: number, points: number) {
+        (this as any).scoreCtrl[playerId]?.incValue(points);
+        this.board.incPoints(playerId, points);
+    }
+    
+    private incRerolls(playerId: number, footprints: number) {
+        this.rerollCounters[playerId]?.incValue(footprints);
+    }
+    
+    private incFootprints(playerId: number, footprints: number) {
+        this.footprintCounters[playerId]?.incValue(footprints);
+    }
+    
+    private incFireflies(playerId: number, fireflies: number) {
+        this.fireflyCounters[playerId]?.incValue(fireflies);
     }
 
     private addHelp() {
@@ -525,6 +537,9 @@ class Glow implements GlowGame {
             ['removeCompanion', ANIMATION_MS],
             ['removeCompanions', ANIMATION_MS],
             ['points', 1],
+            ['rerolls', 1],
+            ['footprints', 1],
+            ['fireflies', 1],
             ['lastTurn', 1],
             ['newFirstPlayer', 1],
             ['newDay', 1],
@@ -554,8 +569,20 @@ class Glow implements GlowGame {
     }
 
     notif_points(notif: Notif<NotifPointsArgs>) {
-        this.setPoints(notif.args.playerId, notif.args.points);
+        this.incPoints(notif.args.playerId, notif.args.points);
     }
+
+    notif_rerolls(notif: Notif<NotifRerollsArgs>) {
+        this.incFootprints(notif.args.playerId, notif.args.rerolls);
+    }
+
+    notif_footprints(notif: Notif<NotifFootprintsArgs>) {
+        this.incFootprints(notif.args.playerId, notif.args.footprints);
+    }
+
+    notif_fireflies(notif: Notif<NotifFirefliesArgs>) {
+        this.incFootprints(notif.args.playerId, notif.args.fireflies);
+    }    
 
     notif_newFirstPlayer(notif: Notif<NotifFirstPlayerArgs>) {
         this.placeFirstPlayerToken(notif.args.playerId);

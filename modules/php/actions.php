@@ -56,10 +56,8 @@ trait ActionTrait {
 
         $this->companions->moveCard($companion->id, 'player', $playerId);
         self::DbQuery("UPDATE player SET `player_recruit_day` = (".$this->getDaySql().") where `player_id` = $playerId");  
-        
-        
+
         $dice = $this->getDiceByLocation('meeting', $spot);
-        // TODO add footprints from meeting track to player and clean it
 
         self::notifyAllPlayers('chosenCompanion', clienttranslate('${player_name} chooses companion ${companionName}'), [
             'playerId' => $playerId,
@@ -69,6 +67,9 @@ trait ActionTrait {
             'spot' => $spot,
             'dice' => $dice,
         ]);
+        
+        $this->addPlayerFootprints($playerId, $this->getMeetingTrackFootprints($spot));
+        $this->removeMeetingTrackFootprints($spot);
 
         $this->gamestate->nextState($this->getPlayerCount() == 2 ? 'removeCompanion' : 'nextPlayer');
     }

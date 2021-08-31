@@ -154,12 +154,19 @@ class Glow extends Table {
         $result['side'] = $this->getSide();
         $result['day'] = intval(self::getGameStateValue(DAY));
 
+        $dice = $this->getDiceByLocation('meeting');
         $meetingTrack = [];
-        $meetingTrack[0] = new stdClass();
+        $meetingTrack[0] = new MeetingTrackSpot();
+
         for ($i=1;$i<=5;$i++) {
-            $meetingTrack[$i] = new stdClass();
             $companions = $this->getCompanionsFromDb($this->adventurers->getCardsInLocation('meeting', $i));
-            $meetingTrack[$i]->companion = count($companions) > 0 ? $companions[0] : null;
+            $companion = count($companions) > 0 ? $companions[0] : null;
+
+            $spotDice = array_values(array_filter($dice, function($idie) use ($i) { return $idie->location_arg === $i; }));
+
+            $footprints = $this->getMeetingTrackFootprints($i);
+
+            $meetingTrack[$i] = new MeetingTrackSpot($companion, $spotDice, $footprints);
         }
 
         $result['meetingTrack'] = $meetingTrack;

@@ -128,3 +128,18 @@ interface NotifPointsArgs {
     playerId: number;
     points: number;
 }
+
+interface NotifRerollsArgs {
+    playerId: number;
+    rerolls: number;
+}
+
+interface NotifFootprintsArgs {
+    playerId: number;
+    footprints: number;
+}
+
+interface NotifFirefliesArgs {
+    playerId: number;
+    fireflies: number;
+}

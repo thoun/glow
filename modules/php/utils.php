@@ -4,6 +4,7 @@ require_once(__DIR__.'/objects/effect.php');
 require_once(__DIR__.'/objects/adventurer.php');
 require_once(__DIR__.'/objects/companion.php');
 require_once(__DIR__.'/objects/dice.php');
+require_once(__DIR__.'/objects/meeting-track-spot.php');
 
 trait UtilTrait {
 
@@ -116,16 +117,14 @@ trait UtilTrait {
         return intval(self::getUniqueValueFromDB("SELECT player_score FROM player where `player_id` = $playerId"));
     }
 
-    function incPlayerScore(int $playerId, int $incScore, $message = null, $params = []) {
+    function incPlayerScore(int $playerId, int $incScore, $message = '', $params = []) {
         self::DbQuery("UPDATE player SET player_score = player_score + $incScore WHERE player_id = $playerId");
 
-        if ($message != null) {
-            self::notifyAllPlayers('points', $message, $params + [
-                'playerId' => $playerId,
-                'playerName' => $this->getPlayerName($playerId),
-                'points' => $incScore,
-            ]);
-        }
+        self::notifyAllPlayers('points', $message, $params + [
+            'playerId' => $playerId,
+            'playerName' => $this->getPlayerName($playerId),
+            'points' => $incScore,
+        ]);
     }
 
     function decPlayerScore(int $playerId, int $decScore) {
@@ -138,8 +137,14 @@ trait UtilTrait {
         return intval(self::getUniqueValueFromDB("SELECT `player_rerolls` FROM player where `player_id` = $playerId"));
     }
 
-    function addPlayerRerolls(int $playerId, int $rerolls) {
+    function addPlayerRerolls(int $playerId, int $rerolls, $message = '', $params = []) {
         self::DbQuery("UPDATE player SET `player_rerolls` = `player_rerolls` + $rerolls WHERE `playerId` = $playerId");
+
+        self::notifyAllPlayers('rerolls', $message, $params + [
+            'playerId' => $playerId,
+            'playerName' => $this->getPlayerName($playerId),
+            'rerolls' => $rerolls,
+        ]);
     }
 
     function removePlayerRerolls(int $playerId, int $dec) {
@@ -152,8 +157,14 @@ trait UtilTrait {
         return intval(self::getUniqueValueFromDB("SELECT `player_footprints` FROM player where `player_id` = $playerId"));
     }
 
-    function addPlayerFootprints(int $playerId, int $footprints) {
+    function addPlayerFootprints(int $playerId, int $footprints, $message = '', $params = []) {
         self::DbQuery("UPDATE player SET `player_footprints` = `player_footprints` + $footprints WHERE `playerId` = $playerId");
+
+        self::notifyAllPlayers('footprints', $message, $params + [
+            'playerId' => $playerId,
+            'playerName' => $this->getPlayerName($playerId),
+            'footprints' => $footprints,
+        ]);
     }
 
     function removePlayerFootprints(int $playerId, int $dec) {
@@ -166,8 +177,14 @@ trait UtilTrait {
         return intval(self::getUniqueValueFromDB("SELECT `player_fireflies` FROM player where `player_id` = $playerId"));
     }
 
-    function addPlayerFireflies(int $playerId, int $fireflies) {
+    function addPlayerFireflies(int $playerId, int $fireflies, $message = '', $params = []) {
         self::DbQuery("UPDATE player SET `player_fireflies` = `player_fireflies` + $fireflies WHERE `playerId` = $playerId");
+
+        self::notifyAllPlayers('fireflies', $message, $params + [
+            'playerId' => $playerId,
+            'playerName' => $this->getPlayerName($playerId),
+            'fireflies' => $fireflies,
+        ]);
     }
 
     function createAdventurers() {        
@@ -222,15 +239,25 @@ trait UtilTrait {
 
         for ($i=1; $i<=5; $i++) {
             $colorDice = array_values(array_filter($smallDice, function ($idie) use ($i) { return $idie->color === $i; }));
+            $footprints = 0;
             if (count($colorDice) > 0) {
                 $this->moveDice($colorDice, 'meeting', $this->MEETING_SPOT_BY_COLOR[$i]);
             } else {
                 // add footprint if no die on track
+                $footprints = 1;
             }
+
+            self::DbQuery("INSERT INTO meetingtrack (`spot`, `footprints`) VALUES ($i, $footprints)");
         }
          $this->persistDice($smallDice);
     }
 
+    function getMeetingTrackFootprints(int $spot) {
+        return intval(self::getUniqueValueFromDB("SELECT `footprints` FROM meetingtrack WHERE `spot` = $spot"));
+    }
 
+    function removeMeetingTrackFootprints(int $spot) {
+        self::DbQuery("UPDATE meetingtrack SET `footprints` = 0 WHERE `spot` = $spot");
+    }
         
 }

@@ -34,7 +34,7 @@ trait ArgsTrait {
 
             $spotDice = array_values(array_filter($dice, function($idie) use ($i) { return $idie->location_arg === $i; }));
 
-            $footprints = 0; // TODO
+            $footprints = $this->getMeetingTrackFootprints($i);
 
             $companions[$i] = new MeetingTrackSpot($companion, $spotDice, $footprints);
         }
