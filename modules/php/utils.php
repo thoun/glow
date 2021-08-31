@@ -15,6 +15,10 @@ trait UtilTrait {
         return intval(self::getGameStateValue(FIRST_PLAYER));
     }
 
+    function getDaySql() {
+        return "select global_value from global where global_id = 10"; // 10 = DAY global id
+    }
+
     function createDice() {
         $sql = "INSERT INTO dice (`color`, `small`) VALUES ";
         $values = [];
@@ -123,6 +127,7 @@ trait UtilTrait {
             $companions[] = [ 'type' => $subType > 23 ? 2 : 1, 'type_arg' => $subType, 'nbr' => 1];
         }
         $this->companions->createCards($companions, 'deck');
+        $this->companions->shuffle('deck');
 
         // remove 3 of each face
         for ($face=1; $face<=2; $face++) {

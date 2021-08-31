@@ -550,13 +550,27 @@ class Glow implements GlowGame {
         </div>`, 'page-title');
     }
 
+    private getColor(color: number) {
+        switch (color) {
+            case 0: return 'black';
+            case 1: return '#00995c';
+            case 2: return '#0077ba';
+            case 3: return '#57cbf5';
+            case 4: return '#bf1e2e';
+            case 5: return '#ea7d28';
+            case 6: return '#8a298a';
+            case 7: return '#ffd503';
+        }
+        return null;
+    }
+
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */
     public format_string_recursive(log: string, args: any) {
         try {
             if (log && args && !args.processed) {
                 if (typeof args.adventurerName == 'string' && args.adventurerName[0] != '<') {
-                    args.adventurerName = `<strong>${args.adventurerName}</strong>`; // TODO add dice color ?
+                    args.adventurerName = `<strong style="color: ${this.getColor(args.adventurer?.type)};">${args.adventurerName}</strong>`; // TODO add dice color ?
                 }
                 if (typeof args.companionName == 'string' && args.companionName[0] != '<') {
                     args.companionName = `<strong>${args.companionName}</strong>`;

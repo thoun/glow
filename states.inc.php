@@ -73,11 +73,11 @@ $basicGameStates = [
         ],
     ],
 
-    ST_NEXT_PLAYER_RECRUIT => [
-        "name" => "nextPlayerRecruit",
+    ST_NEXT_PLAYER_RECRUIT_COMPANION => [
+        "name" => "nextPlayerRecruitCompanion",
         "description" => "",
         "type" => "game",
-        "action" => "stNextPlayerRecruit",
+        "action" => "stNextPlayerRecruitCompanion",
         "transitions" => [
             "nextPlayer" => ST_START_ROUND, 
             "end" => ST_MULTIPLAYER_ROLL_DICE,
@@ -123,9 +123,9 @@ $playerActionsGameStates = [
             "recruitCompanion",
         ],
         "transitions" => [
-            "nextPlayer" => ST_NEXT_PLAYER_RECRUIT,
+            "nextPlayer" => ST_NEXT_PLAYER_RECRUIT_COMPANION,
             "removeCompanion" => ST_PLAYER_REMOVE_COMPANION,
-            "zombiePass" => ST_NEXT_PLAYER_RECRUIT,
+            "zombiePass" => ST_NEXT_PLAYER_RECRUIT_COMPANION,
         ]
     ],
 
@@ -139,8 +139,8 @@ $playerActionsGameStates = [
             "removeCompanion",
         ],
         "transitions" => [
-            "nextPlayer" => ST_NEXT_PLAYER_RECRUIT,
-            "zombiePass" => ST_NEXT_PLAYER_RECRUIT,
+            "nextPlayer" => ST_NEXT_PLAYER_RECRUIT_COMPANION,
+            "zombiePass" => ST_NEXT_PLAYER_RECRUIT_COMPANION,
         ]
     ],
 
@@ -149,14 +149,14 @@ $playerActionsGameStates = [
         "description" => clienttranslate('Players can reroll their dice'),
         "descriptionmyturn" => clienttranslate('${you} can reroll their dice'),
         "type" => "multipleactiveplayer",
-        //"action" => "stLeaveTokyo",
+        "action" => "stRollDice",
         //"args" => "argLeaveTokyo",
         "possibleactions" => [ 
             "reroll", 
             "keep" 
         ],
         "transitions" => [
-            "keep" => ST_MULTIPLAYER_RESOLVE_CARDS,
+            "resolve" => ST_MULTIPLAYER_RESOLVE_CARDS,
             "zombiePass" => ST_MULTIPLAYER_RESOLVE_CARDS,
         ],
     ],
@@ -166,13 +166,13 @@ $playerActionsGameStates = [
         "description" => clienttranslate('Players must resolve their cards'),
         "descriptionmyturn" => clienttranslate('${you} must resolve their cards'),
         "type" => "multipleactiveplayer",
-        //"action" => "stLeaveTokyo",
+        "action" => "stResolveCards",
         //"args" => "argLeaveTokyo",
         "possibleactions" => [ 
             "resolve", 
         ],
         "transitions" => [
-            "resolve" => ST_MULTIPLAYER_MOVE,
+            "move" => ST_MULTIPLAYER_MOVE,
             "zombiePass" => ST_MULTIPLAYER_MOVE,
         ],
     ],
@@ -184,13 +184,13 @@ $playerActionsGameStates = [
         "descriptionboat" => clienttranslate('Players must move their boats'),
         "descriptionmyturnboat" => clienttranslate('${you} must move their boats'),
         "type" => "multipleactiveplayer",
-        //"action" => "stLeaveTokyo",
+        "action" => "stMove",
         //"args" => "argLeaveTokyo",
         "possibleactions" => [ 
             "move", 
         ],
         "transitions" => [
-            "resolve" => ST_END_ROUND,
+            "endRound" => ST_END_ROUND,
             "zombiePass" => ST_END_ROUND,
         ],
     ],

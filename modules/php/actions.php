@@ -55,6 +55,7 @@ trait ActionTrait {
         }
 
         $this->companions->moveCard($companion->id, 'player', $playerId);
+        self::DbQuery("UPDATE player SET `player_recruit_day` = (".$this->getDaySql().") where `player_id` = $playerId");        
 
         self::notifyAllPlayers('chosenCompanion', clienttranslate('${player_name} chooses companion ${companionName}'), [
             'playerId' => $playerId,

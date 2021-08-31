@@ -46,10 +46,11 @@ function setupAdventurersCards(adventurerStock) {
     }
 }
 function setupCompanionCards(companionsStock) {
+    companionsStock.image_items_per_row = 10;
     var cardsurl = g_gamethemeurl + "img/companions.png";
     for (var type = 1; type <= 2; type++) {
         for (var subType = 1; subType <= 23; subType++) {
-            companionsStock.addItemType(subType, 0, cardsurl, type + (subType - 1));
+            companionsStock.addItemType(subType, 0, cardsurl, type + (subType - 2));
         }
     }
 }
@@ -205,8 +206,9 @@ var MeetingTrack = /** @class */ (function () {
             _loop_1(i);
         }
     }
-    MeetingTrack.prototype.setCompanion = function (companion, spot) {
+    MeetingTrack.prototype.setCompanion = function (meetingTrackSpot, spot) {
         var _a;
+        var companion = meetingTrackSpot.companion;
         if (!companion) {
             this.companionsStocks[spot].removeAll();
             return;
@@ -696,13 +698,27 @@ var Glow = /** @class */ (function () {
         }
         dojo.place("<div id=\"last-round\">\n            " + _("This is the last round of the game!") + "\n        </div>", 'page-title');
     };
+    Glow.prototype.getColor = function (color) {
+        switch (color) {
+            case 0: return 'black';
+            case 1: return '#00995c';
+            case 2: return '#0077ba';
+            case 3: return '#57cbf5';
+            case 4: return '#bf1e2e';
+            case 5: return '#ea7d28';
+            case 6: return '#8a298a';
+            case 7: return '#ffd503';
+        }
+        return null;
+    };
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */
     Glow.prototype.format_string_recursive = function (log, args) {
+        var _a;
         try {
             if (log && args && !args.processed) {
                 if (typeof args.adventurerName == 'string' && args.adventurerName[0] != '<') {
-                    args.adventurerName = "<strong>" + args.adventurerName + "</strong>"; // TODO add dice color ?
+                    args.adventurerName = "<strong style=\"color: " + this.getColor((_a = args.adventurer) === null || _a === void 0 ? void 0 : _a.type) + ";\">" + args.adventurerName + "</strong>"; // TODO add dice color ?
                 }
                 if (typeof args.companionName == 'string' && args.companionName[0] != '<') {
                     args.companionName = "<strong>" + args.companionName + "</strong>";

@@ -13,7 +13,7 @@ define('ST_START_ROUND', 15);
 // morning
 define('ST_PLAYER_RECRUIT_COMPANION', 20);
 define('ST_PLAYER_REMOVE_COMPANION', 21);
-define('ST_NEXT_PLAYER_RECRUIT', 29);
+define('ST_NEXT_PLAYER_RECRUIT_COMPANION', 29);
 
 // late morning
 define('ST_MULTIPLAYER_ROLL_DICE', 30);

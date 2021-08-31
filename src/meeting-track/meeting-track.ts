@@ -28,7 +28,8 @@ class MeetingTrack {
         }
     }
     
-    public setCompanion(companion: Companion, spot: number): void {
+    public setCompanion(meetingTrackSpot: MeetingTrackSpot, spot: number): void {
+        const companion = meetingTrackSpot.companion;
         if (!companion) {
             this.companionsStocks[spot].removeAll();
             return;

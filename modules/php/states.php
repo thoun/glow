@@ -11,8 +11,6 @@ trait StateTrait {
         The action method of state X is called everytime the current game state is set to X.
     */
 
-    
-
     function stNextPlayerChooseAdventurer() {     
         $playerId = self::getActivePlayerId();
 
@@ -25,8 +23,25 @@ trait StateTrait {
         $this->gamestate->nextState($startRound ? 'end' : 'nextPlayer');
     }
 
-    function stStartRound() {   
-        self::setGameStateValue(DAY, intval($this->getGameStateValue(DAY)) + 1);
+    function stNextPlayerRecruitCompanion() {     
+        $playerId = self::getActivePlayerId();
+
+        $this->activeNextPlayer();
+    
+        $playerId = self::getActivePlayerId();
+        self::giveExtraTime($playerId);
+
+        $endRecruit = intval(self::getUniqueValueFromDB("SELECT count(*) FROM player where player_recruit_day < (".$this->getDaySql().")")) == 0;
+        $this->gamestate->nextState($endRecruit ? 'end' : 'nextPlayer');
+    }
+
+    function stStartRound() {
+        $day = intval($this->getGameStateValue(DAY)) + 1;
+        self::setGameStateValue(DAY, $day);
+
+        self::notifyAllPlayers('newDay', '', [
+            'day' => $day,
+        ]);
 
         // reset cards
         /*$this->animals->moveAllCardsInLocation(null, 'deck');
@@ -42,7 +57,17 @@ trait StateTrait {
         $this->gamestate->nextState('morning');
     }
 
-    
+    function stRollDice() {
+        $this->gamestate->nextState('resolve'); // TODO
+    }
+
+    function stResolveCards() {
+        $this->gamestate->nextState('move'); // TODO
+    }
+
+    function stMove() {
+        $this->gamestate->nextState('endRound'); // TODO
+    }    
 
     function stEndRound() {
 

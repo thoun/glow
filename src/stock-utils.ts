@@ -27,6 +27,8 @@ function setupAdventurersCards(adventurerStock: Stock) {
 }
 
 function setupCompanionCards(companionsStock: Stock) {
+    companionsStock.image_items_per_row = 10;
+
     const cardsurl = `${g_gamethemeurl}img/companions.png`;
 
     for (let type=1; type<=2;type++) {
@@ -35,7 +37,7 @@ function setupCompanionCards(companionsStock: Stock) {
                 subType, 
                 0, 
                 cardsurl, 
-                type + (subType - 1)
+                type + (subType - 2)
             );
         }
     }

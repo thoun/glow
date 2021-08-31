@@ -77,7 +77,7 @@ interface ChooseAdventurerArgs {
 }
 
 interface RecruitCompanionArgs {
-    companions: Companion[];
+    companions: MeetingTrackSpot[];
 }
 
 interface ChoosePlayActionArgs {
