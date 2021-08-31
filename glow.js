@@ -205,8 +205,7 @@ var MeetingTrack = /** @class */ (function () {
                 this_1.companionsStocks[i].addToStockWithId(spot.companion.subType, '' + spot.companion.id);
             }
             spot.dice.forEach(function (die) {
-                _this.game.createAndPlaceDieHtml(die, "meeting-track-dice-" + i);
-                _this.game.addRollToDiv(_this.game.getDieDiv(die), 'no-roll');
+                _this.game.createOrMoveDie(die, "meeting-track-dice-" + i);
             });
         };
         var this_1 = this;
@@ -246,6 +245,9 @@ var MeetingTrack = /** @class */ (function () {
     MeetingTrack.prototype.getStock = function (spot) {
         return this.companionsStocks[spot];
     };
+    MeetingTrack.prototype.clearFootprintTokens = function () {
+        // TODO
+    };
     return MeetingTrack;
 }());
 var PlayerTable = /** @class */ (function () {
@@ -253,7 +255,7 @@ var PlayerTable = /** @class */ (function () {
         var _this = this;
         this.game = game;
         this.playerId = Number(player.id);
-        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock\" >\n            <div class=\"name-column\">\n                <div class=\"player-name\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n            </div>\n            <div class=\"adventurer-and-companions\">\n                <div id=\"player-table-" + this.playerId + "-adventurer\"></div>\n                <div id=\"player-table-" + this.playerId + "-companions\"></div>\n            </div>\n        </div>";
+        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock\" >\n            <div class=\"name-column\">\n                <div class=\"player-name\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n                <div id=\"player-table-" + this.playerId + "-dice\"></div>\n            </div>\n            <div class=\"adventurer-and-companions\">\n                <div id=\"player-table-" + this.playerId + "-adventurer\"></div>\n                <div id=\"player-table-" + this.playerId + "-companions\"></div>\n            </div>\n        </div>";
         dojo.place(html, 'playerstables');
         // adventurer        
         this.adventurerStock = new ebg.stock();
@@ -261,7 +263,7 @@ var PlayerTable = /** @class */ (function () {
         this.adventurerStock.selectionClass = 'selected';
         this.adventurerStock.create(this.game, $("player-table-" + this.playerId + "-adventurer"), CARD_WIDTH, CARD_HEIGHT);
         this.adventurerStock.setSelectionMode(0);
-        this.adventurerStock.onItemCreate = function (cardDiv, type) { return setupProjectCard(game, cardDiv, type); };
+        //this.adventurerStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupProjectCard(game, cardDiv, type);
         setupAdventurersCards(this.adventurerStock);
         if (player.adventurer) {
             this.adventurerStock.addToStockWithId(player.adventurer.color, '' + player.adventurer.id);
@@ -276,6 +278,9 @@ var PlayerTable = /** @class */ (function () {
         this.companionsStock.setSelectionMode(0);
         setupCompanionCards(this.companionsStock);
         player.companions.forEach(function (companion) { return _this.companionsStock.addToStockWithId(companion.subType, '' + companion.id); });
+        player.dice.forEach(function (die) {
+            _this.game.createOrMoveDie(die, "player-table-" + _this.playerId + "-dice");
+        });
     }
     PlayerTable.prototype.setAdventurer = function (adventurer) {
         //this.adventurerStock.removeAll();
@@ -283,6 +288,10 @@ var PlayerTable = /** @class */ (function () {
     };
     PlayerTable.prototype.addCompanion = function (companion, from) {
         moveToAnotherStock(from, this.companionsStock, companion.subType, '' + companion.id);
+    };
+    PlayerTable.prototype.addDice = function (dice) {
+        var _this = this;
+        dice.forEach(function (die) { return _this.game.createOrMoveDie(die, "player-table-" + _this.playerId + "-dice"); });
     };
     return PlayerTable;
 }());
@@ -455,14 +464,12 @@ var Glow = /** @class */ (function () {
     //                        action status bar (ie: the HTML links in the status bar).
     //
     Glow.prototype.onUpdateActionButtons = function (stateName, args) {
+        var _this = this;
         if (this.isCurrentPlayerActive()) {
             switch (stateName) {
-                /*case 'selectResource':
-                    const selectResourceArgs = args as SelectResourceArgs;
-                    selectResourceArgs.possibleCombinations.forEach((combination, index) =>
-                        (this as any).addActionButton(`selectResourceCombination${index}-button`, formatTextIcons(combination.map(type => `[resource${type}]`).join('')), () => this.selectResource(combination))
-                    );
-                    break;*/
+                case 'rollDice':
+                    this.addActionButton("keepDice-button", _("Keep"), function () { return _this.keepDice(); }, null, null, 'red');
+                    break;
             }
         }
     };
@@ -602,15 +609,28 @@ var Glow = /** @class */ (function () {
         this.playersTables.push(playerTable);
     };
     Glow.prototype.createAndPlaceDieHtml = function (die, destinationId) {
-        var html = "<div id=\"die" + die.id + "\" class=\"die die" + die.face + "\" data-die-id=\"" + die.id + "\" data-die-value=\"" + die.face + "\">\n        <ol class=\"die-list\" data-roll=\"" + die.face + "\">";
+        var html = "<div id=\"die" + die.id + "\" class=\"die die" + die.face + " " + (die.small ? 'small' : '') + "\" data-die-id=\"" + die.id + "\" data-die-value=\"" + die.face + "\">\n        <ol class=\"die-list\" data-roll=\"" + die.face + "\">";
         for (var dieFace = 1; dieFace <= 6; dieFace++) {
             html += "<li class=\"die-item color" + die.color + " side" + dieFace + "\" data-side=\"" + dieFace + "\"></li>";
         }
         html += "   </ol>\n        </div>";
         // security to destroy pre-existing die with same id
-        var dieDiv = document.getElementById("die" + die.id);
-        dieDiv === null || dieDiv === void 0 ? void 0 : dieDiv.parentNode.removeChild(dieDiv);
+        //const dieDiv = document.getElementById(`die${die.id}`);
+        //dieDiv?.parentNode.removeChild(dieDiv);
         dojo.place(html, destinationId);
+    };
+    Glow.prototype.createOrMoveDie = function (die, destinationId, rollClass) {
+        if (rollClass === void 0) { rollClass = 'no-roll'; }
+        var dieDiv = this.getDieDiv(die);
+        if (dieDiv) {
+            slideToObjectAndAttach(dieDiv, destinationId);
+        }
+        else {
+            this.createAndPlaceDieHtml(die, destinationId);
+            if (rollClass) {
+                this.addRollToDiv(this.getDieDiv(die), rollClass);
+            }
+        }
     };
     Glow.prototype.getDieDiv = function (die) {
         return document.getElementById("die" + die.id);
@@ -657,6 +677,12 @@ var Glow = /** @class */ (function () {
         this.takeAction('removeCompanion', {
             spot: spot
         });
+    };
+    Glow.prototype.keepDice = function () {
+        if (!this.checkAction('keepDice')) {
+            return;
+        }
+        this.takeAction('keepDice');
     };
     /*public discardSelectedMachines() {
         if(!(this as any).checkAction('discardSelectedMachines')) {
@@ -757,7 +783,10 @@ var Glow = /** @class */ (function () {
         this.getPlayerTable(notif.args.playerId).setAdventurer(notif.args.adventurer);
     };
     Glow.prototype.notif_chosenCompanion = function (notif) {
-        this.getPlayerTable(notif.args.playerId).addCompanion(notif.args.companion, this.meetingTrack.getStock(notif.args.spot));
+        var playerTable = this.getPlayerTable(notif.args.playerId);
+        playerTable.addCompanion(notif.args.companion, this.meetingTrack.getStock(notif.args.spot));
+        playerTable.addDice(notif.args.dice); // TODO slide
+        this.meetingTrack.clearFootprintTokens();
     };
     Glow.prototype.notif_removeCompanion = function (notif) {
         this.meetingTrack.removeCompanion(notif.args.spot);

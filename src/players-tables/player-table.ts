@@ -13,6 +13,7 @@ class PlayerTable {
         <div id="player-table-${this.playerId}" class="player-table whiteblock" >
             <div class="name-column">
                 <div class="player-name" style="color: #${player.color};">${player.name}</div>
+                <div id="player-table-${this.playerId}-dice"></div>
             </div>
             <div class="adventurer-and-companions">
                 <div id="player-table-${this.playerId}-adventurer"></div>
@@ -29,7 +30,7 @@ class PlayerTable {
         this.adventurerStock.selectionClass = 'selected';
         this.adventurerStock.create(this.game, $(`player-table-${this.playerId}-adventurer`), CARD_WIDTH, CARD_HEIGHT);
         this.adventurerStock.setSelectionMode(0);
-        this.adventurerStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupProjectCard(game, cardDiv, type);
+        //this.adventurerStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupProjectCard(game, cardDiv, type);
         setupAdventurersCards(this.adventurerStock);
 
         if (player.adventurer) {
@@ -48,6 +49,10 @@ class PlayerTable {
         setupCompanionCards(this.companionsStock);
 
         player.companions.forEach(companion => this.companionsStock.addToStockWithId(companion.subType, ''+companion.id));
+
+        player.dice.forEach(die => {
+            this.game.createOrMoveDie(die, `player-table-${this.playerId}-dice`);
+        });
     }
 
     public setAdventurer(adventurer: Adventurer) {
@@ -57,5 +62,9 @@ class PlayerTable {
     
     public addCompanion(companion: Companion, from: Stock) {
         moveToAnotherStock(from, this.companionsStock, companion.subType, ''+companion.id);
+    }
+    
+    public addDice(dice: Die[]) {
+        dice.forEach(die => this.game.createOrMoveDie(die, `player-table-${this.playerId}-dice`));
     }
 }

@@ -215,12 +215,9 @@ class Glow implements GlowGame {
     public onUpdateActionButtons(stateName: string, args: any) {
         if((this as any).isCurrentPlayerActive()) {
             switch (stateName) {
-                /*case 'selectResource':
-                    const selectResourceArgs = args as SelectResourceArgs;
-                    selectResourceArgs.possibleCombinations.forEach((combination, index) => 
-                        (this as any).addActionButton(`selectResourceCombination${index}-button`, formatTextIcons(combination.map(type => `[resource${type}]`).join('')), () => this.selectResource(combination))
-                    );
-                    break;*/
+                case 'rollDice':
+                    (this as any).addActionButton(`keepDice-button`, _("Keep"), () => this.keepDice(), null, null, 'red');
+                    break;
             }
         }
     }    
@@ -404,8 +401,8 @@ class Glow implements GlowGame {
         this.playersTables.push(playerTable);
     }
 
-    public createAndPlaceDieHtml(die: Die, destinationId: string) {
-        let html = `<div id="die${die.id}" class="die die${die.face}" data-die-id="${die.id}" data-die-value="${die.face}">
+    private createAndPlaceDieHtml(die: Die, destinationId: string) {
+        let html = `<div id="die${die.id}" class="die die${die.face} ${die.small ? 'small' : ''}" data-die-id="${die.id}" data-die-value="${die.face}">
         <ol class="die-list" data-roll="${die.face}">`;
         for (let dieFace=1; dieFace<=6; dieFace++) {
             html += `<li class="die-item color${die.color} side${dieFace}" data-side="${dieFace}"></li>`;
@@ -414,17 +411,30 @@ class Glow implements GlowGame {
         </div>`;
 
         // security to destroy pre-existing die with same id
-        const dieDiv = document.getElementById(`die${die.id}`);
-        dieDiv?.parentNode.removeChild(dieDiv);
+        //const dieDiv = document.getElementById(`die${die.id}`);
+        //dieDiv?.parentNode.removeChild(dieDiv);
 
         dojo.place(html, destinationId);
     }
 
-    public getDieDiv(die: Die): HTMLDivElement {
+    public createOrMoveDie(die: Die, destinationId: string, rollClass: string = 'no-roll') {
+        const dieDiv = this.getDieDiv(die);
+
+        if (dieDiv) {
+            slideToObjectAndAttach(dieDiv, destinationId);
+        } else {
+            this.createAndPlaceDieHtml(die, destinationId);
+            if (rollClass) {
+                this.addRollToDiv(this.getDieDiv(die), rollClass);
+            }
+        }
+    }
+
+    private getDieDiv(die: Die): HTMLDivElement {
         return document.getElementById(`die${die.id}`) as HTMLDivElement;
     }
 
-    public addRollToDiv(dieDiv: HTMLDivElement, rollClass: string, attempt: number = 0) {
+    private addRollToDiv(dieDiv: HTMLDivElement, rollClass: string, attempt: number = 0) {
         const dieList = dieDiv.getElementsByClassName('die-list')[0];
         if (dieList) {
             dieList.classList.add(rollClass);
@@ -469,6 +479,14 @@ class Glow implements GlowGame {
         this.takeAction('removeCompanion', {
             spot
         });
+    }
+
+    public keepDice() {
+        if(!(this as any).checkAction('keepDice')) {
+            return;
+        }
+
+        this.takeAction('keepDice');
     }
 
     /*public discardSelectedMachines() {
@@ -586,7 +604,10 @@ class Glow implements GlowGame {
     }
 
     notif_chosenCompanion(notif: Notif<NotifChosenCompanionArgs>) {
-        this.getPlayerTable(notif.args.playerId).addCompanion(notif.args.companion, this.meetingTrack.getStock(notif.args.spot));
+        const playerTable = this.getPlayerTable(notif.args.playerId);
+        playerTable.addCompanion(notif.args.companion, this.meetingTrack.getStock(notif.args.spot));
+        playerTable.addDice(notif.args.dice); // TODO slide
+        this.meetingTrack.clearFootprintTokens();
     }
 
     notif_removeCompanion(notif: Notif<NotifChosenCompanionArgs>) {

@@ -68,6 +68,14 @@
 
         self::ajaxResponse();
     }
+  	
+    public function keepDice() {
+        self::setAjaxMode();
+
+        $this->game->keepDice();
+
+        self::ajaxResponse();
+    }
 
   }
   

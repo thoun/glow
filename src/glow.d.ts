@@ -21,7 +21,7 @@ interface Die {
     face: number;
     value: number;
     color: number;
-    rolled: boolean;
+    small: boolean;
 }
 
 interface MeetingTrackSpot {
@@ -34,6 +34,7 @@ interface GlowPlayer extends Player {
     playerNo: number;
     adventurer: Adventurer;
     companions: Companion[];
+    dice: Die[];
     rerolls: number;
     footprints: number;
     fireflies: number;
@@ -71,9 +72,10 @@ interface GlowGame extends Game {
     getPlayerId(): number;
     chooseAdventurer(id: number): void;
     selectMeetingTrackCompanion(spot: number): void;
-    createAndPlaceDieHtml(die: Die, destinationId: string): void;    
-    getDieDiv(die: Die): HTMLDivElement;
-    addRollToDiv(dieDiv: HTMLDivElement, rollClass: string): void;
+    //createAndPlaceDieHtml(die: Die, destinationId: string): void;    
+    //getDieDiv(die: Die): HTMLDivElement;
+    //addRollToDiv(dieDiv: HTMLDivElement, rollClass: string): void;
+    createOrMoveDie(die: Die, destinationId: string, rollClass?: string): void;
 }
 
 interface ChooseAdventurerArgs {

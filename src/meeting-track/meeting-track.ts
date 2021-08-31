@@ -30,9 +30,8 @@ class MeetingTrack {
             }
 
             spot.dice.forEach(die => {
-                this.game.createAndPlaceDieHtml(die, `meeting-track-dice-${i}`);
-                this.game.addRollToDiv(this.game.getDieDiv(die), 'no-roll');
-            })
+                this.game.createOrMoveDie(die, `meeting-track-dice-${i}`);
+            });
         }
     }
     
@@ -59,7 +58,7 @@ class MeetingTrack {
         this.companionsStocks[spot].removeAll();
     }
 
-    removeCompanions() {
+    public removeCompanions() {
         for (let i=1; i<=5; i++) {
             this.removeCompanion(i);
         }
@@ -71,7 +70,11 @@ class MeetingTrack {
         }
     }
 
-    getStock(spot: number): Stock {
+    public getStock(spot: number): Stock {
         return this.companionsStocks[spot];
+    }
+
+    public clearFootprintTokens() {
+        // TODO
     }
 }

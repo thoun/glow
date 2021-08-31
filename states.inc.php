@@ -147,16 +147,16 @@ $playerActionsGameStates = [
     ST_MULTIPLAYER_ROLL_DICE => [
         "name" => "rollDice",
         "description" => clienttranslate('Players can reroll their dice'),
-        "descriptionmyturn" => clienttranslate('${you} can reroll their dice'),
+        "descriptionmyturn" => clienttranslate('${you} can reroll your dice'),
         "type" => "multipleactiveplayer",
         "action" => "stRollDice",
         //"args" => "argLeaveTokyo",
         "possibleactions" => [ 
-            "reroll", 
-            "keep" 
+            "rerollDie", 
+            "keepDice" 
         ],
         "transitions" => [
-            "resolve" => ST_MULTIPLAYER_RESOLVE_CARDS,
+            "keepDice" => ST_MULTIPLAYER_RESOLVE_CARDS,
             "zombiePass" => ST_MULTIPLAYER_RESOLVE_CARDS,
         ],
     ],

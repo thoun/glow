@@ -138,7 +138,7 @@ trait UtilTrait {
     }
 
     function addPlayerRerolls(int $playerId, int $rerolls, $message = '', $params = []) {
-        self::DbQuery("UPDATE player SET `player_rerolls` = `player_rerolls` + $rerolls WHERE `playerId` = $playerId");
+        self::DbQuery("UPDATE player SET `player_rerolls` = `player_rerolls` + $rerolls WHERE `player_id` = $playerId");
 
         self::notifyAllPlayers('rerolls', $message, $params + [
             'playerId' => $playerId,
@@ -158,7 +158,7 @@ trait UtilTrait {
     }
 
     function addPlayerFootprints(int $playerId, int $footprints, $message = '', $params = []) {
-        self::DbQuery("UPDATE player SET `player_footprints` = `player_footprints` + $footprints WHERE `playerId` = $playerId");
+        self::DbQuery("UPDATE player SET `player_footprints` = `player_footprints` + $footprints WHERE `player_id` = $playerId");
 
         self::notifyAllPlayers('footprints', $message, $params + [
             'playerId' => $playerId,
@@ -178,7 +178,7 @@ trait UtilTrait {
     }
 
     function addPlayerFireflies(int $playerId, int $fireflies, $message = '', $params = []) {
-        self::DbQuery("UPDATE player SET `player_fireflies` = `player_fireflies` + $fireflies WHERE `playerId` = $playerId");
+        self::DbQuery("UPDATE player SET `player_fireflies` = `player_fireflies` + $fireflies WHERE `player_id` = $playerId");
 
         self::notifyAllPlayers('fireflies', $message, $params + [
             'playerId' => $playerId,
