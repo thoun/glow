@@ -13,7 +13,8 @@ define('ST_START_ROUND', 15);
 // morning
 define('ST_PLAYER_RECRUIT_COMPANION', 20);
 define('ST_PLAYER_REMOVE_COMPANION', 21);
-define('ST_NEXT_PLAYER_RECRUIT_COMPANION', 29);
+define('ST_NEXT_PLAYER_RECRUIT_COMPANION', 28);
+define('ST_END_RECRUIT', 29);
 
 // late morning
 define('ST_MULTIPLAYER_ROLL_DICE', 30);
@@ -25,7 +26,8 @@ define('ST_MULTIPLAYER_RESOLVE_CARDS', 40);
 define('ST_MULTIPLAYER_MOVE', 50);
 
 //Evening
-define('ST_END_ROUND', 95);
+define('ST_END_ROUND', 80);
+define('ST_END_SCORE', 90);
 
 define('ST_END_GAME', 99);
 define('END_SCORE', 100);

@@ -107,7 +107,7 @@ class Glow implements GlowGame {
                 this.onEnteringStateChooseAdventurer(args.args);
                 break;
             case 'startRound':
-                this.onEnteringStateStartRound(args.args);
+                this.onEnteringStateStartRound();
                 break;
             case 'recruitCompanion':
                 this.onEnteringStateRecruitCompanion(args.args);
@@ -124,17 +124,9 @@ class Glow implements GlowGame {
         }
     }
 
-    private onEnteringStateStartRound(args: StartRoundArgs) {
+    private onEnteringStateStartRound() {
         if (document.getElementById('adventurers-stock')) {
             dojo.destroy('adventurers-stock');
-        }
-        
-        if (!this.roundCounter) {
-            this.roundCounter = new ebg.counter();
-            this.roundCounter.create('round-counter');
-            this.roundCounter.setValue(args.day);
-        } else {
-            this.roundCounter.toValue(args.day);
         }
     }
 
@@ -530,9 +522,12 @@ class Glow implements GlowGame {
         const notifs = [
             ['chosenAdventurer', ANIMATION_MS],
             ['chosenCompanion', ANIMATION_MS],
+            ['removeCompanion', ANIMATION_MS],
+            ['removeCompanions', ANIMATION_MS],
             ['points', 1],
             ['lastTurn', 1],
             ['newFirstPlayer', 1],
+            ['newDay', 1],
         ];
 
         notifs.forEach((notif) => {
@@ -550,12 +545,31 @@ class Glow implements GlowGame {
         this.getPlayerTable(notif.args.playerId).addCompanion(notif.args.companion, this.meetingTrack.getStock(notif.args.spot));
     }
 
+    notif_removeCompanion(notif: Notif<NotifChosenCompanionArgs>) {
+        this.meetingTrack.removeCompanion(notif.args.spot);
+    }
+
+    notif_removeCompanions() {
+        this.meetingTrack.removeCompanions();
+    }
+
     notif_points(notif: Notif<NotifPointsArgs>) {
         this.setPoints(notif.args.playerId, notif.args.points);
     }
 
     notif_newFirstPlayer(notif: Notif<NotifFirstPlayerArgs>) {
         this.placeFirstPlayerToken(notif.args.playerId);
+    }
+
+    notif_newDay(notif: Notif<NotifNewDayArgs>) {
+        const day = notif.args.day;
+        if (!this.roundCounter) {
+            this.roundCounter = new ebg.counter();
+            this.roundCounter.create('round-counter');
+            this.roundCounter.setValue(day);
+        } else {
+            this.roundCounter.toValue(day);
+        }
     }
 
     notif_lastTurn() {

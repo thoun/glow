@@ -79,8 +79,8 @@ $basicGameStates = [
         "type" => "game",
         "action" => "stNextPlayerRecruitCompanion",
         "transitions" => [
-            "nextPlayer" => ST_START_ROUND, 
-            "end" => ST_MULTIPLAYER_ROLL_DICE,
+            "nextPlayer" => ST_PLAYER_RECRUIT_COMPANION, 
+            "end" => ST_END_RECRUIT,
         ],
     ],
    
@@ -204,9 +204,18 @@ $gameGameStates = [
         "description" => "",
         "type" => "game",
         "action" => "stStartRound",
-        "args" => "argStartRound",
         "transitions" => [ 
             "morning" => ST_PLAYER_RECRUIT_COMPANION,
+        ],
+    ],
+
+    ST_END_RECRUIT => [
+        "name" => "endRecruit",
+        "description" => "",
+        "type" => "game",
+        "action" => "stEndRecruit",
+        "transitions" => [ 
+            "" => ST_MULTIPLAYER_ROLL_DICE,
         ],
     ],
 
@@ -217,6 +226,16 @@ $gameGameStates = [
         "action" => "stEndRound",
         "transitions" => [ 
             "newRound" => ST_START_ROUND,
+            "endGame" => ST_END_SCORE
+        ],
+    ],
+
+    ST_END_SCORE => [
+        "name" => "endScore",
+        "description" => "",
+        "type" => "game",
+        "action" => "stEndScore",
+        "transitions" => [ 
             "endGame" => ST_END_GAME
         ],
     ],

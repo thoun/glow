@@ -80,10 +80,6 @@ interface RecruitCompanionArgs {
     companions: MeetingTrackSpot[];
 }
 
-interface StartRoundArgs {
-    day: number;
-}
-
 interface SelectMachineArgs {
     selectableMachines: Adventurer[];
 }
@@ -105,6 +101,10 @@ interface Exchange {
 interface SelectExchangeArgs {
     number: number;
     possibleExchanges: Exchange[];
+}
+
+interface NotifNewDayArgs {
+    day: number;
 }
 
 interface NotifFirstPlayerArgs {

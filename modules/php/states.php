@@ -23,6 +23,17 @@ trait StateTrait {
         $this->gamestate->nextState($startRound ? 'end' : 'nextPlayer');
     }
 
+    function stStartRound() {
+        $day = intval($this->getGameStateValue(DAY)) + 1;
+        self::setGameStateValue(DAY, $day);
+
+        self::notifyAllPlayers('newDay', clienttranslate('Day ${day} begins'), [
+            'day' => $day,
+        ]);
+
+        $this->gamestate->nextState('morning');
+    }
+
     function stNextPlayerRecruitCompanion() {     
         $playerId = self::getActivePlayerId();
 
@@ -34,23 +45,15 @@ trait StateTrait {
         $endRecruit = intval(self::getUniqueValueFromDB("SELECT count(*) FROM player where player_recruit_day < (".$this->getDaySql().")")) == 0;
         $this->gamestate->nextState($endRecruit ? 'end' : 'nextPlayer');
     }
+    
+    function stEndRecruit() {
+        $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting'));
 
-    function stStartRound() {
-        $day = intval($this->getGameStateValue(DAY)) + 1;
-        self::setGameStateValue(DAY, $day);
+        $this->companions->moveCards(array_map(function($companion) { return $companion->id; }, $companions), 'cemetery');
 
-        // reset cards
-        /*$this->animals->moveAllCardsInLocation(null, 'deck');
-        $this->animals->shuffle('deck');
-        $this->ferries->moveAllCardsInLocation(null, 'deck');
-        $this->ferries->shuffle('deck');
+        self::notifyAllPlayers('removeCompanions', '', []);
 
-        $this->setInitialCardsAndResources($this->getPlayersIds());*/
-
-        // TODO TEMP
-        //$this->debugSetup();
-
-        $this->gamestate->nextState('morning');
+        $this->gamestate->nextState('');
     }
 
     function stRollDice() {
@@ -112,5 +115,72 @@ trait StateTrait {
         } else {
             $this->gamestate->nextState('newRound');
         }*/
+    }
+
+    function stEndScore() {
+        $playersIds = self::createNextPlayerTable(array_keys(self::loadPlayersBasicInfos()));
+        
+        // Adventurer and companions        
+        foreach($playersIds as $playerId) {
+            $points = 0;
+            $adventurers = $this->getAdventurersFromDb($this->adventurers->getCardsInLocation('player', $playerId));
+            if (count($adventurers) > 0) {
+                $points += $adventurers[0]->points;
+            }
+            $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+            foreach($companions as $companion) {
+                $points += $companion->points;
+            }
+
+            $this->incPlayerScore($playerId, $points, _('${playerName} gains ${points} with adventurer and companions'));
+        }
+
+        // Journey board TODO
+        $side = $this->getSide();  
+        foreach($playersIds as $playerId) {
+            $points = 0;
+
+            if ($side === 1) {
+                /*The Province of Shadows journey
+                Each player moves forward on the score track the number
+                of bursts of light indicated on the village where their
+                encampment is situated, independently of where their
+                company is placed.*/
+            } else if ($side === 2) {
+                /*The Archipelago of Darkness journey
+                Each player adds together the number of bursts of light
+                indicated on the islands on which they have placed their
+                boats. They move forward the corresponding number of
+                spaces on the score track.*/ 
+            }
+        }
+
+        // Fireflies
+        foreach($playersIds as $playerId) {
+            $points = $this->getPlayerFireflies($playerId);
+            $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+            foreach($companions as $companion) {
+                $points += $companion->fireflies;
+            }
+
+            $this->incPlayerScore($playerId, $points, _('${playerName} gains ${points} bursts of light with fireflies'));
+
+            // If they have as many or more fireflies than companions, they score an additional 10 bursts of light.
+            if ($points > count($companions)) {
+                $this->incPlayerScore($playerId, 10, _('${playerName} gains additional ${points} bursts of light (more fireflies than companions)'));
+            }
+        }
+
+        //Each player scores 1 burst of light per footprint in their possession.
+        foreach($playersIds as $playerId) {
+            $points = $this->getPlayerFootprints($playerId);
+
+            $this->incPlayerScore($playerId, $points, _('${playerName} gains ${points} bursts of light with footprints'));
+        }
+
+        // Tie
+        self::DbQuery("UPDATE player SET `player_score_aux` = `player_rerolls`");
+
+        die('test ends here !');
     }
 }

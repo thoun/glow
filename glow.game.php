@@ -160,7 +160,7 @@ class Glow extends Table {
         $result['players'] = self::getCollectionFromDb($sql);
   
         $result['firstPlayer'] = intval(self::getGameStateValue(FIRST_PLAYER));
-        $result['side'] = intval(self::getGameStateValue(BOARD_SIDE));
+        $result['side'] = $this->getSide();
         $result['day'] = intval(self::getGameStateValue(DAY));
 
         $meetingTrack = [];

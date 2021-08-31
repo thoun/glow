@@ -76,8 +76,13 @@ trait ActionTrait {
         if ($spot < 1 || $spot > 5) {
             throw new BgaUserException("Not a valid spot");
         }
+        $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting', $spot));
 
-        $companion = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting', $spot))[0];
+        if (count($companions) == 0) {
+            return;
+        }
+
+        $companion = $companions[0];
 
         if ($companion->location != 'meeting') {
             throw new BgaUserException("Companion not available");
@@ -85,14 +90,13 @@ trait ActionTrait {
 
         $this->companions->moveCard($companion->id, 'cemetery');
 
-        self::notifyAllPlayers('removedCompanion', clienttranslate('${player_name} removes companion ${companionName}'), [
+        self::notifyAllPlayers('removeCompanion', clienttranslate('${player_name} removes companion ${companionName}'), [
             'playerId' => self::getActivePlayerId(),
             'player_name' => self::getActivePlayerName(),
             'companion' => $companion,
             'companionName' => $companion->name,
+            'spot' => $spot,
         ]);
-
-        // TODO remove companion leave stuff with it
         
         $this->gamestate->nextState('nextPlayer');
     }

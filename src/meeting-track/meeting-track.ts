@@ -44,8 +44,17 @@ class MeetingTrack {
             this.companionsStocks[spot].removeAll();
         }
 
-        console.log(spot, companion, this.companionsStocks[spot].item_type);
         this.companionsStocks[spot].addToStockWithId(companion.subType, ''+companion.id);
+    }
+
+    public removeCompanion(spot: number) {
+        this.companionsStocks[spot].removeAll();
+    }
+
+    removeCompanions() {
+        for (let i=1; i<=5; i++) {
+            this.removeCompanion(i);
+        }
     }
 
     public setSelectionMode(mode: number) {

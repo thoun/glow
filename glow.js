@@ -218,8 +218,15 @@ var MeetingTrack = /** @class */ (function () {
         if (currentId && Number(currentId) != companion.id) {
             this.companionsStocks[spot].removeAll();
         }
-        console.log(spot, companion, this.companionsStocks[spot].item_type);
         this.companionsStocks[spot].addToStockWithId(companion.subType, '' + companion.id);
+    };
+    MeetingTrack.prototype.removeCompanion = function (spot) {
+        this.companionsStocks[spot].removeAll();
+    };
+    MeetingTrack.prototype.removeCompanions = function () {
+        for (var i = 1; i <= 5; i++) {
+            this.removeCompanion(i);
+        }
     };
     MeetingTrack.prototype.setSelectionMode = function (mode) {
         for (var i = 1; i <= 5; i++) {
@@ -346,7 +353,7 @@ var Glow = /** @class */ (function () {
                 this.onEnteringStateChooseAdventurer(args.args);
                 break;
             case 'startRound':
-                this.onEnteringStateStartRound(args.args);
+                this.onEnteringStateStartRound();
                 break;
             case 'recruitCompanion':
                 this.onEnteringStateRecruitCompanion(args.args);
@@ -362,17 +369,9 @@ var Glow = /** @class */ (function () {
                 break;
         }
     };
-    Glow.prototype.onEnteringStateStartRound = function (args) {
+    Glow.prototype.onEnteringStateStartRound = function () {
         if (document.getElementById('adventurers-stock')) {
             dojo.destroy('adventurers-stock');
-        }
-        if (!this.roundCounter) {
-            this.roundCounter = new ebg.counter();
-            this.roundCounter.create('round-counter');
-            this.roundCounter.setValue(args.day);
-        }
-        else {
-            this.roundCounter.toValue(args.day);
         }
     };
     Glow.prototype.onEnteringStateChooseAdventurer = function (args) {
@@ -692,9 +691,12 @@ var Glow = /** @class */ (function () {
         var notifs = [
             ['chosenAdventurer', ANIMATION_MS],
             ['chosenCompanion', ANIMATION_MS],
+            ['removeCompanion', ANIMATION_MS],
+            ['removeCompanions', ANIMATION_MS],
             ['points', 1],
             ['lastTurn', 1],
             ['newFirstPlayer', 1],
+            ['newDay', 1],
         ];
         notifs.forEach(function (notif) {
             dojo.subscribe(notif[0], _this, "notif_" + notif[0]);
@@ -707,11 +709,28 @@ var Glow = /** @class */ (function () {
     Glow.prototype.notif_chosenCompanion = function (notif) {
         this.getPlayerTable(notif.args.playerId).addCompanion(notif.args.companion, this.meetingTrack.getStock(notif.args.spot));
     };
+    Glow.prototype.notif_removeCompanion = function (notif) {
+        this.meetingTrack.removeCompanion(notif.args.spot);
+    };
+    Glow.prototype.notif_removeCompanions = function () {
+        this.meetingTrack.removeCompanions();
+    };
     Glow.prototype.notif_points = function (notif) {
         this.setPoints(notif.args.playerId, notif.args.points);
     };
     Glow.prototype.notif_newFirstPlayer = function (notif) {
         this.placeFirstPlayerToken(notif.args.playerId);
+    };
+    Glow.prototype.notif_newDay = function (notif) {
+        var day = notif.args.day;
+        if (!this.roundCounter) {
+            this.roundCounter = new ebg.counter();
+            this.roundCounter.create('round-counter');
+            this.roundCounter.setValue(day);
+        }
+        else {
+            this.roundCounter.toValue(day);
+        }
     };
     Glow.prototype.notif_lastTurn = function () {
         if (document.getElementById('last-round')) {

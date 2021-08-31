@@ -19,6 +19,10 @@ trait UtilTrait {
         return "select global_value from global where global_id = 10"; // 10 = DAY global id
     }
 
+    function getSide() {
+        return intval(self::getGameStateValue(BOARD_SIDE));
+    }
+
     function createDice() {
         $sql = "INSERT INTO dice (`color`, `small`) VALUES ";
         $values = [];
@@ -91,8 +95,16 @@ trait UtilTrait {
         return intval(self::getUniqueValueFromDB("SELECT player_score FROM player where `player_id` = $playerId"));
     }
 
-    function incPlayerScore(int $playerId, int $incScore) {
+    function incPlayerScore(int $playerId, int $incScore, $message = null, $params = []) {
         self::DbQuery("UPDATE player SET player_score = player_score + $incScore WHERE player_id = $playerId");
+
+        if ($message != null) {
+            self::notifyAllPlayers('points', $message, $params + [
+                'playerId' => $playerId,
+                'playerName' => $this->getPlayerName($playerId),
+                'points' => $incScore,
+            ]);
+        }
     }
 
     function decPlayerScore(int $playerId, int $decScore) {
@@ -101,18 +113,40 @@ trait UtilTrait {
         return $newScore;
     }
 
-    function getPlayerReroll(int $playerId) {
-        return intval(self::getUniqueValueFromDB("SELECT player_score FROM player where `player_id` = $playerId"));
+    function getPlayerRerolls(int $playerId) {
+        return intval(self::getUniqueValueFromDB("SELECT `player_rerolls` FROM player where `player_id` = $playerId"));
     }
 
-    function addPlayerReroll(int $playerId, int $rerolls) {
+    function addPlayerRerolls(int $playerId, int $rerolls) {
         self::DbQuery("UPDATE player SET `player_rerolls` = `player_rerolls` + $rerolls WHERE `playerId` = $playerId");
     }
 
-    function removePlayerReroll(int $playerId, int $dec) {
-        $newValue = max(0, $this->getPlayerReroll($playerId) - $dec);
+    function removePlayerRerolls(int $playerId, int $dec) {
+        $newValue = max(0, $this->getPlayerRerolls($playerId) - $dec);
         self::DbQuery("UPDATE player SET `player_rerolls` = $newValue WHERE player_id = $playerId");
         return $newValue;
+    }
+
+    function getPlayerFootprints(int $playerId) {
+        return intval(self::getUniqueValueFromDB("SELECT `player_footprints` FROM player where `player_id` = $playerId"));
+    }
+
+    function addPlayerFootprints(int $playerId, int $footprints) {
+        self::DbQuery("UPDATE player SET `player_footprints` = `player_footprints` + $footprints WHERE `playerId` = $playerId");
+    }
+
+    function removePlayerFootprints(int $playerId, int $dec) {
+        $newValue = max(0, $this->getPlayerFootprints($playerId) - $dec);
+        self::DbQuery("UPDATE player SET `player_footprints` = $newValue WHERE player_id = $playerId");
+        return $newValue;
+    }
+
+    function getPlayerFireflies(int $playerId) {
+        return intval(self::getUniqueValueFromDB("SELECT `player_fireflies` FROM player where `player_id` = $playerId"));
+    }
+
+    function addPlayerFireflies(int $playerId, int $fireflies) {
+        self::DbQuery("UPDATE player SET `player_fireflies` = `player_fireflies` + $fireflies WHERE `playerId` = $playerId");
     }
 
     function createAdventurers() {        
