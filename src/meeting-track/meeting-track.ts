@@ -7,7 +7,10 @@ class MeetingTrack {
     ) {
 
         for (let i=1; i<=5; i++) {
-            let html = `<div id="meeting-track-companion-${i}" class="meeting-track-stock" style="left: ${490 + 243*(i-1)}px;"></div>`;
+            let html = `
+                <div id="meeting-track-dice-${i}" class="meeting-track-dice" style="left: ${490 + 243*(i-1)}px;"></div>
+                <div id="meeting-track-companion-${i}" class="meeting-track-stock" style="left: ${490 + 243*(i-1)}px;"></div>
+            `;
 
             dojo.place(html, 'meeting-track');
 
@@ -25,6 +28,11 @@ class MeetingTrack {
             if (spot.companion) {
                 this.companionsStocks[i].addToStockWithId(spot.companion.subType, ''+spot.companion.id);
             }
+
+            spot.dice.forEach(die => {
+                this.game.createAndPlaceDieHtml(die, `meeting-track-dice-${i}`);
+                this.game.addRollToDiv(this.game.getDieDiv(die), 'no-roll');
+            })
         }
     }
     

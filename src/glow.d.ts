@@ -18,15 +18,16 @@ interface Companion {
 
 interface Die {
     id: number;
+    face: number;
     value: number;
-    extra: boolean;
-    locked: boolean;
+    color: number;
     rolled: boolean;
 }
 
 interface MeetingTrackSpot {
     companion: Companion;
-    // TODO
+    dice: Die[];
+    footprints: number;
 }
 
 interface GlowPlayer extends Player {
@@ -70,6 +71,9 @@ interface GlowGame extends Game {
     getPlayerId(): number;
     chooseAdventurer(id: number): void;
     selectMeetingTrackCompanion(spot: number): void;
+    createAndPlaceDieHtml(die: Die, destinationId: string): void;    
+    getDieDiv(die: Die): HTMLDivElement;
+    addRollToDiv(dieDiv: HTMLDivElement, rollClass: string): void;
 }
 
 interface ChooseAdventurerArgs {

@@ -28,7 +28,7 @@ interface Dojo {
     hitch: Function;
     hasClass: (nodeId: string, className: string) => boolean;
     addClass: (nodeId: string, className: string) => void;
-    removeClass: (nodeId: string, className?: string) => void;
+    removeClass: (nodeId: string | HTMLElement, className?: string) => void;
     toggleClass: (nodeId: string, className: string, forceValue?: boolean) => void;
     connect: Function;
     disconnect: Function;

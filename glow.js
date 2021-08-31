@@ -158,14 +158,20 @@ var Board = /** @class */ (function () {
         this.points.set(playerId, this.points.get(playerId) + points);
         this.movePoints();
     };
+    Board.prototype.getPointsCoordinates = function (points) {
+        var cases = points === 10 ? 11 :
+            (points > 10 ? points + 2 : points);
+        var top = cases < 86 ? Math.min(Math.max(cases - 34, 0), 17) * POINT_CASE_SIZE : (102 - cases) * POINT_CASE_SIZE;
+        var left = cases < 52 ? Math.min(cases, 34) * POINT_CASE_SIZE : (33 - Math.max(cases - 52, 0)) * POINT_CASE_SIZE;
+        return [19 + left, 24 + top];
+    };
     Board.prototype.movePoints = function () {
         var _this = this;
         this.points.forEach(function (points, playerId) {
             var markerDiv = document.getElementById("player-" + playerId + "-point-marker");
-            var cases = points === 10 ? 11 :
-                (points > 10 ? points + 2 : points);
-            var top = 19 + (cases < 86 ? Math.min(Math.max(cases - 34, 0), 17) * POINT_CASE_SIZE : (102 - cases) * POINT_CASE_SIZE);
-            var left = 24 + (cases < 52 ? Math.min(cases, 34) * POINT_CASE_SIZE : (33 - Math.max(cases - 52, 0)) * POINT_CASE_SIZE);
+            var coordinates = _this.getPointsCoordinates(points);
+            var left = coordinates[0];
+            var top = coordinates[1];
             var topShift = 0;
             var leftShift = 0;
             _this.points.forEach(function (iPoints, iPlayerId) {
@@ -185,7 +191,7 @@ var MeetingTrack = /** @class */ (function () {
         this.game = game;
         this.companionsStocks = [];
         var _loop_1 = function (i) {
-            var html = "<div id=\"meeting-track-companion-" + i + "\" class=\"meeting-track-stock\" style=\"left: " + (490 + 243 * (i - 1)) + "px;\"></div>";
+            var html = "\n                <div id=\"meeting-track-dice-" + i + "\" class=\"meeting-track-dice\" style=\"left: " + (490 + 243 * (i - 1)) + "px;\"></div>\n                <div id=\"meeting-track-companion-" + i + "\" class=\"meeting-track-stock\" style=\"left: " + (490 + 243 * (i - 1)) + "px;\"></div>\n            ";
             dojo.place(html, 'meeting-track');
             var spot = meetingTrackSpot[i];
             this_1.companionsStocks[i] = new ebg.stock();
@@ -198,6 +204,10 @@ var MeetingTrack = /** @class */ (function () {
             if (spot.companion) {
                 this_1.companionsStocks[i].addToStockWithId(spot.companion.subType, '' + spot.companion.id);
             }
+            spot.dice.forEach(function (die) {
+                _this.game.createAndPlaceDieHtml(die, "meeting-track-dice-" + i);
+                _this.game.addRollToDiv(_this.game.getDieDiv(die), 'no-roll');
+            });
         };
         var this_1 = this;
         for (var i = 1; i <= 5; i++) {
@@ -385,7 +395,7 @@ var Glow = /** @class */ (function () {
             this.adventurersStock.setSelectionAppearance('class');
             this.adventurersStock.selectionClass = 'nothing';
             this.adventurersStock.centerItems = true;
-            this.adventurersStock.onItemCreate = function (cardDiv, type) { return setupMachineCard(_this, cardDiv, type); };
+            // this.adventurersStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupMachineCard(this, cardDiv, type);
             dojo.connect(this.adventurersStock, 'onChangeSelection', this, function () { return _this.onAdventurerSelection(_this.adventurersStock.getSelectedItems()); });
             setupAdventurersCards(this.adventurersStock);
             adventurers.forEach(function (adventurer) { return _this.adventurersStock.addToStockWithId(adventurer.color, '' + adventurer.id); });
@@ -591,6 +601,31 @@ var Glow = /** @class */ (function () {
         var playerTable = new PlayerTable(this, gamedatas.players[playerId]);
         this.playersTables.push(playerTable);
     };
+    Glow.prototype.createAndPlaceDieHtml = function (die, destinationId) {
+        var html = "<div id=\"die" + die.id + "\" class=\"die die" + die.face + "\" data-die-id=\"" + die.id + "\" data-die-value=\"" + die.face + "\">\n        <ol class=\"die-list\" data-roll=\"" + die.face + "\">";
+        for (var dieFace = 1; dieFace <= 6; dieFace++) {
+            html += "<li class=\"die-item color" + die.color + " side" + dieFace + "\" data-side=\"" + dieFace + "\"></li>";
+        }
+        html += "   </ol>\n        </div>";
+        // security to destroy pre-existing die with same id
+        var dieDiv = document.getElementById("die" + die.id);
+        dieDiv === null || dieDiv === void 0 ? void 0 : dieDiv.parentNode.removeChild(dieDiv);
+        dojo.place(html, destinationId);
+    };
+    Glow.prototype.getDieDiv = function (die) {
+        return document.getElementById("die" + die.id);
+    };
+    Glow.prototype.addRollToDiv = function (dieDiv, rollClass, attempt) {
+        var _this = this;
+        if (attempt === void 0) { attempt = 0; }
+        var dieList = dieDiv.getElementsByClassName('die-list')[0];
+        if (dieList) {
+            dieList.classList.add(rollClass);
+        }
+        else if (attempt < 5) {
+            setTimeout(function () { return _this.addRollToDiv(dieDiv, rollClass, attempt + 1); }, 200);
+        }
+    };
     Glow.prototype.selectMeetingTrackCompanion = function (spot) {
         if (this.meetingTrackClickAction === 'remove') {
             this.removeCompanion(spot);
@@ -764,7 +799,6 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.getColor = function (color) {
         switch (color) {
-            case 0: return 'black';
             case 1: return '#00995c';
             case 2: return '#0077ba';
             case 3: return '#57cbf5';
@@ -772,6 +806,7 @@ var Glow = /** @class */ (function () {
             case 5: return '#ea7d28';
             case 6: return '#8a298a';
             case 7: return '#ffd503';
+            case 8: return '#000000';
         }
         return null;
     };

@@ -5,6 +5,18 @@
   background-image: url('img/meeting-track.png'); 
   margin-bottom: 260px; 
 
+  .meeting-track-dice {
+    position: absolute;
+    top: 20px;
+    width: 142px;
+    height: 150px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+  }
+
   .meeting-track-stock {
     position: absolute;
     top: 295px;

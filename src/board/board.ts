@@ -23,15 +23,23 @@ class Board {
         this.movePoints();
     }
 
+    private getPointsCoordinates(points: number) {
+        const cases = points === 10 ? 11 :
+            (points > 10 ? points + 2 : points);
+
+        const top = cases < 86 ? Math.min(Math.max(cases - 34, 0), 17) * POINT_CASE_SIZE : (102 - cases) * POINT_CASE_SIZE;
+        const left = cases < 52 ? Math.min(cases, 34) * POINT_CASE_SIZE : (33 - Math.max(cases - 52, 0))*POINT_CASE_SIZE;
+
+        return [19 + left, 24 + top];
+    }
+
     private movePoints() {
         this.points.forEach((points, playerId) => {
             const markerDiv = document.getElementById(`player-${playerId}-point-marker`);
 
-            const cases = points === 10 ? 11 :
-                (points > 10 ? points + 2 : points);
-
-            const top = 19 + (cases < 86 ? Math.min(Math.max(cases - 34, 0), 17) * POINT_CASE_SIZE : (102 - cases) * POINT_CASE_SIZE);
-            const left = 24 + (cases < 52 ? Math.min(cases, 34) * POINT_CASE_SIZE : (33 - Math.max(cases - 52, 0))*POINT_CASE_SIZE);
+            const coordinates = this.getPointsCoordinates(points);
+            const left = coordinates[0];
+            const top = coordinates[1];
     
             let topShift = 0;
             let leftShift = 0;

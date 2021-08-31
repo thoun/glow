@@ -141,7 +141,7 @@ class Glow implements GlowGame {
             this.adventurersStock.setSelectionAppearance('class');
             this.adventurersStock.selectionClass = 'nothing';
             this.adventurersStock.centerItems = true;
-            this.adventurersStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupMachineCard(this, cardDiv, type);
+            // this.adventurersStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupMachineCard(this, cardDiv, type);
             dojo.connect(this.adventurersStock, 'onChangeSelection', this, () => this.onAdventurerSelection(this.adventurersStock.getSelectedItems()));
 
             setupAdventurersCards(this.adventurersStock);
@@ -404,6 +404,35 @@ class Glow implements GlowGame {
         this.playersTables.push(playerTable);
     }
 
+    public createAndPlaceDieHtml(die: Die, destinationId: string) {
+        let html = `<div id="die${die.id}" class="die die${die.face}" data-die-id="${die.id}" data-die-value="${die.face}">
+        <ol class="die-list" data-roll="${die.face}">`;
+        for (let dieFace=1; dieFace<=6; dieFace++) {
+            html += `<li class="die-item color${die.color} side${dieFace}" data-side="${dieFace}"></li>`;
+        }
+        html += `   </ol>
+        </div>`;
+
+        // security to destroy pre-existing die with same id
+        const dieDiv = document.getElementById(`die${die.id}`);
+        dieDiv?.parentNode.removeChild(dieDiv);
+
+        dojo.place(html, destinationId);
+    }
+
+    public getDieDiv(die: Die): HTMLDivElement {
+        return document.getElementById(`die${die.id}`) as HTMLDivElement;
+    }
+
+    public addRollToDiv(dieDiv: HTMLDivElement, rollClass: string, attempt: number = 0) {
+        const dieList = dieDiv.getElementsByClassName('die-list')[0];
+        if (dieList) {
+            dieList.classList.add(rollClass);
+        } else if (attempt < 5) {
+            setTimeout(() => this.addRollToDiv(dieDiv, rollClass, attempt + 1), 200); 
+        }
+    }
+
     public selectMeetingTrackCompanion(spot: number) {
         if (this.meetingTrackClickAction === 'remove') {
             this.removeCompanion(spot);
@@ -611,7 +640,6 @@ class Glow implements GlowGame {
 
     private getColor(color: number) {
         switch (color) {
-            case 0: return 'black';
             case 1: return '#00995c';
             case 2: return '#0077ba';
             case 3: return '#57cbf5';
@@ -619,6 +647,7 @@ class Glow implements GlowGame {
             case 5: return '#ea7d28';
             case 6: return '#8a298a';
             case 7: return '#ffd503';
+            case 8: return '#000000';
         }
         return null;
     }

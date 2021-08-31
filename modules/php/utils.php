@@ -76,8 +76,8 @@ trait UtilTrait {
         return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices));
     }
     
-    function getDiceByColorAndSize(int $color = 0, bool $small = false, int $limit = 0) {
-        $sql = "SELECT * FROM dice WHERE `color` = $color AND `small` = ".json_encode($small);
+    function getBigDiceByColor(int $color = 0, int $limit = 0) {
+        $sql = "SELECT * FROM dice WHERE `color` = $color AND `small` = false";
         if ($limit > 0) {
             $sql .= " LIMIT $limit";
         }
@@ -86,7 +86,7 @@ trait UtilTrait {
     }
     
     function getDiceByLocation(string $location, $locationArg = null) {
-        $sql = "SELECT * FROM dice WHERE `location` = '$locationArg'";
+        $sql = "SELECT * FROM dice WHERE `location` = '$location'";
         if ($locationArg !== null) {
             $sql .= " AND `location_arg` = $locationArg";
         }

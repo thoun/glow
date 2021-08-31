@@ -25,7 +25,7 @@ trait ActionTrait {
         $this->adventurers->moveCard($adventurer->id, 'player', $playerId);
 
         // take big dice
-        $dice = $this->getDiceByColorAndSize($adventurer->color, false, $adventurer->dice);
+        $dice = $this->getBigDiceByColor($adventurer->color, $adventurer->dice);
         $this->moveDice($dice, 'player', $playerId);
 
         self::notifyAllPlayers('chosenAdventurer', clienttranslate('${player_name} chooses adventurer ${adventurerName}'), [
