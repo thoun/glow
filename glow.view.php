@@ -38,6 +38,9 @@
         $players_nbr = count( $players );
 
         /*********** Place your code below:  ************/
+
+        $this->tpl['DAY'] = self::_("Day");
+
         /*********** Do not change anything below this line  ************/
   	}
   }

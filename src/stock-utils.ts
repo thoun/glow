@@ -31,15 +31,13 @@ function setupCompanionCards(companionsStock: Stock) {
 
     const cardsurl = `${g_gamethemeurl}img/companions.png`;
 
-    for (let type=1; type<=2;type++) {
-        for (let subType=1; subType<=23;subType++) {
-            companionsStock.addItemType(
-                subType, 
-                0, 
-                cardsurl, 
-                type + (subType - 2)
-            );
-        }
+    for (let subType=1; subType<=46;subType++) {
+        companionsStock.addItemType(
+            subType, 
+            0, 
+            cardsurl, 
+            subType + (subType > 23 ? 1 : 0)
+        );
     }
 }
 

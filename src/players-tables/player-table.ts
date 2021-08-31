@@ -54,4 +54,8 @@ class PlayerTable {
         //this.adventurerStock.removeAll();
         moveToAnotherStock(this.game.adventurersStock, this.adventurerStock, adventurer.color, ''+adventurer.id);
     }
+    
+    public addCompanion(companion: Companion, from: Stock) {
+        moveToAnotherStock(from, this.companionsStock, companion.subType, ''+companion.id);
+    }
 }

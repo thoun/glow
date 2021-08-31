@@ -22,6 +22,12 @@ trait ArgsTrait {
         ];
     }
 
+    function argStartRound() {
+        return [
+            'day' => intval($this->getGameStateValue(DAY)),
+         ];
+    }
+
     function argRecuitCompanion() {
         $companions = [];
         $companions[0] = null;

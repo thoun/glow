@@ -22,7 +22,7 @@ class Glow implements GlowGame {
     private footprintCounters: Counter[] = [];
     private fireflyCounters: Counter[] = [];
     private companionCounter: Counter;
-    private projectCounter: Counter;
+    private roundCounter: Counter;
     private helpDialog: any;
 
     public adventurersStock: Stock;
@@ -69,14 +69,11 @@ class Glow implements GlowGame {
         this.board = new Board(this, Object.values(gamedatas.players));
         this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack);
         this.createPlayerTables(gamedatas);
-
-        /*this.machineCounter = new ebg.counter();
-        this.machineCounter.create('remaining-machine-counter');
-        this.setRemainingMachines(gamedatas.remainingMachines);
-
-        this.projectCounter = new ebg.counter();
-        this.projectCounter.create('remaining-project-counter');
-        this.setRemainingProjects(gamedatas.remainingProjects);*/
+        if (gamedatas.day > 0) {
+            this.roundCounter = new ebg.counter();
+            this.roundCounter.create('round-counter');
+            this.roundCounter.setValue(gamedatas.day);
+        }
 
         if (gamedatas.endTurn) {
             this.notif_lastTurn();
@@ -110,9 +107,7 @@ class Glow implements GlowGame {
                 this.onEnteringStateChooseAdventurer(args.args);
                 break;
             case 'startRound':
-                if (document.getElementById('adventurers-stock')) {
-                    dojo.destroy('adventurers-stock');
-                }
+                this.onEnteringStateStartRound(args.args);
                 break;
             case 'recruitCompanion':
                 this.onEnteringStateRecruitCompanion(args.args);
@@ -126,6 +121,20 @@ class Glow implements GlowGame {
                     lastTurnBar.style.display = 'none';
                 }
                 break;
+        }
+    }
+
+    private onEnteringStateStartRound(args: StartRoundArgs) {
+        if (document.getElementById('adventurers-stock')) {
+            dojo.destroy('adventurers-stock');
+        }
+        
+        if (!this.roundCounter) {
+            this.roundCounter = new ebg.counter();
+            this.roundCounter.create('round-counter');
+            this.roundCounter.setValue(args.day);
+        } else {
+            this.roundCounter.toValue(args.day);
         }
     }
 
@@ -300,6 +309,17 @@ class Glow implements GlowGame {
         }
     }
 
+    placeFirstPlayerToken(playerId: number) {
+        const firstPlayerToken = document.getElementById('firstPlayerToken');
+        if (firstPlayerToken) {
+            slideToObjectAndAttach(firstPlayerToken, `player_board_${playerId}_firstPlayerWrapper`);
+        } else {
+            dojo.place('<div id="firstPlayerToken"></div>', `player_board_${playerId}_firstPlayerWrapper`);
+
+            (this as any).addTooltipHtml('firstPlayerToken', _("First Player token"));
+        }
+    }
+
     public setHandSelectable(selectable: boolean) {
         this.adventurersStock.setSelectionMode(selectable ? 1 : 0);
     }
@@ -362,11 +382,13 @@ class Glow implements GlowGame {
             const fireflyCounter = new ebg.counter();
             fireflyCounter.create(`firefly-counter-${playerId}`);
             fireflyCounter.setValue(player.fireflies);
-            this.fireflyCounters[playerId] = fireflyCounter;
+            this.fireflyCounters[playerId] = fireflyCounter;     
 
-            if (player.playerNo == 1) {
-                dojo.place(`<div id="player-icon-first-player" class="player-icon first-player"></div>`, `player_board_${player.id}`);
-                (this as any).addTooltipHtml('player-icon-first-player', _("First player"));
+            // first player token
+            dojo.place(`<div id="player_board_${player.id}_firstPlayerWrapper"></div>`, `player_board_${player.id}`);
+
+            if (gamedatas.firstPlayer === playerId) {
+                this.placeFirstPlayerToken(gamedatas.firstPlayer);
             }
         });
 
@@ -490,20 +512,6 @@ class Glow implements GlowGame {
         this.helpDialog.show();
     }
 
-    private setRemainingMachines(remainingMachines: number) {
-        this.companionCounter.setValue(remainingMachines);
-        const visibility = remainingMachines > 0 ? 'visible' : 'hidden';
-        document.getElementById('machine-deck').style.visibility = visibility;
-        document.getElementById('remaining-machine-counter').style.visibility = visibility;
-    }
-
-    private setRemainingProjects(remainingProjects: number) {
-        this.projectCounter.setValue(remainingProjects);
-        const visibility = remainingProjects > 0 ? 'visible' : 'hidden';
-        document.getElementById('project-deck').style.visibility = visibility;
-        document.getElementById('remaining-project-counter').style.visibility = visibility;
-    }
-
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications
 
@@ -521,8 +529,10 @@ class Glow implements GlowGame {
 
         const notifs = [
             ['chosenAdventurer', ANIMATION_MS],
+            ['chosenCompanion', ANIMATION_MS],
             ['points', 1],
             ['lastTurn', 1],
+            ['newFirstPlayer', 1],
         ];
 
         notifs.forEach((notif) => {
@@ -536,8 +546,16 @@ class Glow implements GlowGame {
         this.getPlayerTable(notif.args.playerId).setAdventurer(notif.args.adventurer);
     }
 
+    notif_chosenCompanion(notif: Notif<NotifChosenCompanionArgs>) {
+        this.getPlayerTable(notif.args.playerId).addCompanion(notif.args.companion, this.meetingTrack.getStock(notif.args.spot));
+    }
+
     notif_points(notif: Notif<NotifPointsArgs>) {
         this.setPoints(notif.args.playerId, notif.args.points);
+    }
+
+    notif_newFirstPlayer(notif: Notif<NotifFirstPlayerArgs>) {
+        this.placeFirstPlayerToken(notif.args.playerId);
     }
 
     notif_lastTurn() {
@@ -570,7 +588,7 @@ class Glow implements GlowGame {
         try {
             if (log && args && !args.processed) {
                 if (typeof args.adventurerName == 'string' && args.adventurerName[0] != '<') {
-                    args.adventurerName = `<strong style="color: ${this.getColor(args.adventurer?.type)};">${args.adventurerName}</strong>`; // TODO add dice color ?
+                    args.adventurerName = `<strong style="color: ${this.getColor(args.adventurer?.color)};">${args.adventurerName}</strong>`;
                 }
                 if (typeof args.companionName == 'string' && args.companionName[0] != '<') {
                     args.companionName = `<strong>${args.companionName}</strong>`;

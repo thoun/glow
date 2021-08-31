@@ -44,6 +44,7 @@ class MeetingTrack {
             this.companionsStocks[spot].removeAll();
         }
 
+        console.log(spot, companion, this.companionsStocks[spot].item_type);
         this.companionsStocks[spot].addToStockWithId(companion.subType, ''+companion.id);
     }
 
@@ -51,5 +52,9 @@ class MeetingTrack {
         for (let i=1; i<=5; i++) {
             this.companionsStocks[i].setSelectionMode(mode);
         }
+    }
+
+    getStock(spot: number): Stock {
+        return this.companionsStocks[spot];
     }
 }

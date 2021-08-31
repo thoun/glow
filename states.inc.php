@@ -204,6 +204,7 @@ $gameGameStates = [
         "description" => "",
         "type" => "game",
         "action" => "stStartRound",
+        "args" => "argStartRound",
         "transitions" => [ 
             "morning" => ST_PLAYER_RECRUIT_COMPANION,
         ],

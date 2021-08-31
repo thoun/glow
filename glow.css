@@ -3,7 +3,6 @@
   position: relative;
   width: 1656px;
   height: 862px;
-  margin-bottom: 20px;
 }
 #board.side1 {
   background-image: url("img/side1.png");
@@ -233,6 +232,12 @@
 .player-board .counters .icon {
   margin-right: 5px;
 }
+.player-board #firstPlayerToken {
+  background: url("img/first-player.png");
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+}
 
 html {
   background: url("img/background.jpg");
@@ -270,4 +275,19 @@ html {
 
 #adventurers-stock {
   margin-bottom: 20px;
+}
+
+#round-counter-wrapper {
+  text-align: center;
+  background: white;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 10px;
+}
+
+#last-round {
+  margin: 5px -5px -5px;
+  text-align: center;
+  background: black;
+  color: white;
 }

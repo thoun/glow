@@ -48,10 +48,8 @@ function setupAdventurersCards(adventurerStock) {
 function setupCompanionCards(companionsStock) {
     companionsStock.image_items_per_row = 10;
     var cardsurl = g_gamethemeurl + "img/companions.png";
-    for (var type = 1; type <= 2; type++) {
-        for (var subType = 1; subType <= 23; subType++) {
-            companionsStock.addItemType(subType, 0, cardsurl, type + (subType - 2));
-        }
+    for (var subType = 1; subType <= 46; subType++) {
+        companionsStock.addItemType(subType, 0, cardsurl, subType + (subType > 23 ? 1 : 0));
     }
 }
 function getMachineTooltip(type) {
@@ -220,12 +218,16 @@ var MeetingTrack = /** @class */ (function () {
         if (currentId && Number(currentId) != companion.id) {
             this.companionsStocks[spot].removeAll();
         }
+        console.log(spot, companion, this.companionsStocks[spot].item_type);
         this.companionsStocks[spot].addToStockWithId(companion.subType, '' + companion.id);
     };
     MeetingTrack.prototype.setSelectionMode = function (mode) {
         for (var i = 1; i <= 5; i++) {
             this.companionsStocks[i].setSelectionMode(mode);
         }
+    };
+    MeetingTrack.prototype.getStock = function (spot) {
+        return this.companionsStocks[spot];
     };
     return MeetingTrack;
 }());
@@ -261,6 +263,9 @@ var PlayerTable = /** @class */ (function () {
     PlayerTable.prototype.setAdventurer = function (adventurer) {
         //this.adventurerStock.removeAll();
         moveToAnotherStock(this.game.adventurersStock, this.adventurerStock, adventurer.color, '' + adventurer.id);
+    };
+    PlayerTable.prototype.addCompanion = function (companion, from) {
+        moveToAnotherStock(from, this.companionsStock, companion.subType, '' + companion.id);
     };
     return PlayerTable;
 }());
@@ -310,13 +315,11 @@ var Glow = /** @class */ (function () {
         this.board = new Board(this, Object.values(gamedatas.players));
         this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack);
         this.createPlayerTables(gamedatas);
-        /*this.machineCounter = new ebg.counter();
-        this.machineCounter.create('remaining-machine-counter');
-        this.setRemainingMachines(gamedatas.remainingMachines);
-
-        this.projectCounter = new ebg.counter();
-        this.projectCounter.create('remaining-project-counter');
-        this.setRemainingProjects(gamedatas.remainingProjects);*/
+        if (gamedatas.day > 0) {
+            this.roundCounter = new ebg.counter();
+            this.roundCounter.create('round-counter');
+            this.roundCounter.setValue(gamedatas.day);
+        }
         if (gamedatas.endTurn) {
             this.notif_lastTurn();
         }
@@ -343,9 +346,7 @@ var Glow = /** @class */ (function () {
                 this.onEnteringStateChooseAdventurer(args.args);
                 break;
             case 'startRound':
-                if (document.getElementById('adventurers-stock')) {
-                    dojo.destroy('adventurers-stock');
-                }
+                this.onEnteringStateStartRound(args.args);
                 break;
             case 'recruitCompanion':
                 this.onEnteringStateRecruitCompanion(args.args);
@@ -359,6 +360,19 @@ var Glow = /** @class */ (function () {
                     lastTurnBar.style.display = 'none';
                 }
                 break;
+        }
+    };
+    Glow.prototype.onEnteringStateStartRound = function (args) {
+        if (document.getElementById('adventurers-stock')) {
+            dojo.destroy('adventurers-stock');
+        }
+        if (!this.roundCounter) {
+            this.roundCounter = new ebg.counter();
+            this.roundCounter.create('round-counter');
+            this.roundCounter.setValue(args.day);
+        }
+        else {
+            this.roundCounter.toValue(args.day);
         }
     };
     Glow.prototype.onEnteringStateChooseAdventurer = function (args) {
@@ -505,6 +519,16 @@ var Glow = /** @class */ (function () {
                 break;
         }
     };
+    Glow.prototype.placeFirstPlayerToken = function (playerId) {
+        var firstPlayerToken = document.getElementById('firstPlayerToken');
+        if (firstPlayerToken) {
+            slideToObjectAndAttach(firstPlayerToken, "player_board_" + playerId + "_firstPlayerWrapper");
+        }
+        else {
+            dojo.place('<div id="firstPlayerToken"></div>', "player_board_" + playerId + "_firstPlayerWrapper");
+            this.addTooltipHtml('firstPlayerToken', _("First Player token"));
+        }
+    };
     Glow.prototype.setHandSelectable = function (selectable) {
         this.adventurersStock.setSelectionMode(selectable ? 1 : 0);
     };
@@ -545,9 +569,10 @@ var Glow = /** @class */ (function () {
             fireflyCounter.create("firefly-counter-" + playerId);
             fireflyCounter.setValue(player.fireflies);
             _this.fireflyCounters[playerId] = fireflyCounter;
-            if (player.playerNo == 1) {
-                dojo.place("<div id=\"player-icon-first-player\" class=\"player-icon first-player\"></div>", "player_board_" + player.id);
-                _this.addTooltipHtml('player-icon-first-player', _("First player"));
+            // first player token
+            dojo.place("<div id=\"player_board_" + player.id + "_firstPlayerWrapper\"></div>", "player_board_" + player.id);
+            if (gamedatas.firstPlayer === playerId) {
+                _this.placeFirstPlayerToken(gamedatas.firstPlayer);
             }
         });
         this.addTooltipHtmlToClass('reroll-counter', _("Rerolls"));
@@ -650,18 +675,6 @@ var Glow = /** @class */ (function () {
         }
         this.helpDialog.show();
     };
-    Glow.prototype.setRemainingMachines = function (remainingMachines) {
-        this.companionCounter.setValue(remainingMachines);
-        var visibility = remainingMachines > 0 ? 'visible' : 'hidden';
-        document.getElementById('machine-deck').style.visibility = visibility;
-        document.getElementById('remaining-machine-counter').style.visibility = visibility;
-    };
-    Glow.prototype.setRemainingProjects = function (remainingProjects) {
-        this.projectCounter.setValue(remainingProjects);
-        var visibility = remainingProjects > 0 ? 'visible' : 'hidden';
-        document.getElementById('project-deck').style.visibility = visibility;
-        document.getElementById('remaining-project-counter').style.visibility = visibility;
-    };
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications
     /*
@@ -678,8 +691,10 @@ var Glow = /** @class */ (function () {
         var _this = this;
         var notifs = [
             ['chosenAdventurer', ANIMATION_MS],
+            ['chosenCompanion', ANIMATION_MS],
             ['points', 1],
             ['lastTurn', 1],
+            ['newFirstPlayer', 1],
         ];
         notifs.forEach(function (notif) {
             dojo.subscribe(notif[0], _this, "notif_" + notif[0]);
@@ -689,8 +704,14 @@ var Glow = /** @class */ (function () {
     Glow.prototype.notif_chosenAdventurer = function (notif) {
         this.getPlayerTable(notif.args.playerId).setAdventurer(notif.args.adventurer);
     };
+    Glow.prototype.notif_chosenCompanion = function (notif) {
+        this.getPlayerTable(notif.args.playerId).addCompanion(notif.args.companion, this.meetingTrack.getStock(notif.args.spot));
+    };
     Glow.prototype.notif_points = function (notif) {
         this.setPoints(notif.args.playerId, notif.args.points);
+    };
+    Glow.prototype.notif_newFirstPlayer = function (notif) {
+        this.placeFirstPlayerToken(notif.args.playerId);
     };
     Glow.prototype.notif_lastTurn = function () {
         if (document.getElementById('last-round')) {
@@ -718,7 +739,7 @@ var Glow = /** @class */ (function () {
         try {
             if (log && args && !args.processed) {
                 if (typeof args.adventurerName == 'string' && args.adventurerName[0] != '<') {
-                    args.adventurerName = "<strong style=\"color: " + this.getColor((_a = args.adventurer) === null || _a === void 0 ? void 0 : _a.type) + ";\">" + args.adventurerName + "</strong>"; // TODO add dice color ?
+                    args.adventurerName = "<strong style=\"color: " + this.getColor((_a = args.adventurer) === null || _a === void 0 ? void 0 : _a.color) + ";\">" + args.adventurerName + "</strong>";
                 }
                 if (typeof args.companionName == 'string' && args.companionName[0] != '<') {
                     args.companionName = "<strong>" + args.companionName + "</strong>";

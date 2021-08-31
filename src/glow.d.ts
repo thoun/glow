@@ -80,9 +80,8 @@ interface RecruitCompanionArgs {
     companions: MeetingTrackSpot[];
 }
 
-interface ChoosePlayActionArgs {
-    machine: Adventurer;
-    canApplyEffect: boolean;
+interface StartRoundArgs {
+    day: number;
 }
 
 interface SelectMachineArgs {
@@ -108,56 +107,23 @@ interface SelectExchangeArgs {
     possibleExchanges: Exchange[];
 }
 
+interface NotifFirstPlayerArgs {
+    playerId: number;
+}
+
 interface NotifChosenAdventurerArgs {
     playerId: number;
     adventurer: Adventurer;
     dice: Die[];
 }
 
-interface NotifMachinePlayedArgs {
+interface NotifChosenCompanionArgs {
     playerId: number;
-    machine: Adventurer;
-}
-
-interface NotifMachineRepairedArgs {
-    playerId: number;
-    machine: Adventurer;
-    machineSpot: number;
-}
-
-interface NotifTableMoveArgs {
-    moved: { [originalSpot: number]: Adventurer };
+    companion: Companion;
+    spot: number;
 }
 
 interface NotifPointsArgs {
     playerId: number;
     points: number;
-}
-
-interface NotifResourcesArgs {
-    playerId: number;
-    resourceType: number;
-    count: number;
-    opponentId: number;
-    opponentCount: number;
-}
-
-interface NotifAddMachinesToHandArgs {
-    machines: Adventurer[];
-    from: number;
-    remainingMachines?: number;
-}
-
-interface NotifDiscardMachinesArgs {
-    machines: Adventurer[];
-}
-
-interface NotifAddWorkshopProjectsArgs {
-    playerId: number;
-    projects: Companion[];
-}
-
-interface NotifRemoveProjectArgs {
-    playerId: number;
-    project: Companion;
 }

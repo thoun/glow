@@ -39,10 +39,6 @@ trait StateTrait {
         $day = intval($this->getGameStateValue(DAY)) + 1;
         self::setGameStateValue(DAY, $day);
 
-        self::notifyAllPlayers('newDay', '', [
-            'day' => $day,
-        ]);
-
         // reset cards
         /*$this->animals->moveAllCardsInLocation(null, 'deck');
         $this->animals->shuffle('deck');

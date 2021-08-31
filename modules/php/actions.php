@@ -62,6 +62,7 @@ trait ActionTrait {
             'player_name' => self::getActivePlayerName(),
             'companion' => $companion,
             'companionName' => $companion->name,
+            'spot' => $spot,
         ]);
 
         // TODO get stuff with it
