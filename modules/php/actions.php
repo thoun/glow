@@ -26,7 +26,7 @@ trait ActionTrait {
 
         // take big dice
         $dice = $this->getDiceByColorAndSize($adventurer->color, false, $adventurer->dice);
-        $this->moveDiceToPlayer($dice, $playerId);
+        $this->moveDice($dice, 'player', $playerId);
 
         self::notifyAllPlayers('chosenAdventurer', clienttranslate('${player_name} chooses adventurer ${adventurerName}'), [
             'playerId' => $playerId,
@@ -55,7 +55,11 @@ trait ActionTrait {
         }
 
         $this->companions->moveCard($companion->id, 'player', $playerId);
-        self::DbQuery("UPDATE player SET `player_recruit_day` = (".$this->getDaySql().") where `player_id` = $playerId");        
+        self::DbQuery("UPDATE player SET `player_recruit_day` = (".$this->getDaySql().") where `player_id` = $playerId");  
+        
+        
+        $dice = $this->getDiceByLocation('meeting', $spot);
+        // TODO add footprints from meeting track to player and clean it
 
         self::notifyAllPlayers('chosenCompanion', clienttranslate('${player_name} chooses companion ${companionName}'), [
             'playerId' => $playerId,
@@ -63,9 +67,8 @@ trait ActionTrait {
             'companion' => $companion,
             'companionName' => $companion->name,
             'spot' => $spot,
+            'dice' => $dice,
         ]);
-
-        // TODO get stuff with it
 
         $this->gamestate->nextState($this->getPlayerCount() == 2 ? 'removeCompanion' : 'nextPlayer');
     }

@@ -121,6 +121,7 @@ interface NotifChosenCompanionArgs {
     playerId: number;
     companion: Companion;
     spot: number;
+    dice: Die[];
 }
 
 interface NotifPointsArgs {

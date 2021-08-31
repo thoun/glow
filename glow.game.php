@@ -80,7 +80,7 @@ class Glow extends Table {
  
         // Create players
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
-        $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar, player_rerolls) VALUES ";
+        $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_score, player_avatar, player_rerolls) VALUES ";
         $values = [];
         $i = 0;
         foreach($players as $playerId => $player) {
@@ -89,7 +89,7 @@ class Glow extends Table {
             // The player on the right of first player receives 2 reroll tokens.
             $lastPlayer = $i > 0 && $i == count($players) - 1;
 
-            $values[] = "('".$playerId."','$color','".$player['player_canal']."','".addslashes( $player['player_name'] )."','".addslashes( $player['player_avatar'] )."', ".($lastPlayer ? 2 : 0).")";
+            $values[] = "('".$playerId."','$color','".$player['player_canal']."','".addslashes( $player['player_name'] )."', 10, '".addslashes( $player['player_avatar'] )."', ".($lastPlayer ? 2 : 0).")";
 
             if ($i == 0) {
                 self::setGameStateValue(FIRST_PLAYER, $playerId);
@@ -120,16 +120,7 @@ class Glow extends Table {
         $this->createSpells();
 
         $this->placeCompanionsOnMeetingTrack();
-        
-        /*TODO The first player rolls the 9 small dice (2 green, 2 azure,
-        2 blue, 1 red, 1 orange and 1 purple). They are then placed,
-        according to their result, on the corresponding spaces on
-        the meeting track. If the purple die indicates the footprint
-        symbol, it is rerolled by the first player.
-
-        /* TODO It may be that one or more of the spaces on the track do not
-        receive a small die. In this case, a footprint token is placed
-        on each space without a die.*/
+        $this->initMeetingTrack();
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();

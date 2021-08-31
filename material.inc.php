@@ -100,3 +100,13 @@ $this->EFFECTS = [
   5 => new Effect([5, 5], [-23]),
   6 => new Effect([0, 0, 0], [-107], 2),
 ];
+
+$this->MEETING_SPOT_BY_COLOR = [
+  1 => 5,
+  2 => 2,
+  3 => 4,
+  4 => 1,
+  5 => 3,
+];
+
+$this->SCORE_TRACK_REROLLS = [0, 1, 2, 3, 4, 5, 7, 9, 11, 13, 16, 19, 22, 26, 31, 36, 44, 52];

@@ -81,8 +81,8 @@ trait StateTrait {
             'player_name' => $this->getPlayerName($newFirstPlayer),
         ]);
 
-        if (intval($this->companions->countCardInLocation('deck')) == 0 || intval($this->getGameStateValue(DAY)) == 8) {
-            $this->gamestate->nextState('endGame');
+        if (intval($this->companions->countCardInLocation('deck')) == 0 || intval($this->getGameStateValue(DAY)) >= 8) {
+            $this->gamestate->nextState('endScore');
         } else {
             $this->gamestate->nextState('newRound');
         }
@@ -181,6 +181,6 @@ trait StateTrait {
         // Tie
         self::DbQuery("UPDATE player SET `player_score_aux` = `player_rerolls`");
 
-        die('test ends here !');
+        $this->gamestate->nextState('endGame');
     }
 }

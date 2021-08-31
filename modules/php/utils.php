@@ -41,6 +41,12 @@ trait UtilTrait {
         self::DbQuery($sql);
     }
 
+    function persistDice(array $dice) {
+        foreach($dice as $idie) {
+            self::DbQuery("UPDATE dice SET `die_face` = $idie->face WHERE `die_id` = $idie->id");
+        }
+    }
+
     function getAdventurerFromDb($dbObject) {
         if (!$dbObject || !array_key_exists('id', $dbObject)) {
             throw new BgaSystemException("Adventurer doesn't exists ".json_encode($dbObject));
@@ -63,10 +69,25 @@ trait UtilTrait {
         return array_map(function($dbObject) { return $this->getCompanionFromDb($dbObject); }, array_values($dbObjects));
     }
     
-    function getDiceByColorAndSize(int $color, bool $small = false, int $limit = 0) {
+    function getSmallDiceIgnoreBlack() {
+        $sql = "SELECT * FROM dice WHERE `small` = true and `color` <> 8";
+        $dbDices = self::getCollectionFromDB($sql);
+        return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices));
+    }
+    
+    function getDiceByColorAndSize(int $color = 0, bool $small = false, int $limit = 0) {
         $sql = "SELECT * FROM dice WHERE `color` = $color AND `small` = ".json_encode($small);
         if ($limit > 0) {
             $sql .= " LIMIT $limit";
+        }
+        $dbDices = self::getCollectionFromDB($sql);
+        return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices));
+    }
+    
+    function getDiceByLocation(string $location, $locationArg = null) {
+        $sql = "SELECT * FROM dice WHERE `location` = '$locationArg'";
+        if ($locationArg !== null) {
+            $sql .= " AND `location_arg` = $locationArg";
         }
         $dbDices = self::getCollectionFromDB($sql);
         return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices));
@@ -78,9 +99,9 @@ trait UtilTrait {
         return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices))[0];
     }
 
-    function moveDiceToPlayer(array $dice, int $playerId) {
+    function moveDice(array $dice, string $location, int $locationArg) {
         $ids = array_map(function ($idie) { return $idie->id; }, $dice);
-        self::DbQuery("UPDATE dice SET `location` = 'player', `location_arg` = $playerId WHERE `die_id` IN (".implode(',', $ids).")");
+        self::DbQuery("UPDATE dice SET `location` = '$location', `location_arg` = $locationArg WHERE `die_id` IN (".implode(',', $ids).")");
     }
 
     function getPlayerCount() {
@@ -185,4 +206,31 @@ trait UtilTrait {
             $this->companions->pickCardForLocation('deck', 'meeting', $i);
         }
     }
+
+    function initMeetingTrack() {
+        $smallDice = $this->getSmallDiceIgnoreBlack();
+
+        // rolls the 9 small dice
+        foreach($smallDice as &$idie) {
+            $idie->roll();
+
+            // If the purple die indicates the footprint symbol, it is rerolled
+            while ($idie->color === 6 && $idie->face === 6) {
+                $idie->roll();
+            }
+        }
+
+        for ($i=1; $i<=5; $i++) {
+            $colorDice = array_values(array_filter($smallDice, function ($idie) use ($i) { return $idie->color === $i; }));
+            if (count($colorDice) > 0) {
+                $this->moveDice($colorDice, 'meeting', $this->MEETING_SPOT_BY_COLOR[$i]);
+            } else {
+                // add footprint if no die on track
+            }
+        }
+         $this->persistDice($smallDice);
+    }
+
+
+        
 }

@@ -26,10 +26,17 @@ trait ArgsTrait {
         $companions = [];
         $companions[0] = null;
 
+        $dice = $this->getDiceByLocation('meeting');
+
         for ($i=1;$i<=5;$i++) {
-            $companions[$i] = new stdClass();
             $companionsFromDb = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting', $i));
-            $companions[$i]->companion = count($companionsFromDb) > 0 ? $companionsFromDb[0] : null;
+            $companion = count($companionsFromDb) > 0 ? $companionsFromDb[0] : null;
+
+            $spotDice = array_values(array_filter($dice, function($idie) use ($i) { return $idie->location_arg === $i; }));
+
+            $footprints = 0; // TODO
+
+            $companions[$i] = new MeetingTrackSpot($companion, $spotDice, $footprints);
         }
 
         return [
@@ -42,9 +49,9 @@ trait ArgsTrait {
         $companions[0] = null;
         
         for ($i=1;$i<=5;$i++) {
-            $companions[$i] = new stdClass();
             $companionsFromDb = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting', $i));
-            $companions[$i]->companion = count($companionsFromDb) > 0 ? $companionsFromDb[0] : null;
+            $companion = count($companionsFromDb) > 0 ? $companionsFromDb[0] : null;
+            $companions[$i] = new MeetingTrackSpot($companion);
         }
 
         return [

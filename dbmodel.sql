@@ -20,7 +20,7 @@
 
 CREATE TABLE IF NOT EXISTS `dice` (
   `die_id` TINYINT unsigned NOT NULL AUTO_INCREMENT,
-  `die_value` TINYINT unsigned NOT NULL DEFAULT 0,
+  `die_face` TINYINT unsigned NOT NULL DEFAULT 0,
   `color` TINYINT unsigned NOT NULL DEFAULT 0,
   `small` TINYINT unsigned NOT NULL DEFAULT false,
   `location` varchar(16) NOT NULL DEFAULT 'deck',

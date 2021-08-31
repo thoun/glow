@@ -226,7 +226,7 @@ $gameGameStates = [
         "action" => "stEndRound",
         "transitions" => [ 
             "newRound" => ST_START_ROUND,
-            "endGame" => ST_END_SCORE
+            "endScore" => ST_END_SCORE
         ],
     ],
 
