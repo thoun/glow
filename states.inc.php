@@ -209,7 +209,7 @@ $gameGameStates = [
         ],
     ],
 
-    ST_END_RECRUIT => [
+    ST_END_RECRUIT => [ // it's also here dice are rolled
         "name" => "endRecruit",
         "description" => "",
         "type" => "game",

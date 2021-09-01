@@ -51,6 +51,8 @@ function setupCompanionCards(companionsStock) {
     for (var subType = 1; subType <= 46; subType++) {
         companionsStock.addItemType(subType, 0, cardsurl, subType + (subType > 23 ? 1 : 0));
     }
+    companionsStock.addItemType(1001, 0, cardsurl, 0);
+    companionsStock.addItemType(1002, 0, cardsurl, 24);
 }
 function getMachineTooltip(type) {
     switch (type) {
@@ -199,7 +201,13 @@ var MeetingTrack = /** @class */ (function () {
         this.game = game;
         this.companionsStocks = [];
         var _loop_1 = function (i) {
-            var html = "\n                <div id=\"meeting-track-dice-" + i + "\" class=\"meeting-track-dice\" style=\"left: " + (490 + 243 * (i - 1)) + "px;\"></div>\n                <div id=\"meeting-track-companion-" + i + "\" class=\"meeting-track-stock\" style=\"left: " + (490 + 243 * (i - 1)) + "px;\"></div>\n            ";
+            var html = '';
+            var cemetery = i === 0;
+            if (!cemetery) {
+                html += "<div id=\"meeting-track-dice-" + i + "\" class=\"meeting-track-dice\" style=\"left: " + (490 + 243 * (i - 1)) + "px;\"></div>";
+            }
+            var left = cemetery ? 200 : 490 + 243 * (i - 1);
+            html += "<div id=\"meeting-track-companion-" + i + "\" class=\"meeting-track-stock\" style=\"left: " + left + "px;\"></div>";
             dojo.place(html, 'meeting-track');
             var spot = meetingTrackSpot[i];
             this_1.companionsStocks[i] = new ebg.stock();
@@ -209,13 +217,20 @@ var MeetingTrack = /** @class */ (function () {
             this_1.companionsStocks[i].setSelectionMode(0);
             dojo.connect(this_1.companionsStocks[i], 'onChangeSelection', this_1, function () { return _this.game.selectMeetingTrackCompanion(i); });
             setupCompanionCards(this_1.companionsStocks[i]);
-            if (spot.companion) {
-                this_1.companionsStocks[i].addToStockWithId(spot.companion.subType, '' + spot.companion.id);
+            if (cemetery) {
+                // TODO show last companion on cemetery back
+                //this.companionsStocks[i].addToStockWithId(1001, '1');
+                //this.companionsStocks[i].addToStockWithId(1002, '2');
             }
-            this_1.placeSmallDice(spot.dice);
+            else {
+                if (spot.companion) {
+                    this_1.companionsStocks[i].addToStockWithId(spot.companion.subType, '' + spot.companion.id);
+                }
+                this_1.placeSmallDice(spot.dice);
+            }
         };
         var this_1 = this;
-        for (var i = 1; i <= 5; i++) {
+        for (var i = 0; i <= 5; i++) {
             _loop_1(i);
         }
     }
@@ -635,16 +650,7 @@ var Glow = /** @class */ (function () {
         if (rollClass === void 0) { rollClass = 'no-roll'; }
         var dieDiv = this.getDieDiv(die);
         if (dieDiv) {
-            var currentValue = Number(dieDiv.dataset.dieValue);
-            if (currentValue != die.face) {
-                dieDiv.classList.remove("die" + currentValue);
-                dieDiv.classList.add("die" + die.face);
-                dieDiv.dataset.dieValue = '' + die.face;
-                var dieList = dieDiv.getElementsByClassName('die-list')[0];
-                if (dieList) {
-                    dieList.classList.add('change-die-roll');
-                }
-            }
+            this.setNewFace(die, true);
             slideToObjectAndAttach(dieDiv, destinationId);
         }
         else {
@@ -654,14 +660,35 @@ var Glow = /** @class */ (function () {
             }
         }
     };
+    Glow.prototype.setNewFace = function (die, addChangeDieRoll) {
+        if (addChangeDieRoll === void 0) { addChangeDieRoll = false; }
+        var dieDiv = this.getDieDiv(die);
+        if (dieDiv) {
+            var currentValue = Number(dieDiv.dataset.dieValue);
+            if (currentValue != die.face) {
+                dieDiv.classList.remove("die" + currentValue);
+                dieDiv.classList.add("die" + die.face);
+                dieDiv.dataset.dieValue = '' + die.face;
+                if (addChangeDieRoll) {
+                    this.addRollToDiv(dieDiv, 'change-die-roll');
+                }
+            }
+        }
+    };
     Glow.prototype.getDieDiv = function (die) {
         return document.getElementById("die" + die.id);
     };
     Glow.prototype.addRollToDiv = function (dieDiv, rollClass, attempt) {
         var _this = this;
         if (attempt === void 0) { attempt = 0; }
+        dieDiv.classList.remove('rolled');
+        if (rollClass === 'odd-roll' || rollClass === 'even-roll') {
+            dieDiv.classList.add('rolled');
+        }
         var dieList = dieDiv.getElementsByClassName('die-list')[0];
         if (dieList) {
+            dieList.dataset.roll = dieDiv.dataset.dieValue;
+            dieList.classList.remove('no-roll');
             dieList.classList.add(rollClass);
         }
         else if (attempt < 5) {
@@ -789,6 +816,7 @@ var Glow = /** @class */ (function () {
             ['removeCompanion', ANIMATION_MS],
             ['removeCompanions', ANIMATION_MS],
             ['replaceSmallDice', ANIMATION_MS],
+            ['diceRolled', ANIMATION_MS],
             ['points', 1],
             ['rerolls', 1],
             ['footprints', 1],
@@ -803,12 +831,14 @@ var Glow = /** @class */ (function () {
         });
     };
     Glow.prototype.notif_chosenAdventurer = function (notif) {
-        this.getPlayerTable(notif.args.playerId).setAdventurer(notif.args.adventurer);
+        var playerTable = this.getPlayerTable(notif.args.playerId);
+        playerTable.setAdventurer(notif.args.adventurer);
+        playerTable.addDice(notif.args.dice);
     };
     Glow.prototype.notif_chosenCompanion = function (notif) {
         var playerTable = this.getPlayerTable(notif.args.playerId);
         playerTable.addCompanion(notif.args.companion, this.meetingTrack.getStock(notif.args.spot));
-        playerTable.addDice(notif.args.dice); // TODO slide
+        playerTable.addDice(notif.args.dice);
         this.meetingTrack.clearFootprintTokens();
     };
     Glow.prototype.notif_removeCompanion = function (notif) {
@@ -845,6 +875,13 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.notif_replaceSmallDice = function (notif) {
         this.meetingTrack.placeSmallDice(notif.args.dice);
+    };
+    Glow.prototype.notif_diceRolled = function (notif) {
+        var _this = this;
+        notif.args.dice.forEach(function (die) {
+            _this.setNewFace(die);
+            _this.addRollToDiv(_this.getDieDiv(die), Math.random() > 0.5 ? 'odd-roll' : 'even-roll');
+        });
     };
     Glow.prototype.notif_lastTurn = function () {
         if (document.getElementById('last-round')) {

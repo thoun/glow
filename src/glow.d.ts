@@ -150,6 +150,6 @@ interface NotifFirefliesArgs {
     fireflies: number;
 }
 
-interface NotifReplaceSmallDiceArgs {
+interface NotifDiceUpdateArgs {
     dice: Die[];
 }

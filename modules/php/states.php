@@ -53,6 +53,8 @@ trait StateTrait {
 
         self::notifyAllPlayers('removeCompanions', '', []);
 
+        $this->rollPlayerDice();
+
         $this->gamestate->nextState('');
     }
 

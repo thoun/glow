@@ -39,6 +39,9 @@ function setupCompanionCards(companionsStock: Stock) {
             subType + (subType > 23 ? 1 : 0)
         );
     }
+
+    companionsStock.addItemType(1001,  0, cardsurl, 0);
+    companionsStock.addItemType(1002,  0, cardsurl, 24);
 }
 
 function getMachineTooltip(type: number) {

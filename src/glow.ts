@@ -421,16 +421,7 @@ class Glow implements GlowGame {
         const dieDiv = this.getDieDiv(die);
 
         if (dieDiv) {
-            const currentValue = Number(dieDiv.dataset.dieValue);
-            if (currentValue != die.face) {
-                dieDiv.classList.remove(`die${currentValue}`);
-                dieDiv.classList.add(`die${die.face}`);
-                dieDiv.dataset.dieValue = ''+die.face;
-                const dieList = dieDiv.getElementsByClassName('die-list')[0];
-                if (dieList) {
-                    dieList.classList.add('change-die-roll');
-                }
-            }
+            this.setNewFace(die, true);
 
             slideToObjectAndAttach(dieDiv, destinationId);
         } else {
@@ -441,13 +432,37 @@ class Glow implements GlowGame {
         }
     }
 
+    private setNewFace(die: Die, addChangeDieRoll: boolean = false) {
+        const dieDiv = this.getDieDiv(die);
+
+        if (dieDiv) {
+            const currentValue = Number(dieDiv.dataset.dieValue);
+            if (currentValue != die.face) {
+                dieDiv.classList.remove(`die${currentValue}`);
+                dieDiv.classList.add(`die${die.face}`);
+                dieDiv.dataset.dieValue = ''+die.face;
+
+                if (addChangeDieRoll) {
+                    this.addRollToDiv(dieDiv, 'change-die-roll');
+                }
+            }
+        }
+    }
+
     private getDieDiv(die: Die): HTMLDivElement {
         return document.getElementById(`die${die.id}`) as HTMLDivElement;
     }
 
     private addRollToDiv(dieDiv: HTMLDivElement, rollClass: string, attempt: number = 0) {
-        const dieList = dieDiv.getElementsByClassName('die-list')[0];
+        dieDiv.classList.remove('rolled');
+        if (rollClass === 'odd-roll' || rollClass ==='even-roll') {
+            dieDiv.classList.add('rolled');
+        }
+
+        const dieList = dieDiv.getElementsByClassName('die-list')[0] as HTMLDivElement;
         if (dieList) {
+            dieList.dataset.roll = dieDiv.dataset.dieValue;
+            dieList.classList.remove('no-roll');
             dieList.classList.add(rollClass);
         } else if (attempt < 5) {
             setTimeout(() => this.addRollToDiv(dieDiv, rollClass, attempt + 1), 200); 
@@ -595,6 +610,7 @@ class Glow implements GlowGame {
             ['removeCompanion', ANIMATION_MS],
             ['removeCompanions', ANIMATION_MS],
             ['replaceSmallDice', ANIMATION_MS],
+            ['diceRolled', ANIMATION_MS],
             ['points', 1],
             ['rerolls', 1],
             ['footprints', 1],
@@ -612,13 +628,15 @@ class Glow implements GlowGame {
 
 
     notif_chosenAdventurer(notif: Notif<NotifChosenAdventurerArgs>) {
-        this.getPlayerTable(notif.args.playerId).setAdventurer(notif.args.adventurer);
+        const playerTable = this.getPlayerTable(notif.args.playerId);
+        playerTable.setAdventurer(notif.args.adventurer);
+        playerTable.addDice(notif.args.dice);
     }
 
     notif_chosenCompanion(notif: Notif<NotifChosenCompanionArgs>) {
         const playerTable = this.getPlayerTable(notif.args.playerId);
         playerTable.addCompanion(notif.args.companion, this.meetingTrack.getStock(notif.args.spot));
-        playerTable.addDice(notif.args.dice); // TODO slide
+        playerTable.addDice(notif.args.dice);
         this.meetingTrack.clearFootprintTokens();
     }
 
@@ -661,10 +679,16 @@ class Glow implements GlowGame {
         }
     }
 
-    notif_replaceSmallDice(notif: Notif<NotifReplaceSmallDiceArgs>) {
+    notif_replaceSmallDice(notif: Notif<NotifDiceUpdateArgs>) {
         this.meetingTrack.placeSmallDice(notif.args.dice);
     }
 
+    notif_diceRolled(notif: Notif<NotifDiceUpdateArgs>) {
+        notif.args.dice.forEach(die => {
+            this.setNewFace(die);
+            this.addRollToDiv(this.getDieDiv(die), Math.random() > 0.5 ? 'odd-roll' : 'even-roll');
+        });
+    }
 
     notif_lastTurn() {
         if (document.getElementById('last-round')) {

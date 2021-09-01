@@ -15,11 +15,15 @@ class MeetingTrack {
         meetingTrackSpot: MeetingTrackSpot[],
     ) {
 
-        for (let i=1; i<=5; i++) {
-            let html = `
-                <div id="meeting-track-dice-${i}" class="meeting-track-dice" style="left: ${490 + 243*(i-1)}px;"></div>
-                <div id="meeting-track-companion-${i}" class="meeting-track-stock" style="left: ${490 + 243*(i-1)}px;"></div>
-            `;
+        for (let i=0; i<=5; i++) {
+            let html = '';
+            const cemetery = i === 0;
+            
+            if (!cemetery) {
+                html += `<div id="meeting-track-dice-${i}" class="meeting-track-dice" style="left: ${490 + 243*(i-1)}px;"></div>`
+            }
+            const left = cemetery ? 200 : 490 + 243*(i-1);
+            html += `<div id="meeting-track-companion-${i}" class="meeting-track-stock" style="left: ${left}px;"></div>`;
 
             dojo.place(html, 'meeting-track');
 
@@ -34,11 +38,17 @@ class MeetingTrack {
 
             setupCompanionCards(this.companionsStocks[i]);
     
-            if (spot.companion) {
-                this.companionsStocks[i].addToStockWithId(spot.companion.subType, ''+spot.companion.id);
-            }
+            if (cemetery) {
+                // TODO show last companion on cemetery back
+                //this.companionsStocks[i].addToStockWithId(1001, '1');
+                //this.companionsStocks[i].addToStockWithId(1002, '2');
+            } else {
+                if (spot.companion) {
+                    this.companionsStocks[i].addToStockWithId(spot.companion.subType, ''+spot.companion.id);
+                }
 
-            this.placeSmallDice(spot.dice);
+                this.placeSmallDice(spot.dice);
+            }
         }
     }
     

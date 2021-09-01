@@ -25,17 +25,19 @@ trait UtilTrait {
     }
 
     function createDice() {
-        $sql = "INSERT INTO dice (`color`, `small`) VALUES ";
+        $sql = "INSERT INTO dice (`color`, `small`, `die_face`) VALUES ";
         $values = [];
         foreach($this->DICES as $color => $counts) {
+            $face = min($color, 6);
+
             // big
             for ($i=0; $i<$counts[0]; $i++) {
-                $values[] = "($color, false)";
+                $values[] = "($color, false, $face)";
             }
 
             // small
             for ($i=0; $i<$counts[1]; $i++) {
-                $values[] = "($color, true)";
+                $values[] = "($color, true, $face)";
             }
         }
         $sql .= implode($values, ',');
@@ -242,6 +244,8 @@ trait UtilTrait {
     }
 
     function initMeetingTrackSmallDice() {
+        self::DbQuery("INSERT INTO meetingtrack (`spot`, `footprints`) VALUES (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)");
+
         $smallDice = $this->getSmallDice(true);
 
         // rolls the 9 small dice
@@ -286,10 +290,24 @@ trait UtilTrait {
                 $footprints = 1;
             }
 
-            self::DbQuery("INSERT INTO meetingtrack (`spot`, `footprints`) VALUES ($i, $footprints)");
+            self::DbQuery("UPDATE meetingtrack SET `footprints` = `footprints` + $footprints WHERE `spot` = $i");
         }
 
         $this->persistDice($smallDice);
+    }
+
+    function rollPlayerDice() {
+        $dice = $this->getDiceByLocation('player');
+
+        foreach($dice as &$idie) {
+            $idie->roll();
+        }
+
+        $this->persistDice($dice);
+
+        self::notifyAllPlayers('diceRolled', '', [
+            'dice' => $dice,
+        ]);
     }
         
 }
