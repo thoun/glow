@@ -1,3 +1,12 @@
+const MEETING_SPOT_BY_COLOR = [
+    null,
+    5,
+    2,
+    4,
+    1,
+    3,
+  ];
+
 class MeetingTrack {
     private companionsStocks: Stock[] = [];
 
@@ -29,9 +38,7 @@ class MeetingTrack {
                 this.companionsStocks[i].addToStockWithId(spot.companion.subType, ''+spot.companion.id);
             }
 
-            spot.dice.forEach(die => {
-                this.game.createOrMoveDie(die, `meeting-track-dice-${i}`);
-            });
+            this.placeSmallDice(spot.dice);
         }
     }
     
@@ -76,5 +83,11 @@ class MeetingTrack {
 
     public clearFootprintTokens() {
         // TODO
+    }
+    
+    public placeSmallDice(dice: Die[]) {
+        dice.forEach(die => {
+            this.game.createOrMoveDie(die, `meeting-track-dice-${MEETING_SPOT_BY_COLOR[die.color]}`);
+        });
     }
 }

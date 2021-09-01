@@ -421,6 +421,17 @@ class Glow implements GlowGame {
         const dieDiv = this.getDieDiv(die);
 
         if (dieDiv) {
+            const currentValue = Number(dieDiv.dataset.dieValue);
+            if (currentValue != die.face) {
+                dieDiv.classList.remove(`die${currentValue}`);
+                dieDiv.classList.add(`die${die.face}`);
+                dieDiv.dataset.dieValue = ''+die.face;
+                const dieList = dieDiv.getElementsByClassName('die-list')[0];
+                if (dieList) {
+                    dieList.classList.add('change-die-roll');
+                }
+            }
+
             slideToObjectAndAttach(dieDiv, destinationId);
         } else {
             this.createAndPlaceDieHtml(die, destinationId);
@@ -583,6 +594,7 @@ class Glow implements GlowGame {
             ['chosenCompanion', ANIMATION_MS],
             ['removeCompanion', ANIMATION_MS],
             ['removeCompanions', ANIMATION_MS],
+            ['replaceSmallDice', ANIMATION_MS],
             ['points', 1],
             ['rerolls', 1],
             ['footprints', 1],
@@ -648,6 +660,11 @@ class Glow implements GlowGame {
             this.roundCounter.toValue(day);
         }
     }
+
+    notif_replaceSmallDice(notif: Notif<NotifReplaceSmallDiceArgs>) {
+        this.meetingTrack.placeSmallDice(notif.args.dice);
+    }
+
 
     notif_lastTurn() {
         if (document.getElementById('last-round')) {

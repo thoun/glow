@@ -34,7 +34,7 @@ trait UtilTrait {
             }
 
             // small
-            for ($i=0; $i<$counts[0]; $i++) {
+            for ($i=0; $i<$counts[1]; $i++) {
                 $values[] = "($color, true)";
             }
         }
@@ -70,8 +70,11 @@ trait UtilTrait {
         return array_map(function($dbObject) { return $this->getCompanionFromDb($dbObject); }, array_values($dbObjects));
     }
     
-    function getSmallDiceIgnoreBlack() {
-        $sql = "SELECT * FROM dice WHERE `small` = true and `color` <> 8";
+    function getSmallDice(bool $ignoreBlack) {
+        $sql = "SELECT * FROM dice WHERE `small` = true ";
+        if ($ignoreBlack) {
+            $sql .= " AND `color` <> 8";
+        } 
         $dbDices = self::getCollectionFromDB($sql);
         return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices));
     }
@@ -96,6 +99,12 @@ trait UtilTrait {
 
     function getDieById(int $id) {
         $sql = "SELECT * FROM dice WHERE `die_id` = $id";
+        $dbDices = self::getCollectionFromDB($sql);
+        return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices))[0];
+    }
+
+    function getBlackDie() {
+        $sql = "SELECT * FROM dice WHERE `color` = 8";
         $dbDices = self::getCollectionFromDB($sql);
         return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices))[0];
     }
@@ -218,14 +227,22 @@ trait UtilTrait {
         $this->effects->createCards($effects, 'deck');
     }
 
+    function getMeetingTrackFootprints(int $spot) {
+        return intval(self::getUniqueValueFromDB("SELECT `footprints` FROM meetingtrack WHERE `spot` = $spot"));
+    }
+
+    function removeMeetingTrackFootprints(int $spot) {
+        self::DbQuery("UPDATE meetingtrack SET `footprints` = 0 WHERE `spot` = $spot");
+    }
+
     function placeCompanionsOnMeetingTrack() {
         for ($i=1;$i<=5;$i++) {
             $this->companions->pickCardForLocation('deck', 'meeting', $i);
         }
     }
 
-    function initMeetingTrack() {
-        $smallDice = $this->getSmallDiceIgnoreBlack();
+    function initMeetingTrackSmallDice() {
+        $smallDice = $this->getSmallDice(true);
 
         // rolls the 9 small dice
         foreach($smallDice as &$idie) {
@@ -237,6 +254,28 @@ trait UtilTrait {
             }
         }
 
+        $this->moveSmallDiceToMeetingTrack($smallDice);
+    }
+    
+    function replaceSmallDiceOnMeetingTrack() {
+        $isBlackDieDeck = $this->getBlackDie()->location === 'deck';
+        $smallDice = $this->getSmallDice($isBlackDieDeck);
+
+        // If a die indicates a -2 burst of light or a footprint symbol, it must be rerolled until it indicates a color
+        foreach($smallDice as &$idie) {
+            while ($idie->value > 6 || $idie->value < 0) {
+                $idie->roll();
+            }
+        }
+
+        $this->moveSmallDiceToMeetingTrack($smallDice);
+
+        self::notifyAllPlayers('replaceSmallDice', '', [
+            'dice' => $smallDice,
+        ]);
+    }
+
+    private function moveSmallDiceToMeetingTrack(array $smallDice) {
         for ($i=1; $i<=5; $i++) {
             $colorDice = array_values(array_filter($smallDice, function ($idie) use ($i) { return $idie->color === $i; }));
             $footprints = 0;
@@ -249,15 +288,8 @@ trait UtilTrait {
 
             self::DbQuery("INSERT INTO meetingtrack (`spot`, `footprints`) VALUES ($i, $footprints)");
         }
-         $this->persistDice($smallDice);
-    }
 
-    function getMeetingTrackFootprints(int $spot) {
-        return intval(self::getUniqueValueFromDB("SELECT `footprints` FROM meetingtrack WHERE `spot` = $spot"));
-    }
-
-    function removeMeetingTrackFootprints(int $spot) {
-        self::DbQuery("UPDATE meetingtrack SET `footprints` = 0 WHERE `spot` = $spot");
+        $this->persistDice($smallDice);
     }
         
 }

@@ -120,7 +120,7 @@ class Glow extends Table {
         $this->createSpells();
 
         $this->placeCompanionsOnMeetingTrack();
-        $this->initMeetingTrack();
+        $this->initMeetingTrackSmallDice();
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();

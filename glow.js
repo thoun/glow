@@ -185,6 +185,14 @@ var Board = /** @class */ (function () {
     };
     return Board;
 }());
+var MEETING_SPOT_BY_COLOR = [
+    null,
+    5,
+    2,
+    4,
+    1,
+    3,
+];
 var MeetingTrack = /** @class */ (function () {
     function MeetingTrack(game, meetingTrackSpot) {
         var _this = this;
@@ -204,9 +212,7 @@ var MeetingTrack = /** @class */ (function () {
             if (spot.companion) {
                 this_1.companionsStocks[i].addToStockWithId(spot.companion.subType, '' + spot.companion.id);
             }
-            spot.dice.forEach(function (die) {
-                _this.game.createOrMoveDie(die, "meeting-track-dice-" + i);
-            });
+            this_1.placeSmallDice(spot.dice);
         };
         var this_1 = this;
         for (var i = 1; i <= 5; i++) {
@@ -247,6 +253,12 @@ var MeetingTrack = /** @class */ (function () {
     };
     MeetingTrack.prototype.clearFootprintTokens = function () {
         // TODO
+    };
+    MeetingTrack.prototype.placeSmallDice = function (dice) {
+        var _this = this;
+        dice.forEach(function (die) {
+            _this.game.createOrMoveDie(die, "meeting-track-dice-" + MEETING_SPOT_BY_COLOR[die.color]);
+        });
     };
     return MeetingTrack;
 }());
@@ -623,6 +635,16 @@ var Glow = /** @class */ (function () {
         if (rollClass === void 0) { rollClass = 'no-roll'; }
         var dieDiv = this.getDieDiv(die);
         if (dieDiv) {
+            var currentValue = Number(dieDiv.dataset.dieValue);
+            if (currentValue != die.face) {
+                dieDiv.classList.remove("die" + currentValue);
+                dieDiv.classList.add("die" + die.face);
+                dieDiv.dataset.dieValue = '' + die.face;
+                var dieList = dieDiv.getElementsByClassName('die-list')[0];
+                if (dieList) {
+                    dieList.classList.add('change-die-roll');
+                }
+            }
             slideToObjectAndAttach(dieDiv, destinationId);
         }
         else {
@@ -766,6 +788,7 @@ var Glow = /** @class */ (function () {
             ['chosenCompanion', ANIMATION_MS],
             ['removeCompanion', ANIMATION_MS],
             ['removeCompanions', ANIMATION_MS],
+            ['replaceSmallDice', ANIMATION_MS],
             ['points', 1],
             ['rerolls', 1],
             ['footprints', 1],
@@ -819,6 +842,9 @@ var Glow = /** @class */ (function () {
         else {
             this.roundCounter.toValue(day);
         }
+    };
+    Glow.prototype.notif_replaceSmallDice = function (notif) {
+        this.meetingTrack.placeSmallDice(notif.args.dice);
     };
     Glow.prototype.notif_lastTurn = function () {
         if (document.getElementById('last-round')) {

@@ -149,3 +149,7 @@ interface NotifFirefliesArgs {
     playerId: number;
     fireflies: number;
 }
+
+interface NotifReplaceSmallDiceArgs {
+    dice: Die[];
+}

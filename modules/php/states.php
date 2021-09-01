@@ -71,6 +71,7 @@ trait StateTrait {
     function stEndRound() {
 
         $this->placeCompanionsOnMeetingTrack();
+        $this->replaceSmallDiceOnMeetingTrack();
 
         $nextPlayerTable = self::createNextPlayerTable(array_keys(self::loadPlayersBasicInfos()));
         $newFirstPlayer = intval($nextPlayerTable[intval($this->getGameStateValue(FIRST_PLAYER))]);
