@@ -2,6 +2,7 @@ const POINT_CASE_SIZE = 46;
 
 class Board {
     private points = new Map<number, number>();
+    private meeples: Meeple[] = [];
 
     constructor(
         private game: GlowGame, 
@@ -14,8 +15,13 @@ class Board {
             html += `<div id="player-${player.id}-point-marker" class="point-marker" style="background: #${player.color};"></div>`
         );
         dojo.place(html, 'board');
-        players.forEach(player => this.points.set(Number(player.id), Number(player.score)));
+        players.forEach(player => {
+            this.points.set(Number(player.id), Number(player.score));
+            this.meeples.push(...player.meeples);
+        });
         this.movePoints();
+
+        players.forEach(player => this.placeMeeples(player));
     }
 
     public incPoints(playerId: number, points: number) {
@@ -52,5 +58,17 @@ class Board {
     
             markerDiv.style.transform = `translateX(${left + leftShift}px) translateY(${top + topShift}px)`;
         });
+    }
+
+    private placeMeeples(player: GlowPlayer) {
+        player.meeples.forEach(meeple => this.placeMeeple(meeple, player.color));
+    }
+
+    private placeMeeple(meeple: Meeple, color: string) {
+        const x = 122;
+        const y = 754;
+        const shift = this.meeples.filter(m => m.playerId < meeple.playerId || (m.playerId === meeple.playerId && m.position < meeple.position)).length;
+
+        dojo.place(`<div class="token meeple${meeple.type}" style="background-color: #${color}; transform: translate(${x + shift*5 + (meeple.type === 2 ? 50 : 0)}px, ${y + shift*5}px)"></div>`, 'board');
     }
 }

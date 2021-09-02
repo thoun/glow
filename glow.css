@@ -362,6 +362,26 @@
 #board .point-marker.red {
   background-position: 100% 0%;
 }
+#board .token {
+  width: 40px;
+  height: 40px;
+  transition: transform 0.5s linear;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+#board .token.meeple1 {
+  mask: url("img/company.svg") no-repeat center/contain;
+  -webkit-mask: url("img/company.svg") no-repeat center/contain;
+}
+#board .token.meeple2 {
+  mask: url("img/encampment.svg") no-repeat center/contain;
+  -webkit-mask: url("img/encampment.svg") no-repeat center/contain;
+}
+#board .token.meeple0 {
+  mask: url("img/boat.svg") no-repeat center/contain;
+  -webkit-mask: url("img/boat.svg") no-repeat center/contain;
+}
 
 #meeting-track {
   position: relative;

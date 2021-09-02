@@ -24,6 +24,15 @@ interface Die {
     small: boolean;
 }
 
+
+interface Meeple {
+    id: number;
+    playerId: number;
+    type: number;
+    position: number;
+}
+
+
 interface MeetingTrackSpot {
     companion: Companion;
     dice: Die[];
@@ -32,6 +41,7 @@ interface MeetingTrackSpot {
 
 interface GlowPlayer extends Player {
     playerNo: number;
+    meeples: Meeple[];
     adventurer: Adventurer;
     companions: Companion[];
     dice: Die[];

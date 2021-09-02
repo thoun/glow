@@ -115,6 +115,7 @@ class Glow extends Table {
         // TODO: setup the initial game situation here
         
         $this->createDice();
+        $this->createMeeples(array_keys($players));
         $this->createAdventurers();
         $this->createCompanions();
         $this->createSpells();
@@ -173,6 +174,7 @@ class Glow extends Table {
 
         foreach($result['players'] as $playerId => &$player) {
             $player['playerNo'] = intval($player['playerNo']);
+            $player['meeples'] = $this->getPlayerMeeples($playerId);
             $adventurers = $this->getAdventurersFromDb($this->adventurers->getCardsInLocation('player', $playerId));
             $player['adventurer'] = count($adventurers) > 0 ? $adventurers[0] : null;
             $player['companions'] = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));

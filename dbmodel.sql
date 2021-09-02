@@ -28,6 +28,14 @@ CREATE TABLE IF NOT EXISTS `dice` (
   PRIMARY KEY (`die_id`)
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS `meeple` (
+  `id` TINYINT unsigned NOT NULL AUTO_INCREMENT,
+  `player_id` int(11) NOT NULL,
+  `type` TINYINT unsigned NOT NULL,
+  `position` TINYINT unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB;
+
 CREATE TABLE IF NOT EXISTS `meetingtrack` (
   `spot` TINYINT unsigned NOT NULL,
   `footprints` TINYINT unsigned NOT NULL DEFAULT 0,

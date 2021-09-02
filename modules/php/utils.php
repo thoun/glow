@@ -4,6 +4,7 @@ require_once(__DIR__.'/objects/effect.php');
 require_once(__DIR__.'/objects/adventurer.php');
 require_once(__DIR__.'/objects/companion.php');
 require_once(__DIR__.'/objects/dice.php');
+require_once(__DIR__.'/objects/meeple.php');
 require_once(__DIR__.'/objects/meeting-track-spot.php');
 
 trait UtilTrait {
@@ -40,6 +41,7 @@ trait UtilTrait {
                 $values[] = "($color, true, $face)";
             }
         }
+
         $sql .= implode($values, ',');
         self::DbQuery($sql);
     }
@@ -48,6 +50,33 @@ trait UtilTrait {
         foreach($dice as $idie) {
             self::DbQuery("UPDATE dice SET `die_face` = $idie->face WHERE `die_id` = $idie->id");
         }
+    }
+
+    function createMeeples(array $playersIds) {
+        $side = $this->getSide();
+
+        $sql = "INSERT INTO meeple (`player_id`, `type`) VALUES ";
+        $values = [];
+        
+        foreach($playersIds as $playerId) {
+            if ($side === 1) {
+                $values[] = "($playerId, 1)"; // company
+                $values[] = "($playerId, 2)"; // encampment
+            } else if ($side === 2) {
+                for ($i=0; $i<4; $i++) {
+                    $values[] = "($playerId, 0)"; // boat
+                }
+            }
+        }
+
+        $sql .= implode($values, ',');
+        self::DbQuery($sql);
+    }    
+
+    function getPlayerMeeples(int $playerId) {
+        $sql = "SELECT * FROM meeple WHERE `player_id` = $playerId";
+        $dbMeeples = self::getCollectionFromDB($sql);
+        return array_map(function($dbMeeples) { return new Meeple($dbMeeples); }, array_values($dbMeeples));
     }
 
     function getAdventurerFromDb($dbObject) {

@@ -147,14 +147,20 @@ var Board = /** @class */ (function () {
         var _this = this;
         this.game = game;
         this.points = new Map();
+        this.meeples = [];
         var html = '';
         // points
         players.forEach(function (player) {
             return html += "<div id=\"player-" + player.id + "-point-marker\" class=\"point-marker\" style=\"background: #" + player.color + ";\"></div>";
         });
         dojo.place(html, 'board');
-        players.forEach(function (player) { return _this.points.set(Number(player.id), Number(player.score)); });
+        players.forEach(function (player) {
+            var _a;
+            _this.points.set(Number(player.id), Number(player.score));
+            (_a = _this.meeples).push.apply(_a, player.meeples);
+        });
         this.movePoints();
+        players.forEach(function (player) { return _this.placeMeeples(player); });
     }
     Board.prototype.incPoints = function (playerId, points) {
         this.points.set(playerId, this.points.get(playerId) + points);
@@ -184,6 +190,16 @@ var Board = /** @class */ (function () {
             });
             markerDiv.style.transform = "translateX(" + (left + leftShift) + "px) translateY(" + (top + topShift) + "px)";
         });
+    };
+    Board.prototype.placeMeeples = function (player) {
+        var _this = this;
+        player.meeples.forEach(function (meeple) { return _this.placeMeeple(meeple, player.color); });
+    };
+    Board.prototype.placeMeeple = function (meeple, color) {
+        var x = 122;
+        var y = 754;
+        var shift = this.meeples.filter(function (m) { return m.playerId < meeple.playerId || (m.playerId === meeple.playerId && m.position < meeple.position); }).length;
+        dojo.place("<div class=\"token meeple" + meeple.type + "\" style=\"background-color: #" + color + "; transform: translate(" + (x + shift * 5 + (meeple.type === 2 ? 50 : 0)) + "px, " + (y + shift * 5) + "px)\"></div>", 'board');
     };
     return Board;
 }());
