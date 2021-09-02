@@ -13,7 +13,7 @@ class PlayerTable {
         <div id="player-table-${this.playerId}" class="player-table whiteblock" >
             <div class="name-column">
                 <div class="player-name" style="color: #${player.color};">${player.name}</div>
-                <div id="player-table-${this.playerId}-dice"></div>
+                <div id="player-table-${this.playerId}-dice" class="player-table-dice"></div>
             </div>
             <div class="adventurer-and-companions">
                 <div id="player-table-${this.playerId}-adventurer"></div>
@@ -21,7 +21,7 @@ class PlayerTable {
             </div>
         </div>`;
 
-        dojo.place(html, 'playerstables');
+        dojo.place(html, this.playerId === this.game.getPlayerId() ? 'currentplayertable' : 'playerstables');
 
         // adventurer        
 

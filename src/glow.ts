@@ -133,7 +133,7 @@ class Glow implements GlowGame {
     private onEnteringStateChooseAdventurer(args: ChooseAdventurerArgs) {
         const adventurers = args.adventurers;
         if (!document.getElementById('adventurers-stock')) {
-            dojo.place(`<div id="adventurers-stock"></div>`, 'board', 'before');
+            dojo.place(`<div id="adventurers-stock"></div>`, 'currentplayertable', 'before');
             
             this.adventurersStock = new ebg.stock() as Stock;
             this.adventurersStock.create(this, $('adventurers-stock'), CARD_WIDTH, CARD_HEIGHT);

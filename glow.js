@@ -314,8 +314,8 @@ var PlayerTable = /** @class */ (function () {
         var _this = this;
         this.game = game;
         this.playerId = Number(player.id);
-        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock\" >\n            <div class=\"name-column\">\n                <div class=\"player-name\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n                <div id=\"player-table-" + this.playerId + "-dice\"></div>\n            </div>\n            <div class=\"adventurer-and-companions\">\n                <div id=\"player-table-" + this.playerId + "-adventurer\"></div>\n                <div id=\"player-table-" + this.playerId + "-companions\"></div>\n            </div>\n        </div>";
-        dojo.place(html, 'playerstables');
+        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock\" >\n            <div class=\"name-column\">\n                <div class=\"player-name\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n                <div id=\"player-table-" + this.playerId + "-dice\" class=\"player-table-dice\"></div>\n            </div>\n            <div class=\"adventurer-and-companions\">\n                <div id=\"player-table-" + this.playerId + "-adventurer\"></div>\n                <div id=\"player-table-" + this.playerId + "-companions\"></div>\n            </div>\n        </div>";
+        dojo.place(html, this.playerId === this.game.getPlayerId() ? 'currentplayertable' : 'playerstables');
         // adventurer        
         this.adventurerStock = new ebg.stock();
         this.adventurerStock.setSelectionAppearance('class');
@@ -456,7 +456,7 @@ var Glow = /** @class */ (function () {
         var _this = this;
         var adventurers = args.adventurers;
         if (!document.getElementById('adventurers-stock')) {
-            dojo.place("<div id=\"adventurers-stock\"></div>", 'board', 'before');
+            dojo.place("<div id=\"adventurers-stock\"></div>", 'currentplayertable', 'before');
             this.adventurersStock = new ebg.stock();
             this.adventurersStock.create(this, $('adventurers-stock'), CARD_WIDTH, CARD_HEIGHT);
             this.adventurersStock.setSelectionMode(1);

@@ -422,14 +422,17 @@
   border-radius: 50%;
 }
 
-#playerstables .whiteblock {
+#currentplayertable .whiteblock, #playerstables .whiteblock {
   padding: 0;
 }
-#playerstables .player-table .name-column {
+#currentplayertable .player-table .name-column, #playerstables .player-table .name-column {
   position: relative;
   padding: 5px;
 }
-#playerstables .player-table .adventurer-and-companions {
+#currentplayertable .player-table .player-table-dice, #playerstables .player-table .player-table-dice {
+  height: 54px;
+}
+#currentplayertable .player-table .adventurer-and-companions, #playerstables .player-table .adventurer-and-companions {
   display: grid;
   grid-template-columns: 200px auto;
 }

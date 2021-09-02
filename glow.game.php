@@ -24,6 +24,7 @@ require_once('modules/php/utils.php');
 require_once('modules/php/states.php');
 require_once('modules/php/args.php');
 require_once('modules/php/actions.php');
+require_once('modules/php/map.php');
 require_once('modules/php/debug-util.php');
 
 class Glow extends Table {
@@ -31,6 +32,7 @@ class Glow extends Table {
     use ActionTrait;
     use StateTrait;
     use ArgsTrait;
+    use MapTrait;
     use DebugUtilTrait;
 
 	function __construct() {

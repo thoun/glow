@@ -4,7 +4,7 @@
 // 1/5 : color, -1/-5 : forbidden color
 // +1x : fireflies
 // +2x, -2x : footprints
-// 30 : reroll, 33 skull, 34 black die, 35 resurect, 36 spell
+// 30 : reroll, 33 skull, 34 black die, 35 resurect, 36 spell, 37 skull/spell
 // +10x, -10x : points
 
 class Effect {

@@ -135,27 +135,22 @@ trait StateTrait {
                 $points += $companion->points;
             }
 
-            $this->incPlayerScore($playerId, $points, _('${playerName} gains ${points} with adventurer and companions'));
+            $this->incPlayerScore($playerId, $points, _('${playerName} gains ${points} bursts of light with adventurer and companions'));
         }
 
-        // Journey board TODO
+        // Journey board 
         $side = $this->getSide();  
         foreach($playersIds as $playerId) {
-            $points = 0;
+            $points = $this->getMapFinalScore($side, $playerId);
 
+            $message = null;
             if ($side === 1) {
-                /*The Province of Shadows journey
-                Each player moves forward on the score track the number
-                of bursts of light indicated on the village where their
-                encampment is situated, independently of where their
-                company is placed.*/
+                $message = _('${playerName} gains ${points} bursts of light with the village where encampment is situated');
             } else if ($side === 2) {
-                /*The Archipelago of Darkness journey
-                Each player adds together the number of bursts of light
-                indicated on the islands on which they have placed their
-                boats. They move forward the corresponding number of
-                spaces on the score track.*/ 
+                $message = _('${playerName} gains ${points} bursts of light with boats placed on islands');
             }
+
+            $this->incPlayerScore($playerId, $points, $message);
         }
 
         // Fireflies
