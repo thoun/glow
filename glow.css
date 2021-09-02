@@ -370,22 +370,36 @@
   background-image: url("img/meeting-track.png");
   margin-bottom: 260px;
 }
-#meeting-track .meeting-track-dice {
+#meeting-track .meeting-track-zone {
   position: absolute;
-  top: 20px;
   width: 142px;
-  height: 150px;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
   align-content: center;
 }
+#meeting-track .meeting-track-zone.dice {
+  top: 20px;
+  height: 100px;
+}
+#meeting-track .meeting-track-zone.footprints {
+  top: 120px;
+  height: 100px;
+}
 #meeting-track .meeting-track-stock {
   position: absolute;
   top: 295px;
   width: 200px;
   height: 250px;
+}
+#meeting-track .footprint-token {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background-image: url("img/footprint-token.png");
+  box-shadow: 0 0 2px 4px white;
+  border-radius: 50%;
 }
 
 #playerstables .whiteblock {

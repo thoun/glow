@@ -204,7 +204,8 @@ var MeetingTrack = /** @class */ (function () {
             var html = '';
             var cemetery = i === 0;
             if (!cemetery) {
-                html += "<div id=\"meeting-track-dice-" + i + "\" class=\"meeting-track-dice\" style=\"left: " + (490 + 243 * (i - 1)) + "px;\"></div>";
+                var left_1 = 490 + 243 * (MEETING_SPOT_BY_COLOR[i] - 1);
+                html += "<div id=\"meeting-track-dice-" + i + "\" class=\"meeting-track-zone dice\" style=\"left: " + left_1 + "px;\"></div>\n                <div id=\"meeting-track-footprints-" + i + "\" class=\"meeting-track-zone footprints\" style=\"left: " + left_1 + "px;\"></div>";
             }
             var left = cemetery ? 200 : 490 + 243 * (i - 1);
             html += "<div id=\"meeting-track-companion-" + i + "\" class=\"meeting-track-stock\" style=\"left: " + left + "px;\"></div>";
@@ -226,12 +227,16 @@ var MeetingTrack = /** @class */ (function () {
                 if (spot.companion) {
                     this_1.companionsStocks[i].addToStockWithId(spot.companion.subType, '' + spot.companion.id);
                 }
-                this_1.placeSmallDice(spot.dice);
+                this_1.setFootprintTokens(i, spot.footprints);
             }
         };
         var this_1 = this;
         for (var i = 0; i <= 5; i++) {
             _loop_1(i);
+        }
+        for (var i = 1; i <= 5; i++) {
+            var spot = meetingTrackSpot[i];
+            this.placeSmallDice(spot.dice);
         }
     }
     MeetingTrack.prototype.setCompanion = function (meetingTrackSpot, spot) {
@@ -266,13 +271,24 @@ var MeetingTrack = /** @class */ (function () {
     MeetingTrack.prototype.getStock = function (spot) {
         return this.companionsStocks[spot];
     };
-    MeetingTrack.prototype.clearFootprintTokens = function () {
-        // TODO
+    MeetingTrack.prototype.setFootprintTokens = function (spot, number) {
+        var zone = document.getElementById("meeting-track-footprints-" + spot);
+        while (zone.childElementCount > number) {
+            zone.removeChild(zone.lastChild);
+        }
+        for (var i = zone.childElementCount; i < number; i++) {
+            dojo.place("<div class=\"footprint-token\"></div>", zone.id);
+        }
+    };
+    MeetingTrack.prototype.clearFootprintTokens = function (spot, toPlayer) {
+        var _this = this;
+        var zone = document.getElementById("meeting-track-footprints-" + spot);
+        Array.from(zone.children).forEach(function (tokenDiv) { return _this.game.slideToObjectAndDestroy(tokenDiv, "footprint-counter-" + toPlayer); });
     };
     MeetingTrack.prototype.placeSmallDice = function (dice) {
         var _this = this;
         dice.forEach(function (die) {
-            _this.game.createOrMoveDie(die, "meeting-track-dice-" + MEETING_SPOT_BY_COLOR[die.color]);
+            _this.game.createOrMoveDie(die, "meeting-track-dice-" + die.value);
         });
     };
     return MeetingTrack;
@@ -644,6 +660,7 @@ var Glow = /** @class */ (function () {
         // security to destroy pre-existing die with same id
         //const dieDiv = document.getElementById(`die${die.id}`);
         //dieDiv?.parentNode.removeChild(dieDiv);
+        console.log(html, destinationId);
         dojo.place(html, destinationId);
     };
     Glow.prototype.createOrMoveDie = function (die, destinationId, rollClass) {
@@ -839,7 +856,7 @@ var Glow = /** @class */ (function () {
         var playerTable = this.getPlayerTable(notif.args.playerId);
         playerTable.addCompanion(notif.args.companion, this.meetingTrack.getStock(notif.args.spot));
         playerTable.addDice(notif.args.dice);
-        this.meetingTrack.clearFootprintTokens();
+        this.meetingTrack.clearFootprintTokens(notif.args.spot, notif.args.playerId);
     };
     Glow.prototype.notif_removeCompanion = function (notif) {
         this.meetingTrack.removeCompanion(notif.args.spot);

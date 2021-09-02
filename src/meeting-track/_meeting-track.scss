@@ -5,16 +5,24 @@
   background-image: url('img/meeting-track.png'); 
   margin-bottom: 260px; 
 
-  .meeting-track-dice {
+  .meeting-track-zone {
     position: absolute;
-    top: 20px;
     width: 142px;
-    height: 150px;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
     align-content: center;
+
+    &.dice {      
+      top: 20px;
+      height: 100px;
+    }
+
+    &.footprints {      
+      top: 120px;
+      height: 100px;
+    }
   }
 
   .meeting-track-stock {
@@ -22,5 +30,14 @@
     top: 295px;
     width: 200px;
     height: 250px;
+  }
+
+  .footprint-token {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background-image: url('img/footprint-token.png');
+    box-shadow: 0 0 2px 4px white;
+    border-radius: 50%;
   }
 }

@@ -20,7 +20,9 @@ class MeetingTrack {
             const cemetery = i === 0;
             
             if (!cemetery) {
-                html += `<div id="meeting-track-dice-${i}" class="meeting-track-dice" style="left: ${490 + 243*(i-1)}px;"></div>`
+                const left = 490 + 243*(MEETING_SPOT_BY_COLOR[i]-1);
+                html += `<div id="meeting-track-dice-${i}" class="meeting-track-zone dice" style="left: ${left}px;"></div>
+                <div id="meeting-track-footprints-${i}" class="meeting-track-zone footprints" style="left: ${left}px;"></div>`
             }
             const left = cemetery ? 200 : 490 + 243*(i-1);
             html += `<div id="meeting-track-companion-${i}" class="meeting-track-stock" style="left: ${left}px;"></div>`;
@@ -46,9 +48,13 @@ class MeetingTrack {
                 if (spot.companion) {
                     this.companionsStocks[i].addToStockWithId(spot.companion.subType, ''+spot.companion.id);
                 }
-
-                this.placeSmallDice(spot.dice);
+                this.setFootprintTokens(i, spot.footprints);
             }
+        }
+        
+        for (let i=1; i<=5; i++) {
+            const spot = meetingTrackSpot[i];
+            this.placeSmallDice(spot.dice);
         }
     }
     
@@ -91,13 +97,26 @@ class MeetingTrack {
         return this.companionsStocks[spot];
     }
 
-    public clearFootprintTokens() {
-        // TODO
+    public setFootprintTokens(spot: number, number: number) {
+        const zone = document.getElementById(`meeting-track-footprints-${spot}`) as HTMLDivElement;
+        while (zone.childElementCount > number) {
+            zone.removeChild(zone.lastChild);
+        }
+        for (let i = zone.childElementCount; i<number; i++) {
+            dojo.place(`<div class="footprint-token"></div>`, zone.id);
+        }
+    }
+
+    public clearFootprintTokens(spot: number, toPlayer: number) {
+        const zone = document.getElementById(`meeting-track-footprints-${spot}`) as HTMLDivElement;
+        Array.from(zone.children).forEach(
+            tokenDiv => (this.game as any).slideToObjectAndDestroy(tokenDiv, `footprint-counter-${toPlayer}`)
+        );
     }
     
     public placeSmallDice(dice: Die[]) {
         dice.forEach(die => {
-            this.game.createOrMoveDie(die, `meeting-track-dice-${MEETING_SPOT_BY_COLOR[die.color]}`);
+            this.game.createOrMoveDie(die, `meeting-track-dice-${die.value}`);
         });
     }
 }

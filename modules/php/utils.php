@@ -281,7 +281,7 @@ trait UtilTrait {
 
     private function moveSmallDiceToMeetingTrack(array $smallDice) {
         for ($i=1; $i<=5; $i++) {
-            $colorDice = array_values(array_filter($smallDice, function ($idie) use ($i) { return $idie->color === $i; }));
+            $colorDice = array_values(array_filter($smallDice, function ($idie) use ($i) { return $idie->value === $i; }));
             $footprints = 0;
             if (count($colorDice) > 0) {
                 $this->moveDice($colorDice, 'meeting', $this->MEETING_SPOT_BY_COLOR[$i]);

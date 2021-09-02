@@ -413,7 +413,7 @@ class Glow implements GlowGame {
         // security to destroy pre-existing die with same id
         //const dieDiv = document.getElementById(`die${die.id}`);
         //dieDiv?.parentNode.removeChild(dieDiv);
-
+        console.log(html, destinationId);
         dojo.place(html, destinationId);
     }
 
@@ -637,7 +637,7 @@ class Glow implements GlowGame {
         const playerTable = this.getPlayerTable(notif.args.playerId);
         playerTable.addCompanion(notif.args.companion, this.meetingTrack.getStock(notif.args.spot));
         playerTable.addDice(notif.args.dice);
-        this.meetingTrack.clearFootprintTokens();
+        this.meetingTrack.clearFootprintTokens(notif.args.spot, notif.args.playerId);
     }
 
     notif_removeCompanion(notif: Notif<NotifChosenCompanionArgs>) {
