@@ -502,7 +502,7 @@ class Glow implements GlowGame {
             ids.push(`changeDie${i}-button`);
         }
         ids.forEach(id => {
-            const elem = document.getElementById(id);console.log(id, elem);
+            const elem = document.getElementById(id);
             if (elem) {
                 elem.parentElement.removeChild(elem);
             }
@@ -647,6 +647,19 @@ class Glow implements GlowGame {
         this.unselectDice();
         this.diceSelectionActive = active;        
         (Array.from(document.getElementsByClassName('die')) as HTMLElement[]).forEach(node => dojo.toggleClass(node, 'selectable', active));
+    }
+
+    private diceChangedOrRolled(dice: Die[], changed: boolean, args: EnteringRollDiceArgs) {
+        dice.forEach(die => {
+            dojo.removeClass(`die${die.id}`, 'selected');
+            this.setNewFace(die);
+            this.addRollToDiv(this.getDieDiv(die), changed ? 'change-die-roll' : (Math.random() > 0.5 ? 'odd-roll' : 'even-roll'));
+        });
+
+        if (args) {
+            this.rollDiceArgs = args;
+            this.setActionBarRollDice(true);
+        }
     }
 
     private rollDice() {
@@ -810,6 +823,7 @@ class Glow implements GlowGame {
             ['removeCompanions', ANIMATION_MS],
             ['replaceSmallDice', ANIMATION_MS],
             ['diceRolled', ANIMATION_MS],
+            ['diceChanged', ANIMATION_MS],
             ['points', 1],
             ['rerolls', 1],
             ['footprints', 1],
@@ -885,16 +899,11 @@ class Glow implements GlowGame {
     }
 
     notif_diceRolled(notif: Notif<NotifDiceUpdateArgs>) {
-        notif.args.dice.forEach(die => {
-            dojo.removeClass(`die${die.id}`, 'selected');
-            this.setNewFace(die);
-            this.addRollToDiv(this.getDieDiv(die), Math.random() > 0.5 ? 'odd-roll' : 'even-roll');
-        });
+        this.diceChangedOrRolled(notif.args.dice, false, notif.args.args);
+    }
 
-        if (notif.args.args) {
-            this.rollDiceArgs = notif.args.args;
-            this.setActionBarRollDice(true);
-        }
+    notif_diceChanged(notif: Notif<NotifDiceUpdateArgs>) {
+        this.diceChangedOrRolled(notif.args.dice, true, notif.args.args);
     }
 
     notif_lastTurn() {

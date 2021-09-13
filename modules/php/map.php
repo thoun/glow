@@ -47,7 +47,7 @@ trait MapTrait {
     }
 
     function getMapSpot(int $side, int $position) {
-        foreach($this->MAP[$side] as $spot) {
+        foreach($this->MAPS[$side] as $spot) {
             if ($spot->position === $position) {
                 return $spot;
             }
@@ -55,10 +55,10 @@ trait MapTrait {
     }
 
     function getMapSpotPoints(int $side, int $position) {
-        $mapSpot = $this->getMapSpot(1, $poition);
+        $mapSpot = $this->getMapSpot(1, $position);
 
-        $pointEffect = $this->array_find($encampment->effects, function($effect) { return $effect > 100; });
-        if (!$pointEffect !== null) {
+        $pointEffect = $this->array_find($mapSpot->effects, function($effect) { return $effect > 100; });
+        if ($pointEffect !== null) {
             return $pointEffect - 100;
         } else {
             return 0;
@@ -89,7 +89,7 @@ trait MapTrait {
             
             $boats = $this->getPlayerMeeples($playerId, 0);
             foreach($boats as $boat) {
-                $mapSpot = $this->getMapSpot($poition);
+                $mapSpot = $this->getMapSpot($position);
                 $points += $this->getMapSpotPoints($side, $boat->position);
             }
             
@@ -101,7 +101,7 @@ trait MapTrait {
     function getRoutes(int $side, int $position) {
         $routes = [];
 
-        foreach($this->MAP[$side] as $spot) {
+        foreach($this->MAPS[$side] as $spot) {
             if ($spot->position === $position) {
                 $routes = array_merge($routes, $spot->routes);
             } else {

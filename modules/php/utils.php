@@ -382,12 +382,16 @@ trait UtilTrait {
         return $result;
     }
 
+    function getRerollUsed(object $companion) {
+        return boolval(self::getUniqueValueFromDB("SELECT `reroll_used` FROM companion WHERE `card_id` = $companion->id"));
+    }
+
     function getPlayerCompanionRerolls(int $playerId) {
         $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
 
         $rerolls = 0;
         foreach($companions as $companion) {
-            if ($companion->reroll && !$companion->rerollUsed) {
+            if ($companion->reroll && !$this->getRerollUsed($companion)) {
                 $rerolls++;
             }
         }
@@ -405,7 +409,7 @@ trait UtilTrait {
             $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
             $companionsFlagged = 0;
             foreach($companions as $companion) {
-                if ($companion->reroll && !$companion->rerollUsed && $companionsFlagged < $companionsToFlag) {
+                if ($companionsFlagged < $companionsToFlag && $companion->reroll && !$this->getRerollUsed($companion)) {
                     self::DbQuery("UPDATE companion SET `reroll_used` = true WHERE card_id = $companion->id");
                     $companionsFlagged++;
                 }

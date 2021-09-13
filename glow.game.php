@@ -129,7 +129,7 @@ class Glow extends Table {
         $this->activeNextPlayer();
 
         // TODO TEMP card to test
-        // $this->debugSetup();
+        //$this->debugSetup();
 
         /************ End of the game initialization *****/
     }

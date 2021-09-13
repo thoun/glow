@@ -122,8 +122,22 @@ trait ActionTrait {
         $this->rollPlayerDice($ids, $params);
     }
 
-    public function changeDie(int $id, int $value) {
-        
+    public function changeDie(int $id, int $face) {
+        self::checkAction('changeDie');
+
+        $playerId = $this->getCurrentPlayerId();
+
+        $this->applyRollDieCost($playerId, 3);
+
+        $die = $this->getDieById($id);
+        $die->setFace($face);
+
+        $this->persistDice([$die]);
+
+        self::notifyAllPlayers('diceChanged', '', [
+            'dice' => [$die],
+            'args' => $this->argRollDice(),
+        ]);
     }
 
     public function keepDice() {

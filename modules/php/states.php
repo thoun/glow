@@ -143,11 +143,9 @@ trait StateTrait {
                 $points += $companion->fireflies;
             }
 
-            $this->incPlayerScore($playerId, $points, _('${playerName} gains ${points} bursts of light with fireflies'));
-
-            // If they have as many or more fireflies than companions, they score an additional 10 bursts of light.
+            // If they have as many or more fireflies than companions, they score 10 bursts of light.
             if ($points > count($companions)) {
-                $this->incPlayerScore($playerId, 10, _('${playerName} gains additional ${points} bursts of light (more fireflies than companions)'));
+                $this->incPlayerScore($playerId, 10, _('${playerName} gains ${points} bursts of light with fireflies (more fireflies than companions)'));
             }
         }
 

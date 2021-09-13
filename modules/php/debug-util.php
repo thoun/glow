@@ -7,7 +7,7 @@ trait DebugUtilTrait {
 ////////////
 
     function debugSetup() {
-        //self::DbQuery("UPDATE card SET `card_location_arg` = card_location_arg + 200 where `card_type` = 117");
+        self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 200 where `card_type_arg` in (18, 45)");
         //$this->addResource(2343492, 4, 0);
         //$this->debugSetPoints(19);
         $this->debugSkipAdventurers();
@@ -22,7 +22,7 @@ trait DebugUtilTrait {
         foreach(array_keys(self::loadPlayersBasicInfos()) as $playerId) {
             $this->adventurers->pickCardForLocation('deck', 'player', $playerId);
         }
-        //$this->gamestate->jumpToState(ST_NEXT_PLAYER_CHOOSE_ADVENTURER);
+        //$this->gamestate->jumpToState(ST_START_ROUND);
     }
 
     /*private function debugSetPlayerPoints(int $playerId, int $score) {

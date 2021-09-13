@@ -785,7 +785,6 @@ var Glow = /** @class */ (function () {
         }
         ids.forEach(function (id) {
             var elem = document.getElementById(id);
-            console.log(id, elem);
             if (elem) {
                 elem.parentElement.removeChild(elem);
             }
@@ -914,6 +913,18 @@ var Glow = /** @class */ (function () {
         this.unselectDice();
         this.diceSelectionActive = active;
         Array.from(document.getElementsByClassName('die')).forEach(function (node) { return dojo.toggleClass(node, 'selectable', active); });
+    };
+    Glow.prototype.diceChangedOrRolled = function (dice, changed, args) {
+        var _this = this;
+        dice.forEach(function (die) {
+            dojo.removeClass("die" + die.id, 'selected');
+            _this.setNewFace(die);
+            _this.addRollToDiv(_this.getDieDiv(die), changed ? 'change-die-roll' : (Math.random() > 0.5 ? 'odd-roll' : 'even-roll'));
+        });
+        if (args) {
+            this.rollDiceArgs = args;
+            this.setActionBarRollDice(true);
+        }
     };
     Glow.prototype.rollDice = function () {
         if (!this.checkAction('rollDice')) {
@@ -1052,6 +1063,7 @@ var Glow = /** @class */ (function () {
             ['removeCompanions', ANIMATION_MS],
             ['replaceSmallDice', ANIMATION_MS],
             ['diceRolled', ANIMATION_MS],
+            ['diceChanged', ANIMATION_MS],
             ['points', 1],
             ['rerolls', 1],
             ['footprints', 1],
@@ -1114,16 +1126,10 @@ var Glow = /** @class */ (function () {
         this.meetingTrack.placeSmallDice(notif.args.dice);
     };
     Glow.prototype.notif_diceRolled = function (notif) {
-        var _this = this;
-        notif.args.dice.forEach(function (die) {
-            dojo.removeClass("die" + die.id, 'selected');
-            _this.setNewFace(die);
-            _this.addRollToDiv(_this.getDieDiv(die), Math.random() > 0.5 ? 'odd-roll' : 'even-roll');
-        });
-        if (notif.args.args) {
-            this.rollDiceArgs = notif.args.args;
-            this.setActionBarRollDice(true);
-        }
+        this.diceChangedOrRolled(notif.args.dice, false, notif.args.args);
+    };
+    Glow.prototype.notif_diceChanged = function (notif) {
+        this.diceChangedOrRolled(notif.args.dice, true, notif.args.args);
     };
     Glow.prototype.notif_lastTurn = function () {
         if (document.getElementById('last-round')) {
