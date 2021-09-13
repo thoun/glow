@@ -16,6 +16,21 @@
   animation: rolled-die 1s forwards;
   transform: translateY(-40vh);
 }
+.die.selectable {
+  cursor: pointer;
+}
+.die.selectable.selected {
+  box-shadow: 0 0 4px 4px red;
+}
+
+@keyframes selected-dice-animation {
+  100% {
+    box-shadow: 0 0 8px 4px red;
+  }
+}
+.highlight {
+  animation: highlight-animation 0.75s alternate 2;
+}
 
 @keyframes rolled-die {
   100% {
@@ -333,6 +348,11 @@
   transform: rotate3d(1, 0, 0, 180deg) translateZ(1rem);
 }
 
+#generalactions .die-item {
+  width: 36px;
+  height: 36px;
+}
+
 #board {
   position: relative;
   width: 916px;
@@ -585,9 +605,12 @@ html {
   background-position: 0% 0%;
 }
 .icon.footprint {
-  background-position: 50% 0%;
+  background-position: 33.33% 0%;
 }
 .icon.firefly {
+  background-position: 66.66% 0%;
+}
+.icon.point {
   background-position: 100% 0%;
 }
 

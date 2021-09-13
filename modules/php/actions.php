@@ -108,6 +108,24 @@ trait ActionTrait {
         $this->gamestate->nextState('nextPlayer');
     }
 
+    public function rollDice(array $ids) {
+        self::checkAction('rollDice');
+
+        $playerId = $this->getCurrentPlayerId();
+
+        $this->applyRollDieCost($playerId, 1);
+
+        $params = [
+            'args' => $this->argRollDice(),
+        ];
+
+        $this->rollPlayerDice($ids, $params);
+    }
+
+    public function changeDie(int $id, int $value) {
+        
+    }
+
     public function keepDice() {
         self::checkAction('keepDice');
         $this->gamestate->setPlayerNonMultiactive( $this->getCurrentPlayerId(), 'keepDice');

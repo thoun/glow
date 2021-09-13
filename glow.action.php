@@ -68,6 +68,28 @@
 
         self::ajaxResponse();
     }
+
+    public function rollDice() {
+        self::setAjaxMode();     
+
+        $idsStr = explode(',', self::getArg("ids", AT_numberlist, true));
+        $ids = array_map(function($idStr) { return intval($idStr); }, $idsStr);
+        $this->game->rollDice($ids);
+
+        self::ajaxResponse();
+
+    }
+
+    public function changeDie() {
+        self::setAjaxMode();     
+
+        $id = self::getArg('id', AT_posint, true);
+        $value = self::getArg('value', AT_posint, true);
+        $this->game->changeDie($id, $value);
+
+        self::ajaxResponse();
+
+    }
   	
     public function keepDice() {
         self::setAjaxMode();

@@ -9,6 +9,8 @@ declare const board: HTMLDivElement;
 
 const ANIMATION_MS = 500;
 
+const ROLL_DICE_ACTION_BUTTONS_IDS = [`setRollDice-button`, `setChangeDie-button`, `keepDice-button`, `cancelRollDice-button`, `rollDice-button`, `changeDie-button`];
+
 const ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1];
 const ZOOM_LEVELS_MARGIN = [-300, -166, -100, -60, -33, -14, 0];
 const LOCAL_STORAGE_ZOOM_KEY = 'Glow-zoom';
@@ -24,6 +26,11 @@ class Glow implements GlowGame {
     private companionCounter: Counter;
     private roundCounter: Counter;
     private helpDialog: any;
+    private rollDiceArgs: EnteringRollDiceArgs;
+    private selectedDice: Die[] = [];
+    private diceSelectionActive: boolean = false;
+    private originalTextRollDice: string;
+    private isChangeDie: boolean = false;
 
     public adventurersStock: Stock;
     private board: Board;
@@ -115,6 +122,9 @@ class Glow implements GlowGame {
             case 'removeCompanion':
                 this.onEnteringStateRemoveCompanion(args.args);
                 break;
+            case 'rollDice':
+                this.onEnteringStateRollDice();
+                break;
             case 'gameEnd':
                 const lastTurnBar = document.getElementById('last-round');
                 if (lastTurnBar) {
@@ -185,6 +195,10 @@ class Glow implements GlowGame {
         }
     }
 
+    private onEnteringStateRollDice() {
+        this.setDiceSelectionActive(true);
+    }
+
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
@@ -198,6 +212,9 @@ class Glow implements GlowGame {
             case 'recruitCompanion':
                 this.onLeavingRecruitCompanion();
                 break;
+            case 'rollDice':
+                this.onLeavingRollDice();
+                break;
         }
     }
 
@@ -209,22 +226,19 @@ class Glow implements GlowGame {
         this.meetingTrack.setSelectionMode(0);
     }
 
+    onLeavingRollDice() {
+        this.setDiceSelectionActive(false);
+    }
+
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
     //
     public onUpdateActionButtons(stateName: string, args: any) {
-        if((this as any).isCurrentPlayerActive()) {
+        if ((this as any).isCurrentPlayerActive()) {
             switch (stateName) {
                 case 'rollDice':
-                    const rollDiceArgs = args as EnteringRollDiceArgs;
-                    const possibleRerolls = rollDiceArgs.rerollCompanion + rollDiceArgs.rerollTokens + Object.values(rollDiceArgs.rerollScore).length;
-
-                    (this as any).addActionButton(`rollDice-button`, _("Roll 1 or 2 dice") + formatTextIcons(' (1 [reroll] )'), () => this.rollDice());
-                    (this as any).addActionButton(`changeDie-button`, _("Change die face") + formatTextIcons(' (3 [reroll] )'), () => this.changeDie());
-                    (this as any).addActionButton(`keepDice-button`, _("Keep"), () => this.keepDice(), null, null, 'red');
-
-                    dojo.toggleClass(`rollDice-button`, 'disabled', possibleRerolls < 1);
-                    dojo.toggleClass(`changeDie-button`, 'disabled', possibleRerolls < 3);
+                    this.rollDiceArgs = args as EnteringRollDiceArgs;
+                    this.setActionBarRollDice(false);
                     break;
             }
         }
@@ -235,7 +249,6 @@ class Glow implements GlowGame {
 
 
     ///////////////////////////////////////////////////
-    
 
     private setZoom(zoom: number = 1) {
         this.zoom = zoom;
@@ -427,6 +440,8 @@ class Glow implements GlowGame {
         //const dieDiv = document.getElementById(`die${die.id}`);
         //dieDiv?.parentNode.removeChild(dieDiv);
         dojo.place(html, destinationId);
+
+        document.getElementById(`die${die.id}`).addEventListener('click', () => this.onDiceClick(die));
     }
 
     public createOrMoveDie(die: Die, destinationId: string, rollClass: string = 'no-roll') {
@@ -481,12 +496,176 @@ class Glow implements GlowGame {
         }
     }
 
-    private rollDice() {
-
+    private removeRollDiceActionButtons() {
+        const ids = ROLL_DICE_ACTION_BUTTONS_IDS;
+        for (let i=1; i<=6; i++) {
+            ids.push(`changeDie${i}-button`);
+        }
+        ids.forEach(id => {
+            const elem = document.getElementById(id);console.log(id, elem);
+            if (elem) {
+                elem.parentElement.removeChild(elem);
+            }
+        })
     }
     
-    private changeDie() {
+    private setGamestateDescription(property?: string, cost: number = 0) {
+        if (!this.originalTextRollDice) {
+            this.originalTextRollDice = document.getElementById('pagemaintitletext').innerHTML;
+        }
 
+        const originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
+        document.getElementById('pagemaintitletext').innerHTML = property ? 
+            `${originalState['description' + property]}` + this.getRollDiceCost(cost) : 
+            this.originalTextRollDice;
+    }
+    
+    private setActionBarRollDice(fromCancel: boolean) {
+        this.isChangeDie = false;
+        this.removeRollDiceActionButtons();
+        if (fromCancel) {
+            this.setGamestateDescription();
+            this.unselectDice();
+        }
+
+        const possibleRerolls = this.rollDiceArgs.rerollCompanion + this.rollDiceArgs.rerollTokens + Object.values(this.rollDiceArgs.rerollScore).length;
+
+        (this as any).addActionButton(`setRollDice-button`, _("Reroll 1 or 2 dice") + formatTextIcons(' (1 [reroll] )'), () => this.setActionBarSelectRollDice());
+        (this as any).addActionButton(`setChangeDie-button`, _("Change die face") + formatTextIcons(' (3 [reroll] )'), () => this.setActionBarSelectChangeDie());
+        (this as any).addActionButton(`keepDice-button`, _("Keep"), () => this.keepDice(), null, null, 'red');
+
+        dojo.toggleClass(`setRollDice-button`, 'disabled', possibleRerolls < 1);
+        dojo.toggleClass(`setChangeDie-button`, 'disabled', possibleRerolls < 3);
+    }
+    
+
+    private setActionBarSelectRollDice() {
+        this.isChangeDie = false;
+        this.removeRollDiceActionButtons();
+        this.setGamestateDescription(`rollDice`, 1);
+
+        (this as any).addActionButton(`rollDice-button`, _("Reroll selected dice"), () => this.rollDice());
+        (this as any).addActionButton(`cancelRollDice-button`, _("Cancel"), () => this.setActionBarRollDice(true));
+
+        dojo.toggleClass(`rollDice-button`, 'disabled', this.selectedDice.length < 1 || this.selectedDice.length > 2);
+    }
+    
+    private setActionBarSelectChangeDie() {
+        this.isChangeDie = true;
+        this.removeRollDiceActionButtons();
+        this.setGamestateDescription(`changeDie`, 3);
+
+        (this as any).addActionButton(`cancelRollDice-button`, _("Cancel"), () => this.setActionBarRollDice(true));
+
+        if (this.selectedDice.length === 1) {
+            this.onSelectedDiceChange();
+        }
+    }
+
+    private getRollDiceCost(cost: number) {
+        let tokenCost = 0;
+        let scoreCost = 0;
+        let remainingCost = cost;
+
+        if (remainingCost > 0 && this.rollDiceArgs.rerollCompanion > 0) {
+            remainingCost = Math.max(0, remainingCost - this.rollDiceArgs.rerollCompanion);
+        }
+        
+        if (remainingCost > 0 && this.rollDiceArgs.rerollTokens > 0) {
+            tokenCost = Math.min(this.rollDiceArgs.rerollTokens, remainingCost);
+            remainingCost -= tokenCost;
+        }
+        
+        if (remainingCost > 0 && Object.values(this.rollDiceArgs.rerollScore).length > 0) {
+            scoreCost = Math.min(Object.values(this.rollDiceArgs.rerollScore).length, remainingCost);
+            remainingCost -= scoreCost;
+        }
+
+        if (remainingCost > 0) {
+            throw Error('remainingCost is positive !');
+        }
+
+        if (tokenCost || scoreCost) {
+            return ` ( ${tokenCost ? formatTextIcons(`-${tokenCost} [reroll] `) : ''}${scoreCost ? formatTextIcons(`-${this.rollDiceArgs.rerollScore[scoreCost]} [point] `) : ''} )`;
+        } else {
+            return '';
+        }
+    }
+
+    private onSelectedDiceChange() {
+        const count = this.selectedDice.length;
+        if (document.getElementById(`rollDice-button`)) {
+            dojo.toggleClass(`rollDice-button`, 'disabled', count < 1 || count > 2);
+        }
+        if (this.isChangeDie) {
+            if (count === 1) {
+                const die = this.selectedDice[0];
+                const cancel = document.getElementById(`cancelRollDice-button`);
+                cancel?.parentElement.removeChild(cancel);
+
+                const faces = die.color <= 5 ? 5 : 6;
+
+                for (let i=1; i<=faces; i++) {
+                    const html = `<div class="die-item color${die.color} side${i}"></div>`;
+
+                    (this as any).addActionButton(`changeDie${i}-button`, html, () => this.changeDie(i));
+                }
+
+                (this as any).addActionButton(`cancelRollDice-button`, _("Cancel"), () => this.setActionBarRollDice(true));
+            } else {
+                for (let i=1; i<=6; i++) {
+                    const elem = document.getElementById(`changeDie${i}-button`);
+                    elem?.parentElement.removeChild(elem);
+                }
+            }
+        }
+    }
+
+    private onDiceClick(die: Die, force: boolean = false) {
+        if (!this.diceSelectionActive && !force) {
+            return;
+        }
+
+        const index = this.selectedDice.findIndex(d => d.id === die.id);
+        const selected = index !== -1;
+
+        if (selected) {
+            this.selectedDice.splice(index, 1);
+        } else {
+            this.selectedDice.push(die);
+        }
+
+        dojo.toggleClass(`die${die.id}`, 'selected', !selected);
+        this.onSelectedDiceChange();
+    }
+
+    private unselectDice() {
+        this.selectedDice.forEach(die => this.onDiceClick(die, true));
+    }
+
+    private setDiceSelectionActive(active: boolean) {        
+        this.unselectDice();
+        this.diceSelectionActive = active;        
+        (Array.from(document.getElementsByClassName('die')) as HTMLElement[]).forEach(node => dojo.toggleClass(node, 'selectable', active));
+    }
+
+    private rollDice() {
+        if(!(this as any).checkAction('rollDice')) {
+            return;
+        }
+
+        this.takeAction('rollDice', { ids: this.selectedDice.map(die => die.id).join(',') });
+    }
+    
+    private changeDie(value: number) {
+        if(!(this as any).checkAction('changeDie')) {
+            return;
+        }
+
+        this.takeAction('changeDie', { 
+            id: this.selectedDice[0].id,
+            value
+        });
     }
 
     public selectMeetingTrackCompanion(spot: number) {
@@ -675,7 +854,7 @@ class Glow implements GlowGame {
     }
 
     notif_rerolls(notif: Notif<NotifRerollsArgs>) {
-        this.incFootprints(notif.args.playerId, notif.args.rerolls);
+        this.incRerolls(notif.args.playerId, notif.args.rerolls);
     }
 
     notif_footprints(notif: Notif<NotifFootprintsArgs>) {
@@ -683,7 +862,7 @@ class Glow implements GlowGame {
     }
 
     notif_fireflies(notif: Notif<NotifFirefliesArgs>) {
-        this.incFootprints(notif.args.playerId, notif.args.fireflies);
+        this.incFireflies(notif.args.playerId, notif.args.fireflies);
     }    
 
     notif_newFirstPlayer(notif: Notif<NotifFirstPlayerArgs>) {
@@ -707,9 +886,15 @@ class Glow implements GlowGame {
 
     notif_diceRolled(notif: Notif<NotifDiceUpdateArgs>) {
         notif.args.dice.forEach(die => {
+            dojo.removeClass(`die${die.id}`, 'selected');
             this.setNewFace(die);
             this.addRollToDiv(this.getDieDiv(die), Math.random() > 0.5 ? 'odd-roll' : 'even-roll');
         });
+
+        if (notif.args.args) {
+            this.rollDiceArgs = notif.args.args;
+            this.setActionBarRollDice(true);
+        }
     }
 
     notif_lastTurn() {

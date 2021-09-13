@@ -19,6 +19,25 @@ $size: 0.25rem;
         animation: rolled-die 1s forwards;
         transform: translateY(-40vh);
     }
+
+    &.selectable {
+      cursor: pointer;
+
+      &.selected {
+        // animation: selected-dice-animation 0.5s alternate infinite;
+        box-shadow: 0 0 4px 4px red;
+      }
+    }
+}
+
+@keyframes selected-dice-animation {
+    100% { 
+      box-shadow: 0 0 8px 4px red;
+    }
+}
+
+.highlight {
+  animation: highlight-animation 0.75s alternate 2;
 }
 
 @keyframes rolled-die {
@@ -243,3 +262,10 @@ $size: 0.25rem;
   [data-side="6"] {
     transform: rotate3d(1, 0, 0, 180deg) translateZ(4*$size);
   }
+
+#generalactions {
+  .die-item {
+    width: 36px;
+    height: 36px;
+  }
+}

@@ -113,6 +113,16 @@ trait UtilTrait {
         return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices));
     }
 
+    function getDiceByIds(array $ids) {
+        if (count($ids) === 0) {
+            return [];
+        }
+
+        $sql = "SELECT * FROM dice WHERE `die_id` IN (".implode(',', $ids).")";
+        $dbDices = self::getCollectionFromDB($sql);
+        return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices));
+    }
+
     function getDieById(int $id) {
         $sql = "SELECT * FROM dice WHERE `die_id` = $id";
         $dbDices = self::getCollectionFromDB($sql);
@@ -152,9 +162,16 @@ trait UtilTrait {
         ]);
     }
 
-    function decPlayerScore(int $playerId, int $decScore) {
+    function decPlayerScore(int $playerId, int $decScore, $message = '', $params = []) {
         $newScore = max(0, $this->getPlayerScore($playerId) - $decScore);
         self::DbQuery("UPDATE player SET player_score = $newScore WHERE player_id = $playerId");
+
+        self::notifyAllPlayers('points', $message, $params + [
+            'playerId' => $playerId,
+            'playerName' => $this->getPlayerName($playerId),
+            'points' => -$decScore,
+        ]);
+
         return $newScore;
     }
 
@@ -172,9 +189,16 @@ trait UtilTrait {
         ]);
     }
 
-    function removePlayerRerolls(int $playerId, int $dec) {
+    function removePlayerRerolls(int $playerId, int $dec, $message = '', $params = []) {
         $newValue = max(0, $this->getPlayerRerolls($playerId) - $dec);
         self::DbQuery("UPDATE player SET `player_rerolls` = $newValue WHERE player_id = $playerId");
+
+        self::notifyAllPlayers('rerolls', $message, $params + [
+            'playerId' => $playerId,
+            'playerName' => $this->getPlayerName($playerId),
+            'rerolls' => -$dec,
+        ]);
+
         return $newValue;
     }
 
@@ -192,9 +216,16 @@ trait UtilTrait {
         ]);
     }
 
-    function removePlayerFootprints(int $playerId, int $dec) {
+    function removePlayerFootprints(int $playerId, int $dec, $message = '', $params = []) {
         $newValue = max(0, $this->getPlayerFootprints($playerId) - $dec);
         self::DbQuery("UPDATE player SET `player_footprints` = $newValue WHERE player_id = $playerId");
+
+        self::notifyAllPlayers('footprints', $message, $params + [
+            'playerId' => $playerId,
+            'playerName' => $this->getPlayerName($playerId),
+            'footprints' => -$dec,
+        ]);
+
         return $newValue;
     }
 
@@ -310,8 +341,8 @@ trait UtilTrait {
         $this->persistDice($smallDice);
     }
 
-    function rollPlayerDice() {
-        $dice = $this->getDiceByLocation('player');
+    function rollPlayerDice($ids = null, $params = []) {
+        $dice = $ids === null ? $this->getDiceByLocation('player') : $this->getDiceByIds($ids);
 
         foreach($dice as &$idie) {
             $idie->roll();
@@ -321,7 +352,7 @@ trait UtilTrait {
 
         self::notifyAllPlayers('diceRolled', '', [
             'dice' => $dice,
-        ]);
+        ] + $params);
     }
 
     function sendToCemetary(object $companion) {
@@ -356,11 +387,51 @@ trait UtilTrait {
 
         $rerolls = 0;
         foreach($companions as $companion) {
-            if ($companion->reroll) { // TODO check not already used
+            if ($companion->reroll && !$companion->rerollUsed) {
                 $rerolls++;
             }
         }
 
         return $rerolls;
+    }
+
+    public function applyRollDieCost(int $playerId, int $cost) {
+        $args = $this->argRollDice();
+        $remainingCost = $cost;
+
+        if ($remainingCost > 0 && $args['rerollCompanion'] > 0) {
+            $companionsToFlag = min($args['rerollCompanion'], $remainingCost);
+
+            $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+            $companionsFlagged = 0;
+            foreach($companions as $companion) {
+                if ($companion->reroll && !$companion->rerollUsed && $companionsFlagged < $companionsToFlag) {
+                    self::DbQuery("UPDATE companion SET `reroll_used` = true WHERE card_id = $companion->id");
+                    $companionsFlagged++;
+                }
+            }
+
+            $remainingCost = max(0, $remainingCost - $companionsFlagged);
+        }
+        
+        if ($remainingCost > 0 && $args['rerollTokens'] > 0) {
+            $tokenCost = min($args['rerollTokens'], $remainingCost);
+
+            $this->removePlayerRerolls($playerId, $tokenCost);
+
+            $remainingCost -= $tokenCost;
+        }
+        
+        if ($remainingCost > 0 && count($args['rerollScore']) > 0) {
+            $scoreCost = min(count($args['rerollScore']), $remainingCost);
+
+            $this->decPlayerScore($playerId, $args['rerollScore'][$scoreCost]);
+
+            $remainingCost -= $scoreCost;
+        }
+
+        if ($remainingCost > 0) {
+            throw new BgaUserException('Not enough reroll available');
+        }
     }
 }

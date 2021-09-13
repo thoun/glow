@@ -173,4 +173,5 @@ interface NotifFirefliesArgs {
 
 interface NotifDiceUpdateArgs {
     dice: Die[];
+    args?: EnteringRollDiceArgs;
 }

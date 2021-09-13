@@ -27,6 +27,9 @@ trait StateTrait {
         $day = intval($this->getGameStateValue(DAY)) + 1;
         self::setGameStateValue(DAY, $day);
 
+        
+        self::DbQuery("UPDATE companion SET `reroll_used` = false");
+
         self::notifyAllPlayers('newDay', clienttranslate('Day ${day} begins'), [
             'day' => $day,
         ]);

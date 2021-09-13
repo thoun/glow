@@ -46,10 +46,14 @@ html {
   }
 
   &.footprint {
-    background-position: 50% 0%;
+    background-position: 33.33% 0%;
   }
 
   &.firefly {
+    background-position: 66.66% 0%;
+  }
+
+  &.point {
     background-position: 100% 0%;
   }
 }

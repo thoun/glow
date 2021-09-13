@@ -146,13 +146,16 @@ $playerActionsGameStates = [
 
     ST_MULTIPLAYER_ROLL_DICE => [
         "name" => "rollDice",
-        "description" => clienttranslate('Players can reroll their dice'),
-        "descriptionmyturn" => clienttranslate('${you} can reroll your dice'),
+        "description" => clienttranslate('Players can reroll or change their dice'),
+        "descriptionmyturn" => clienttranslate('${you} can reroll or change your dice'),
+        "descriptionrollDice" => clienttranslate('Select 1 or 2 dice to reroll'),
+        "descriptionchangeDie" => clienttranslate('Select 1 die to change'),
         "type" => "multipleactiveplayer",
         "action" => "stRollDice",
         "args" => "argRollDice",
         "possibleactions" => [ 
-            "rerollDie", 
+            "rollDice", 
+            "changeDie", 
             "keepDice" 
         ],
         "transitions" => [
