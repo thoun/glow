@@ -58,7 +58,9 @@ trait ActionTrait {
         self::DbQuery("UPDATE player SET `player_recruit_day` = (".$this->getDaySql().") where `player_id` = $playerId");  
 
         $dice = $this->getDiceByLocation('meeting', $spot);
-        $this->moveDice($dice, 'player', $playerId);
+        if (count($dice) > 0) {
+            $this->moveDice($dice, 'player', $playerId);
+        }
 
         self::notifyAllPlayers('chosenCompanion', clienttranslate('${player_name} chooses companion ${companionName}'), [
             'playerId' => $playerId,

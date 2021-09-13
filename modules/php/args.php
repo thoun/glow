@@ -58,4 +58,18 @@ trait ArgsTrait {
            'companions' => $companions,
         ];
     }
+
+    function argRollDice() {
+        $playerId = self::getCurrentPlayerId();
+
+        $rerollCompanion = $this->getPlayerCompanionRerolls($playerId);
+        $rerollTokens = $this->getPlayerRerolls($playerId);
+        $rerollScore = $this->getRerollScoreCost($this->getPlayerScore($playerId));
+
+        return [
+            'rerollCompanion' => $rerollCompanion,
+            'rerollTokens' => $rerollTokens,
+            'rerollScore' => $rerollScore,
+        ];
+    }
 }

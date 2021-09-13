@@ -150,7 +150,7 @@ $playerActionsGameStates = [
         "descriptionmyturn" => clienttranslate('${you} can reroll your dice'),
         "type" => "multipleactiveplayer",
         "action" => "stRollDice",
-        //"args" => "argLeaveTokyo",
+        "args" => "argRollDice",
         "possibleactions" => [ 
             "rerollDie", 
             "keepDice" 

@@ -336,4 +336,31 @@ trait UtilTrait {
             return null;
         }
     }
+
+    function getRerollScoreCost(int $score) {
+        // list of points with reroll, under current score, top first
+        $scoreTrackRerolls = array_values(array_reverse(array_filter($this->SCORE_TRACK_REROLLS, function($p) use ($score) { return $p < $score; })));
+
+        $result = [];
+        $i = 1;
+        foreach($scoreTrackRerolls as $scoreTrackReroll) {
+            $result[$i] = $score - $scoreTrackReroll;
+            $i++;
+        }
+
+        return $result;
+    }
+
+    function getPlayerCompanionRerolls(int $playerId) {
+        $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+
+        $rerolls = 0;
+        foreach($companions as $companion) {
+            if ($companion->reroll) { // TODO check not already used
+                $rerolls++;
+            }
+        }
+
+        return $rerolls;
+    }
 }

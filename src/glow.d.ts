@@ -97,6 +97,12 @@ interface RecruitCompanionArgs {
     companions: MeetingTrackSpot[];
 }
 
+interface EnteringRollDiceArgs {
+    rerollCompanion: number;
+    rerollTokens: number;
+    rerollScore: { [rerolls: number]: number }; // number of rerolls -> cost
+}
+
 interface SelectMachineArgs {
     selectableMachines: Adventurer[];
 }

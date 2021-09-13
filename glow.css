@@ -427,7 +427,7 @@
 }
 #currentplayertable .player-table .adventurer-and-companions, #playerstables .player-table .adventurer-and-companions {
   display: grid;
-  grid-template-columns: 200px auto;
+  grid-template-columns: 160px auto;
 }
 
 #glow-help-button {
@@ -589,6 +589,14 @@ html {
 }
 .icon.firefly {
   background-position: 100% 0%;
+}
+
+#page-title .icon {
+  width: 20px;
+  height: 20px;
+}
+#page-title .icon {
+  margin: -5px 0;
 }
 
 #adventurers-stock {

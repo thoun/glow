@@ -216,7 +216,15 @@ class Glow implements GlowGame {
         if((this as any).isCurrentPlayerActive()) {
             switch (stateName) {
                 case 'rollDice':
+                    const rollDiceArgs = args as EnteringRollDiceArgs;
+                    const possibleRerolls = rollDiceArgs.rerollCompanion + rollDiceArgs.rerollTokens + Object.values(rollDiceArgs.rerollScore).length;
+
+                    (this as any).addActionButton(`rollDice-button`, _("Roll 1 or 2 dice") + formatTextIcons(' (1 [reroll] )'), () => this.rollDice());
+                    (this as any).addActionButton(`changeDie-button`, _("Change die face") + formatTextIcons(' (3 [reroll] )'), () => this.changeDie());
                     (this as any).addActionButton(`keepDice-button`, _("Keep"), () => this.keepDice(), null, null, 'red');
+
+                    dojo.toggleClass(`rollDice-button`, 'disabled', possibleRerolls < 1);
+                    dojo.toggleClass(`changeDie-button`, 'disabled', possibleRerolls < 3);
                     break;
             }
         }
@@ -471,6 +479,14 @@ class Glow implements GlowGame {
         } else if (attempt < 5) {
             setTimeout(() => this.addRollToDiv(dieDiv, rollClass, attempt + 1), 200); 
         }
+    }
+
+    private rollDice() {
+
+    }
+    
+    private changeDie() {
+
     }
 
     public selectMeetingTrackCompanion(spot: number) {

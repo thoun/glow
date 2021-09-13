@@ -134,11 +134,7 @@ function addToStockWithId(destinationStock, uniqueId, cardId, from) {
 }
 function formatTextIcons(rawText) {
     return rawText
-        .replace(/\[resource0\]/ig, '<span class="icon charcoalium"></span>')
-        .replace(/\[resource1\]/ig, '<span class="icon wood"></span>')
-        .replace(/\[resource2\]/ig, '<span class="icon copper"></span>')
-        .replace(/\[resource3\]/ig, '<span class="icon crystal"></span>')
-        .replace(/\[resource9\]/ig, '<span class="icon joker"></span>');
+        .replace(/\[reroll\]/ig, '<span class="icon reroll"></span>');
 }
 var POINT_CASE_SIZE = 25.5;
 var MAP1 = [
@@ -560,7 +556,13 @@ var Glow = /** @class */ (function () {
         if (this.isCurrentPlayerActive()) {
             switch (stateName) {
                 case 'rollDice':
+                    var rollDiceArgs = args;
+                    var possibleRerolls = rollDiceArgs.rerollCompanion + rollDiceArgs.rerollTokens + Object.values(rollDiceArgs.rerollScore).length;
+                    this.addActionButton("rollDice-button", _("Roll 1 or 2 dice") + formatTextIcons(' (1 [reroll] )'), function () { return _this.rollDice(); });
+                    this.addActionButton("changeDie-button", _("Change die face") + formatTextIcons(' (3 [reroll] )'), function () { return _this.changeDie(); });
                     this.addActionButton("keepDice-button", _("Keep"), function () { return _this.keepDice(); }, null, null, 'red');
+                    dojo.toggleClass("rollDice-button", 'disabled', possibleRerolls < 1);
+                    dojo.toggleClass("changeDie-button", 'disabled', possibleRerolls < 3);
                     break;
             }
         }
@@ -762,6 +764,10 @@ var Glow = /** @class */ (function () {
         else if (attempt < 5) {
             setTimeout(function () { return _this.addRollToDiv(dieDiv, rollClass, attempt + 1); }, 200);
         }
+    };
+    Glow.prototype.rollDice = function () {
+    };
+    Glow.prototype.changeDie = function () {
     };
     Glow.prototype.selectMeetingTrackCompanion = function (spot) {
         if (this.meetingTrackClickAction === 'remove') {
