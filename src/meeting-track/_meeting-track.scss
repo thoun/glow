@@ -1,7 +1,7 @@
 #meeting-track {
   position: relative;
-  width: 1656px;
-  height: 294px;
+  width: 916px;
+  height: 163px;
   background-image: url('img/meeting-track.png'); 
   margin-bottom: 260px; 
 
@@ -16,26 +16,25 @@
 
     &.dice {      
       top: 20px;
-      height: 100px;
+      height: 60px;
     }
 
     &.footprints {      
-      top: 120px;
-      height: 100px;
+      top: 85px;
+      height: 60px;
     }
   }
 
   .meeting-track-stock {
     position: absolute;
-    top: 295px;
-    width: 200px;
+    top: 158px;
     height: 250px;
   }
 
   .footprint-token {
     position: absolute;
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     background-image: url('img/footprint-token.png');
     box-shadow: 0 0 2px 4px white;
     border-radius: 50%;

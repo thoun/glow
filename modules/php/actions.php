@@ -93,7 +93,7 @@ trait ActionTrait {
             throw new BgaUserException("Companion not available");
         }
 
-        $this->companions->moveCard($companion->id, 'cemetery');
+        $this->sendToCemetary($companion, 'cemetery');
 
         self::notifyAllPlayers('removeCompanion', clienttranslate('${player_name} removes companion ${companionName}'), [
             'playerId' => self::getActivePlayerId(),

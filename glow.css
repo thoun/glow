@@ -2,15 +2,15 @@
 .die {
   display: inline-block;
   position: relative;
-  width: 48px;
-  height: 48px;
+  width: 36px;
+  height: 36px;
   margin: 3px;
   border-radius: 20%;
   box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.5);
 }
 .die.small {
-  width: 33px;
-  height: 33px;
+  width: 24px;
+  height: 24px;
 }
 .die.rolled {
   animation: rolled-die 1s forwards;
@@ -335,8 +335,8 @@
 
 #board {
   position: relative;
-  width: 1656px;
-  height: 862px;
+  width: 916px;
+  height: 477px;
 }
 #board.side1 {
   background-image: url("img/side1.png");
@@ -348,23 +348,17 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 44px;
-  height: 44px;
-  box-shadow: 1px 1px 2px 2px black;
+  width: 16px;
+  height: 16px;
+  box-shadow: 1px 1px 1px 1px black;
   border-radius: 50%;
   background-image: url("img/points.png");
   background-size: auto 100%;
   transition: transform 0.5s;
 }
-#board .point-marker.blue {
-  background-position: 0% 0%;
-}
-#board .point-marker.red {
-  background-position: 100% 0%;
-}
 #board .token {
-  width: 40px;
-  height: 40px;
+  width: 24px;
+  height: 24px;
   transition: transform 0.5s linear;
   position: absolute;
   top: 0;
@@ -385,8 +379,8 @@
 
 #meeting-track {
   position: relative;
-  width: 1656px;
-  height: 294px;
+  width: 916px;
+  height: 163px;
   background-image: url("img/meeting-track.png");
   margin-bottom: 260px;
 }
@@ -401,22 +395,21 @@
 }
 #meeting-track .meeting-track-zone.dice {
   top: 20px;
-  height: 100px;
+  height: 60px;
 }
 #meeting-track .meeting-track-zone.footprints {
-  top: 120px;
-  height: 100px;
+  top: 85px;
+  height: 60px;
 }
 #meeting-track .meeting-track-stock {
   position: absolute;
-  top: 295px;
-  width: 200px;
+  top: 158px;
   height: 250px;
 }
 #meeting-track .footprint-token {
   position: absolute;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   background-image: url("img/footprint-token.png");
   box-shadow: 0 0 2px 4px white;
   border-radius: 50%;
@@ -430,7 +423,7 @@
   padding: 5px;
 }
 #currentplayertable .player-table .player-table-dice, #playerstables .player-table .player-table-dice {
-  height: 54px;
+  height: 42px;
 }
 #currentplayertable .player-table .adventurer-and-companions, #playerstables .player-table .adventurer-and-companions {
   display: grid;
@@ -475,126 +468,61 @@
 #help-popin h1 {
   color: black;
 }
-#help-popin .icon {
-  width: 20px;
-  height: 20px;
-  margin: -5px 0;
-}
 #help-popin .help-section table {
   border-spacing: 10px;
   border-collapse: separate;
 }
-#help-popin #help-machines .machine {
+#help-popin #help-companions .companion {
   width: 190px;
   height: 190px;
   background-image: url("img/cards.jpg");
 }
-#help-popin #help-machines #machine0 {
+#help-popin #help-companions #machine0 {
   background-position: 0% 0%;
 }
-#help-popin #help-machines #machine1 {
+#help-popin #help-companions #machine1 {
   background-position: 6.6666666667% 0%;
 }
-#help-popin #help-machines #machine2 {
+#help-popin #help-companions #machine2 {
   background-position: 13.3333333333% 0%;
 }
-#help-popin #help-machines #machine3 {
+#help-popin #help-companions #machine3 {
   background-position: 20% 0%;
 }
-#help-popin #help-machines #machine4 {
+#help-popin #help-companions #machine4 {
   background-position: 26.6666666667% 0%;
 }
-#help-popin #help-machines #machine5 {
+#help-popin #help-companions #machine5 {
   background-position: 33.3333333333% 0%;
 }
-#help-popin #help-machines #machine6 {
+#help-popin #help-companions #machine6 {
   background-position: 40% 0%;
 }
-#help-popin #help-machines #machine7 {
+#help-popin #help-companions #machine7 {
   background-position: 46.6666666667% 0%;
 }
-#help-popin #help-machines #machine8 {
+#help-popin #help-companions #machine8 {
   background-position: 53.3333333333% 0%;
 }
-#help-popin #help-machines #machine9 {
+#help-popin #help-companions #machine9 {
   background-position: 60% 0%;
 }
-#help-popin #help-machines #machine10 {
+#help-popin #help-companions #machine10 {
   background-position: 66.6666666667% 0%;
 }
-#help-popin #help-machines #machine11 {
+#help-popin #help-companions #machine11 {
   background-position: 73.3333333333% 0%;
 }
-#help-popin #help-machines #machine12 {
+#help-popin #help-companions #machine12 {
   background-position: 80% 0%;
 }
-#help-popin #help-machines #machine13 {
+#help-popin #help-companions #machine13 {
   background-position: 86.6666666667% 0%;
 }
-#help-popin #help-machines #machine14 {
+#help-popin #help-companions #machine14 {
   background-position: 93.3333333333% 0%;
 }
-#help-popin #help-machines #machine15 {
-  background-position: 100% 0%;
-}
-#help-popin #help-projects .grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-}
-#help-popin #help-projects .project {
-  width: 134px;
-  height: 93px;
-  background-image: url("img/projects.jpg");
-}
-#help-popin #help-projects #project0 {
-  background-position: 0% 0%;
-}
-#help-popin #help-projects #project1 {
-  background-position: 6.25% 0%;
-}
-#help-popin #help-projects #project2 {
-  background-position: 12.5% 0%;
-}
-#help-popin #help-projects #project3 {
-  background-position: 18.75% 0%;
-}
-#help-popin #help-projects #project4 {
-  background-position: 25% 0%;
-}
-#help-popin #help-projects #project5 {
-  background-position: 31.25% 0%;
-}
-#help-popin #help-projects #project6 {
-  background-position: 37.5% 0%;
-}
-#help-popin #help-projects #project7 {
-  background-position: 43.75% 0%;
-}
-#help-popin #help-projects #project8 {
-  background-position: 50% 0%;
-}
-#help-popin #help-projects #project9 {
-  background-position: 56.25% 0%;
-}
-#help-popin #help-projects #project10 {
-  background-position: 62.5% 0%;
-}
-#help-popin #help-projects #project11 {
-  background-position: 68.75% 0%;
-}
-#help-popin #help-projects #project12 {
-  background-position: 75% 0%;
-}
-#help-popin #help-projects #project13 {
-  background-position: 81.25% 0%;
-}
-#help-popin #help-projects #project14 {
-  background-position: 87.5% 0%;
-}
-#help-popin #help-projects #project15 {
-  background-position: 93.75% 0%;
-}
-#help-popin #help-projects #project16 {
+#help-popin #help-companions #machine15 {
   background-position: 100% 0%;
 }
 
@@ -631,6 +559,14 @@ html {
   background-repeat: repeat;
 }
 
+#full-board-wrapper {
+  display: flex;
+  justify-content: center;
+}
+#full-board-wrapper #full-board {
+  width: 916px;
+}
+
 .stockitem {
   border-radius: 10px;
   margin: 5px;
@@ -662,9 +598,9 @@ html {
 #round-counter-wrapper {
   text-align: center;
   background: white;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
-  padding: 10px;
+  padding: 8px;
 }
 
 #last-round {

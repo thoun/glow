@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS `dice` (
   `die_face` TINYINT unsigned NOT NULL DEFAULT 0,
   `color` TINYINT unsigned NOT NULL DEFAULT 0,
   `small` TINYINT unsigned NOT NULL DEFAULT false,
+  `used` TINYINT unsigned NOT NULL DEFAULT false,
   `location` varchar(16) NOT NULL DEFAULT 'deck',
   `location_arg` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`die_id`)

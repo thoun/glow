@@ -20,11 +20,11 @@ class MeetingTrack {
             const cemetery = i === 0;
             
             if (!cemetery) {
-                const left = 490 + 243*(MEETING_SPOT_BY_COLOR[i]-1);
+                const left = 240 + 135*(MEETING_SPOT_BY_COLOR[i]-1);
                 html += `<div id="meeting-track-dice-${i}" class="meeting-track-zone dice" style="left: ${left}px;"></div>
                 <div id="meeting-track-footprints-${i}" class="meeting-track-zone footprints" style="left: ${left}px;"></div>`
             }
-            const left = cemetery ? 200 : 490 + 243*(i-1);
+            const left = cemetery ? 50 : 240 + 135*(i-1);
             html += `<div id="meeting-track-companion-${i}" class="meeting-track-stock" style="left: ${left}px;"></div>`;
 
             dojo.place(html, 'meeting-track');
@@ -41,9 +41,7 @@ class MeetingTrack {
             setupCompanionCards(this.companionsStocks[i]);
     
             if (cemetery) {
-                // TODO show last companion on cemetery back
-                //this.companionsStocks[i].addToStockWithId(1001, '1');
-                //this.companionsStocks[i].addToStockWithId(1002, '2');
+                this.setCemetaryTop(spot.companion);
             } else {
                 if (spot.companion) {
                     this.companionsStocks[i].addToStockWithId(spot.companion.subType, ''+spot.companion.id);
@@ -118,5 +116,18 @@ class MeetingTrack {
         dice.forEach(die => {
             this.game.createOrMoveDie(die, `meeting-track-dice-${die.value}`);
         });
+    }
+
+    public setCemetaryTop(companion?: Companion) {
+        if (companion) {
+            if (!this.companionsStocks[0].items.length) {
+                this.companionsStocks[0].addToStockWithId(1000 + companion.type, '' + companion.type);
+            } else if (this.companionsStocks[0].items[0].id !== '' + companion.type) {
+                this.companionsStocks[0].removeAll();
+                this.companionsStocks[0].addToStockWithId(1000 + companion.type, '' + companion.type);
+            }
+        } else {
+            this.companionsStocks[0].removeAll();
+        }
     }
 }

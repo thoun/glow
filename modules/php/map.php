@@ -66,7 +66,7 @@ trait MapTrait {
     }
 
     function canSettle(int $playerId, int $position) {
-        $mapSpot = $this->getMapSpot(1, $poition);
+        $mapSpot = $this->getMapSpot(1, $position);
 
         if (!$mapSpot->canSettle) {
             return false;
@@ -97,5 +97,63 @@ trait MapTrait {
         
         return $points;
     }
-        
+    
+    function getRoutes(int $side, int $position) {
+        $routes = [];
+
+        foreach($this->MAP[$side] as $spot) {
+            if ($spot->position === $position) {
+                $routes = array_merge($routes, $spot->routes);
+            } else {
+                $routeToSpot = $this->array_find($spot->routes, function ($route) use ($position) { return $route->destination == $position; });
+                if ($routeToSpot !== null) {
+                    $routes[] = new MapRoute($spot->position, $routeToSpot->effects, $routeToSpot->min, $routeToSpot->max);
+                }
+            }
+        } 
+
+        return $routes;
+    }
+
+    function getPossibleRoutesForPlayer(int $side, int $position, int $playerId) {
+        $possibleRoutes = [];
+        $routes = $this->getRoutes($side, $position);
+
+        $footprints = $this->getPlayerFootprints($playerId);
+
+        foreach($routes as $route) {
+
+            if ($side === 1) {
+    
+                // TODO
+    
+            } else if ($side === 2) {
+                $playerDice = $this->getDiceByLocation('player', $playerId, false);
+                
+                $groups = [];
+                foreach ($playerDice as $playerDie) {
+                    if ($playerDie->value <= 5) {
+                        $groups[$playerDie][] = $playerDie;
+                    }
+                }
+                $colors = count($groups);
+
+                $canGoForFree = $route->min === null || ($colors >= $route->min && $colors <= $route->max);
+                $canGoByPaying = 0;
+                if (!$canGoForFree && $colors < $route->min && ($route->min - $colors) < $footprints) {
+                    $canGoByPaying = $route->min - $colors;
+                }
+                if ($canGoForFree || $canGoByPaying > 0) {
+                    $effects = array_merge($route->effects, [20 + $canGoByPaying]);
+                    // TODO check player can afford $effects
+
+                    $route->costForPlayer = $effects;
+
+                    $possibleRoutes[] = $route;
+                }
+            }
+        }
+
+        return $possibleRoutes;
+    }
 }

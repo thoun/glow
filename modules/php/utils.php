@@ -101,10 +101,13 @@ trait UtilTrait {
         return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices));
     }
     
-    function getDiceByLocation(string $location, $locationArg = null) {
+    function getDiceByLocation(string $location, $locationArg = null, $used = null) {
         $sql = "SELECT * FROM dice WHERE `location` = '$location'";
         if ($locationArg !== null) {
             $sql .= " AND `location_arg` = $locationArg";
+        }
+        if ($used !== null) {
+            $sql .= " AND `used` = $used";
         }
         $dbDices = self::getCollectionFromDB($sql);
         return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices));
@@ -320,5 +323,17 @@ trait UtilTrait {
             'dice' => $dice,
         ]);
     }
+
+    function sendToCemetary(object $companion) {
+        $this->companions->moveCard($companion->id, 'cemetery', intval($this->companions->countCardInLocation('cemetery')));
+    }
         
+    function getTopCemetaryCompanion() {
+        $companionDb = $this->companions->getCardOnTop('cemetary');
+        if ($companionDb != null) {
+            return $this->getCompanionFromDb($companionDb);
+        } else {
+            return null;
+        }
+    }
 }

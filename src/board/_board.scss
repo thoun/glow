@@ -1,7 +1,7 @@
 #board {
   position: relative;
-  width: 1656px;
-  height: 862px;
+  width: 916px;
+  height: 477px;
 
   &.side1 {
     background-image: url('img/side1.png');
@@ -15,26 +15,18 @@
     position: absolute;
     top: 0;
     left: 0;
-    width: 44px;
-    height: 44px;
-    box-shadow: 1px 1px 2px 2px black;
+    width: 16px;
+    height: 16px;
+    box-shadow: 1px 1px 1px 1px black;
     border-radius: 50%;
     background-image: url('img/points.png');
     background-size: auto 100%;   
     transition: transform 0.5s; 
-  
-    &.blue {
-      background-position: 0% 0%;
-    }
-  
-    &.red {
-      background-position: 100% 0%;
-    }
   }
 
   .token {
-    width: 40px; 
-    height: 40px;  
+    width: 24px; 
+    height: 24px;  
     transition: transform 0.5s linear;
     position: absolute;
     top: 0;

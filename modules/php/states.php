@@ -49,9 +49,13 @@ trait StateTrait {
     function stEndRecruit() {
         $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting'));
 
-        $this->companions->moveCards(array_map(function($companion) { return $companion->id; }, $companions), 'cemetery');
+        foreach($companions as $companion) {
+            $this->sendToCemetary($companion);
+        }
 
-        self::notifyAllPlayers('removeCompanions', '', []);
+        self::notifyAllPlayers('removeCompanions', '', [
+            'cemetaryTop' => $this->getTopCemetaryCompanion(),
+        ]);
 
         $this->rollPlayerDice();
 
@@ -59,7 +63,9 @@ trait StateTrait {
     }
 
     function stRollDice() {
-        $this->gamestate->setAllPlayersMultiactive();
+        //$this->gamestate->setAllPlayersMultiactive();
+
+        $this->gamestate->nextState('keepDice'); // TODO
     }
 
     function stResolveCards() {
@@ -71,6 +77,8 @@ trait StateTrait {
     }    
 
     function stEndRound() {
+        // reset dice use
+        self::DbQuery("UPDATE dice SET used = false WHERE 1");
 
         $this->placeCompanionsOnMeetingTrack();
         $this->replaceSmallDiceOnMeetingTrack();
@@ -89,35 +97,6 @@ trait StateTrait {
         } else {
             $this->gamestate->nextState('newRound');
         }
-
-        /*// count points remaining in hands
-        $playersIds = $this->getPlayersIds();
-        foreach($playersIds as $playerId) {
-            $animals = $this->getAnimalsFromDb($this->animals->getCardsInLocation('hand', $playerId));
-            $points = array_reduce($animals, function ($carry, $item) { return $carry + $item->points; }, 0);
-            $this->incPlayerScore($playerId, $points);
-        }
-        
-        // player with highest score starts        
-        $sql = "SELECT player_id FROM player where player_score=(select min(player_score) from player) limit 1";
-        $minScorePlayerId = self::getUniqueValueFromDB($sql);
-        $this->gamestate->changeActivePlayer($minScorePlayerId);
-        self::giveExtraTime($minScorePlayerId);
-
-        $roundNumber = intval(self::getGameStateValue(ROUND_NUMBER));
-
-        $endGame = null;
-        if ($this->isVariant()) {
-            $endGame = $this->getMaxPlayerScore() >= 26;
-        } else {
-            $endGame = $roundNumber >= 3;
-        }
-
-        if ($endGame) {
-            $this->gamestate->nextState('endGame');
-        } else {
-            $this->gamestate->nextState('newRound');
-        }*/
     }
 
     function stEndScore() {

@@ -1,4 +1,24 @@
-const POINT_CASE_SIZE = 46;
+const POINT_CASE_SIZE = 25.5;
+
+const MAP1: number[][] = [
+    [45, 410], // 0
+];
+
+const MAP2: number[][] = [
+    [450, 220], // 0
+    [660, 220], // 1
+    [780, 150], // 2
+    [590, 310], // 3
+    [790, 355], // 4
+    [440, 390], // 5
+    [305, 305], // 6
+    [110, 360], // 7
+    [175, 215], // 8
+    [85, 85], // 9
+    [320, 90], // 10
+    [515, 85], // 11
+];
+const MAPS: number[][][] = [null, MAP1, MAP2];
 
 class Board {
     private points = new Map<number, number>();
@@ -36,7 +56,7 @@ class Board {
         const top = cases < 86 ? Math.min(Math.max(cases - 34, 0), 17) * POINT_CASE_SIZE : (102 - cases) * POINT_CASE_SIZE;
         const left = cases < 52 ? Math.min(cases, 34) * POINT_CASE_SIZE : (33 - Math.max(cases - 52, 0))*POINT_CASE_SIZE;
 
-        return [19 + left, 24 + top];
+        return [17 + left, 15 + top];
     }
 
     private movePoints() {
@@ -64,10 +84,15 @@ class Board {
         player.meeples.forEach(meeple => this.placeMeeple(meeple, player.color));
     }
 
+    private getMapSpot(spot: number): number[] {
+        return MAPS[this.game.getBoardSide()][spot];
+    }
+
     private placeMeeple(meeple: Meeple, color: string) {
-        const x = 122;
-        const y = 754;
-        const shift = this.meeples.filter(m => m.playerId < meeple.playerId || (m.playerId === meeple.playerId && m.position < meeple.position)).length;
+        const mapSpot = this.getMapSpot(meeple.position);
+        const x = mapSpot[0];
+        const y = mapSpot[1];
+        const shift = this.meeples.filter(m => m.type === meeple.type && (m.playerId < meeple.playerId || (m.playerId === meeple.playerId  && m.id < meeple.id))).length;
 
         dojo.place(`<div class="token meeple${meeple.type}" style="background-color: #${color}; transform: translate(${x + shift*5 + (meeple.type === 2 ? 50 : 0)}px, ${y + shift*5}px)"></div>`, 'board');
     }

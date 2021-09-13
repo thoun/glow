@@ -324,6 +324,11 @@ class Glow implements GlowGame {
         return Number((this as any).player_id);
     }
 
+    
+    public getBoardSide(): number {
+        return this.gamedatas.side;
+    }
+
     public getOpponentId(playerId: number): number {
         return Number(Object.values(this.gamedatas.players).find(player => Number(player.id) != playerId).id);
     }
@@ -413,7 +418,6 @@ class Glow implements GlowGame {
         // security to destroy pre-existing die with same id
         //const dieDiv = document.getElementById(`die${die.id}`);
         //dieDiv?.parentNode.removeChild(dieDiv);
-        console.log(html, destinationId);
         dojo.place(html, destinationId);
     }
 
@@ -562,8 +566,8 @@ class Glow implements GlowGame {
             this.helpDialog.setTitle( _("Cards help") );
             
             var html = `<div id="help-popin">
-                <h1>${_("Machines effects")}</h1>
-                <div id="help-machines" class="help-section">
+                <h1>${_("Specific companions")}</h1>
+                <div id="help-companions" class="help-section">
                     <table>`;
                 /*.forEach((number, index) => html += `<tr><td><div id="machine${index}" class="machine"></div></td><td>${getMachineTooltip(number)}</td></tr>`);
                 html += `</table>
@@ -642,10 +646,12 @@ class Glow implements GlowGame {
 
     notif_removeCompanion(notif: Notif<NotifChosenCompanionArgs>) {
         this.meetingTrack.removeCompanion(notif.args.spot);
+        this.meetingTrack.setCemetaryTop(notif.args.companion);
     }
 
-    notif_removeCompanions() {
+    notif_removeCompanions(notif: Notif<NotifRemoveCompanionsArgs>) {
         this.meetingTrack.removeCompanions();
+        this.meetingTrack.setCemetaryTop(notif.args.cemetaryTop);
     }
 
     notif_points(notif: Notif<NotifPointsArgs>) {

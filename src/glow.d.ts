@@ -80,6 +80,7 @@ interface GlowGame extends Game {
     adventurersStock: Stock;
     
     getPlayerId(): number;
+    getBoardSide(): number;
     chooseAdventurer(id: number): void;
     selectMeetingTrackCompanion(spot: number): void;
     //createAndPlaceDieHtml(die: Die, destinationId: string): void;    
@@ -138,6 +139,10 @@ interface NotifChosenCompanionArgs {
     companion: Companion;
     spot: number;
     dice: Die[];
+}
+
+interface NotifRemoveCompanionsArgs {
+    cemetaryTop: Companion;
 }
 
 interface NotifPointsArgs {

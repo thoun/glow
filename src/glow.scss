@@ -18,6 +18,15 @@ html {
     background-repeat: repeat;
 }
 
+#full-board-wrapper {
+  display: flex;
+  justify-content: center;
+
+  #full-board {
+    width: 916px;
+  }
+}
+
 .stockitem {
   border-radius: 10px;
   margin: 5px;
@@ -52,9 +61,9 @@ html {
 #round-counter-wrapper {
   text-align: center;
   background: white;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
-  padding: 10px;
+  padding: 8px;
 }
 
 #last-round {

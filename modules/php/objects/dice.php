@@ -6,6 +6,7 @@ class Dice {
     public $value;
     public $color;
     public $small;
+    public $used;
     public $location;
     public $location_arg;
 
@@ -14,6 +15,7 @@ class Dice {
         $this->color = intval($dbDice['color']);
         $this->setFace(intval($dbDice['die_face'])); // after color
         $this->small = boolval($dbDice['small']);
+        $this->used = boolval($dbDice['used']);
         $this->location = $dbDice['location'];
         $this->location_arg = intval($dbDice['location_arg']);
     } 

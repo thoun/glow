@@ -1,8 +1,6 @@
 
-$machine-width: 190px; 
-$machine-height: 190px;
-$project-width: 134px; 
-$project-height: 93px;
+$companion-width: 190px; 
+$companion-height: 190px;
 
 #glow-help-button {
     position: fixed;
@@ -45,13 +43,6 @@ $project-height: 93px;
         color: black;
     }
 
-    
-    .icon {
-        width: 20px;
-        height: 20px;
-        margin: -5px 0;
-    }
-
     .help-section {    
         table {
             border-spacing: 10px;
@@ -59,34 +50,15 @@ $project-height: 93px;
         }
     }
 
-    #help-machines {
-        .machine {
-            width: $machine-width; 
-            height: $machine-height;
+    #help-companions {
+        .companion {
+            width: $companion-width; 
+            height: $companion-height;
             background-image: url('img/cards.jpg');
         }
         @for $i from 0 through 15 {
             #machine#{$i} {
                 background-position: ($i * 100% / 15) 0%;
-            }
-        }
-    }
-
-    #help-projects {
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .project {
-            width: $project-width; 
-            height: $project-height;
-            background-image: url('img/projects.jpg');
-        }
-        
-        @for $i from 0 through 16 {
-            #project#{$i} {
-                background-position: ($i * 100% / 16) 0%;
             }
         }
     }

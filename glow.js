@@ -10,7 +10,6 @@ function slideToObjectAndAttach(object, destinationId, posX, posY) {
         var destinationCR = destination.getBoundingClientRect();
         var deltaX = destinationCR.left - objectCR.left + (posX !== null && posX !== void 0 ? posX : 0);
         var deltaY = destinationCR.top - objectCR.top + (posY !== null && posY !== void 0 ? posY : 0);
-        //object.id == 'tile98' && console.log(object, destination, objectCR, destinationCR, destinationCR.left - objectCR.left, );
         object.style.transition = "transform 0.5s ease-in";
         object.style.transform = "translate(" + deltaX + "px, " + deltaY + "px)";
         var transitionend = function () {
@@ -141,7 +140,25 @@ function formatTextIcons(rawText) {
         .replace(/\[resource3\]/ig, '<span class="icon crystal"></span>')
         .replace(/\[resource9\]/ig, '<span class="icon joker"></span>');
 }
-var POINT_CASE_SIZE = 46;
+var POINT_CASE_SIZE = 25.5;
+var MAP1 = [
+    [45, 410], // 0
+];
+var MAP2 = [
+    [450, 220],
+    [660, 220],
+    [780, 150],
+    [590, 310],
+    [790, 355],
+    [440, 390],
+    [305, 305],
+    [110, 360],
+    [175, 215],
+    [85, 85],
+    [320, 90],
+    [515, 85], // 11
+];
+var MAPS = [null, MAP1, MAP2];
 var Board = /** @class */ (function () {
     function Board(game, players) {
         var _this = this;
@@ -171,7 +188,7 @@ var Board = /** @class */ (function () {
             (points > 10 ? points + 2 : points);
         var top = cases < 86 ? Math.min(Math.max(cases - 34, 0), 17) * POINT_CASE_SIZE : (102 - cases) * POINT_CASE_SIZE;
         var left = cases < 52 ? Math.min(cases, 34) * POINT_CASE_SIZE : (33 - Math.max(cases - 52, 0)) * POINT_CASE_SIZE;
-        return [19 + left, 24 + top];
+        return [17 + left, 15 + top];
     };
     Board.prototype.movePoints = function () {
         var _this = this;
@@ -195,10 +212,14 @@ var Board = /** @class */ (function () {
         var _this = this;
         player.meeples.forEach(function (meeple) { return _this.placeMeeple(meeple, player.color); });
     };
+    Board.prototype.getMapSpot = function (spot) {
+        return MAPS[this.game.getBoardSide()][spot];
+    };
     Board.prototype.placeMeeple = function (meeple, color) {
-        var x = 122;
-        var y = 754;
-        var shift = this.meeples.filter(function (m) { return m.playerId < meeple.playerId || (m.playerId === meeple.playerId && m.position < meeple.position); }).length;
+        var mapSpot = this.getMapSpot(meeple.position);
+        var x = mapSpot[0];
+        var y = mapSpot[1];
+        var shift = this.meeples.filter(function (m) { return m.type === meeple.type && (m.playerId < meeple.playerId || (m.playerId === meeple.playerId && m.id < meeple.id)); }).length;
         dojo.place("<div class=\"token meeple" + meeple.type + "\" style=\"background-color: #" + color + "; transform: translate(" + (x + shift * 5 + (meeple.type === 2 ? 50 : 0)) + "px, " + (y + shift * 5) + "px)\"></div>", 'board');
     };
     return Board;
@@ -220,10 +241,10 @@ var MeetingTrack = /** @class */ (function () {
             var html = '';
             var cemetery = i === 0;
             if (!cemetery) {
-                var left_1 = 490 + 243 * (MEETING_SPOT_BY_COLOR[i] - 1);
+                var left_1 = 240 + 135 * (MEETING_SPOT_BY_COLOR[i] - 1);
                 html += "<div id=\"meeting-track-dice-" + i + "\" class=\"meeting-track-zone dice\" style=\"left: " + left_1 + "px;\"></div>\n                <div id=\"meeting-track-footprints-" + i + "\" class=\"meeting-track-zone footprints\" style=\"left: " + left_1 + "px;\"></div>";
             }
-            var left = cemetery ? 200 : 490 + 243 * (i - 1);
+            var left = cemetery ? 50 : 240 + 135 * (i - 1);
             html += "<div id=\"meeting-track-companion-" + i + "\" class=\"meeting-track-stock\" style=\"left: " + left + "px;\"></div>";
             dojo.place(html, 'meeting-track');
             var spot = meetingTrackSpot[i];
@@ -235,9 +256,7 @@ var MeetingTrack = /** @class */ (function () {
             dojo.connect(this_1.companionsStocks[i], 'onChangeSelection', this_1, function () { return _this.game.selectMeetingTrackCompanion(i); });
             setupCompanionCards(this_1.companionsStocks[i]);
             if (cemetery) {
-                // TODO show last companion on cemetery back
-                //this.companionsStocks[i].addToStockWithId(1001, '1');
-                //this.companionsStocks[i].addToStockWithId(1002, '2');
+                this_1.setCemetaryTop(spot.companion);
             }
             else {
                 if (spot.companion) {
@@ -306,6 +325,20 @@ var MeetingTrack = /** @class */ (function () {
         dice.forEach(function (die) {
             _this.game.createOrMoveDie(die, "meeting-track-dice-" + die.value);
         });
+    };
+    MeetingTrack.prototype.setCemetaryTop = function (companion) {
+        if (companion) {
+            if (!this.companionsStocks[0].items.length) {
+                this.companionsStocks[0].addToStockWithId(1000 + companion.type, '' + companion.type);
+            }
+            else if (this.companionsStocks[0].items[0].id !== '' + companion.type) {
+                this.companionsStocks[0].removeAll();
+                this.companionsStocks[0].addToStockWithId(1000 + companion.type, '' + companion.type);
+            }
+        }
+        else {
+            this.companionsStocks[0].removeAll();
+        }
     };
     return MeetingTrack;
 }());
@@ -616,6 +649,9 @@ var Glow = /** @class */ (function () {
     Glow.prototype.getPlayerId = function () {
         return Number(this.player_id);
     };
+    Glow.prototype.getBoardSide = function () {
+        return this.gamedatas.side;
+    };
     Glow.prototype.getOpponentId = function (playerId) {
         return Number(Object.values(this.gamedatas.players).find(function (player) { return Number(player.id) != playerId; }).id);
     };
@@ -676,7 +712,6 @@ var Glow = /** @class */ (function () {
         // security to destroy pre-existing die with same id
         //const dieDiv = document.getElementById(`die${die.id}`);
         //dieDiv?.parentNode.removeChild(dieDiv);
-        console.log(html, destinationId);
         dojo.place(html, destinationId);
     };
     Glow.prototype.createOrMoveDie = function (die, destinationId, rollClass) {
@@ -809,7 +844,7 @@ var Glow = /** @class */ (function () {
             this.helpDialog = new ebg.popindialog();
             this.helpDialog.create('glowHelpDialog');
             this.helpDialog.setTitle(_("Cards help"));
-            var html = "<div id=\"help-popin\">\n                <h1>" + _("Machines effects") + "</h1>\n                <div id=\"help-machines\" class=\"help-section\">\n                    <table>";
+            var html = "<div id=\"help-popin\">\n                <h1>" + _("Specific companions") + "</h1>\n                <div id=\"help-companions\" class=\"help-section\">\n                    <table>";
             /*.forEach((number, index) => html += `<tr><td><div id="machine${index}" class="machine"></div></td><td>${getMachineTooltip(number)}</td></tr>`);
             html += `</table>
             </div>
@@ -876,9 +911,11 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.notif_removeCompanion = function (notif) {
         this.meetingTrack.removeCompanion(notif.args.spot);
+        this.meetingTrack.setCemetaryTop(notif.args.companion);
     };
-    Glow.prototype.notif_removeCompanions = function () {
+    Glow.prototype.notif_removeCompanions = function (notif) {
         this.meetingTrack.removeCompanions();
+        this.meetingTrack.setCemetaryTop(notif.args.cemetaryTop);
     };
     Glow.prototype.notif_points = function (notif) {
         this.incPoints(notif.args.playerId, notif.args.points);
