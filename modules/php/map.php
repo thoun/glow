@@ -46,6 +46,14 @@ trait MapTrait {
         return $this->getPlayerMeeples($playerId, 2)[0];
     }
 
+    function movePlayerCompany(int $playerId, int $position) {
+        $sql = "UPDATE meeple SET `position` = $position WHERE `player_id` = $playerId AND `type` = 1";
+        
+        self::notifyAllPlayers('meepleMoved', '', [
+            'meeple' => $this->getPlayerCompany($playerId),
+        ]);
+    }
+
     function getMapSpot(int $side, int $position) {
         foreach($this->MAPS[$side] as $spot) {
             if ($spot->position === $position) {
@@ -65,7 +73,9 @@ trait MapTrait {
         }
     }
 
-    function canSettle(int $playerId, int $position) {
+    function canSettle(int $playerId) {
+        $company = $this->getPlayerCompany($playerId);
+        $position = $company->position;
         $mapSpot = $this->getMapSpot(1, $position);
 
         if (!$mapSpot->canSettle) {
@@ -74,7 +84,7 @@ trait MapTrait {
 
         $encampment = $this->getPlayerEncampment($playerId);
 
-        return $encampment->position != $position; // TODO check conditions here ?
+        return $encampment->position != $position;
     }
 
     function getMapFinalScore(int $side, int $playerId) {
@@ -119,19 +129,44 @@ trait MapTrait {
         $possibleRoutes = [];
         $routes = $this->getRoutes($side, $position);
 
-        $footprints = $this->getPlayerFootprints($playerId);
+        $footprints = $this->getPlayerFootprints($playerId);        
+        $dice = $this->getDiceByLocation('player', $playerId, false);
 
         foreach($routes as $route) {
 
             if ($side === 1) {
-    
-                // TODO
+                $effects = $this->getMapSpot($side, $route->destination)->effects;
+                
+                $canGoToDestination = true;
+                $usedFootprints = 0;
+
+                foreach($effects as $effect) {
+                    if ($effect >= -5 && $effect <= -1 && $this->array_some($dice, function ($die) use ($effect) { return $die->value == -$effect; })) { // TODO TOCHECK can we bypass with a footprint ?
+                        $canGoToDestination = false;
+                    } else if ($effect < -20 && $effect > -30 && $footprints < -($effect + 20)) {
+                        $canGoToDestination = false;
+                    } else if ($effect >= 1 && $effect <= 5 && !$this->array_some($dice, function ($die) use ($effect) { return $die->value == $effect; })) {
+                        if ($usedFootprints < $footprints) {
+                            $usedFootprints++;
+                        } else {
+                            $canGoToDestination = false;
+                        }
+                    }
+                }
+
+                if ($canGoToDestination) {
+                    if ($usedFootprints > 0) {
+                        $route->costForPlayer = array_merge($effects, [-20 - $usedFootprints]);
+                    } else {
+                        $route->costForPlayer = $effects;
+                    }
+                    $possibleRoutes[] = $route;
+                }
     
             } else if ($side === 2) {
-                $playerDice = $this->getDiceByLocation('player', $playerId, false);
                 
                 $groups = [];
-                foreach ($playerDice as $playerDie) {
+                foreach ($dice as $playerDie) {
                     if ($playerDie->value <= 5) {
                         $groups[$playerDie][] = $playerDie;
                     }

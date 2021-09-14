@@ -88,12 +88,24 @@ class Board {
         return MAPS[this.game.getBoardSide()][spot];
     }
 
-    private placeMeeple(meeple: Meeple, color: string) {
+    private placeMeeple(meeple: Meeple, color?: string) {
         const mapSpot = this.getMapSpot(meeple.position);
         const x = mapSpot[0];
         const y = mapSpot[1];
         const shift = this.meeples.filter(m => m.type === meeple.type && (m.playerId < meeple.playerId || (m.playerId === meeple.playerId  && m.id < meeple.id))).length;
 
-        dojo.place(`<div class="token meeple${meeple.type}" style="background-color: #${color}; transform: translate(${x + shift*5 + (meeple.type === 2 ? 50 : 0)}px, ${y + shift*5}px)"></div>`, 'board');
+        const div = document.getElementById(`meeple${meeple.id}`);
+        const transform = `translate(${x + shift*5 + (meeple.type === 2 ? 50 : 0)}px, ${y + shift*5}px)`;
+        if (div) {
+            div.style.transform = transform;
+        } else {
+            dojo.place(`<div id="meeple${meeple.id}" class="token meeple${meeple.type}" style="background-color: #${color}; transform: ${transform}"></div>`, 'board');
+        }
+    }
+
+    public moveMeeple(meeple: Meeple) {
+        this.meeples.find(m => m.id = meeple.id).position = meeple.position;
+
+        this.placeMeeple(meeple);
     }
 }

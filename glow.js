@@ -217,7 +217,18 @@ var Board = /** @class */ (function () {
         var x = mapSpot[0];
         var y = mapSpot[1];
         var shift = this.meeples.filter(function (m) { return m.type === meeple.type && (m.playerId < meeple.playerId || (m.playerId === meeple.playerId && m.id < meeple.id)); }).length;
-        dojo.place("<div class=\"token meeple" + meeple.type + "\" style=\"background-color: #" + color + "; transform: translate(" + (x + shift * 5 + (meeple.type === 2 ? 50 : 0)) + "px, " + (y + shift * 5) + "px)\"></div>", 'board');
+        var div = document.getElementById("meeple" + meeple.id);
+        var transform = "translate(" + (x + shift * 5 + (meeple.type === 2 ? 50 : 0)) + "px, " + (y + shift * 5) + "px)";
+        if (div) {
+            div.style.transform = transform;
+        }
+        else {
+            dojo.place("<div id=\"meeple" + meeple.id + "\" class=\"token meeple" + meeple.type + "\" style=\"background-color: #" + color + "; transform: " + transform + "\"></div>", 'board');
+        }
+    };
+    Board.prototype.moveMeeple = function (meeple) {
+        this.meeples.find(function (m) { return m.id = meeple.id; }).position = meeple.position;
+        this.placeMeeple(meeple);
     };
     return Board;
 }());
@@ -576,6 +587,14 @@ var Glow = /** @class */ (function () {
             }
         });
     };
+    Glow.prototype.onEnteringStateMove = function (args) {
+        var _this = this;
+        if (this.gamedatas.side === 1) {
+            this.addActionButton("placeEncampment-button", _("Place encampment"), function () { return _this.placeEncampment(); });
+            dojo.toggleClass("placeEncampment-button", 'disabled', !args.canSettle);
+        }
+        this.addActionButton("endTurn-button", _("End turn"), function () { return _this.endTurn(); }, null, null, 'red');
+    };
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
@@ -622,6 +641,10 @@ var Glow = /** @class */ (function () {
                 case 'resolveCards':
                     var resolveCardsArgs = args[this.getPlayerId()];
                     this.onEnteringStateResolveCards(resolveCardsArgs);
+                    break;
+                case 'move':
+                    var moveArgs = args[this.getPlayerId()];
+                    this.onEnteringStateMove(moveArgs);
                     break;
             }
         }
@@ -1036,6 +1059,26 @@ var Glow = /** @class */ (function () {
             id: id,
         });
     };
+    Glow.prototype.move = function (destination) {
+        if (!this.checkAction('move')) {
+            return;
+        }
+        this.takeAction('move', {
+            destination: destination
+        });
+    };
+    Glow.prototype.placeEncampment = function () {
+        if (!this.checkAction('placeEncampment')) {
+            return;
+        }
+        this.takeAction('placeEncampment');
+    };
+    Glow.prototype.endTurn = function () {
+        if (!this.checkAction('endTurn')) {
+            return;
+        }
+        this.takeAction('endTurn');
+    };
     Glow.prototype.takeAction = function (action, data) {
         data = data || {};
         data.lock = true;
@@ -1110,6 +1153,7 @@ var Glow = /** @class */ (function () {
             ['replaceSmallDice', ANIMATION_MS],
             ['diceRolled', ANIMATION_MS],
             ['diceChanged', ANIMATION_MS],
+            ['meepleMoved', ANIMATION_MS],
             ['resolveCardUpdate', 1],
             ['points', 1],
             ['rerolls', 1],
@@ -1186,6 +1230,9 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.notif_resolveCardUpdate = function (notif) {
         this.onEnteringStateResolveCards(notif.args.remainingEffects);
+    };
+    Glow.prototype.notif_meepleMoved = function (notif) {
+        this.board.moveMeeple(notif.args.meeple);
     };
     Glow.prototype.notif_lastTurn = function () {
         if (document.getElementById('last-round')) {

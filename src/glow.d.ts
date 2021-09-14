@@ -39,6 +39,10 @@ interface MeetingTrackSpot {
     footprints: number;
 }
 
+interface Route {
+    // TODO
+}
+
 interface GlowPlayer extends Player {
     playerNo: number;
     meeples: Meeple[];
@@ -112,6 +116,15 @@ interface EnteringResolveCardsArgs {
     [playerId: number]: number[][];
 }
 
+interface EnteringMoveForPlayer {
+    possibleRoutes: Route[];
+    canSettle?: boolean;
+}
+
+interface EnteringMoveArgs {
+    [playerId: number]: EnteringMoveForPlayer;
+}
+
 interface NotifNewDayArgs {
     day: number;
 }
@@ -166,3 +179,6 @@ interface NotifResolveCardUpdateArgs {
     remainingEffects: number[][];
 }
 
+interface NotifMeepleMovedArgs {
+    meeple: Meeple;
+}

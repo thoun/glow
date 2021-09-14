@@ -221,6 +221,15 @@ class Glow implements GlowGame {
         });
     }
 
+    private onEnteringStateMove(args: EnteringMoveForPlayer) {
+        
+        if (this.gamedatas.side === 1) {
+            (this as any).addActionButton(`placeEncampment-button`, _("Place encampment"), () => this.placeEncampment());
+            dojo.toggleClass(`placeEncampment-button`, 'disabled', !args.canSettle);
+        }
+        (this as any).addActionButton(`endTurn-button`, _("End turn"), () => this.endTurn(), null, null, 'red');
+    }
+
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
@@ -273,6 +282,10 @@ class Glow implements GlowGame {
                 case 'resolveCards':
                     const resolveCardsArgs = (args as EnteringResolveCardsArgs)[this.getPlayerId()];
                     this.onEnteringStateResolveCards(resolveCardsArgs);
+                    break;
+                case 'move':
+                    const moveArgs = (args as EnteringMoveArgs)[this.getPlayerId()];
+                    this.onEnteringStateMove(moveArgs);
                     break;
 
             }
@@ -773,6 +786,32 @@ class Glow implements GlowGame {
         });
     }
 
+    public move(destination: number) {
+        if(!(this as any).checkAction('move')) {
+            return;
+        }
+
+        this.takeAction('move', {
+            destination
+        });
+    }
+
+    public placeEncampment() {
+        if(!(this as any).checkAction('placeEncampment')) {
+            return;
+        }
+
+        this.takeAction('placeEncampment');
+    }
+
+    public endTurn() {
+        if(!(this as any).checkAction('endTurn')) {
+            return;
+        }
+
+        this.takeAction('endTurn');
+    } 
+
     public takeAction(action: string, data?: any) {
         data = data || {};
         data.lock = true;
@@ -858,6 +897,7 @@ class Glow implements GlowGame {
             ['replaceSmallDice', ANIMATION_MS],
             ['diceRolled', ANIMATION_MS],
             ['diceChanged', ANIMATION_MS],
+            ['meepleMoved', ANIMATION_MS],
             ['resolveCardUpdate', 1],
             ['points', 1],
             ['rerolls', 1],
@@ -873,7 +913,6 @@ class Glow implements GlowGame {
             (this as any).notifqueue.setSynchronous(notif[0], notif[1]);
         });
     }
-
 
     notif_chosenAdventurer(notif: Notif<NotifChosenAdventurerArgs>) {
         const playerTable = this.getPlayerTable(notif.args.playerId);
@@ -948,6 +987,10 @@ class Glow implements GlowGame {
 
     notif_resolveCardUpdate(notif: Notif<NotifResolveCardUpdateArgs>) {
         this.onEnteringStateResolveCards(notif.args.remainingEffects);
+    }
+
+    notif_meepleMoved(notif: Notif<NotifMeepleMovedArgs>) {
+        this.board.moveMeeple(notif.args.meeple);
     }
 
     notif_lastTurn() {

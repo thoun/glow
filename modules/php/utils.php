@@ -120,7 +120,7 @@ trait UtilTrait {
             $sql .= " AND `location_arg` = $locationArg";
         }
         if ($used !== null) {
-            $sql .= " AND `used` = $used";
+            $sql .= " AND `used` = ".json_encode($used);
         }
         $dbDices = self::getCollectionFromDB($sql);
         return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices));

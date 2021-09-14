@@ -111,9 +111,12 @@ trait ArgsTrait {
     function argMove() {
         $playersIds = $this->getPlayersIds();
         $args = [];
+        $side = $this->getSide();
 
         foreach($playersIds as $playerId) {
-            $args[$playerId] = $this->getPossibleRoutes($playerId);
+            $args[$playerId] = new stdClass();
+            $args[$playerId]->possibleRoutes = $this->getPossibleRoutes($playerId);
+            $args[$playerId]->canSettle = $side == 1 ? $this->canSettle($playerId) : null;
         }
 
         return $args;

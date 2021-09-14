@@ -110,6 +110,33 @@
         self::ajaxResponse();
     }
 
+    public function move() {
+        self::setAjaxMode();
+
+        $destination = self::getArg('destination', AT_posint, true);
+
+        $this->game->move($destination);
+
+        self::ajaxResponse();
+    }
+  	
+    public function placeEncampment() {
+        self::setAjaxMode();
+
+        $this->game->placeEncampment();
+
+        self::ajaxResponse();
+    }
+
+  	
+    public function endTurn() {
+        self::setAjaxMode();
+
+        $this->game->endTurn();
+
+        self::ajaxResponse();
+    }
+
   }
   
 

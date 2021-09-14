@@ -182,15 +182,17 @@ $playerActionsGameStates = [
 
     ST_MULTIPLAYER_MOVE => [
         "name" => "move",
-        "description" => clienttranslate('Players must move their company'),
-        "descriptionmyturn" => clienttranslate('${you} must move their company'),
-        "descriptionboat" => clienttranslate('Players must move their boats'),
-        "descriptionmyturnboat" => clienttranslate('${you} must move their boats'),
+        "description" => clienttranslate('Players can move their company'),
+        "descriptionmyturn" => clienttranslate('${you} can move your company'),
+        "descriptionboat" => clienttranslate('Players can move their boats'),
+        "descriptionmyturnboat" => clienttranslate('${you} can move your boats'),
         "type" => "multipleactiveplayer",
         "action" => "stMove",
         "args" => "argMove",
         "possibleactions" => [ 
             "move", 
+            "placeEncampment",
+            "endTurn",
         ],
         "transitions" => [
             "endRound" => ST_END_ROUND,

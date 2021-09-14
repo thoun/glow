@@ -162,4 +162,38 @@ trait ActionTrait {
             $this->gamestate->setPlayerNonMultiactive($playerId, 'move');
         }
     }
+
+    public function move(int $destination) {
+        self::checkAction('move');
+
+        $playerId = intval($this->getCurrentPlayerId());
+
+        // check possible & apply cost (set used dice too)
+
+        $this->movePlayerCompany($playerId, $destination);
+
+        // TODO send new arg
+    }
+
+    private function applyEndTurn(int $playerId) {
+        $this->gamestate->setPlayerNonMultiactive($playerId, 'endRound');
+    }
+  	
+    public function placeEncampment() {
+        self::checkAction('placeEncampment');
+
+        $playerId = intval($this->getCurrentPlayerId());
+
+        $this->movePlayerEncampment($playerId, $this->getPlayerCompany($playerId)->position);
+        $this->applyEndTurn($playerId);
+    }
+
+  	
+    public function endTurn() {
+        self::checkAction('endTurn');
+
+        $playerId = intval($this->getCurrentPlayerId());
+
+        $this->applyEndTurn($playerId);
+    }
 }
