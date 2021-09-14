@@ -59,7 +59,7 @@ class MeetingTrack {
     public setCompanion(meetingTrackSpot: MeetingTrackSpot, spot: number): void {
         const companion = meetingTrackSpot.companion;
         if (!companion) {
-            this.companionsStocks[spot].removeAll();
+            this.companionsStocks[spot].removeAllTo(CEMETARY);
             return;
         }
         
@@ -69,14 +69,14 @@ class MeetingTrack {
         }
 
         if (currentId && Number(currentId) != companion.id) {
-            this.companionsStocks[spot].removeAll();
+            this.companionsStocks[spot].removeAllTo(CEMETARY);
         }
 
         this.companionsStocks[spot].addToStockWithId(companion.subType, ''+companion.id);
     }
 
     public removeCompanion(spot: number) {
-        this.companionsStocks[spot].removeAll();
+        this.companionsStocks[spot].removeAllTo(CEMETARY);
     }
 
     public removeCompanions() {

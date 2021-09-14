@@ -369,7 +369,7 @@ trait UtilTrait {
     }
 
     function sendToCemetary(int $companionId) {
-        $this->companions->moveCard($companion->id, 'cemetery', intval($this->companions->countCardInLocation('cemetery')));
+        $this->companions->moveCard($companionId, 'cemetery', intval($this->companions->countCardInLocation('cemetery')));
     }
         
     function getTopCemetaryCompanion() {
@@ -413,7 +413,7 @@ trait UtilTrait {
     }
 
     public function applyRollDieCost(int $playerId, int $cost) {
-        $args = $this->argRollDice();
+        $args = $this->argRollDiceForPlayer($playerId);
         $remainingCost = $cost;
 
         if ($remainingCost > 0 && $args['rerollCompanion'] > 0) {
@@ -577,11 +577,18 @@ trait UtilTrait {
         }
 
         else if ($effect === 30) {
-            $this->addPlayerFootprints($playerId, 1);
+            $this->addPlayerRerolls($playerId, 1);
         }
 
         else if ($effect === 33) { // skull
             $this->sendToCemetary($cardId, 'cemetery');
+
+            $companion = $this->getCompanionFromDb($this->companions->getCard($cardId));
+
+            self::notifyAllPlayers('removeCompanion', '', [
+                'playerId' => $playerId,
+                'companion' => $companion,
+            ]);
         } else {
             // TODO special cards effects
         }

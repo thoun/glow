@@ -889,7 +889,12 @@ class Glow implements GlowGame {
     }
 
     notif_removeCompanion(notif: Notif<NotifChosenCompanionArgs>) {
-        this.meetingTrack.removeCompanion(notif.args.spot);
+        if (notif.args.spot) {
+            this.meetingTrack.removeCompanion(notif.args.spot);
+        } else {
+            const playerTable = this.getPlayerTable(notif.args.playerId);
+            playerTable.removeCompanion(notif.args.companion);
+        }
         this.meetingTrack.setCemetaryTop(notif.args.companion);
     }
 

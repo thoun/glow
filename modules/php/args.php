@@ -93,4 +93,29 @@ trait ArgsTrait {
 
         return $args;
     }
+
+    function getPossibleRoutes(int $playerId) {
+        $side = $this->getSide();
+        $possibleRoutes = [];
+
+        $meeples = $this->getPlayerMeeples($playerId);
+        foreach ($meeples as $meeple) {
+            if ($meeple->type < 2) {
+                $possibleRoutes = array_merge($possibleRoutes, $this->getPossibleRoutesForPlayer($side, $meeple->position, $playerId));
+            }
+        }
+
+        return $possibleRoutes;
+    }
+
+    function argMove() {
+        $playersIds = $this->getPlayersIds();
+        $args = [];
+
+        foreach($playersIds as $playerId) {
+            $args[$playerId] = $this->getPossibleRoutes($playerId);
+        }
+
+        return $args;
+    }
 }

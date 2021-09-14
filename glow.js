@@ -275,7 +275,7 @@ var MeetingTrack = /** @class */ (function () {
         var _a;
         var companion = meetingTrackSpot.companion;
         if (!companion) {
-            this.companionsStocks[spot].removeAll();
+            this.companionsStocks[spot].removeAllTo(CEMETARY);
             return;
         }
         var currentId = (_a = this.companionsStocks[spot].items[0]) === null || _a === void 0 ? void 0 : _a.id;
@@ -283,12 +283,12 @@ var MeetingTrack = /** @class */ (function () {
             return;
         }
         if (currentId && Number(currentId) != companion.id) {
-            this.companionsStocks[spot].removeAll();
+            this.companionsStocks[spot].removeAllTo(CEMETARY);
         }
         this.companionsStocks[spot].addToStockWithId(companion.subType, '' + companion.id);
     };
     MeetingTrack.prototype.removeCompanion = function (spot) {
-        this.companionsStocks[spot].removeAll();
+        this.companionsStocks[spot].removeAllTo(CEMETARY);
     };
     MeetingTrack.prototype.removeCompanions = function () {
         for (var i = 1; i <= 5; i++) {
@@ -339,6 +339,7 @@ var MeetingTrack = /** @class */ (function () {
     };
     return MeetingTrack;
 }());
+var CEMETARY = 'meeting-track-companion-0';
 var PlayerTable = /** @class */ (function () {
     function PlayerTable(game, player) {
         var _this = this;
@@ -393,6 +394,9 @@ var PlayerTable = /** @class */ (function () {
     PlayerTable.prototype.addDice = function (dice) {
         var _this = this;
         dice.forEach(function (die) { return _this.game.createOrMoveDie(die, "player-table-" + _this.playerId + "-dice"); });
+    };
+    PlayerTable.prototype.removeCompanion = function (companion) {
+        this.companionsStock.removeFromStockById('' + companion.id, CEMETARY);
     };
     return PlayerTable;
 }());
@@ -1132,7 +1136,13 @@ var Glow = /** @class */ (function () {
         this.meetingTrack.clearFootprintTokens(notif.args.spot, notif.args.playerId);
     };
     Glow.prototype.notif_removeCompanion = function (notif) {
-        this.meetingTrack.removeCompanion(notif.args.spot);
+        if (notif.args.spot) {
+            this.meetingTrack.removeCompanion(notif.args.spot);
+        }
+        else {
+            var playerTable = this.getPlayerTable(notif.args.playerId);
+            playerTable.removeCompanion(notif.args.companion);
+        }
         this.meetingTrack.setCemetaryTop(notif.args.companion);
     };
     Glow.prototype.notif_removeCompanions = function (notif) {

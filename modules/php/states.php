@@ -90,7 +90,22 @@ trait StateTrait {
     }
 
     function stMove() {
-        $this->gamestate->nextState('endRound'); // TODO
+        $playerWithRoutes = [];
+
+        $playersIds = $this->getPlayersIds();
+        $args = [];
+
+        foreach($playersIds as $playerId) {
+            //if (count($this->getPossibleRoutes($playerId)) > 0) {
+                $playerWithRoutes[] = $playerId;
+            //}
+        }
+
+        if (count($playerWithRoutes) > 0) {
+            $this->gamestate->setPlayersMultiactive($playerWithRoutes, 'endRound', true);
+        } else {
+            $this->gamestate->nextState('endRound');
+        }
     }    
 
     function stEndRound() {

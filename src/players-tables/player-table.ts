@@ -1,3 +1,5 @@
+const CEMETARY = 'meeting-track-companion-0';
+
 class PlayerTable {
     public playerId: number;
     public adventurerStock: Stock;
@@ -78,5 +80,9 @@ class PlayerTable {
     
     public addDice(dice: Die[]) {
         dice.forEach(die => this.game.createOrMoveDie(die, `player-table-${this.playerId}-dice`));
+    }
+    
+    public removeCompanion(companion: Companion) {
+        this.companionsStock.removeFromStockById(''+companion.id, CEMETARY);
     }
 }

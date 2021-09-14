@@ -188,7 +188,7 @@ $playerActionsGameStates = [
         "descriptionmyturnboat" => clienttranslate('${you} must move their boats'),
         "type" => "multipleactiveplayer",
         "action" => "stMove",
-        //"args" => "argLeaveTokyo",
+        "args" => "argMove",
         "possibleactions" => [ 
             "move", 
         ],
