@@ -353,6 +353,12 @@ var PlayerTable = /** @class */ (function () {
         this.adventurerStock.create(this.game, $("player-table-" + this.playerId + "-adventurer"), CARD_WIDTH, CARD_HEIGHT);
         this.adventurerStock.setSelectionMode(0);
         //this.adventurerStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupProjectCard(game, cardDiv, type);
+        dojo.connect(this.adventurerStock, 'onChangeSelection', this, function (_, itemId) {
+            if (_this.adventurerStock.getSelectedItems().length) {
+                _this.game.resolveCard(0, Number(itemId));
+            }
+            _this.adventurerStock.unselectAll();
+        });
         setupAdventurersCards(this.adventurerStock);
         if (player.adventurer) {
             this.adventurerStock.addToStockWithId(player.adventurer.color, '' + player.adventurer.id);
@@ -365,6 +371,12 @@ var PlayerTable = /** @class */ (function () {
         this.companionsStock.selectionClass = 'selected';
         this.companionsStock.create(this.game, $("player-table-" + this.playerId + "-companions"), CARD_WIDTH, CARD_HEIGHT);
         this.companionsStock.setSelectionMode(0);
+        dojo.connect(this.companionsStock, 'onChangeSelection', this, function (_, itemId) {
+            if (_this.companionsStock.getSelectedItems().length) {
+                _this.game.resolveCard(1, Number(itemId));
+            }
+            _this.companionsStock.unselectAll();
+        });
         setupCompanionCards(this.companionsStock);
         player.companions.forEach(function (companion) { return _this.companionsStock.addToStockWithId(companion.subType, '' + companion.id); });
         player.dice.forEach(function (die) {
@@ -539,6 +551,27 @@ var Glow = /** @class */ (function () {
     Glow.prototype.onEnteringStateRollDice = function () {
         this.setDiceSelectionActive(true);
     };
+    Glow.prototype.onEnteringStateResolveCards = function (possibleEffects) {
+        this.onLeavingResolveCards();
+        var playerId = this.getPlayerId();
+        var playerTable = this.getPlayerTable(playerId);
+        possibleEffects.forEach(function (possibleEffect) {
+            var cardType = possibleEffect[0];
+            var cardId = possibleEffect[1];
+            if (cardType === 0) { // adventurer
+                playerTable.adventurerStock.setSelectionMode(1);
+                dojo.addClass(playerTable.adventurerStock.container_div.id + "_item_" + cardId, 'selectable');
+            }
+            else if (cardType === 1) { // adventurer
+                playerTable.companionsStock.setSelectionMode(1);
+                dojo.addClass(playerTable.companionsStock.container_div.id + "_item_" + cardId, 'selectable');
+            }
+            if (cardType === 2) { // spells
+                /*TODO Spells playerTable.adventurerStock.setSelectionMode(1);
+                dojo.addClass(`${playerTable.adventurerStock.container_div.id}_item_${cardId}`, 'selectable');*/
+            }
+        });
+    };
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
@@ -554,6 +587,9 @@ var Glow = /** @class */ (function () {
             case 'rollDice':
                 this.onLeavingRollDice();
                 break;
+            case 'resolveCards':
+                this.onLeavingResolveCards();
+                break;
         }
     };
     Glow.prototype.onLeavingChooseAdventurer = function () {
@@ -565,6 +601,10 @@ var Glow = /** @class */ (function () {
     Glow.prototype.onLeavingRollDice = function () {
         this.setDiceSelectionActive(false);
     };
+    Glow.prototype.onLeavingResolveCards = function () {
+        Array.from(document.getElementsByClassName('selectable')).forEach(function (node) { return dojo.removeClass(node, 'selectable'); });
+        __spreadArray(__spreadArray([], this.playersTables.map(function (pt) { return pt.adventurerStock; })), this.playersTables.map(function (pt) { return pt.companionsStock; })).forEach(function (stock) { return stock.setSelectionMode(0); });
+    };
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
     //
@@ -572,8 +612,12 @@ var Glow = /** @class */ (function () {
         if (this.isCurrentPlayerActive()) {
             switch (stateName) {
                 case 'rollDice':
-                    this.rollDiceArgs = args;
+                    this.rollDiceArgs = args[this.getPlayerId()];
                     this.setActionBarRollDice(false);
+                    break;
+                case 'resolveCards':
+                    var resolveCardsArgs = args[this.getPlayerId()];
+                    this.onEnteringStateResolveCards(resolveCardsArgs);
                     break;
             }
         }
@@ -922,7 +966,7 @@ var Glow = /** @class */ (function () {
             _this.addRollToDiv(_this.getDieDiv(die), changed ? 'change-die-roll' : (Math.random() > 0.5 ? 'odd-roll' : 'even-roll'));
         });
         if (args) {
-            this.rollDiceArgs = args;
+            this.rollDiceArgs = args[this.getPlayerId()];
             this.setActionBarRollDice(true);
         }
     };
@@ -979,17 +1023,15 @@ var Glow = /** @class */ (function () {
         }
         this.takeAction('keepDice');
     };
-    /*public discardSelectedMachines() {
-        if(!(this as any).checkAction('discardSelectedMachines')) {
+    Glow.prototype.resolveCard = function (type, id) {
+        if (!this.checkAction('resolveCard')) {
             return;
         }
-
-        const base64 = btoa(JSON.stringify(/*this.discardedMachineSelector.getCompleteProjects()*-/'TODO'));
-
-        this.takeAction('discardSelectedMachines', {
-            completeProjects: base64
+        this.takeAction('resolveCard', {
+            type: type,
+            id: id,
         });
-    }*/
+    };
     Glow.prototype.takeAction = function (action, data) {
         data = data || {};
         data.lock = true;
@@ -1064,6 +1106,7 @@ var Glow = /** @class */ (function () {
             ['replaceSmallDice', ANIMATION_MS],
             ['diceRolled', ANIMATION_MS],
             ['diceChanged', ANIMATION_MS],
+            ['resolveCardUpdate', 1],
             ['points', 1],
             ['rerolls', 1],
             ['footprints', 1],
@@ -1130,6 +1173,9 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.notif_diceChanged = function (notif) {
         this.diceChangedOrRolled(notif.args.dice, true, notif.args.args);
+    };
+    Glow.prototype.notif_resolveCardUpdate = function (notif) {
+        this.onEnteringStateResolveCards(notif.args.remainingEffects);
     };
     Glow.prototype.notif_lastTurn = function () {
         if (document.getElementById('last-round')) {

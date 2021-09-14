@@ -95,7 +95,7 @@ trait ActionTrait {
             throw new BgaUserException("Companion not available");
         }
 
-        $this->sendToCemetary($companion, 'cemetery');
+        $this->sendToCemetary($companion->id, 'cemetery');
 
         self::notifyAllPlayers('removeCompanion', clienttranslate('${player_name} removes companion ${companionName}'), [
             'playerId' => self::getActivePlayerId(),
@@ -143,5 +143,23 @@ trait ActionTrait {
     public function keepDice() {
         self::checkAction('keepDice');
         $this->gamestate->setPlayerNonMultiactive( $this->getCurrentPlayerId(), 'keepDice');
+    }
+
+    public function resolveCard(int $cardType, int $id) {
+        self::checkAction('resolveCard');
+
+        $playerId = intval($this->getCurrentPlayerId());
+
+        $this->applyCardEffect($playerId, $cardType, $id);
+
+        $remainingEffects = $this->getRemainingEffects($playerId);
+     
+        self::notifyPlayer($playerId, 'resolveCardUpdate', '', [
+            'remainingEffects' => $remainingEffects,
+        ]);
+        
+        if (count($remainingEffects) === 0) {
+            $this->gamestate->setPlayerNonMultiactive($playerId, 'move');
+        }
     }
 }

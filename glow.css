@@ -592,6 +592,10 @@ html {
   margin: 5px;
   border: 1px solid gray;
 }
+.stockitem.selectable {
+  cursor: pointer;
+  box-shadow: 0 0 4px 4px red;
+}
 
 .icon {
   display: inline-block;

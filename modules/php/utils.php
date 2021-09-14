@@ -22,8 +22,21 @@ trait UtilTrait {
         return null;
     }
 
+    function array_some(array $array, callable $fn) {
+        foreach ($array as $value) {
+            if($fn($value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     function getFirstPlayerId() {
         return intval(self::getGameStateValue(FIRST_PLAYER));
+    }
+
+    function getPlayersIds() {
+        return array_keys($this->loadPlayersBasicInfos());
     }
 
     function getDaySql() {
@@ -268,10 +281,10 @@ trait UtilTrait {
     }
 
     function createSpells() {
-        foreach($this->EFFECTS as $type => $effect) {
-            $effects[] = [ 'type' => $type, 'type_arg' => null, 'nbr' => 1];
+        foreach($this->SPELLS as $type => $effect) {
+            $spells[] = [ 'type' => $type, 'type_arg' => null, 'nbr' => 1];
         }
-        $this->effects->createCards($effects, 'deck');
+        $this->spells->createCards($spells, 'deck');
     }
 
     function getMeetingTrackFootprints(int $spot) {
@@ -355,7 +368,7 @@ trait UtilTrait {
         ] + $params);
     }
 
-    function sendToCemetary(object $companion) {
+    function sendToCemetary(int $companionId) {
         $this->companions->moveCard($companion->id, 'cemetery', intval($this->companions->countCardInLocation('cemetery')));
     }
         
@@ -437,5 +450,171 @@ trait UtilTrait {
         if ($remainingCost > 0) {
             throw new BgaUserException('Not enough reroll available');
         }
+    }
+
+    private function countRepetitionInDiceForEffectCondition(array $diceValues, array $conditions) { // here conditions are always >=1 and <=5
+        $unusedValues = $diceValues;
+        foreach ($conditions as $condition) {
+            $index = array_search($condition, $unusedValues);
+
+            if ($index === false) {
+                return 0;
+            } else {
+                array_splice($unusedValues, $index, 1);
+            }
+        }
+        
+        return 1 + $this->countRepetitionInDiceForEffectCondition($unusedValues, $conditions);
+    }
+
+    public function isTriggeredEffectsForCard(array $dice, object $effect) {
+        // we check if we have a forbidden die, preventing the effect
+        foreach($effect->conditions as $condition) {
+            if ($condition >= -5 && $condition <= -1 && $this->array_some($dice, function ($die) use ($condition) { return $die->value == -$condition; })) {
+                return 0;
+            }
+        }
+
+        $effects = [];
+
+        $diceValues = array_map(function($die) { return $die->value; }, $dice);
+        // we remove forbidden signs, as they have been checked before
+        $effectConditions = array_values(array_filter($effect->conditions, function ($condition) { return $condition >= 0; }));
+        if (count($effectConditions) === 0) {
+            return 1;
+        }
+
+        if ($this->array_some($effect->conditions, function ($condition) { return $condition == 0; })) { // serie of same color
+            $count = 0;
+            foreach ([1, 2, 3, 4, 5, 22, 103] as $i) {
+                $conditions = array_map(function($condition) use ($i) { return $condition == 0 ? $i : $condition; }, $effectConditions);
+                $count += $this->countRepetitionInDiceForEffectCondition($diceValues, $conditions);
+            }
+            return $count;
+        } else {
+            return $this->countRepetitionInDiceForEffectCondition($diceValues, $effectConditions);
+        }
+    }
+
+    public function getTriggeredEffectsForPlayer(int $playerId) {
+        $effectsCodes = [];
+        $dice = $this->getDiceByLocation('player', $playerId);
+
+        $adventurer = $this->getAdventurersFromDb($this->adventurers->getCardsInLocation('player', $playerId))[0];
+        if ($adventurer->effect != null) {
+            $count = $this->isTriggeredEffectsForCard($dice, $adventurer->effect);
+            for ($i=0; $i<$count; $i++) {
+                $effectsCodes[] = [0, $adventurer->id];
+            }
+        }
+
+        $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+        foreach($companions as $companion) {
+            if ($companion->effect != null) {
+                $count = $this->isTriggeredEffectsForCard($dice, $companion->effect);
+                for ($i=0; $i<$count; $i++) {
+                    $effectsCodes[] = [1, $companion->id];
+                }
+            }
+        }
+
+        /* TODO add spells
+        $spells = $this->getSpellsFromDb($this->spells->getCardsInLocation('player', $playerId));
+        foreach($spells as $spell) {
+            if ($this->isTriggeredEffectsForCard($dice, $spell->effect);
+                $effectsCodes[] = [2, $spell->id];
+            }
+        }*/
+
+        return $effectsCodes;
+    }
+
+    public function getRemainingEffects(int $playerId) {
+        $allEffects = $this->getTriggeredEffectsForPlayer($playerId);
+        $appliedEffects = [];
+        $json_obj = self::getUniqueValueFromDB("SELECT `applied_effects` FROM `player` WHERE `player_id` = $playerId");
+        if ($json_obj) {
+            $appliedEffects = json_decode($json_obj, true);
+        }
+
+        $remainingEffects = [];
+        foreach($allEffects as $effect) {
+            if (!$this->array_some($appliedEffects, function ($appliedEffect) use ($effect) { return $appliedEffect[0] == $effect[0] && $appliedEffect[1] == $effect[1]; })) {
+                $remainingEffects[] = $effect;
+            }
+        }
+
+        return $remainingEffects;
+    }
+
+
+    function saveAppliedEffect(int $playerId, array $effectCode) {
+        $appliedEffects = [];
+        $json_obj = self::getUniqueValueFromDB("SELECT `applied_effects` FROM `player` WHERE `player_id` = $playerId");
+        if ($json_obj) {
+            $appliedEffects = json_decode($json_obj, true);
+        }
+        $appliedEffects[] = $effectCode;
+        $jsonObj = json_encode($appliedEffects);
+        self::DbQuery("UPDATE `player` SET `applied_effects` = '$jsonObj' WHERE `player_id` = $playerId");
+    }
+
+    function applyEffect(int $playerId, int $effect, $cardId = null) {
+        if ($effect > 100) {
+            $this->incPlayerScore($playerId, $effect - 100);
+        } else if ($effect < -100) {
+            $this->decPlayerScore($playerId, -($effect + 100));
+        }
+
+        else if ($effect > 20 && $effect < 30) {
+            $this->addPlayerFootprints($playerId, $effect - 20);
+        } else if ($effect < -20 && $effect > -30) {
+            $this->removePlayerFootprints($playerId, -($effect + 20));
+        }
+
+        else if ($effect > 10 && $effect < 20) {
+            $this->addPlayerFireflies($playerId, $effect - 10);
+        }
+
+        else if ($effect === 30) {
+            $this->addPlayerFootprints($playerId, 1);
+        }
+
+        else if ($effect === 33) { // skull
+            $this->sendToCemetary($cardId, 'cemetery');
+        } else {
+            // TODO special cards effects
+        }
+    }
+
+    function applyCardEffect(int $playerId, int $cardType, int $id) {
+        $cardEffect = null;
+        switch ($cardType) {
+            case 0:
+                $adventurer = $this->getAdventurersFromDb($this->adventurers->getCardsInLocation('player', $playerId))[0];
+                if ($adventurer->id == $id) {
+                    $cardEffect = $adventurer->effect;
+                }
+                break;
+            case 1:
+                $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+                foreach($companions as $companion) {
+                    if ($companion->id == $id) {
+                        $cardEffect = $companion->effect;
+                    }
+                }
+                break;
+            // 2: TODO spells
+        }
+
+        if ($cardEffect === null) {
+            throw new BgaUserException("Selected effect is not available");
+        }
+
+        foreach($cardEffect->effects as $effect) {
+            $this->applyEffect($playerId, $effect, $id);
+        }
+
+        $this->saveAppliedEffect($playerId, [$cardType, $id]);
     }
 }

@@ -94,7 +94,7 @@ $this->COMPANIONS = [ // (string $name, int $points, $effect, bool $reroll, int 
   46 => new CompanionCard('Kapao', 4, new Effect([2, 2], [33, 22])),
 ];
 
-$this->EFFECTS = [
+$this->SPELLS = [
   1 => new Effect([1, 1], [-105]),
   2 => new Effect([2, 2], [-105]),
   3 => new Effect([3, 3], [33]),

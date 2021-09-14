@@ -87,6 +87,7 @@ interface GlowGame extends Game {
     //getDieDiv(die: Die): HTMLDivElement;
     //addRollToDiv(dieDiv: HTMLDivElement, rollClass: string): void;
     createOrMoveDie(die: Die, destinationId: string, rollClass?: string): void;
+    resolveCard(type: number, id: number): void;
 }
 
 interface ChooseAdventurerArgs {
@@ -97,33 +98,18 @@ interface RecruitCompanionArgs {
     companions: MeetingTrackSpot[];
 }
 
-interface EnteringRollDiceArgs {
+interface EnteringRollDiceForPlayer {
     rerollCompanion: number;
     rerollTokens: number;
     rerollScore: { [rerolls: number]: number }; // number of rerolls -> cost
 }
 
-interface SelectMachineArgs {
-    selectableMachines: Adventurer[];
+interface EnteringRollDiceArgs {
+    [playerId: number]: EnteringRollDiceForPlayer;
 }
 
-interface SelectResourceArgs {
-    possibleCombinations: number[][];
-}
-
-interface SelectProjectArgs {
-    projects: Companion[];
-    remainingProjects?: number;
-}
-
-interface Exchange {
-    from: number;
-    to: number;
-}
-
-interface SelectExchangeArgs {
-    number: number;
-    possibleExchanges: Exchange[];
+interface EnteringResolveCardsArgs {
+    [playerId: number]: number[][];
 }
 
 interface NotifNewDayArgs {
@@ -175,3 +161,8 @@ interface NotifDiceUpdateArgs {
     dice: Die[];
     args?: EnteringRollDiceArgs;
 }
+
+interface NotifResolveCardUpdateArgs {
+    remainingEffects: number[][];
+}
+

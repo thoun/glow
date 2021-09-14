@@ -31,6 +31,12 @@ class PlayerTable {
         this.adventurerStock.create(this.game, $(`player-table-${this.playerId}-adventurer`), CARD_WIDTH, CARD_HEIGHT);
         this.adventurerStock.setSelectionMode(0);
         //this.adventurerStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupProjectCard(game, cardDiv, type);
+        dojo.connect(this.adventurerStock, 'onChangeSelection', this, (_, itemId: string) => {
+            if (this.adventurerStock.getSelectedItems().length) {
+                this.game.resolveCard(0, Number(itemId));
+            }
+            this.adventurerStock.unselectAll();
+        });
         setupAdventurersCards(this.adventurerStock);
 
         if (player.adventurer) {
@@ -46,6 +52,12 @@ class PlayerTable {
         this.companionsStock.selectionClass = 'selected';
         this.companionsStock.create(this.game, $(`player-table-${this.playerId}-companions`), CARD_WIDTH, CARD_HEIGHT);
         this.companionsStock.setSelectionMode(0);
+        dojo.connect(this.companionsStock, 'onChangeSelection', this, (_, itemId: string) => {
+            if (this.companionsStock.getSelectedItems().length) {
+                this.game.resolveCard(1, Number(itemId));
+            }
+            this.companionsStock.unselectAll();
+        });
         setupCompanionCards(this.companionsStock);
 
         player.companions.forEach(companion => this.companionsStock.addToStockWithId(companion.subType, ''+companion.id));

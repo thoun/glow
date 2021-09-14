@@ -26,7 +26,7 @@ class Glow implements GlowGame {
     private companionCounter: Counter;
     private roundCounter: Counter;
     private helpDialog: any;
-    private rollDiceArgs: EnteringRollDiceArgs;
+    private rollDiceArgs: EnteringRollDiceForPlayer;
     private selectedDice: Die[] = [];
     private diceSelectionActive: boolean = false;
     private originalTextRollDice: string;
@@ -199,6 +199,28 @@ class Glow implements GlowGame {
         this.setDiceSelectionActive(true);
     }
 
+    private onEnteringStateResolveCards(possibleEffects: number[][]) {
+        this.onLeavingResolveCards();
+
+        const playerId = this.getPlayerId();
+        const playerTable = this.getPlayerTable(playerId);
+
+        possibleEffects.forEach(possibleEffect => {
+            const cardType = possibleEffect[0];
+            const cardId = possibleEffect[1];
+            if (cardType === 0) { // adventurer
+                playerTable.adventurerStock.setSelectionMode(1);
+                dojo.addClass(`${playerTable.adventurerStock.container_div.id}_item_${cardId}`, 'selectable');
+            } else if (cardType === 1) { // adventurer
+                playerTable.companionsStock.setSelectionMode(1);
+                dojo.addClass(`${playerTable.companionsStock.container_div.id}_item_${cardId}`, 'selectable');
+            } if (cardType === 2) { // spells
+                /*TODO Spells playerTable.adventurerStock.setSelectionMode(1);
+                dojo.addClass(`${playerTable.adventurerStock.container_div.id}_item_${cardId}`, 'selectable');*/
+            }
+        });
+    }
+
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
@@ -215,6 +237,9 @@ class Glow implements GlowGame {
             case 'rollDice':
                 this.onLeavingRollDice();
                 break;
+            case 'resolveCards':
+                this.onLeavingResolveCards();
+                break;
         }
     }
 
@@ -230,6 +255,11 @@ class Glow implements GlowGame {
         this.setDiceSelectionActive(false);
     }
 
+    onLeavingResolveCards() {
+        (Array.from(document.getElementsByClassName('selectable')) as HTMLElement[]).forEach(node => dojo.removeClass(node, 'selectable'));
+        [...this.playersTables.map(pt => pt.adventurerStock), ...this.playersTables.map(pt => pt.companionsStock)].forEach(stock => stock.setSelectionMode(0));
+    }
+
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
     //
@@ -237,9 +267,14 @@ class Glow implements GlowGame {
         if ((this as any).isCurrentPlayerActive()) {
             switch (stateName) {
                 case 'rollDice':
-                    this.rollDiceArgs = args as EnteringRollDiceArgs;
+                    this.rollDiceArgs = (args as EnteringRollDiceArgs)[this.getPlayerId()];
                     this.setActionBarRollDice(false);
                     break;
+                case 'resolveCards':
+                    const resolveCardsArgs = (args as EnteringResolveCardsArgs)[this.getPlayerId()];
+                    this.onEnteringStateResolveCards(resolveCardsArgs);
+                    break;
+
             }
         }
     }    
@@ -657,7 +692,7 @@ class Glow implements GlowGame {
         });
 
         if (args) {
-            this.rollDiceArgs = args;
+            this.rollDiceArgs = args[this.getPlayerId()];
             this.setActionBarRollDice(true);
         }
     }
@@ -727,17 +762,16 @@ class Glow implements GlowGame {
         this.takeAction('keepDice');
     }
 
-    /*public discardSelectedMachines() {
-        if(!(this as any).checkAction('discardSelectedMachines')) {
+    public resolveCard(type: number, id: number) {
+        if(!(this as any).checkAction('resolveCard')) {
             return;
         }
 
-        const base64 = btoa(JSON.stringify(/*this.discardedMachineSelector.getCompleteProjects()*-/'TODO'));
-
-        this.takeAction('discardSelectedMachines', {
-            completeProjects: base64
-        });        
-    }*/
+        this.takeAction('resolveCard', {
+            type,
+            id,
+        });
+    }
 
     public takeAction(action: string, data?: any) {
         data = data || {};
@@ -824,6 +858,7 @@ class Glow implements GlowGame {
             ['replaceSmallDice', ANIMATION_MS],
             ['diceRolled', ANIMATION_MS],
             ['diceChanged', ANIMATION_MS],
+            ['resolveCardUpdate', 1],
             ['points', 1],
             ['rerolls', 1],
             ['footprints', 1],
@@ -904,6 +939,10 @@ class Glow implements GlowGame {
 
     notif_diceChanged(notif: Notif<NotifDiceUpdateArgs>) {
         this.diceChangedOrRolled(notif.args.dice, true, notif.args.args);
+    }
+
+    notif_resolveCardUpdate(notif: Notif<NotifResolveCardUpdateArgs>) {
+        this.onEnteringStateResolveCards(notif.args.remainingEffects);
     }
 
     notif_lastTurn() {

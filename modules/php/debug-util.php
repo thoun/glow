@@ -7,6 +7,11 @@ trait DebugUtilTrait {
 ////////////
 
     function debugSetup() {
+        global $g_config;
+        if (!$g_config['debug_from_chat']) { 
+            return;
+        } 
+
         self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 200 where `card_type_arg` in (18, 45)");
         //$this->addResource(2343492, 4, 0);
         //$this->debugSetPoints(19);

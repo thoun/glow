@@ -59,8 +59,7 @@ trait ArgsTrait {
         ];
     }
 
-    function argRollDice() {
-        $playerId = self::getCurrentPlayerId();
+    function argRollDiceForPlayer(int $playerId) {
 
         $rerollCompanion = $this->getPlayerCompanionRerolls($playerId);
         $rerollTokens = $this->getPlayerRerolls($playerId);
@@ -71,5 +70,27 @@ trait ArgsTrait {
             'rerollTokens' => $rerollTokens,
             'rerollScore' => $rerollScore,
         ];
+    }
+
+    function argRollDice() {
+        $playersIds = $this->getPlayersIds();
+        $args = [];
+
+        foreach($playersIds as $playerId) {
+            $args[$playerId] = $this->argRollDiceForPlayer($playerId);
+        }
+
+        return $args;
+    }
+
+    function argResolveCards() {
+        $playersIds = $this->getPlayersIds();
+        $args = [];
+
+        foreach($playersIds as $playerId) {
+            $args[$playerId] = $this->getRemainingEffects($playerId);
+        }
+
+        return $args;
     }
 }

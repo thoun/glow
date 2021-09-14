@@ -167,12 +167,12 @@ $playerActionsGameStates = [
     ST_MULTIPLAYER_RESOLVE_CARDS => [
         "name" => "resolveCards",
         "description" => clienttranslate('Players must resolve their cards'),
-        "descriptionmyturn" => clienttranslate('${you} must resolve their cards'),
+        "descriptionmyturn" => clienttranslate('${you} must resolve your cards (select the card to resolve first)'),
         "type" => "multipleactiveplayer",
         "action" => "stResolveCards",
-        //"args" => "argLeaveTokyo",
+        "args" => "argResolveCards",
         "possibleactions" => [ 
-            "resolve", 
+            "resolveCard", 
         ],
         "transitions" => [
             "move" => ST_MULTIPLAYER_MOVE,

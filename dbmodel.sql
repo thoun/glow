@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS `companion` (
   PRIMARY KEY (`card_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
-CREATE TABLE IF NOT EXISTS `effect` (
+CREATE TABLE IF NOT EXISTS `spells` (
   `card_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `card_type` int(1) NOT NULL,
   `card_type_arg` int(1) NULL,
@@ -75,5 +75,4 @@ ALTER TABLE `player` ADD `player_recruit_day` TINYINT UNSIGNED NOT NULL DEFAULT 
 ALTER TABLE `player` ADD `player_rerolls` TINYINT UNSIGNED NOT NULL DEFAULT '0';
 ALTER TABLE `player` ADD `player_footprints` TINYINT UNSIGNED NOT NULL DEFAULT '0';
 ALTER TABLE `player` ADD `player_fireflies` TINYINT UNSIGNED NOT NULL DEFAULT '0';
-
--- TODO spell tokens
+ALTER TABLE `player` ADD `applied_effects` json;

@@ -57,8 +57,8 @@ class Glow extends Table {
         $this->companions = self::getNew("module.common.deck");
         $this->companions->init("companion");
 		
-        $this->effects = self::getNew("module.common.deck");
-        $this->effects->init("effect");
+        $this->spells = self::getNew("module.common.deck");
+        $this->spells->init("spells");
 	}
 	
     protected function getGameName() {
@@ -201,7 +201,10 @@ class Glow extends Table {
         (see states.inc.php)
     */
     function getGameProgression() {
-        // TODO: compute and return the game progression
+        $stateName = $this->gamestate->state()['name']; 
+        if ($stateName === 'gameEnd') {
+            return 100;
+        }
 
         return (intval(self::getGameStateValue(DAY)) - 1) * 12.5;
     }

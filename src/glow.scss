@@ -31,6 +31,11 @@ html {
   border-radius: 10px;
   margin: 5px;
   border: 1px solid gray;
+
+  &.selectable {
+    cursor: pointer;
+    box-shadow: 0 0 4px 4px red;
+  }
 }
 
 .icon {

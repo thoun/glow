@@ -99,6 +99,17 @@
         self::ajaxResponse();
     }
 
+    public function resolveCard() {
+        self::setAjaxMode();
+
+        $type = self::getArg('type', AT_posint, true);
+        $id = self::getArg('id', AT_posint, true);
+
+        $this->game->resolveCard($type, $id);
+
+        self::ajaxResponse();
+    }
+
   }
   
 

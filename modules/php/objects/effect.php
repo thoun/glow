@@ -25,15 +25,15 @@ class EffectToken extends Effect {
     public $location_arg;
     public $type;
 
-    public function __construct($dbCard, $EFFECTS) {
+    public function __construct($dbCard, $SPELLS) {
         $this->id = intval($dbCard['id']);
         $this->location = $dbCard['location'];
         $this->location_arg = intval($dbCard['location_arg']);
         $this->type = intval($dbCard['type']);
 
-        $effectCard = $EFFECTS[$this->type];
-        $this->conditions = $effectCard->conditions;
-        $this->effects = $effectCard->effects;
+        $spellCard = $SPELLS[$this->type];
+        $this->conditions = $spellCard->conditions;
+        $this->effects = $spellCard->effects;
     } 
 }
 ?>

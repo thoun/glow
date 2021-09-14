@@ -26,9 +26,9 @@ trait StateTrait {
     function stStartRound() {
         $day = intval($this->getGameStateValue(DAY)) + 1;
         self::setGameStateValue(DAY, $day);
-
         
         self::DbQuery("UPDATE companion SET `reroll_used` = false");
+        self::DbQuery("UPDATE player SET `applied_effects` = null");
 
         self::notifyAllPlayers('newDay', clienttranslate('Day ${day} begins'), [
             'day' => $day,
@@ -53,7 +53,7 @@ trait StateTrait {
         $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting'));
 
         foreach($companions as $companion) {
-            $this->sendToCemetary($companion);
+            $this->sendToCemetary($companion->id);
         }
 
         self::notifyAllPlayers('removeCompanions', '', [
@@ -67,12 +67,26 @@ trait StateTrait {
 
     function stRollDice() {
         $this->gamestate->setAllPlayersMultiactive();
-
-        //$this->gamestate->nextState('keepDice'); // TODO
+        // $this->gamestate->nextState('keepDice');
     }
 
     function stResolveCards() {
-        $this->gamestate->nextState('move'); // TODO
+        $playerWithEffects = [];
+
+        $playersIds = $this->getPlayersIds();
+        $args = [];
+
+        foreach($playersIds as $playerId) {
+            if (count($this->getRemainingEffects($playerId)) > 0) {
+                $playerWithEffects[] = $playerId;
+            }
+        }
+
+        if (count($playerWithEffects) > 0) {
+            $this->gamestate->setPlayersMultiactive($playerWithEffects, 'move', true);
+        } else {
+            $this->gamestate->nextState('move');
+        }
     }
 
     function stMove() {
