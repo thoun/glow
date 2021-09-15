@@ -40,7 +40,7 @@ interface MeetingTrackSpot {
 }
 
 interface Route {
-    // TODO
+    destination: number;
 }
 
 interface GlowPlayer extends Player {
@@ -92,6 +92,7 @@ interface GlowGame extends Game {
     //addRollToDiv(dieDiv: HTMLDivElement, rollClass: string): void;
     createOrMoveDie(die: Die, destinationId: string, rollClass?: string): void;
     resolveCard(type: number, id: number): void;
+    move(destination: number): void;
 }
 
 interface ChooseAdventurerArgs {
@@ -177,6 +178,10 @@ interface NotifDiceUpdateArgs {
 
 interface NotifResolveCardUpdateArgs {
     remainingEffects: number[][];
+}
+
+interface NotifMoveUpdateArgs {
+    args: EnteringMoveForPlayer;
 }
 
 interface NotifMeepleMovedArgs {

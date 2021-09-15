@@ -1,22 +1,82 @@
 const POINT_CASE_SIZE = 25.5;
 
 const MAP1: number[][] = [
-    [45, 410], // 0
+    [36, 396, 1], // 0
+    [157, 382], // 1
+    [204, 360], // 2
+    [267, 376], // 3
+    [332, 358], // 4
+    [383, 388, 1], // 5
+    [530, 393], // 6
+    [596, 373], // 7
+    [654, 341], // 8
+    [771, 315], // 9
+    [817, 269], // 10
+    [741, 134], // 11
+    [710, 44], // 12
+    [766, 39], // 13
+    [786, 78, 1], // 14
+    [695, 164], // 15
+    [720, 257], // 16
+    [572, 250, 1], // 17
+    [657, 201], // 18
+    [615, 157], // 19
+    [651, 124], // 20
+    [666, 88], // 21
+    [646, 37], // 22
+    [561, 36], // 23
+    [538, 77], // 24
+    [584, 94], // 25
+    [523, 133], // 26
+    [529, 197], // 27
+    [474, 132], // 28
+    [404, 150], // 29
+    [410, 201], // 30
+    [467, 218], // 31
+    [566, 312], // 32
+    [436, 292, 1], // 33
+    [380, 250], // 34
+    [314, 230], // 35
+    [346, 200], // 36
+    [336, 155], // 37
+    [222, 115, 1], // 38
+    [373, 105], // 39
+    [159, 40], // 40
+    [289, 44], // 41
+    [348, 38], // 42
+    [419, 62, 1], // 43
+    [78, 367], // 44
+    [124, 353], // 45
+    [150, 317], // 46
+    [201, 313], // 47
+    [227, 278], // 48
+    [275, 292], // 49
+    [316, 275], // 50
+    [361, 304], // 51
+    [227, 209], // 52
+    [102, 43], // 53
+    [77, 77], // 54
+    [42, 105], // 55
+    [70, 179], // 56
+    [130, 198], // 57
+    [176, 255], // 58
+    [37, 233, 1], // 59
+    [74, 319], // 60
 ];
 
 const MAP2: number[][] = [
-    [450, 220], // 0
-    [660, 220], // 1
-    [780, 150], // 2
-    [590, 310], // 3
-    [790, 355], // 4
-    [440, 390], // 5
-    [305, 305], // 6
-    [110, 360], // 7
-    [175, 215], // 8
-    [85, 85], // 9
-    [320, 90], // 10
-    [515, 85], // 11
+    [419, 212, 1], // 0
+    [628, 212, 1], // 1
+    [752, 142, 1], // 2
+    [559, 302, 1], // 3
+    [750, 355, 1], // 4
+    [397, 386, 1], // 5
+    [257, 306, 1], // 6
+    [63, 355, 1], // 7
+    [150, 208, 1], // 8
+    [79, 77, 1], // 9
+    [288, 83, 1], // 10
+    [503, 67, 1], // 11
 ];
 const MAPS: number[][][] = [null, MAP1, MAP2];
 
@@ -106,6 +166,19 @@ class Board {
     public moveMeeple(meeple: Meeple) {
         this.meeples.find(m => m.id = meeple.id).position = meeple.position;
 
+        console.log('moveMeeple', meeple);
         this.placeMeeple(meeple);
+    }
+
+    public createDestinationZones(possibleDestinations: number[]) {console.log('createDestinationZones');
+        (Array.from(document.getElementsByClassName('destination-zone')) as HTMLElement[]).forEach(node => node.parentElement.removeChild(node));
+
+        possibleDestinations.forEach(position => {
+            const mapSpot = this.getMapSpot(position);
+            dojo.place(`<div id="destination-zone-${position}" class="destination-zone ${mapSpot[2] ? 'big' : 'small'}" style="left: ${mapSpot[0]}px; top: ${mapSpot[1]}px;"></div>`, 'board');
+            document.getElementById(`destination-zone-${position}`).addEventListener('click', () => this.game.move(position));
+            console.log('bind for', position);
+        });
+        
     }
 }

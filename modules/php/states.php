@@ -96,9 +96,9 @@ trait StateTrait {
         $args = [];
 
         foreach($playersIds as $playerId) {
-            //if (count($this->getPossibleRoutes($playerId)) > 0) {
+            if (count($this->getPossibleRoutes($playerId)) > 0) {
                 $playerWithRoutes[] = $playerId;
-            //}
+            }
         }
 
         if (count($playerWithRoutes) > 0) {

@@ -396,6 +396,20 @@
   mask: url("img/boat.svg") no-repeat center/contain;
   -webkit-mask: url("img/boat.svg") no-repeat center/contain;
 }
+#board .destination-zone {
+  position: absolute;
+  border: 3px dashed red;
+  border-radius: 50%;
+  cursor: pointer;
+}
+#board .destination-zone.big {
+  width: 85px;
+  height: 50px;
+}
+#board .destination-zone.small {
+  width: 30px;
+  height: 30px;
+}
 
 #meeting-track {
   position: relative;

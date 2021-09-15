@@ -124,6 +124,8 @@ class Glow implements GlowGame {
                 break;
             case 'rollDice':
                 this.onEnteringStateRollDice();
+            case 'move':
+                this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
                 break;
             case 'gameEnd':
                 const lastTurnBar = document.getElementById('last-round');
@@ -132,6 +134,13 @@ class Glow implements GlowGame {
                 }
                 break;
         }
+    }
+    
+    private setGamestateDescription(property: string = '') {
+        const originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
+        this.gamedatas.gamestate.description = `${originalState['description' + property]}`; 
+        this.gamedatas.gamestate.descriptionmyturn = `${originalState['descriptionmyturn' + property]}`; 
+        (this as any).updatePageTitle();        
     }
 
     private onEnteringStateStartRound() {
@@ -222,12 +231,18 @@ class Glow implements GlowGame {
     }
 
     private onEnteringStateMove(args: EnteringMoveForPlayer) {
+        this.board.createDestinationZones(args.possibleRoutes.map(route => route.destination));
         
         if (this.gamedatas.side === 1) {
-            (this as any).addActionButton(`placeEncampment-button`, _("Place encampment"), () => this.placeEncampment());
+            if (!document.getElementById(`placeEncampment-button`)) {
+                (this as any).addActionButton(`placeEncampment-button`, _("Place encampment"), () => this.placeEncampment());
+            }
             dojo.toggleClass(`placeEncampment-button`, 'disabled', !args.canSettle);
         }
-        (this as any).addActionButton(`endTurn-button`, _("End turn"), () => this.endTurn(), null, null, 'red');
+
+        if (!document.getElementById(`endTurn-button`)) {
+            (this as any).addActionButton(`endTurn-button`, _("End turn"), () => this.endTurn(), null, null, 'red');
+        }
     }
 
     // onLeavingState: this method is called each time we are leaving a game state.
@@ -557,7 +572,7 @@ class Glow implements GlowGame {
         })
     }
     
-    private setGamestateDescription(property?: string, cost: number = 0) {
+    private setRollDiceGamestateDescription(property?: string, cost: number = 0) {
         if (!this.originalTextRollDice) {
             this.originalTextRollDice = document.getElementById('pagemaintitletext').innerHTML;
         }
@@ -572,7 +587,7 @@ class Glow implements GlowGame {
         this.isChangeDie = false;
         this.removeRollDiceActionButtons();
         if (fromCancel) {
-            this.setGamestateDescription();
+            this.setRollDiceGamestateDescription();
             this.unselectDice();
         }
 
@@ -590,7 +605,7 @@ class Glow implements GlowGame {
     private setActionBarSelectRollDice() {
         this.isChangeDie = false;
         this.removeRollDiceActionButtons();
-        this.setGamestateDescription(`rollDice`, 1);
+        this.setRollDiceGamestateDescription(`rollDice`, 1);
 
         (this as any).addActionButton(`rollDice-button`, _("Reroll selected dice"), () => this.rollDice());
         (this as any).addActionButton(`cancelRollDice-button`, _("Cancel"), () => this.setActionBarRollDice(true));
@@ -601,7 +616,7 @@ class Glow implements GlowGame {
     private setActionBarSelectChangeDie() {
         this.isChangeDie = true;
         this.removeRollDiceActionButtons();
-        this.setGamestateDescription(`changeDie`, 3);
+        this.setRollDiceGamestateDescription(`changeDie`, 3);
 
         (this as any).addActionButton(`cancelRollDice-button`, _("Cancel"), () => this.setActionBarRollDice(true));
 
@@ -786,7 +801,7 @@ class Glow implements GlowGame {
         });
     }
 
-    public move(destination: number) {
+    public move(destination: number) {console.log('move', destination);
         if(!(this as any).checkAction('move')) {
             return;
         }
@@ -899,6 +914,7 @@ class Glow implements GlowGame {
             ['diceChanged', ANIMATION_MS],
             ['meepleMoved', ANIMATION_MS],
             ['resolveCardUpdate', 1],
+            ['moveUpdate', 1],
             ['points', 1],
             ['rerolls', 1],
             ['footprints', 1],
@@ -987,6 +1003,10 @@ class Glow implements GlowGame {
 
     notif_resolveCardUpdate(notif: Notif<NotifResolveCardUpdateArgs>) {
         this.onEnteringStateResolveCards(notif.args.remainingEffects);
+    }
+
+    notif_moveUpdate(notif: Notif<NotifMoveUpdateArgs>) {
+        this.onEnteringStateMove(notif.args.args);
     }
 
     notif_meepleMoved(notif: Notif<NotifMeepleMovedArgs>) {

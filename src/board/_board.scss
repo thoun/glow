@@ -45,4 +45,21 @@
       -webkit-mask: url('img/boat.svg') no-repeat center / contain;    
     }
   }
+
+  .destination-zone {
+    position: absolute;
+    border: 3px dashed red;
+    border-radius: 50%;
+    cursor: pointer;
+
+    &.big {
+      width: 85px;
+      height: 50px;
+    }
+
+    &.small {
+      width: 30px;
+      height: 30px;
+    }
+  }
 }

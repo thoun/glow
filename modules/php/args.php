@@ -101,22 +101,34 @@ trait ArgsTrait {
         $meeples = $this->getPlayerMeeples($playerId);
         foreach ($meeples as $meeple) {
             if ($meeple->type < 2) {
-                $possibleRoutes = array_merge($possibleRoutes, $this->getPossibleRoutesForPlayer($side, $meeple->position, $playerId));
+                $possibleRoutesForMeeple = $this->getPossibleRoutesForPlayer($side, $meeple->position, $playerId);
+                foreach($possibleRoutesForMeeple as $possibleRoute) {
+                    if (!$this->array_some($possibleRoutes, function($p) use ($possibleRoute) { return $possibleRoute->destination == $p->destination; })) {
+                        $possibleRoutes[] = $possibleRoute;
+                    }
+                }
             }
         }
 
         return $possibleRoutes;
     }
 
+    function argMoveForPlayer(int $playerId) {
+        $side = $this->getSide();
+
+        $args = new stdClass();
+        $args->possibleRoutes = $this->getPossibleRoutes($playerId);
+        $args->canSettle = $side == 1 ? $this->canSettle($playerId) : null;
+
+        return $args;
+    }
+
     function argMove() {
         $playersIds = $this->getPlayersIds();
         $args = [];
-        $side = $this->getSide();
 
         foreach($playersIds as $playerId) {
-            $args[$playerId] = new stdClass();
-            $args[$playerId]->possibleRoutes = $this->getPossibleRoutes($playerId);
-            $args[$playerId]->canSettle = $side == 1 ? $this->canSettle($playerId) : null;
+            $args[$playerId] = $this->argMoveForPlayer($playerId);
         }
 
         return $args;

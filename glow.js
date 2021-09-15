@@ -139,21 +139,81 @@ function formatTextIcons(rawText) {
 }
 var POINT_CASE_SIZE = 25.5;
 var MAP1 = [
-    [45, 410], // 0
+    [36, 396, 1],
+    [157, 382],
+    [204, 360],
+    [267, 376],
+    [332, 358],
+    [383, 388, 1],
+    [530, 393],
+    [596, 373],
+    [654, 341],
+    [771, 315],
+    [817, 269],
+    [741, 134],
+    [710, 44],
+    [766, 39],
+    [786, 78, 1],
+    [695, 164],
+    [720, 257],
+    [572, 250, 1],
+    [657, 201],
+    [615, 157],
+    [651, 124],
+    [666, 88],
+    [646, 37],
+    [561, 36],
+    [538, 77],
+    [584, 94],
+    [523, 133],
+    [529, 197],
+    [474, 132],
+    [404, 150],
+    [410, 201],
+    [467, 218],
+    [566, 312],
+    [436, 292, 1],
+    [380, 250],
+    [314, 230],
+    [346, 200],
+    [336, 155],
+    [222, 115, 1],
+    [373, 105],
+    [159, 40],
+    [289, 44],
+    [348, 38],
+    [419, 62, 1],
+    [78, 367],
+    [124, 353],
+    [150, 317],
+    [201, 313],
+    [227, 278],
+    [275, 292],
+    [316, 275],
+    [361, 304],
+    [227, 209],
+    [102, 43],
+    [77, 77],
+    [42, 105],
+    [70, 179],
+    [130, 198],
+    [176, 255],
+    [37, 233, 1],
+    [74, 319], // 60
 ];
 var MAP2 = [
-    [450, 220],
-    [660, 220],
-    [780, 150],
-    [590, 310],
-    [790, 355],
-    [440, 390],
-    [305, 305],
-    [110, 360],
-    [175, 215],
-    [85, 85],
-    [320, 90],
-    [515, 85], // 11
+    [419, 212, 1],
+    [628, 212, 1],
+    [752, 142, 1],
+    [559, 302, 1],
+    [750, 355, 1],
+    [397, 386, 1],
+    [257, 306, 1],
+    [63, 355, 1],
+    [150, 208, 1],
+    [79, 77, 1],
+    [288, 83, 1],
+    [503, 67, 1], // 11
 ];
 var MAPS = [null, MAP1, MAP2];
 var Board = /** @class */ (function () {
@@ -228,7 +288,19 @@ var Board = /** @class */ (function () {
     };
     Board.prototype.moveMeeple = function (meeple) {
         this.meeples.find(function (m) { return m.id = meeple.id; }).position = meeple.position;
+        console.log('moveMeeple', meeple);
         this.placeMeeple(meeple);
+    };
+    Board.prototype.createDestinationZones = function (possibleDestinations) {
+        var _this = this;
+        console.log('createDestinationZones');
+        Array.from(document.getElementsByClassName('destination-zone')).forEach(function (node) { return node.parentElement.removeChild(node); });
+        possibleDestinations.forEach(function (position) {
+            var mapSpot = _this.getMapSpot(position);
+            dojo.place("<div id=\"destination-zone-" + position + "\" class=\"destination-zone " + (mapSpot[2] ? 'big' : 'small') + "\" style=\"left: " + mapSpot[0] + "px; top: " + mapSpot[1] + "px;\"></div>", 'board');
+            document.getElementById("destination-zone-" + position).addEventListener('click', function () { return _this.game.move(position); });
+            console.log('bind for', position);
+        });
     };
     return Board;
 }());
@@ -502,6 +574,8 @@ var Glow = /** @class */ (function () {
                 break;
             case 'rollDice':
                 this.onEnteringStateRollDice();
+            case 'move':
+                this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
                 break;
             case 'gameEnd':
                 var lastTurnBar = document.getElementById('last-round');
@@ -510,6 +584,13 @@ var Glow = /** @class */ (function () {
                 }
                 break;
         }
+    };
+    Glow.prototype.setGamestateDescription = function (property) {
+        if (property === void 0) { property = ''; }
+        var originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
+        this.gamedatas.gamestate.description = "" + originalState['description' + property];
+        this.gamedatas.gamestate.descriptionmyturn = "" + originalState['descriptionmyturn' + property];
+        this.updatePageTitle();
     };
     Glow.prototype.onEnteringStateStartRound = function () {
         if (document.getElementById('adventurers-stock')) {
@@ -589,11 +670,16 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.onEnteringStateMove = function (args) {
         var _this = this;
+        this.board.createDestinationZones(args.possibleRoutes.map(function (route) { return route.destination; }));
         if (this.gamedatas.side === 1) {
-            this.addActionButton("placeEncampment-button", _("Place encampment"), function () { return _this.placeEncampment(); });
+            if (!document.getElementById("placeEncampment-button")) {
+                this.addActionButton("placeEncampment-button", _("Place encampment"), function () { return _this.placeEncampment(); });
+            }
             dojo.toggleClass("placeEncampment-button", 'disabled', !args.canSettle);
         }
-        this.addActionButton("endTurn-button", _("End turn"), function () { return _this.endTurn(); }, null, null, 'red');
+        if (!document.getElementById("endTurn-button")) {
+            this.addActionButton("endTurn-button", _("End turn"), function () { return _this.endTurn(); }, null, null, 'red');
+        }
     };
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
@@ -861,7 +947,7 @@ var Glow = /** @class */ (function () {
             }
         });
     };
-    Glow.prototype.setGamestateDescription = function (property, cost) {
+    Glow.prototype.setRollDiceGamestateDescription = function (property, cost) {
         if (cost === void 0) { cost = 0; }
         if (!this.originalTextRollDice) {
             this.originalTextRollDice = document.getElementById('pagemaintitletext').innerHTML;
@@ -876,7 +962,7 @@ var Glow = /** @class */ (function () {
         this.isChangeDie = false;
         this.removeRollDiceActionButtons();
         if (fromCancel) {
-            this.setGamestateDescription();
+            this.setRollDiceGamestateDescription();
             this.unselectDice();
         }
         var possibleRerolls = this.rollDiceArgs.rerollCompanion + this.rollDiceArgs.rerollTokens + Object.values(this.rollDiceArgs.rerollScore).length;
@@ -890,7 +976,7 @@ var Glow = /** @class */ (function () {
         var _this = this;
         this.isChangeDie = false;
         this.removeRollDiceActionButtons();
-        this.setGamestateDescription("rollDice", 1);
+        this.setRollDiceGamestateDescription("rollDice", 1);
         this.addActionButton("rollDice-button", _("Reroll selected dice"), function () { return _this.rollDice(); });
         this.addActionButton("cancelRollDice-button", _("Cancel"), function () { return _this.setActionBarRollDice(true); });
         dojo.toggleClass("rollDice-button", 'disabled', this.selectedDice.length < 1 || this.selectedDice.length > 2);
@@ -899,7 +985,7 @@ var Glow = /** @class */ (function () {
         var _this = this;
         this.isChangeDie = true;
         this.removeRollDiceActionButtons();
-        this.setGamestateDescription("changeDie", 3);
+        this.setRollDiceGamestateDescription("changeDie", 3);
         this.addActionButton("cancelRollDice-button", _("Cancel"), function () { return _this.setActionBarRollDice(true); });
         if (this.selectedDice.length === 1) {
             this.onSelectedDiceChange();
@@ -1060,6 +1146,7 @@ var Glow = /** @class */ (function () {
         });
     };
     Glow.prototype.move = function (destination) {
+        console.log('move', destination);
         if (!this.checkAction('move')) {
             return;
         }
@@ -1155,6 +1242,7 @@ var Glow = /** @class */ (function () {
             ['diceChanged', ANIMATION_MS],
             ['meepleMoved', ANIMATION_MS],
             ['resolveCardUpdate', 1],
+            ['moveUpdate', 1],
             ['points', 1],
             ['rerolls', 1],
             ['footprints', 1],
@@ -1230,6 +1318,9 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.notif_resolveCardUpdate = function (notif) {
         this.onEnteringStateResolveCards(notif.args.remainingEffects);
+    };
+    Glow.prototype.notif_moveUpdate = function (notif) {
+        this.onEnteringStateMove(notif.args.args);
     };
     Glow.prototype.notif_meepleMoved = function (notif) {
         this.board.moveMeeple(notif.args.meeple);

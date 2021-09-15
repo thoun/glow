@@ -47,10 +47,31 @@ trait MapTrait {
     }
 
     function movePlayerCompany(int $playerId, int $position) {
-        $sql = "UPDATE meeple SET `position` = $position WHERE `player_id` = $playerId AND `type` = 1";
+        self::DbQuery("UPDATE meeple SET `position` = $position WHERE `player_id` = $playerId AND `type` = 1");
         
         self::notifyAllPlayers('meepleMoved', '', [
             'meeple' => $this->getPlayerCompany($playerId),
+        ]);
+    }
+
+    function movePlayerEncampment(int $playerId, int $position) {
+        self::DbQuery("UPDATE meeple SET `position` = $position WHERE `player_id` = $playerId AND `type` = 2");
+        
+        self::notifyAllPlayers('meepleMoved', '', [
+            'meeple' => $this->getPlayerEncampment($playerId),
+        ]);
+    }
+
+    function movePlayerBoat(int $playerId, int $position) {
+        // TODO determine which boat to move
+        $boats = $this->getPlayerMeeples($playerId, 0);
+        $boat = $boats[0];
+
+        $boat->position = $position;
+        self::DbQuery("UPDATE meeple SET `position` = $position WHERE `id` = $boat->id");
+        
+        self::notifyAllPlayers('meepleMoved', '', [
+            'meeple' => $boat,
         ]);
     }
 
@@ -168,7 +189,7 @@ trait MapTrait {
                 $groups = [];
                 foreach ($dice as $playerDie) {
                     if ($playerDie->value <= 5) {
-                        $groups[$playerDie][] = $playerDie;
+                        $groups[$playerDie->value] = true;
                     }
                 }
                 $colors = count($groups);

@@ -168,14 +168,28 @@ trait ActionTrait {
 
         $playerId = intval($this->getCurrentPlayerId());
 
-        // check possible & apply cost (set used dice too)
+        $side = $this->getSide();
+        if ($side === 1) {
+            // check possible & apply cost (set used dice too)
+            $this->movePlayerCompany($playerId, $destination);
 
-        $this->movePlayerCompany($playerId, $destination);
+            self::notifyPlayer($playerId, 'moveUpdate', '', [
+                'args' => $this->argMoveForPlayer($playerId),
+            ]);
+        } else if ($side === 2) {
+            // check possible & apply cost (set used dice too)
+            $this->movePlayerBoat($playerId, $destination);
 
-        // TODO send new arg
+            $this->applyEndTurn($playerId);
+        }
     }
 
     private function applyEndTurn(int $playerId) {
+        // updates possible routes -> no more possible route as it is end of turn, so empty array
+        self::notifyPlayer($playerId, 'moveUpdate', '', [
+            'args' => [],
+        ]);
+
         $this->gamestate->setPlayerNonMultiactive($playerId, 'endRound');
     }
   	
