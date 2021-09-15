@@ -85,4 +85,12 @@ class PlayerTable {
     public removeCompanion(companion: Companion) {
         this.companionsStock.removeFromStockById(''+companion.id, CEMETARY);
     }
+
+    public setUsedDie(dieId: number) {
+        dojo.addClass(`die${dieId}`, 'used');
+    }
+    
+    public clearUsedDice() {
+        (Array.from(document.getElementsByClassName('die')) as HTMLElement[]).forEach(die => dojo.removeClass(die, 'used'));
+    }
 }

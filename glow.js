@@ -288,18 +288,15 @@ var Board = /** @class */ (function () {
     };
     Board.prototype.moveMeeple = function (meeple) {
         this.meeples.find(function (m) { return m.id = meeple.id; }).position = meeple.position;
-        console.log('moveMeeple', meeple);
         this.placeMeeple(meeple);
     };
     Board.prototype.createDestinationZones = function (possibleDestinations) {
         var _this = this;
-        console.log('createDestinationZones');
         Array.from(document.getElementsByClassName('destination-zone')).forEach(function (node) { return node.parentElement.removeChild(node); });
         possibleDestinations.forEach(function (position) {
             var mapSpot = _this.getMapSpot(position);
             dojo.place("<div id=\"destination-zone-" + position + "\" class=\"destination-zone " + (mapSpot[2] ? 'big' : 'small') + "\" style=\"left: " + mapSpot[0] + "px; top: " + mapSpot[1] + "px;\"></div>", 'board');
             document.getElementById("destination-zone-" + position).addEventListener('click', function () { return _this.game.move(position); });
-            console.log('bind for', position);
         });
     };
     return Board;
@@ -481,6 +478,12 @@ var PlayerTable = /** @class */ (function () {
     PlayerTable.prototype.removeCompanion = function (companion) {
         this.companionsStock.removeFromStockById('' + companion.id, CEMETARY);
     };
+    PlayerTable.prototype.setUsedDie = function (dieId) {
+        dojo.addClass("die" + dieId, 'used');
+    };
+    PlayerTable.prototype.clearUsedDice = function () {
+        Array.from(document.getElementsByClassName('die')).forEach(function (die) { return dojo.removeClass(die, 'used'); });
+    };
     return PlayerTable;
 }());
 var __spreadArray = (this && this.__spreadArray) || function (to, from) {
@@ -576,6 +579,10 @@ var Glow = /** @class */ (function () {
                 this.onEnteringStateRollDice();
             case 'move':
                 this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
+                break;
+            case 'endRound':
+                var playerTable = this.getPlayerTable(this.getPlayerId());
+                playerTable === null || playerTable === void 0 ? void 0 : playerTable.clearUsedDice();
                 break;
             case 'gameEnd':
                 var lastTurnBar = document.getElementById('last-round');
@@ -875,7 +882,7 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.createAndPlaceDieHtml = function (die, destinationId) {
         var _this = this;
-        var html = "<div id=\"die" + die.id + "\" class=\"die die" + die.face + " " + (die.small ? 'small' : '') + "\" data-die-id=\"" + die.id + "\" data-die-value=\"" + die.face + "\">\n        <ol class=\"die-list\" data-roll=\"" + die.face + "\">";
+        var html = "<div id=\"die" + die.id + "\" class=\"die die" + die.face + " " + (die.small ? 'small' : '') + " " + (die.used ? 'used' : '') + "\" data-die-id=\"" + die.id + "\" data-die-value=\"" + die.face + "\">\n        <ol class=\"die-list\" data-roll=\"" + die.face + "\">";
         for (var dieFace = 1; dieFace <= 6; dieFace++) {
             html += "<li class=\"die-item color" + die.color + " side" + dieFace + "\" data-side=\"" + dieFace + "\"></li>";
         }
@@ -1146,7 +1153,6 @@ var Glow = /** @class */ (function () {
         });
     };
     Glow.prototype.move = function (destination) {
-        console.log('move', destination);
         if (!this.checkAction('move')) {
             return;
         }
@@ -1242,6 +1248,7 @@ var Glow = /** @class */ (function () {
             ['diceChanged', ANIMATION_MS],
             ['meepleMoved', ANIMATION_MS],
             ['resolveCardUpdate', 1],
+            ['usedDice', 1],
             ['moveUpdate', 1],
             ['points', 1],
             ['rerolls', 1],
@@ -1318,6 +1325,10 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.notif_resolveCardUpdate = function (notif) {
         this.onEnteringStateResolveCards(notif.args.remainingEffects);
+    };
+    Glow.prototype.notif_usedDice = function (notif) {
+        var playerTable = this.getPlayerTable(notif.args.playerId);
+        playerTable.setUsedDie(notif.args.dieId);
     };
     Glow.prototype.notif_moveUpdate = function (notif) {
         this.onEnteringStateMove(notif.args.args);

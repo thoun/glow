@@ -127,6 +127,10 @@ class Glow implements GlowGame {
             case 'move':
                 this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
                 break;
+            case 'endRound':
+                const playerTable = this.getPlayerTable(this.getPlayerId());
+                playerTable?.clearUsedDice();
+                break;
             case 'gameEnd':
                 const lastTurnBar = document.getElementById('last-round');
                 if (lastTurnBar) {
@@ -491,7 +495,7 @@ class Glow implements GlowGame {
     }
 
     private createAndPlaceDieHtml(die: Die, destinationId: string) {
-        let html = `<div id="die${die.id}" class="die die${die.face} ${die.small ? 'small' : ''}" data-die-id="${die.id}" data-die-value="${die.face}">
+        let html = `<div id="die${die.id}" class="die die${die.face} ${die.small ? 'small' : ''} ${die.used ? 'used' : ''}" data-die-id="${die.id}" data-die-value="${die.face}">
         <ol class="die-list" data-roll="${die.face}">`;
         for (let dieFace=1; dieFace<=6; dieFace++) {
             html += `<li class="die-item color${die.color} side${dieFace}" data-side="${dieFace}"></li>`;
@@ -801,7 +805,7 @@ class Glow implements GlowGame {
         });
     }
 
-    public move(destination: number) {console.log('move', destination);
+    public move(destination: number) {
         if(!(this as any).checkAction('move')) {
             return;
         }
@@ -914,6 +918,7 @@ class Glow implements GlowGame {
             ['diceChanged', ANIMATION_MS],
             ['meepleMoved', ANIMATION_MS],
             ['resolveCardUpdate', 1],
+            ['usedDice', 1],
             ['moveUpdate', 1],
             ['points', 1],
             ['rerolls', 1],
@@ -1003,6 +1008,11 @@ class Glow implements GlowGame {
 
     notif_resolveCardUpdate(notif: Notif<NotifResolveCardUpdateArgs>) {
         this.onEnteringStateResolveCards(notif.args.remainingEffects);
+    }
+
+    notif_usedDice(notif: Notif<NotifUsedDiceArgs>) {
+        const playerTable = this.getPlayerTable(notif.args.playerId);
+        playerTable.setUsedDie(notif.args.dieId);
     }
 
     notif_moveUpdate(notif: Notif<NotifMoveUpdateArgs>) {

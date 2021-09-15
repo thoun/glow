@@ -22,6 +22,7 @@ interface Die {
     value: number;
     color: number;
     small: boolean;
+    used: boolean;
 }
 
 
@@ -186,4 +187,9 @@ interface NotifMoveUpdateArgs {
 
 interface NotifMeepleMovedArgs {
     meeple: Meeple;
+}
+
+interface NotifUsedDiceArgs {
+    playerId: number;
+    dieId: number;
 }

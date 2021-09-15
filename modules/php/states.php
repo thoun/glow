@@ -26,7 +26,7 @@ trait StateTrait {
     function stStartRound() {
         $day = intval($this->getGameStateValue(DAY)) + 1;
         self::setGameStateValue(DAY, $day);
-        
+
         self::DbQuery("UPDATE companion SET `reroll_used` = false");
         self::DbQuery("UPDATE player SET `applied_effects` = null");
 
@@ -109,8 +109,8 @@ trait StateTrait {
     }    
 
     function stEndRound() {
-        // reset dice use
-        self::DbQuery("UPDATE dice SET used = false WHERE 1");
+        // reset dice use        
+        self::DbQuery("UPDATE dice SET `used` = false");
 
         $this->placeCompanionsOnMeetingTrack();
         $this->replaceSmallDiceOnMeetingTrack();

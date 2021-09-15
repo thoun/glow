@@ -176,11 +176,13 @@ trait MapTrait {
                 }
 
                 if ($canGoToDestination) {
+                    $route->costForPlayer = array_merge($effects, $route->effects);
                     if ($usedFootprints > 0) {
-                        $route->costForPlayer = array_merge($effects, [-20 - $usedFootprints]);
-                    } else {
-                        $route->costForPlayer = $effects;
-                    }
+                        $route->costForPlayer = array_merge($route->costForPlayer, [-20 - $usedFootprints]);
+                    } 
+
+                    // TODO check player can afford $effects
+
                     $possibleRoutes[] = $route;
                 }
     
@@ -200,10 +202,12 @@ trait MapTrait {
                     $canGoByPaying = $route->min - $colors;
                 }
                 if ($canGoForFree || $canGoByPaying > 0) {
-                    $effects = array_merge($route->effects, [20 + $canGoByPaying]);
+                    $effects = $canGoByPaying > 0 ? array_merge($route->effects, [20 + $canGoByPaying]) : $route->effects;
+
                     // TODO check player can afford $effects
 
-                    $route->costForPlayer = $effects;
+                    $destinationEffects = $this->getMapSpot($side, $route->destination)->effects;
+                    $route->costForPlayer = array_merge($effects, $destinationEffects);
 
                     $possibleRoutes[] = $route;
                 }

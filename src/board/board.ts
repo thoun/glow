@@ -166,18 +166,16 @@ class Board {
     public moveMeeple(meeple: Meeple) {
         this.meeples.find(m => m.id = meeple.id).position = meeple.position;
 
-        console.log('moveMeeple', meeple);
         this.placeMeeple(meeple);
     }
 
-    public createDestinationZones(possibleDestinations: number[]) {console.log('createDestinationZones');
+    public createDestinationZones(possibleDestinations: number[]) {
         (Array.from(document.getElementsByClassName('destination-zone')) as HTMLElement[]).forEach(node => node.parentElement.removeChild(node));
 
         possibleDestinations.forEach(position => {
             const mapSpot = this.getMapSpot(position);
             dojo.place(`<div id="destination-zone-${position}" class="destination-zone ${mapSpot[2] ? 'big' : 'small'}" style="left: ${mapSpot[0]}px; top: ${mapSpot[1]}px;"></div>`, 'board');
             document.getElementById(`destination-zone-${position}`).addEventListener('click', () => this.game.move(position));
-            console.log('bind for', position);
         });
         
     }

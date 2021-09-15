@@ -22,6 +22,9 @@
 .die.selectable.selected {
   box-shadow: 0 0 4px 4px red;
 }
+.die.used {
+  filter: grayscale(1);
+}
 
 @keyframes selected-dice-animation {
   100% {

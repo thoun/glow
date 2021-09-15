@@ -28,6 +28,10 @@ $size: 0.25rem;
         box-shadow: 0 0 4px 4px red;
       }
     }
+
+    &.used {
+      filter: grayscale(1);
+    }
 }
 
 @keyframes selected-dice-animation {

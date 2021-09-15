@@ -163,25 +163,51 @@ trait ActionTrait {
         }
     }
 
-    public function move(int $destination) {
-        self::checkAction('move');
+    private function applyMove(int $playerId, object $route) {
+        // apply route & destination effects
+        foreach($route->costForPlayer as $effect) {
+            $this->applyEffect($playerId, $effect);
 
-        $playerId = intval($this->getCurrentPlayerId());
+            if ($effect >= 1 && $effect <= 5) {
+                $dice = $this->getDiceByLocation('player', $playerId, false);
+                $die = $this->array_find($dice, function($die) use ($effect) { return $die->value == $effect; });
+                if ($die != null) {
+                    self::DbQuery("UPDATE dice SET `used` = true WHERE die_id = $die->id");
+
+                    self::notifyAllPlayers('usedDice', '', [
+                        'playerId' => $playerId,
+                        'dieId' => $die->id,
+                    ]);
+                }
+            }
+        }
 
         $side = $this->getSide();
         if ($side === 1) {
-            // check possible & apply cost (set used dice too)
-            $this->movePlayerCompany($playerId, $destination);
+            $this->movePlayerCompany($playerId, $route->destination);
 
             self::notifyPlayer($playerId, 'moveUpdate', '', [
                 'args' => $this->argMoveForPlayer($playerId),
             ]);
         } else if ($side === 2) {
-            // check possible & apply cost (set used dice too)
-            $this->movePlayerBoat($playerId, $destination);
+            $this->movePlayerBoat($playerId, $route->destination);
 
             $this->applyEndTurn($playerId);
         }
+    }
+
+    public function move(int $destination) {
+        self::checkAction('move');
+
+        $playerId = intval($this->getCurrentPlayerId());
+
+        $possibleRoutes = $this->getPossibleRoutes($playerId);
+        $route = $this->array_find($possibleRoutes, function ($possibleRoute) use ($destination) { return $possibleRoute->destination == $destination; });
+        if ($route == null) {
+            throw new BgaUserException("Impossible to move here");
+        }
+
+        $this->applyMove($playerId, $route);
     }
 
     private function applyEndTurn(int $playerId) {
