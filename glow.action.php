@@ -59,6 +59,16 @@
         self::ajaxResponse();
     }
   	
+    public function selectSketalDie() {
+        self::setAjaxMode();     
+
+        $id = self::getArg('id', AT_posint, true);
+
+        $this->game->selectSketalDie($id);
+
+        self::ajaxResponse();
+    }
+  	
     public function removeCompanion() {
         self::setAjaxMode();     
 

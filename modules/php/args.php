@@ -44,6 +44,14 @@ trait ArgsTrait {
         ];
     }
 
+    function argSelectSketalDie() {
+        $dice = $this->getAvailableBigDice();
+
+        return [
+           'dice' => $dice,
+        ];
+    }
+
     function argRemoveCompanion() {
         $companions = [];
         $companions[0] = null;

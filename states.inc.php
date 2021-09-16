@@ -123,6 +123,23 @@ $playerActionsGameStates = [
             "recruitCompanion",
         ],
         "transitions" => [
+            "selectSketalDie" => ST_PLAYER_SELECT_SKETAL_DIE,
+            "nextPlayer" => ST_NEXT_PLAYER_RECRUIT_COMPANION,
+            "removeCompanion" => ST_PLAYER_REMOVE_COMPANION,
+            "zombiePass" => ST_NEXT_PLAYER_RECRUIT_COMPANION,
+        ]
+    ],
+
+    ST_PLAYER_SELECT_SKETAL_DIE => [
+        "name" => "selectSketalDie",
+        "description" => clienttranslate('${actplayer} must choose a new die'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a new die'),
+        "type" => "activeplayer",
+        "args" => "argSelectSketalDie",
+        "possibleactions" => [ 
+            "selectSketalDie",
+        ],
+        "transitions" => [
             "nextPlayer" => ST_NEXT_PLAYER_RECRUIT_COMPANION,
             "removeCompanion" => ST_PLAYER_REMOVE_COMPANION,
             "zombiePass" => ST_NEXT_PLAYER_RECRUIT_COMPANION,

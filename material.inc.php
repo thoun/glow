@@ -113,11 +113,13 @@ $this->MEETING_SPOT_BY_COLOR = [
 
 $this->SCORE_TRACK_REROLLS = [0, 1, 2, 3, 4, 5, 7, 9, 11, 13, 16, 19, 22, 26, 31, 36, 44, 52];
 
+// TODO remove points from map effects so they are not applied on company move
+
 $this->MAP1 = [
   new MapSpot(0, [], [
     new MapRoute(1),
     new MapRoute(44),
-  ], true),
+  ]),
   new MapSpot(1, [4], [
     new MapRoute(2),
   ]),
@@ -131,10 +133,10 @@ $this->MAP1 = [
   new MapSpot(4, [2], [
     new MapRoute(5),
   ]),
-  new MapSpot(5, [105, -21, 11], [
+  new MapSpot(5, [-21, 11], [
     new MapRoute(6),
     new MapRoute(51),
-  ], true),
+  ], 5, true),
   new MapSpot(6, [2], [
     new MapRoute(7),
   ]),
@@ -161,7 +163,7 @@ $this->MAP1 = [
   new MapSpot(13, [4], [
     new MapRoute(14),
   ]),
-  new MapSpot(14, [120, -23], [], true),
+  new MapSpot(14, [-23], [], 20, true),
   new MapSpot(15, [1], [
     new MapRoute(16, [-37]),
     new MapRoute(18),
@@ -169,10 +171,10 @@ $this->MAP1 = [
   new MapSpot(16, [3], [
     new MapRoute(17),
   ]),
-  new MapSpot(17, [12, -21], [
+  new MapSpot(17, [-21], [
     new MapRoute(18),
     new MapRoute(27),
-  ], true),
+  ], 12, true),
   new MapSpot(18, [1], [
     new MapRoute(19),
   ]),
@@ -222,9 +224,9 @@ $this->MAP1 = [
   new MapSpot(32, [2], [
     new MapRoute(33),
   ]),
-  new MapSpot(33, [8, 11, -21], [
+  new MapSpot(33, [11, -21], [
     new MapRoute(34),
-  ], true),
+  ], 8, true),
   new MapSpot(34, [2], [
     new MapRoute(35),
   ]),
@@ -237,10 +239,10 @@ $this->MAP1 = [
   new MapSpot(37, [-5], [
     new MapRoute(38),
   ]),
-  new MapSpot(38, [110, 30, -21], [
+  new MapSpot(38, [30, -21], [
     new MapRoute(39),
     new MapRoute(40),
-  ], true),
+  ], 10, true),
   new MapSpot(39, [5], []),
   new MapSpot(40, [1], [
     new MapRoute(41, [37]),
@@ -252,7 +254,7 @@ $this->MAP1 = [
   new MapSpot(42, [5], [
     new MapRoute(43),
   ]),
-  new MapSpot(43, [115, -22], [], true),
+  new MapSpot(43, [-22], [], 43, true),
   new MapSpot(44, [1], [
     new MapRoute(45),
   ]),
@@ -298,9 +300,9 @@ $this->MAP1 = [
   new MapSpot(58, [-3], [
     new MapRoute(59),
   ]),
-  new MapSpot(59, [103, -21, 30], [
+  new MapSpot(59, [-21, 30], [
     new MapRoute(60),
-  ], true),
+  ], 3, true),
   new MapSpot(60, [3], []),
 ];
 
@@ -320,26 +322,26 @@ $this->MAP2 = [
     new MapRoute(4, [], 1, 2),
     new MapRoute(5, [-21], 5),
   ]),
-  new MapSpot(4, [105, 21], []),
-  new MapSpot(5, [104], [
+  new MapSpot(4, [21], [], 5),
+  new MapSpot(5, [], [
     new MapRoute(6, [-21], 5),
-  ]),
-  new MapSpot(6, [102, 30], [
+  ], 4),
+  new MapSpot(6, [30], [
     new MapRoute(7, [], 4),
-  ]),
-  new MapSpot(7, [102, 30], [
+  ], 2),
+  new MapSpot(7, [30], [
     new MapRoute(8, [], 4),
-  ]),
+  ], 2),
   new MapSpot(8, [], [
     new MapRoute(9, [-21], 1, 2),
   ]),
-  new MapSpot(9, [108], [
+  new MapSpot(9, [], [
     new MapRoute(10, [-21], 1, 2),
-  ]),
+  ], 8),
   new MapSpot(10, [30], [
     new MapRoute(11, [], 5),
   ]),
-  new MapSpot(11, [103], []),
+  new MapSpot(11, [], [], 3),
 ];
 
 $this->MAPS = [

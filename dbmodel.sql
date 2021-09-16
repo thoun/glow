@@ -58,7 +58,8 @@ CREATE TABLE IF NOT EXISTS `companion` (
   `card_type_arg` int(2) NOT NULL,
   `card_location` varchar(16) NOT NULL,
   `card_location_arg` int(11) NOT NULL,
-  `reroll_used` TINYINT UNSIGNED NOT NULL DEFAULT false,
+  `reroll_used` TINYINT UNSIGNED,
+  `die_id` TINYINT UNSIGNED,
   PRIMARY KEY (`card_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
@@ -76,3 +77,4 @@ ALTER TABLE `player` ADD `player_rerolls` TINYINT UNSIGNED NOT NULL DEFAULT '0';
 ALTER TABLE `player` ADD `player_footprints` TINYINT UNSIGNED NOT NULL DEFAULT '0';
 ALTER TABLE `player` ADD `player_fireflies` TINYINT UNSIGNED NOT NULL DEFAULT '0';
 ALTER TABLE `player` ADD `applied_effects` json;
+ALTER TABLE `player` ADD `visited_spots` json;

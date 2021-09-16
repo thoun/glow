@@ -76,6 +76,9 @@ class MeetingTrack {
     }
 
     public removeCompanion(spot: number) {
+        if (spot == 0) {
+            debugger;
+        }
         this.companionsStocks[spot].removeAllTo(CEMETARY);
     }
 

@@ -114,6 +114,10 @@ interface EnteringRollDiceArgs {
     [playerId: number]: EnteringRollDiceForPlayer;
 }
 
+interface EnteringSelectSketalDieArgs {
+    dice: Die[];
+}
+
 interface EnteringResolveCardsArgs {
     [playerId: number]: number[][];
 }
@@ -192,4 +196,9 @@ interface NotifMeepleMovedArgs {
 interface NotifUsedDiceArgs {
     playerId: number;
     dieId: number;
+}
+
+interface NotifSketalDieArgs {
+    playerId: number;
+    die: Die;
 }

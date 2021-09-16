@@ -194,6 +194,14 @@ class Glow implements GlowGame {
         }
     }
 
+    private onEnteringSelectSketalDie(args: EnteringSelectSketalDieArgs) {
+        args.dice.forEach(die => {
+            const html = `<div class="die-item color${die.color} side${Math.min(6, die.color)}"></div>`;
+
+            (this as any).addActionButton(`selectSketalDie${die.id}-button`, html, () => this.selectSketalDie(die.id));
+        });
+    }
+
     private onEnteringStateRemoveCompanion(args: RecruitCompanionArgs) {
         this.meetingTrackClickAction = 'remove';
 
@@ -294,6 +302,9 @@ class Glow implements GlowGame {
     public onUpdateActionButtons(stateName: string, args: any) {
         if ((this as any).isCurrentPlayerActive()) {
             switch (stateName) {
+                case 'selectSketalDie':
+                    this.onEnteringSelectSketalDie(args as EnteringSelectSketalDieArgs);
+                    break;
                 case 'rollDice':
                     this.rollDiceArgs = (args as EnteringRollDiceArgs)[this.getPlayerId()];
                     this.setActionBarRollDice(false);
@@ -776,6 +787,16 @@ class Glow implements GlowGame {
         });
     }
 
+    public selectSketalDie(id: number) {
+        if(!(this as any).checkAction('selectSketalDie')) {
+            return;
+        }
+
+        this.takeAction('selectSketalDie', {
+            id
+        });
+    }
+
     public removeCompanion(spot: number) {
         if(!(this as any).checkAction('removeCompanion')) {
             return;
@@ -917,6 +938,8 @@ class Glow implements GlowGame {
             ['diceRolled', ANIMATION_MS],
             ['diceChanged', ANIMATION_MS],
             ['meepleMoved', ANIMATION_MS],
+            ['takeSketalDie', ANIMATION_MS],
+            ['removeSketalDie', ANIMATION_MS],
             ['resolveCardUpdate', 1],
             ['usedDice', 1],
             ['moveUpdate', 1],
@@ -961,6 +984,16 @@ class Glow implements GlowGame {
     notif_removeCompanions(notif: Notif<NotifRemoveCompanionsArgs>) {
         this.meetingTrack.removeCompanions();
         this.meetingTrack.setCemetaryTop(notif.args.cemetaryTop);
+    }
+
+    notif_takeSketalDie(notif: Notif<NotifSketalDieArgs>) {
+        const playerTable = this.getPlayerTable(notif.args.playerId);
+        playerTable.addDice([notif.args.die]);
+    }
+
+    notif_removeSketalDie(notif: Notif<NotifSketalDieArgs>) {
+        const playerTable = this.getPlayerTable(notif.args.playerId);
+        playerTable.removeDice([notif.args.die]);
     }
 
     notif_points(notif: Notif<NotifPointsArgs>) {

@@ -38,22 +38,8 @@ trait ActionTrait {
 
         $this->gamestate->nextState('nextPlayer');
     }
-    
-    public function recruitCompanion(int $spot) {
-        self::checkAction('recruitCompanion'); 
 
-        if ($spot < 1 || $spot > 5) {
-            throw new BgaUserException("Not a valid spot");
-        }
-        
-        $playerId = intval(self::getActivePlayerId());
-
-        $companion = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting', $spot))[0];
-
-        if ($companion->location != 'meeting') {
-            throw new BgaUserException("Companion not available");
-        }
-
+    public function applyRecruitCompanion(int $playerId, object $companion) {
         $this->companions->moveCard($companion->id, 'player', $playerId);
         self::DbQuery("UPDATE player SET `player_recruit_day` = (".$this->getDaySql().") where `player_id` = $playerId");  
 
@@ -74,7 +60,58 @@ trait ActionTrait {
         $this->addPlayerFootprints($playerId, $this->getMeetingTrackFootprints($spot));
         $this->removeMeetingTrackFootprints($spot);
 
+        // take new die if Sketal
+        if ($companion->die && $companion->dieColor > 0) {
+            $dice = $this->getAvailableBigDice();
+            foreach($dice as $die) {
+                if ($die->color == $companion->die) {
+                    $this->takeSketalDie($playerId, $die);
+                }
+            }
+        }
+    }
+
+    function redirectAfterRecruit() {
         $this->gamestate->nextState($this->getPlayerCount() == 2 ? 'removeCompanion' : 'nextPlayer');
+    }
+    
+    public function recruitCompanion(int $spot) {
+        self::checkAction('recruitCompanion'); 
+
+        if ($spot < 1 || $spot > 5) {
+            throw new BgaUserException("Not a valid spot");
+        }
+        $companion = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting', $spot))[0];
+
+        if ($companion->location != 'meeting') {
+            throw new BgaUserException("Companion not available");
+        }
+        
+        $playerId = self::getActivePlayerId();
+
+        $this->applyRecruitCompanion($playerId, $companion);
+
+        if ($companion->die && $companion->dieColor === 0) {
+            $this->gamestate->nextState('selectSketalDie');
+        } else {
+            $this->redirectAfterRecruit();
+        }
+    }
+
+    public function selectSketalDie(int $id) {
+        self::checkAction('selectSketalDie'); 
+
+        $die = $this->getDieById($id);
+
+        if ($companion->location != 'deck') {
+            throw new BgaUserException("Die not available");
+        }
+        
+        $playerId = self::getActivePlayerId();
+
+        $this->takeSketalDie($playerId, $die);
+
+        $this->redirectAfterRecruit();
     }
     
     public function removeCompanion(int $spot) {

@@ -141,6 +141,12 @@ trait UtilTrait {
         $dbDices = self::getCollectionFromDB($sql);
         return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices))[0];
     }
+    
+    function getAvailableBigDice() {
+        $sql = "SELECT * FROM dice WHERE `location` = 'deck' AND `small` = false";
+        $dbDices = self::getCollectionFromDB($sql);
+        return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices));
+    }
 
     function getBlackDie() {
         $sql = "SELECT * FROM dice WHERE `color` = 8";
@@ -148,7 +154,7 @@ trait UtilTrait {
         return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices))[0];
     }
 
-    function moveDice(array $dice, string $location, int $locationArg) {
+    function moveDice(array $dice, string $location, int $locationArg = 0) {
         $ids = array_map(function ($idie) { return $idie->id; }, $dice);
         self::DbQuery("UPDATE dice SET `location` = '$location', `location_arg` = $locationArg WHERE `die_id` IN (".implode(',', $ids).")");
     }
@@ -277,7 +283,7 @@ trait UtilTrait {
 
         }
         // set face 1 (A) before face 2 (B)
-        self::DbQuery("UPDATE companion SET `card_location_arg` = `card_location_arg` + (100 * `card_type`) WHERE `card_location` = 'deck' ");
+        self::DbQuery("UPDATE companion SET `card_location_arg` = `card_location_arg` + (100 * (2 - `card_type`)) WHERE `card_location` = 'deck' ");
     }
 
     function createSpells() {
@@ -370,6 +376,11 @@ trait UtilTrait {
 
     function sendToCemetary(int $companionId) {
         $this->companions->moveCard($companionId, 'cemetery', intval($this->companions->countCardInLocation('cemetery')));
+
+        $companion = $this->getCompanionFromDb($this->companions->getCard($companionId));
+        if ($companion->die) {
+            $this->removeSketalDie($companion->dieId);
+        }
     }
         
     function getTopCemetaryCompanion() {
@@ -623,5 +634,32 @@ trait UtilTrait {
         }
 
         $this->saveAppliedEffect($playerId, [$cardType, $id]);
+    }
+
+    public function takeSketalDie(int $playerId, object $die) {
+        $this->moveDice([$die], 'player', $playerId);
+
+        $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+        $lastCompanion = $companions[count($companions) - 1];
+        self::DbQuery("UPDATE `companion` SET `die_id` = $die->id WHERE `card_id` = $lastCompanion->id");
+
+        self::notifyAllPlayers('takeSketalDie', clienttranslate('${player_name} takes ${companionName} die'), [
+            'playerId' => $playerId,
+            'player_name' => $this->getPlayerName($playerId),
+            'die' => $die,
+        ]);
+    }
+    
+
+    public function removeSketalDie(int $playerId, object $die) {
+        $this->moveDice([$die], 'deck');
+
+        self::DbQuery("UPDATE `companion` SET `die_id` = null WHERE `die_id` = $die->id");
+
+        self::notifyAllPlayers('removeSketalDie', clienttranslate('${player_name} loses ${companionName} die'), [
+            'playerId' => $playerId,
+            'player_name' => $this->getPlayerName($playerId),
+            'die' => $die,
+        ]);
     }
 }

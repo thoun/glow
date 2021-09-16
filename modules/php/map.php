@@ -49,6 +49,8 @@ trait MapTrait {
     function movePlayerCompany(int $playerId, int $position) {
         self::DbQuery("UPDATE meeple SET `position` = $position WHERE `player_id` = $playerId AND `type` = 1");
         
+        $this->addVisitedMapSpot($playerId, $route->destination);
+        
         self::notifyAllPlayers('meepleMoved', '', [
             'meeple' => $this->getPlayerCompany($playerId),
         ]);
@@ -85,13 +87,7 @@ trait MapTrait {
 
     function getMapSpotPoints(int $side, int $position) {
         $mapSpot = $this->getMapSpot(1, $position);
-
-        $pointEffect = $this->array_find($mapSpot->effects, function($effect) { return $effect > 100; });
-        if ($pointEffect !== null) {
-            return $pointEffect - 100;
-        } else {
-            return 0;
-        }
+        return $mapSpot->points;
     }
 
     function canSettle(int $playerId) {
@@ -146,9 +142,30 @@ trait MapTrait {
         return $routes;
     }
 
+    function getVisitedMapSpots(int $playerId) {
+        $json_obj = self::getUniqueValueFromDB("SELECT `visited_spots` FROM `player` WHERE `player_id` = $playerId");
+        if ($json_obj) {
+            return json_decode($json_obj, true);
+        } else {
+            return [];
+        }
+    }
+
+    function addVisitedMapSpot(int $playerId, int $position) {
+        $visitedSpots = $this->getVisitedMapSpots();
+        $visitedSpots[] = $position;
+        $jsonObj = json_encode($visitedSpots);
+        self::DbQuery("UPDATE `player` SET `visited_spots` = '$jsonObj' WHERE `player_id` = $playerId");
+    }
+
     function getPossibleRoutesForPlayer(int $side, int $position, int $playerId) {
         $possibleRoutes = [];
         $routes = $this->getRoutes($side, $position);
+
+        if ($side === 1) {
+            $visitedSpots = $this->getVisitedMapSpots();
+            $routes = array_values(array_filter($routes, function ($route) use ($visitedSpots) { return in_array($route->destination, $visitedSpots); }));
+        }
 
         $footprints = $this->getPlayerFootprints($playerId);        
         $dice = $this->getDiceByLocation('player', $playerId, false);

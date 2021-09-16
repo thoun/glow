@@ -81,6 +81,10 @@ class PlayerTable {
     public addDice(dice: Die[]) {
         dice.forEach(die => this.game.createOrMoveDie(die, `player-table-${this.playerId}-dice`));
     }
+
+    public removeDice(dice: Die[]) {
+        dice.forEach(die => (this.game as any).fadeOutAndDestroy(`die${die.id}`));
+    }
     
     public removeCompanion(companion: Companion) {
         this.companionsStock.removeFromStockById(''+companion.id, CEMETARY);

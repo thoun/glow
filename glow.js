@@ -368,6 +368,9 @@ var MeetingTrack = /** @class */ (function () {
         this.companionsStocks[spot].addToStockWithId(companion.subType, '' + companion.id);
     };
     MeetingTrack.prototype.removeCompanion = function (spot) {
+        if (spot == 0) {
+            debugger;
+        }
         this.companionsStocks[spot].removeAllTo(CEMETARY);
     };
     MeetingTrack.prototype.removeCompanions = function () {
@@ -474,6 +477,10 @@ var PlayerTable = /** @class */ (function () {
     PlayerTable.prototype.addDice = function (dice) {
         var _this = this;
         dice.forEach(function (die) { return _this.game.createOrMoveDie(die, "player-table-" + _this.playerId + "-dice"); });
+    };
+    PlayerTable.prototype.removeDice = function (dice) {
+        var _this = this;
+        dice.forEach(function (die) { return _this.game.fadeOutAndDestroy("die" + die.id); });
     };
     PlayerTable.prototype.removeCompanion = function (companion) {
         this.companionsStock.removeFromStockById('' + companion.id, CEMETARY);
@@ -639,6 +646,13 @@ var Glow = /** @class */ (function () {
             this.meetingTrack.setSelectionMode(1);
         }
     };
+    Glow.prototype.onEnteringSelectSketalDie = function (args) {
+        var _this = this;
+        args.dice.forEach(function (die) {
+            var html = "<div class=\"die-item color" + die.color + " side" + Math.min(6, die.color) + "\"></div>";
+            _this.addActionButton("selectSketalDie" + die.id + "-button", html, function () { return _this.selectSketalDie(die.id); });
+        });
+    };
     Glow.prototype.onEnteringStateRemoveCompanion = function (args) {
         var _this = this;
         this.meetingTrackClickAction = 'remove';
@@ -727,6 +741,9 @@ var Glow = /** @class */ (function () {
     Glow.prototype.onUpdateActionButtons = function (stateName, args) {
         if (this.isCurrentPlayerActive()) {
             switch (stateName) {
+                case 'selectSketalDie':
+                    this.onEnteringSelectSketalDie(args);
+                    break;
                 case 'rollDice':
                     this.rollDiceArgs = args[this.getPlayerId()];
                     this.setActionBarRollDice(false);
@@ -1129,6 +1146,14 @@ var Glow = /** @class */ (function () {
             spot: spot
         });
     };
+    Glow.prototype.selectSketalDie = function (id) {
+        if (!this.checkAction('selectSketalDie')) {
+            return;
+        }
+        this.takeAction('selectSketalDie', {
+            id: id
+        });
+    };
     Glow.prototype.removeCompanion = function (spot) {
         if (!this.checkAction('removeCompanion')) {
             return;
@@ -1247,6 +1272,8 @@ var Glow = /** @class */ (function () {
             ['diceRolled', ANIMATION_MS],
             ['diceChanged', ANIMATION_MS],
             ['meepleMoved', ANIMATION_MS],
+            ['takeSketalDie', ANIMATION_MS],
+            ['removeSketalDie', ANIMATION_MS],
             ['resolveCardUpdate', 1],
             ['usedDice', 1],
             ['moveUpdate', 1],
@@ -1287,6 +1314,14 @@ var Glow = /** @class */ (function () {
     Glow.prototype.notif_removeCompanions = function (notif) {
         this.meetingTrack.removeCompanions();
         this.meetingTrack.setCemetaryTop(notif.args.cemetaryTop);
+    };
+    Glow.prototype.notif_takeSketalDie = function (notif) {
+        var playerTable = this.getPlayerTable(notif.args.playerId);
+        playerTable.addDice([notif.args.die]);
+    };
+    Glow.prototype.notif_removeSketalDie = function (notif) {
+        var playerTable = this.getPlayerTable(notif.args.playerId);
+        playerTable.removeDice([notif.args.die]);
     };
     Glow.prototype.notif_points = function (notif) {
         this.incPoints(notif.args.playerId, notif.args.points);

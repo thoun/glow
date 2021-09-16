@@ -26,6 +26,7 @@ class Companion extends CompanionCard {
     public $location_arg;
     public $type; // 1 = A, 2 = B
     public $subType; // index (1-23)
+    public $dieId;
 
     public function __construct($dbCard, $COMPANIONS) {
         $this->id = intval($dbCard['id']);
@@ -33,6 +34,7 @@ class Companion extends CompanionCard {
         $this->location_arg = intval($dbCard['location_arg']);
         $this->type = intval($dbCard['type']);
         $this->subType = intval($dbCard['type_arg']);
+        $this->dieId = intval($dbCard['die_id']);
 
         $companionCard = $COMPANIONS[$this->subType];
         $this->name = $companionCard->name;
