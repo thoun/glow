@@ -153,7 +153,7 @@ interface NotifChosenCompanionArgs {
 }
 
 interface NotifRemoveCompanionsArgs {
-    cemetaryTop: Companion;
+    cemeteryTop: Companion;
 }
 
 interface NotifPointsArgs {

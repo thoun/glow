@@ -39,13 +39,16 @@ trait ActionTrait {
         $this->gamestate->nextState('nextPlayer');
     }
 
-    public function applyRecruitCompanion(int $playerId, object $companion) {
+    public function applyRecruitCompanion(int $playerId, object $companion, $spot = null) {
         $this->companions->moveCard($companion->id, 'player', $playerId);
         self::DbQuery("UPDATE player SET `player_recruit_day` = (".$this->getDaySql().") where `player_id` = $playerId");  
 
-        $dice = $this->getDiceByLocation('meeting', $spot);
-        if (count($dice) > 0) {
-            $this->moveDice($dice, 'player', $playerId);
+        $dice = null;
+        if ($spot !== null) {
+            $dice = $this->getDiceByLocation('meeting', $spot);
+            if (count($dice) > 0) {
+                $this->moveDice($dice, 'player', $playerId);
+            }
         }
 
         self::notifyAllPlayers('chosenCompanion', clienttranslate('${player_name} chooses companion ${companionName}'), [
@@ -57,15 +60,18 @@ trait ActionTrait {
             'dice' => $dice,
         ]);
         
-        $this->addPlayerFootprints($playerId, $this->getMeetingTrackFootprints($spot));
-        $this->removeMeetingTrackFootprints($spot);
+        if ($spot !== null) {
+            $this->addPlayerFootprints($playerId, $this->getMeetingTrackFootprints($spot));
+            $this->removeMeetingTrackFootprints($spot);
+        }
 
         // take new die if Sketal
         if ($companion->die && $companion->dieColor > 0) {
             $dice = $this->getAvailableBigDice();
             foreach($dice as $die) {
-                if ($die->color == $companion->die) {
+                if ($die->color === $companion->dieColor) {
                     $this->takeSketalDie($playerId, $die);
+                    break;
                 }
             }
         }
@@ -89,7 +95,7 @@ trait ActionTrait {
         
         $playerId = self::getActivePlayerId();
 
-        $this->applyRecruitCompanion($playerId, $companion);
+        $this->applyRecruitCompanion($playerId, $companion, $spot);
 
         if ($companion->die && $companion->dieColor === 0) {
             $this->gamestate->nextState('selectSketalDie');
@@ -103,7 +109,7 @@ trait ActionTrait {
 
         $die = $this->getDieById($id);
 
-        if ($companion->location != 'deck') {
+        if ($die->location != 'deck') {
             throw new BgaUserException("Die not available");
         }
         
@@ -116,6 +122,8 @@ trait ActionTrait {
     
     public function removeCompanion(int $spot) {
         self::checkAction('removeCompanion'); 
+
+        $playerId = $this->getCurrentPlayerId();
 
         if ($spot < 1 || $spot > 5) {
             throw new BgaUserException("Not a valid spot");
@@ -132,10 +140,10 @@ trait ActionTrait {
             throw new BgaUserException("Companion not available");
         }
 
-        $this->sendToCemetary($companion->id, 'cemetery');
+        $this->sendToCemetery($playerId, $companion->id);
 
         self::notifyAllPlayers('removeCompanion', clienttranslate('${player_name} removes companion ${companionName}'), [
-            'playerId' => self::getActivePlayerId(),
+            'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
             'companion' => $companion,
             'companionName' => $companion->name,

@@ -152,7 +152,7 @@ trait MapTrait {
     }
 
     function addVisitedMapSpot(int $playerId, int $position) {
-        $visitedSpots = $this->getVisitedMapSpots();
+        $visitedSpots = $this->getVisitedMapSpots($playerId);
         $visitedSpots[] = $position;
         $jsonObj = json_encode($visitedSpots);
         self::DbQuery("UPDATE `player` SET `visited_spots` = '$jsonObj' WHERE `player_id` = $playerId");
@@ -163,7 +163,7 @@ trait MapTrait {
         $routes = $this->getRoutes($side, $position);
 
         if ($side === 1) {
-            $visitedSpots = $this->getVisitedMapSpots();
+            $visitedSpots = $this->getVisitedMapSpots($playerId);
             $routes = array_values(array_filter($routes, function ($route) use ($visitedSpots) { return in_array($route->destination, $visitedSpots); }));
         }
 

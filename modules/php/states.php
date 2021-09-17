@@ -53,11 +53,11 @@ trait StateTrait {
         $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting'));
 
         foreach($companions as $companion) {
-            $this->sendToCemetary($companion->id);
+            $this->sendToCemetery(0, $companion->id);
         }
 
         self::notifyAllPlayers('removeCompanions', '', [
-            'cemetaryTop' => $this->getTopCemetaryCompanion(),
+            'cemeteryTop' => $this->getTopCemeteryCompanion(),
         ]);
 
         $this->rollPlayerDice();

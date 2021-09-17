@@ -12,15 +12,15 @@ trait DebugUtilTrait {
             return;
         } 
 
-        self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 200 where `card_type_arg` in (18, 45)");
+        self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (44, 13, 14, 15, 16, 17)");
         //$this->addResource(2343492, 4, 0);
         //$this->debugSetPoints(19);
-        $this->debugSkipAdventurers();
+        //$this->debugSkipAdventurers();
         //$this->debugSetProjectInWorkshop(2343492, 2, 1);
         //$this->debugSetProjectInWorkshop(2343492, 3, 4);
 
         // Activate first player must be commented in setup if this is used
-        $this->gamestate->changeActivePlayer(2343492);
+        //$this->gamestate->changeActivePlayer(2343492);
     }
 
     private function debugSkipAdventurers() {

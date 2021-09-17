@@ -195,7 +195,8 @@ class Glow implements GlowGame {
     }
 
     private onEnteringSelectSketalDie(args: EnteringSelectSketalDieArgs) {
-        args.dice.forEach(die => {
+        // remove color duplicates
+        args.dice.filter((die, index, self) => index === self.findIndex((t) => t.color === die.color)).forEach(die => {
             const html = `<div class="die-item color${die.color} side${Math.min(6, die.color)}"></div>`;
 
             (this as any).addActionButton(`selectSketalDie${die.id}-button`, html, () => this.selectSketalDie(die.id));
@@ -978,12 +979,12 @@ class Glow implements GlowGame {
             const playerTable = this.getPlayerTable(notif.args.playerId);
             playerTable.removeCompanion(notif.args.companion);
         }
-        this.meetingTrack.setCemetaryTop(notif.args.companion);
+        this.meetingTrack.setCemeteryTop(notif.args.companion);
     }
 
     notif_removeCompanions(notif: Notif<NotifRemoveCompanionsArgs>) {
         this.meetingTrack.removeCompanions();
-        this.meetingTrack.setCemetaryTop(notif.args.cemetaryTop);
+        this.meetingTrack.setCemeteryTop(notif.args.cemeteryTop);
     }
 
     notif_takeSketalDie(notif: Notif<NotifSketalDieArgs>) {

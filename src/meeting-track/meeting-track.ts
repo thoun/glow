@@ -41,7 +41,7 @@ class MeetingTrack {
             setupCompanionCards(this.companionsStocks[i]);
     
             if (cemetery) {
-                this.setCemetaryTop(spot.companion);
+                this.setCemeteryTop(spot.companion);
             } else {
                 if (spot.companion) {
                     this.companionsStocks[i].addToStockWithId(spot.companion.subType, ''+spot.companion.id);
@@ -59,7 +59,7 @@ class MeetingTrack {
     public setCompanion(meetingTrackSpot: MeetingTrackSpot, spot: number): void {
         const companion = meetingTrackSpot.companion;
         if (!companion) {
-            this.companionsStocks[spot].removeAllTo(CEMETARY);
+            this.companionsStocks[spot].removeAllTo(Cemetery);
             return;
         }
         
@@ -69,7 +69,7 @@ class MeetingTrack {
         }
 
         if (currentId && Number(currentId) != companion.id) {
-            this.companionsStocks[spot].removeAllTo(CEMETARY);
+            this.companionsStocks[spot].removeAllTo(Cemetery);
         }
 
         this.companionsStocks[spot].addToStockWithId(companion.subType, ''+companion.id);
@@ -79,7 +79,7 @@ class MeetingTrack {
         if (spot == 0) {
             debugger;
         }
-        this.companionsStocks[spot].removeAllTo(CEMETARY);
+        this.companionsStocks[spot].removeAllTo(Cemetery);
     }
 
     public removeCompanions() {
@@ -121,7 +121,7 @@ class MeetingTrack {
         });
     }
 
-    public setCemetaryTop(companion?: Companion) {
+    public setCemeteryTop(companion?: Companion) {
         if (companion) {
             if (!this.companionsStocks[0].items.length) {
                 this.companionsStocks[0].addToStockWithId(1000 + companion.type, '' + companion.type);

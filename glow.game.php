@@ -122,14 +122,14 @@ class Glow extends Table {
         $this->createCompanions();
         $this->createSpells();
 
+        // TODO TEMP card to test
+        $this->debugSetup();
+
         $this->placeCompanionsOnMeetingTrack();
         $this->initMeetingTrackSmallDice();
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
-
-        // TODO TEMP card to test
-        //$this->debugSetup();
 
         /************ End of the game initialization *****/
     }
@@ -160,10 +160,10 @@ class Glow extends Table {
         $dice = $this->getDiceByLocation('meeting');
         $meetingTrack = [];
         $meetingTrack[0] = new MeetingTrackSpot();
-        $meetingTrack[0]->companion = $this->getTopCemetaryCompanion();
+        $meetingTrack[0]->companion = $this->getTopCemeteryCompanion();
 
         for ($i=1;$i<=5;$i++) {
-            $companions = $this->getCompanionsFromDb($this->adventurers->getCardsInLocation('meeting', $i));
+            $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting', $i));
             $companion = count($companions) > 0 ? $companions[0] : null;
 
             $spotDice = array_values(array_filter($dice, function($idie) use ($i) { return $idie->location_arg === $i; }));

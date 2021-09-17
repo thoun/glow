@@ -374,17 +374,21 @@ trait UtilTrait {
         ] + $params);
     }
 
-    function sendToCemetary(int $companionId) {
+    function sendToCemetery(int $playerId, int $companionId) {
         $this->companions->moveCard($companionId, 'cemetery', intval($this->companions->countCardInLocation('cemetery')));
 
         $companion = $this->getCompanionFromDb($this->companions->getCard($companionId));
         if ($companion->die) {
-            $this->removeSketalDie($companion->dieId);
+            $dieId = intval(self::getUniqueValueFromDB("SELECT `die_id` FROM companion WHERE `card_id` = $companion->id"));
+            if ($dieId) {
+                $this->removeSketalDie($playerId, $this->getDieById($dieId));
+            }
         }
     }
         
-    function getTopCemetaryCompanion() {
-        $companionDb = $this->companions->getCardOnTop('cemetary');
+    function getTopCemeteryCompanion() {
+        $companionDb = $this->companions->getCardOnTop('cemetery');
+        //die('cemetery '.json_encode($companionDb));
         if ($companionDb != null) {
             return $this->getCompanionFromDb($companionDb);
         } else {
@@ -592,7 +596,7 @@ trait UtilTrait {
         }
 
         else if ($effect === 33) { // skull
-            $this->sendToCemetary($cardId, 'cemetery');
+            $this->sendToCemetery($playerId, $cardId);
 
             $companion = $this->getCompanionFromDb($this->companions->getCard($cardId));
 
@@ -640,13 +644,14 @@ trait UtilTrait {
         $this->moveDice([$die], 'player', $playerId);
 
         $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
-        $lastCompanion = $companions[count($companions) - 1];
-        self::DbQuery("UPDATE `companion` SET `die_id` = $die->id WHERE `card_id` = $lastCompanion->id");
+        $companion = $companions[count($companions) - 1];
+        self::DbQuery("UPDATE `companion` SET `die_id` = $die->id WHERE `card_id` = $companion->id");
 
         self::notifyAllPlayers('takeSketalDie', clienttranslate('${player_name} takes ${companionName} die'), [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'die' => $die,
+            'companionName' => $companion->name,
         ]);
     }
     
@@ -654,12 +659,16 @@ trait UtilTrait {
     public function removeSketalDie(int $playerId, object $die) {
         $this->moveDice([$die], 'deck');
 
+        $companionId = intval(self::getUniqueValueFromDB("SELECT `card_id` FROM `companion` WHERE `die_id` = $die->id"));
+        $companion = $this->getCompanionFromDb($this->companions->getCard($companionId));
+
         self::DbQuery("UPDATE `companion` SET `die_id` = null WHERE `die_id` = $die->id");
 
         self::notifyAllPlayers('removeSketalDie', clienttranslate('${player_name} loses ${companionName} die'), [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'die' => $die,
+            'companionName' => $companion->name,
         ]);
     }
 }

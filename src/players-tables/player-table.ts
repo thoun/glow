@@ -1,4 +1,4 @@
-const CEMETARY = 'meeting-track-companion-0';
+const Cemetery = 'meeting-track-companion-0';
 
 class PlayerTable {
     public playerId: number;
@@ -87,7 +87,7 @@ class PlayerTable {
     }
     
     public removeCompanion(companion: Companion) {
-        this.companionsStock.removeFromStockById(''+companion.id, CEMETARY);
+        this.companionsStock.removeFromStockById(''+companion.id, Cemetery);
     }
 
     public setUsedDie(dieId: number) {
