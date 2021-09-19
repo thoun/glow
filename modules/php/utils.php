@@ -95,6 +95,17 @@ trait UtilTrait {
     function getCompanionsFromDb(array $dbObjects) {
         return array_map(function($dbObject) { return $this->getCompanionFromDb($dbObject); }, array_values($dbObjects));
     }
+
+    function getSpellFromDb($dbObject) {
+        if (!$dbObject || !array_key_exists('id', $dbObject)) {
+            throw new BgaSystemException("Spell doesn't exists ".json_encode($dbObject));
+        }
+        return new Spell($dbObject, $this->SPELLS);
+    }
+
+    function getSpellsFromDb(array $dbObjects) {
+        return array_map(function($dbObject) { return $this->getSpellFromDb($dbObject); }, array_values($dbObjects));
+    }
     
     function getSmallDice(bool $ignoreBlack) {
         $sql = "SELECT * FROM dice WHERE `small` = true ";
@@ -292,7 +303,7 @@ trait UtilTrait {
 
     function createSpells() {
         foreach($this->SPELLS as $type => $effect) {
-            $spells[] = [ 'type' => $type, 'type_arg' => null, 'nbr' => 1];
+            $spells[] = [ 'type' => $type, 'type_arg' => 0, 'nbr' => 1];
         }
         $this->spells->createCards($spells, 'deck');
     }
@@ -625,8 +636,11 @@ trait UtilTrait {
                 'playerId' => $playerId,
                 'companion' => $companion,
             ]);
+        } else if ($effect === 36) { // spell
+            $playersIds = $this->getPlayersIds();
+            $this->giveSpellToPlayers(array_values(array_filter($playersIds, function($pId) use ($playerId) { return $pId != $playerId; })));
         } else {
-            // TODO special cards effects
+            // TODO 35 resurect, 37 skull/spell
         }
     }
 
@@ -691,5 +705,24 @@ trait UtilTrait {
             'die' => $die,
             'companionName' => $companion->name,
         ]);
+    }
+
+    private function giveSpellToPlayers(array $playersIds) {
+        $spellsIds = [];
+
+        foreach($playersIds as $playerId) {
+            $spellsIds[$playerId] = $this->getSpellFromDb($this->spells->pickCardForLocation('deck', 'player', $playerId))->id;
+        }
+
+        self::notifyAllPlayers('giveHiddenSpells', clienttranslate('${player_name} gives spell token to other players with ${companionName}'), [
+            'playerId' => $playerId,
+            'player_name' => $this->getPlayerName($playerId),
+            'companionName' => $this->COMPANIONS[XARGOK]->name,
+            'spellsIds' => $spellsIds,
+        ]);
+    }
+
+    public function revealSpellTokens() {
+        // TODO;
     }
 }

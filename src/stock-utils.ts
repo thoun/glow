@@ -10,8 +10,7 @@ declare const board: HTMLDivElement;*/
 const CARD_WIDTH = 129;
 const CARD_HEIGHT = 240;
 
-const PROJECT_WIDTH = 134;
-const PROJECT_HEIGHT = 93;
+const SPELL_DIAMETER = 64;
 
 function setupAdventurersCards(adventurerStock: Stock) {
     const cardsurl = `${g_gamethemeurl}img/adventurers.png`;
@@ -42,6 +41,21 @@ function setupCompanionCards(companionsStock: Stock) {
 
     companionsStock.addItemType(1001,  0, cardsurl, 0);
     companionsStock.addItemType(1002,  0, cardsurl, 24);
+}
+
+function setupSpellCards(spellsStock: Stock) {
+    const cardsurl = `${g_gamethemeurl}img/spells.png`;
+
+    for (let type=1; type<=7;type++) {
+        spellsStock.addItemType(
+            type, 
+            type, 
+            cardsurl, 
+            type
+        );
+    }
+
+    spellsStock.addItemType(0,  0, cardsurl, 0);
 }
 
 function getMachineTooltip(type: number) {

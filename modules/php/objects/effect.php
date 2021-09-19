@@ -19,17 +19,19 @@ class Effect {
     } 
 }
 
-class EffectToken extends Effect {
+class Spell extends Effect {
     public $id;
     public $location;
     public $location_arg;
     public $type;
+    public $visible;
 
     public function __construct($dbCard, $SPELLS) {
         $this->id = intval($dbCard['id']);
         $this->location = $dbCard['location'];
         $this->location_arg = intval($dbCard['location_arg']);
         $this->type = intval($dbCard['type']);
+        $this->visible = boolval($dbCard['type_arg']);
 
         $spellCard = $SPELLS[$this->type];
         $this->conditions = $spellCard->conditions;

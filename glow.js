@@ -36,8 +36,7 @@ declare const g_gamethemeurl;
 declare const board: HTMLDivElement;*/
 var CARD_WIDTH = 129;
 var CARD_HEIGHT = 240;
-var PROJECT_WIDTH = 134;
-var PROJECT_HEIGHT = 93;
+var SPELL_DIAMETER = 64;
 function setupAdventurersCards(adventurerStock) {
     var cardsurl = g_gamethemeurl + "img/adventurers.png";
     for (var i = 0; i <= 7; i++) {
@@ -52,6 +51,13 @@ function setupCompanionCards(companionsStock) {
     }
     companionsStock.addItemType(1001, 0, cardsurl, 0);
     companionsStock.addItemType(1002, 0, cardsurl, 24);
+}
+function setupSpellCards(spellsStock) {
+    var cardsurl = g_gamethemeurl + "img/spells.png";
+    for (var type = 1; type <= 7; type++) {
+        spellsStock.addItemType(type, type, cardsurl, type);
+    }
+    spellsStock.addItemType(0, 0, cardsurl, 0);
 }
 function getMachineTooltip(type) {
     switch (type) {
@@ -445,7 +451,7 @@ var PlayerTable = /** @class */ (function () {
         var _this = this;
         this.game = game;
         this.playerId = Number(player.id);
-        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock\" >\n            <div class=\"name-column\">\n                <div class=\"player-name\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n                <div id=\"player-table-" + this.playerId + "-dice\" class=\"player-table-dice\"></div>\n            </div>\n            <div class=\"adventurer-and-companions\">\n                <div id=\"player-table-" + this.playerId + "-adventurer\"></div>\n                <div id=\"player-table-" + this.playerId + "-companions\"></div>\n            </div>\n        </div>";
+        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock\">\n            <div class=\"name-column\">\n                <div class=\"player-name\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n                <div id=\"player-table-" + this.playerId + "-dice\" class=\"player-table-dice\"></div>\n                <div id=\"player-table-" + this.playerId + "-spells\" class=\"player-table-spells\"></div>\n            </div>\n            <div class=\"adventurer-and-companions\">\n                <div id=\"player-table-" + this.playerId + "-adventurer\"></div>\n                <div id=\"player-table-" + this.playerId + "-companions\"></div>\n            </div>\n        </div>";
         dojo.place(html, this.playerId === this.game.getPlayerId() ? 'currentplayertable' : 'playerstables');
         // adventurer        
         this.adventurerStock = new ebg.stock();
@@ -463,9 +469,7 @@ var PlayerTable = /** @class */ (function () {
         setupAdventurersCards(this.adventurerStock);
         if (player.adventurer) {
             this.adventurerStock.addToStockWithId(player.adventurer.color, '' + player.adventurer.id);
-        } /* else {
-            this.adventurerStock.addToStockWithId(0, '0');
-        }*/
+        }
         // companions
         this.companionsStock = new ebg.stock();
         this.companionsStock.setSelectionAppearance('class');
@@ -480,6 +484,21 @@ var PlayerTable = /** @class */ (function () {
         });
         setupCompanionCards(this.companionsStock);
         player.companions.forEach(function (companion) { return _this.companionsStock.addToStockWithId(companion.subType, '' + companion.id); });
+        // spells
+        this.spellsStock = new ebg.stock();
+        this.spellsStock.setSelectionAppearance('class');
+        this.spellsStock.selectionClass = 'selected';
+        this.spellsStock.create(this.game, $("player-table-" + this.playerId + "-spells"), SPELL_DIAMETER, SPELL_DIAMETER);
+        this.spellsStock.setSelectionMode(0);
+        dojo.connect(this.spellsStock, 'onChangeSelection', this, function (_, itemId) {
+            if (_this.spellsStock.getSelectedItems().length) {
+                _this.game.resolveCard(2, Number(itemId));
+            }
+            _this.spellsStock.unselectAll();
+        });
+        setupSpellCards(this.spellsStock);
+        player.spells.forEach(function (spell) { return _this.spellsStock.addToStockWithId(spell.visible ? spell.type : 0, '' + spell.id); });
+        // dice
         player.dice.forEach(function (die) {
             _this.game.createOrMoveDie(die, "player-table-" + _this.playerId + "-dice");
         });
@@ -507,6 +526,13 @@ var PlayerTable = /** @class */ (function () {
     };
     PlayerTable.prototype.clearUsedDice = function () {
         Array.from(document.getElementsByClassName('die')).forEach(function (die) { return dojo.removeClass(die, 'used'); });
+    };
+    PlayerTable.prototype.addHiddenSpell = function (id, fromPlayerId) {
+        this.spellsStock.addToStockWithId(0, '' + id, "overall_player_board_" + fromPlayerId);
+    };
+    PlayerTable.prototype.revealSpell = function (spell) {
+        this.spellsStock.removeFromStockById('0');
+        this.spellsStock.addToStockWithId(spell.type, '' + spell.id);
     };
     return PlayerTable;
 }());
@@ -1312,6 +1338,7 @@ var Glow = /** @class */ (function () {
             ['takeSketalDie', ANIMATION_MS],
             ['removeSketalDie', ANIMATION_MS],
             ['moveBlackDie', ANIMATION_MS],
+            ['giveHiddenSpells', ANIMATION_MS],
             ['resolveCardUpdate', 1],
             ['usedDice', 1],
             ['moveUpdate', 1],
@@ -1412,6 +1439,13 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.notif_moveBlackDie = function (notif) {
         this.meetingTrack.placeSmallDice([notif.args.die]);
+    };
+    Glow.prototype.notif_giveHiddenSpells = function (notif) {
+        var _this = this;
+        Object.keys(notif.args.spellsIds).forEach(function (playerId) {
+            var playerTable = _this.getPlayerTable(Number(playerId));
+            playerTable.addHiddenSpell(notif.args.spellsIds[Number(playerId)], notif.args.playerId);
+        });
     };
     Glow.prototype.notif_lastTurn = function () {
         if (document.getElementById('last-round')) {

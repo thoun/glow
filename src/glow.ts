@@ -965,6 +965,7 @@ class Glow implements GlowGame {
             ['takeSketalDie', ANIMATION_MS],
             ['removeSketalDie', ANIMATION_MS],
             ['moveBlackDie', ANIMATION_MS],
+            ['giveHiddenSpells', ANIMATION_MS],
             ['resolveCardUpdate', 1],
             ['usedDice', 1],
             ['moveUpdate', 1],
@@ -1083,6 +1084,13 @@ class Glow implements GlowGame {
 
     notif_moveBlackDie(notif: Notif<NotifMoveBlackDieArgs>) {
         this.meetingTrack.placeSmallDice([notif.args.die]);
+    }
+
+    notif_giveHiddenSpells(notif: Notif<NotifGiveHiddenSpellsArgs>) {
+        Object.keys(notif.args.spellsIds).forEach(playerId => {
+            const playerTable = this.getPlayerTable(Number(playerId));
+            playerTable.addHiddenSpell(notif.args.spellsIds[Number(playerId)], notif.args.playerId);
+        })
     }
 
     notif_lastTurn() {

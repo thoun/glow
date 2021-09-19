@@ -49,5 +49,6 @@ define('BOARD_SIDE', 'BOARD_SIDE');
  * Cards
  */
 define('KAAR', 20);
+define('XARGOK', 10);
 
 ?>

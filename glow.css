@@ -467,6 +467,10 @@
 #currentplayertable .player-table .player-table-dice, #playerstables .player-table .player-table-dice {
   height: 42px;
 }
+#currentplayertable .player-table .player-table-spells .stockitem, #playerstables .player-table .player-table-spells .stockitem {
+  border: 0;
+  border-radius: 50%;
+}
 #currentplayertable .player-table .adventurer-and-companions, #playerstables .player-table .adventurer-and-companions {
   display: grid;
   grid-template-columns: 160px auto;

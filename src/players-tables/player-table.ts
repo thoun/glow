@@ -4,6 +4,7 @@ class PlayerTable {
     public playerId: number;
     public adventurerStock: Stock;
     public companionsStock: Stock;
+    public spellsStock: Stock;
 
     constructor(
         private game: GlowGame, 
@@ -12,10 +13,11 @@ class PlayerTable {
         this.playerId = Number(player.id);
 
         let html = `
-        <div id="player-table-${this.playerId}" class="player-table whiteblock" >
+        <div id="player-table-${this.playerId}" class="player-table whiteblock">
             <div class="name-column">
                 <div class="player-name" style="color: #${player.color};">${player.name}</div>
                 <div id="player-table-${this.playerId}-dice" class="player-table-dice"></div>
+                <div id="player-table-${this.playerId}-spells" class="player-table-spells"></div>
             </div>
             <div class="adventurer-and-companions">
                 <div id="player-table-${this.playerId}-adventurer"></div>
@@ -43,9 +45,7 @@ class PlayerTable {
 
         if (player.adventurer) {
             this.adventurerStock.addToStockWithId(player.adventurer.color, ''+player.adventurer.id);
-        }/* else {
-            this.adventurerStock.addToStockWithId(0, '0');
-        }*/
+        }
 
         // companions
 
@@ -63,6 +63,25 @@ class PlayerTable {
         setupCompanionCards(this.companionsStock);
 
         player.companions.forEach(companion => this.companionsStock.addToStockWithId(companion.subType, ''+companion.id));
+
+        // spells
+
+        this.spellsStock = new ebg.stock() as Stock;
+        this.spellsStock.setSelectionAppearance('class');
+        this.spellsStock.selectionClass = 'selected';
+        this.spellsStock.create(this.game, $(`player-table-${this.playerId}-spells`), SPELL_DIAMETER, SPELL_DIAMETER);
+        this.spellsStock.setSelectionMode(0);
+        dojo.connect(this.spellsStock, 'onChangeSelection', this, (_, itemId: string) => {
+            if (this.spellsStock.getSelectedItems().length) {
+                this.game.resolveCard(2, Number(itemId));
+            }
+            this.spellsStock.unselectAll();
+        });
+        setupSpellCards(this.spellsStock);
+
+        player.spells.forEach(spell => this.spellsStock.addToStockWithId(spell.visible ? spell.type : 0, ''+spell.id));
+
+        // dice
 
         player.dice.forEach(die => {
             this.game.createOrMoveDie(die, `player-table-${this.playerId}-dice`);
@@ -96,5 +115,14 @@ class PlayerTable {
     
     public clearUsedDice() {
         (Array.from(document.getElementsByClassName('die')) as HTMLElement[]).forEach(die => dojo.removeClass(die, 'used'));
+    }
+
+    public addHiddenSpell(id: number, fromPlayerId: number) {
+        this.spellsStock.addToStockWithId(0, ''+id, `overall_player_board_${fromPlayerId}`);
+    }
+
+    public revealSpell(spell: Spell) {
+        this.spellsStock.removeFromStockById('0');
+        this.spellsStock.addToStockWithId(spell.type, ''+spell.id);
     }
 }

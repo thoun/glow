@@ -315,6 +315,8 @@ trait ActionTrait {
             'args' => [],
         ]);
 
+        // TODO replace small dice here instead of stEndRound
+
         $this->gamestate->setPlayerNonMultiactive($playerId, 'endRound');
     }
   	

@@ -179,6 +179,7 @@ class Glow extends Table {
             $adventurers = $this->getAdventurersFromDb($this->adventurers->getCardsInLocation('player', $playerId));
             $player['adventurer'] = count($adventurers) > 0 ? $adventurers[0] : null;
             $player['companions'] = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+            $player['spells'] = $this->getSpellsFromDb($this->spells->getCardsInLocation('player', $playerId));
             $player['dice'] = $this->getDiceByLocation('player', $playerId);
             $player['rerolls'] = intval($player['rerolls']);
             $player['footprints'] = intval($player['footprints']);

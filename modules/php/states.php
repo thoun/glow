@@ -34,6 +34,8 @@ trait StateTrait {
             'day' => $day,
         ]);
 
+        $this->revealSpellTokens();
+
         $this->gamestate->nextState('morning');
     }
 

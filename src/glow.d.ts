@@ -16,6 +16,14 @@ interface Companion {
     location_arg: number;
 }
 
+interface Spell {
+    id: number;
+    type: number;
+    visible: boolean;
+    location: string;
+    location_arg: number;
+}
+
 interface Die {
     id: number;
     face: number;
@@ -49,6 +57,7 @@ interface GlowPlayer extends Player {
     meeples: Meeple[];
     adventurer: Adventurer;
     companions: Companion[];
+    spells: Spell[];
     dice: Die[];
     rerolls: number;
     footprints: number;
@@ -210,4 +219,9 @@ interface NotifSketalDieArgs {
 
 interface NotifMoveBlackDieArgs {
     die: Die;
+}
+
+interface NotifGiveHiddenSpellsArgs {
+    playerId: number;
+    spellsIds: { [playerId: number]: number };
 }
