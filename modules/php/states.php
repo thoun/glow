@@ -67,7 +67,6 @@ trait StateTrait {
 
     function stRollDice() {
         $this->gamestate->setAllPlayersMultiactive();
-        // $this->gamestate->nextState('keepDice');
     }
 
     function stResolveCards() {

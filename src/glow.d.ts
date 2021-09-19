@@ -94,6 +94,7 @@ interface GlowGame extends Game {
     createOrMoveDie(die: Die, destinationId: string, rollClass?: string): void;
     resolveCard(type: number, id: number): void;
     move(destination: number): void;
+    moveBlackDie(spot: number): void;
 }
 
 interface ChooseAdventurerArgs {
@@ -116,6 +117,10 @@ interface EnteringRollDiceArgs {
 
 interface EnteringSelectSketalDieArgs {
     dice: Die[];
+}
+
+interface EnteringMoveBlackDieArgs {
+    possibleSpots: number[];
 }
 
 interface EnteringResolveCardsArgs {
@@ -200,5 +205,9 @@ interface NotifUsedDiceArgs {
 
 interface NotifSketalDieArgs {
     playerId: number;
+    die: Die;
+}
+
+interface NotifMoveBlackDieArgs {
     die: Die;
 }

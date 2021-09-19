@@ -303,11 +303,11 @@ var Board = /** @class */ (function () {
 }());
 var MEETING_SPOT_BY_COLOR = [
     null,
-    5,
-    2,
     4,
     1,
     3,
+    0,
+    2,
 ];
 var MeetingTrack = /** @class */ (function () {
     function MeetingTrack(game, meetingTrackSpot) {
@@ -318,10 +318,10 @@ var MeetingTrack = /** @class */ (function () {
             var html = '';
             var cemetery = i === 0;
             if (!cemetery) {
-                var left_1 = 240 + 135 * (MEETING_SPOT_BY_COLOR[i] - 1);
+                var left_1 = 240 + 135 * MEETING_SPOT_BY_COLOR[i];
                 html += "<div id=\"meeting-track-dice-" + i + "\" class=\"meeting-track-zone dice\" style=\"left: " + left_1 + "px;\"></div>\n                <div id=\"meeting-track-footprints-" + i + "\" class=\"meeting-track-zone footprints\" style=\"left: " + left_1 + "px;\"></div>";
             }
-            var left = cemetery ? 50 : 240 + 135 * (i - 1);
+            var left = cemetery ? 50 : 240 + 135 * MEETING_SPOT_BY_COLOR[i];
             html += "<div id=\"meeting-track-companion-" + i + "\" class=\"meeting-track-stock\" style=\"left: " + left + "px;\"></div>";
             dojo.place(html, 'meeting-track');
             var spot = meetingTrackSpot[i];
@@ -346,9 +346,18 @@ var MeetingTrack = /** @class */ (function () {
         for (var i = 0; i <= 5; i++) {
             _loop_1(i);
         }
-        for (var i = 1; i <= 5; i++) {
+        var _loop_2 = function (i) {
             var spot = meetingTrackSpot[i];
-            this.placeSmallDice(spot.dice);
+            this_2.placeSmallDice(spot.dice);
+            document.getElementById("meeting-track-dice-" + i).addEventListener('click', function () {
+                if (dojo.hasClass("meeting-track-dice-" + i, 'selectable')) {
+                    _this.game.moveBlackDie(i);
+                }
+            });
+        };
+        var this_2 = this;
+        for (var i = 1; i <= 5; i++) {
+            _loop_2(i);
         }
     }
     MeetingTrack.prototype.setCompanion = function (meetingTrackSpot, spot) {
@@ -418,6 +427,14 @@ var MeetingTrack = /** @class */ (function () {
         }
         else {
             this.companionsStocks[0].removeAll();
+        }
+    };
+    MeetingTrack.prototype.setSelectableDice = function (possibleSpots) {
+        var _loop_3 = function (i) {
+            dojo.toggleClass("meeting-track-dice-" + i, 'selectable', possibleSpots.some(function (ps) { return ps === i; }));
+        };
+        for (var i = 1; i <= 5; i++) {
+            _loop_3(i);
         }
     };
     return MeetingTrack;
@@ -582,6 +599,9 @@ var Glow = /** @class */ (function () {
             case 'removeCompanion':
                 this.onEnteringStateRemoveCompanion(args.args);
                 break;
+            case 'moveBlackDie':
+                this.onEnteringStateMoveBlackDie(args.args);
+                break;
             case 'rollDice':
                 this.onEnteringStateRollDice();
             case 'move':
@@ -666,6 +686,9 @@ var Glow = /** @class */ (function () {
             this.meetingTrack.setSelectionMode(1);
         }
     };
+    Glow.prototype.onEnteringStateMoveBlackDie = function (args) {
+        this.meetingTrack.setSelectableDice(args.possibleSpots);
+    };
     Glow.prototype.onEnteringStateRollDice = function () {
         this.setDiceSelectionActive(true);
     };
@@ -715,6 +738,8 @@ var Glow = /** @class */ (function () {
             case 'recruitCompanion':
                 this.onLeavingRecruitCompanion();
                 break;
+            case 'moveBlackDie':
+                this.onLeavingMoveBlackDie();
             case 'rollDice':
                 this.onLeavingRollDice();
                 break;
@@ -728,6 +753,9 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.onLeavingRecruitCompanion = function () {
         this.meetingTrack.setSelectionMode(0);
+    };
+    Glow.prototype.onLeavingMoveBlackDie = function () {
+        this.meetingTrack.setSelectableDice([]);
     };
     Glow.prototype.onLeavingRollDice = function () {
         this.setDiceSelectionActive(false);
@@ -1053,13 +1081,13 @@ var Glow = /** @class */ (function () {
                 var cancel = document.getElementById("cancelRollDice-button");
                 cancel === null || cancel === void 0 ? void 0 : cancel.parentElement.removeChild(cancel);
                 var faces = die.color <= 5 ? 5 : 6;
-                var _loop_2 = function (i) {
+                var _loop_4 = function (i) {
                     var html = "<div class=\"die-item color" + die.color + " side" + i + "\"></div>";
-                    this_2.addActionButton("changeDie" + i + "-button", html, function () { return _this.changeDie(i); });
+                    this_3.addActionButton("changeDie" + i + "-button", html, function () { return _this.changeDie(i); });
                 };
-                var this_2 = this;
+                var this_3 = this;
                 for (var i = 1; i <= faces; i++) {
-                    _loop_2(i);
+                    _loop_4(i);
                 }
                 this.addActionButton("cancelRollDice-button", _("Cancel"), function () { return _this.setActionBarRollDice(true); });
             }
@@ -1160,6 +1188,14 @@ var Glow = /** @class */ (function () {
             return;
         }
         this.takeAction('removeCompanion', {
+            spot: spot
+        });
+    };
+    Glow.prototype.moveBlackDie = function (spot) {
+        if (!this.checkAction('moveBlackDie')) {
+            return;
+        }
+        this.takeAction('moveBlackDie', {
             spot: spot
         });
     };
@@ -1275,6 +1311,7 @@ var Glow = /** @class */ (function () {
             ['meepleMoved', ANIMATION_MS],
             ['takeSketalDie', ANIMATION_MS],
             ['removeSketalDie', ANIMATION_MS],
+            ['moveBlackDie', ANIMATION_MS],
             ['resolveCardUpdate', 1],
             ['usedDice', 1],
             ['moveUpdate', 1],
@@ -1297,6 +1334,7 @@ var Glow = /** @class */ (function () {
         playerTable.addDice(notif.args.dice);
     };
     Glow.prototype.notif_chosenCompanion = function (notif) {
+        console.log(notif.args);
         var playerTable = this.getPlayerTable(notif.args.playerId);
         playerTable.addCompanion(notif.args.companion, this.meetingTrack.getStock(notif.args.spot));
         playerTable.addDice(notif.args.dice);
@@ -1371,6 +1409,9 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.notif_meepleMoved = function (notif) {
         this.board.moveMeeple(notif.args.meeple);
+    };
+    Glow.prototype.notif_moveBlackDie = function (notif) {
+        this.meetingTrack.placeSmallDice([notif.args.die]);
     };
     Glow.prototype.notif_lastTurn = function () {
         if (document.getElementById('last-round')) {

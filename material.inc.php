@@ -64,7 +64,7 @@ $this->COMPANIONS = [ // (string $name, int $points, $effect, bool $reroll, int 
   17 => new CompanionCard('Sketal', 1, new Effect([3, 3, 3], [33, -104]), false, 0, true, 4),
   18 => new CompanionCard('Lumipili', 0, new Effect([1, 1], [33, 22]), true),
   19 => new CompanionCard('Snarexe', 0, new Effect([0, 0, 0, 0], [33, 110]), false, 1),
-  20 => new CompanionCard('Kaar', 4, null), // TODO black die
+  20 => new CompanionCard('Kaar', 4, null),
   21 => new CompanionCard('Hymoros', -2, new Effect([2], [21]), false, 1),
   22 => new CompanionCard('Dvol', -5, new Effect([3], [21, 101])),
   23 => new CompanionCard('Okans', -2, new Effect([1], [30, 101])),
@@ -103,17 +103,7 @@ $this->SPELLS = [
   6 => new Effect([0, 0, 0], [-107], 2),
 ];
 
-$this->MEETING_SPOT_BY_COLOR = [
-  1 => 5,
-  2 => 2,
-  3 => 4,
-  4 => 1,
-  5 => 3,
-];
-
 $this->SCORE_TRACK_REROLLS = [0, 1, 2, 3, 4, 5, 7, 9, 11, 13, 16, 19, 22, 26, 31, 36, 44, 52];
-
-// TODO remove points from map effects so they are not applied on company move
 
 $this->MAP1 = [
   new MapSpot(0, [], [

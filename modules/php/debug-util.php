@@ -12,7 +12,8 @@ trait DebugUtilTrait {
             return;
         } 
 
-        self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (44, 13, 14, 15, 16, 17)");
+        //self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (44, 13, 14, 15, 16, 17)");
+        self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (20)");
         //$this->addResource(2343492, 4, 0);
         //$this->debugSetPoints(19);
         //$this->debugSkipAdventurers();

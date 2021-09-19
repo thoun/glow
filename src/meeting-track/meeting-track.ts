@@ -1,10 +1,10 @@
 const MEETING_SPOT_BY_COLOR = [
     null,
-    5,
-    2,
     4,
     1,
     3,
+    0,
+    2,
   ];
 
 class MeetingTrack {
@@ -20,11 +20,11 @@ class MeetingTrack {
             const cemetery = i === 0;
             
             if (!cemetery) {
-                const left = 240 + 135*(MEETING_SPOT_BY_COLOR[i]-1);
+                const left = 240 + 135*MEETING_SPOT_BY_COLOR[i];
                 html += `<div id="meeting-track-dice-${i}" class="meeting-track-zone dice" style="left: ${left}px;"></div>
-                <div id="meeting-track-footprints-${i}" class="meeting-track-zone footprints" style="left: ${left}px;"></div>`
+                <div id="meeting-track-footprints-${i}" class="meeting-track-zone footprints" style="left: ${left}px;"></div>`;
             }
-            const left = cemetery ? 50 : 240 + 135*(i-1);
+            const left = cemetery ? 50 : 240 + 135*MEETING_SPOT_BY_COLOR[i];
             html += `<div id="meeting-track-companion-${i}" class="meeting-track-stock" style="left: ${left}px;"></div>`;
 
             dojo.place(html, 'meeting-track');
@@ -53,6 +53,12 @@ class MeetingTrack {
         for (let i=1; i<=5; i++) {
             const spot = meetingTrackSpot[i];
             this.placeSmallDice(spot.dice);
+
+            document.getElementById(`meeting-track-dice-${i}`).addEventListener('click', () => {
+                if (dojo.hasClass(`meeting-track-dice-${i}`, 'selectable')) {
+                    this.game.moveBlackDie(i);
+                }
+            });
         }
     }
     
@@ -131,6 +137,12 @@ class MeetingTrack {
             }
         } else {
             this.companionsStocks[0].removeAll();
+        }
+    }
+    
+    public setSelectableDice(possibleSpots: number[]) {
+        for (let i=1; i<=5; i++) {
+            dojo.toggleClass(`meeting-track-dice-${i}`, 'selectable', possibleSpots.some(ps => ps === i));
         }
     }
 }

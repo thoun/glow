@@ -74,6 +74,23 @@ trait ActionTrait {
                     break;
                 }
             }
+        } else if ($companion->subType == KAAR && $spot !== null) {
+            // black die enters the game
+            $sql = "select `card_location_arg` from `companion` where `card_location` = 'meeting'";
+            $availableSpots = array_values(array_map(function($dbLine) { return intval($dbLine['card_location_arg']); }, self::getCollectionFromDb($sql)));
+
+            $dieSpot = $availableSpots[bga_rand(0, count($availableSpots) - 1)];
+            $die = $this->getBlackDie();
+            $die->setFace($dieSpot);
+            $this->persistDice([$die]);
+            $this->moveDice([$die], 'meeting', $dieSpot);
+
+            self::notifyAllPlayers('moveBlackDie', clienttranslate('${player_name} adds black die with ${companionName}'), [
+                'playerId' => $playerId,
+                'player_name' => self::getActivePlayerName(),
+                'companionName' => $companion->name,
+                'die' => $die,
+            ]);
         }
     }
 
@@ -81,19 +98,31 @@ trait ActionTrait {
         $this->gamestate->nextState($this->getPlayerCount() == 2 ? 'removeCompanion' : 'nextPlayer');
     }
     
-    public function recruitCompanion(int $spot) {
-        self::checkAction('recruitCompanion'); 
+    public function recruitCompanion(int $spot, $ignoreCheck = false) {
+        if (!$ignoreCheck) {
+            self::checkAction('recruitCompanion'); 
+        }
 
         if ($spot < 1 || $spot > 5) {
             throw new BgaUserException("Not a valid spot");
         }
+        
+        $playerId = self::getActivePlayerId();
+
+        $spotDice = $this->getDiceByLocation('meeting', $spot);
+        if ($this->array_some($spotDice, function($die) { return $die->color == 8; })) {
+            $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+            if ($this->array_some($companions, function($companion) { return $companion->subType == KAAR; })) {
+                $this->gamestate->nextState('moveBlackDie');
+                return;
+            }
+        }
+
         $companion = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting', $spot))[0];
 
         if ($companion->location != 'meeting') {
             throw new BgaUserException("Companion not available");
         }
-        
-        $playerId = self::getActivePlayerId();
 
         $this->applyRecruitCompanion($playerId, $companion, $spot);
 
@@ -118,6 +147,31 @@ trait ActionTrait {
         $this->takeSketalDie($playerId, $die);
 
         $this->redirectAfterRecruit();
+    }
+    
+    public function moveBlackDie(int $spot) {
+        self::checkAction('moveBlackDie'); 
+
+        $playerId = $this->getCurrentPlayerId();
+
+        if ($spot < 1 || $spot > 5) {
+            throw new BgaUserException("Not a valid spot");
+        }
+
+        $die = $this->getBlackDie();
+        $currentSpot = $die->location_arg;
+
+        $die->setFace($spot);
+        $this->persistDice([$die]);
+        $this->moveDice([$die], 'meeting', $spot);
+
+        self::notifyAllPlayers('moveBlackDie', clienttranslate('${player_name} moves black die'), [
+            'playerId' => $playerId,
+            'player_name' => self::getActivePlayerName(),
+            'die' => $die,
+        ]);
+
+        $this->recruitCompanion($currentSpot, true);
     }
     
     public function removeCompanion(int $spot) {

@@ -168,7 +168,7 @@ trait MapTrait {
         }
 
         $footprints = $this->getPlayerFootprints($playerId);        
-        $dice = $this->getDiceByLocation('player', $playerId, false);
+        $dice = $this->getEffectiveDice($playerId, false);
 
         foreach($routes as $route) {
 

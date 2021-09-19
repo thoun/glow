@@ -122,6 +122,9 @@ class Glow implements GlowGame {
             case 'removeCompanion':
                 this.onEnteringStateRemoveCompanion(args.args);
                 break;
+            case 'moveBlackDie':                
+                this.onEnteringStateMoveBlackDie(args.args);
+                break;
             case 'rollDice':
                 this.onEnteringStateRollDice();
             case 'move':
@@ -217,6 +220,10 @@ class Glow implements GlowGame {
         }
     }
 
+    private onEnteringStateMoveBlackDie(args: EnteringMoveBlackDieArgs) {
+        this.meetingTrack.setSelectableDice(args.possibleSpots);
+    }
+
     private onEnteringStateRollDice() {
         this.setDiceSelectionActive(true);
     }
@@ -271,6 +278,8 @@ class Glow implements GlowGame {
             case 'recruitCompanion':
                 this.onLeavingRecruitCompanion();
                 break;
+            case 'moveBlackDie':                
+                this.onLeavingMoveBlackDie();
             case 'rollDice':
                 this.onLeavingRollDice();
                 break;
@@ -280,19 +289,23 @@ class Glow implements GlowGame {
         }
     }
 
-    onLeavingChooseAdventurer() {
+    private onLeavingChooseAdventurer() {
         this.adventurersStock.setSelectionMode(0);
     }
 
-    onLeavingRecruitCompanion() {
+    private onLeavingRecruitCompanion() {
         this.meetingTrack.setSelectionMode(0);
     }
 
-    onLeavingRollDice() {
+    private onLeavingMoveBlackDie() {
+        this.meetingTrack.setSelectableDice([]);
+    }
+
+    private onLeavingRollDice() {
         this.setDiceSelectionActive(false);
     }
 
-    onLeavingResolveCards() {
+    private onLeavingResolveCards() {
         (Array.from(document.getElementsByClassName('selectable')) as HTMLElement[]).forEach(node => dojo.removeClass(node, 'selectable'));
         [...this.playersTables.map(pt => pt.adventurerStock), ...this.playersTables.map(pt => pt.companionsStock)].forEach(stock => stock.setSelectionMode(0));
     }
@@ -808,6 +821,16 @@ class Glow implements GlowGame {
         });
     }
 
+    public moveBlackDie(spot: number) {
+        if(!(this as any).checkAction('moveBlackDie')) {
+            return;
+        }
+
+        this.takeAction('moveBlackDie', {
+            spot
+        });
+    }
+
     public keepDice() {
         if(!(this as any).checkAction('keepDice')) {
             return;
@@ -941,6 +964,7 @@ class Glow implements GlowGame {
             ['meepleMoved', ANIMATION_MS],
             ['takeSketalDie', ANIMATION_MS],
             ['removeSketalDie', ANIMATION_MS],
+            ['moveBlackDie', ANIMATION_MS],
             ['resolveCardUpdate', 1],
             ['usedDice', 1],
             ['moveUpdate', 1],
@@ -965,7 +989,7 @@ class Glow implements GlowGame {
         playerTable.addDice(notif.args.dice);
     }
 
-    notif_chosenCompanion(notif: Notif<NotifChosenCompanionArgs>) {
+    notif_chosenCompanion(notif: Notif<NotifChosenCompanionArgs>) {console.log(notif.args);
         const playerTable = this.getPlayerTable(notif.args.playerId);
         playerTable.addCompanion(notif.args.companion, this.meetingTrack.getStock(notif.args.spot));
         playerTable.addDice(notif.args.dice);
@@ -1055,6 +1079,10 @@ class Glow implements GlowGame {
 
     notif_meepleMoved(notif: Notif<NotifMeepleMovedArgs>) {
         this.board.moveMeeple(notif.args.meeple);
+    }
+
+    notif_moveBlackDie(notif: Notif<NotifMoveBlackDieArgs>) {
+        this.meetingTrack.placeSmallDice([notif.args.die]);
     }
 
     notif_lastTurn() {

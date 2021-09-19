@@ -141,4 +141,18 @@ trait ArgsTrait {
 
         return $args;
     }
+
+    function argMoveBlackDie() {
+        $sql = "select `card_location_arg` from `companion` where `card_location` = 'meeting'";
+        $availableSpots = array_values(array_map(function($dbLine) { return intval($dbLine['card_location_arg']); }, self::getCollectionFromDb($sql)));
+
+        $die = $this->getBlackDie();
+        $dieSpot = $die->location_arg;
+
+        $possibleSpots = array_values(array_filter($availableSpots, function ($spot) use ($dieSpot) { return $spot != $dieSpot; }));
+
+        return [
+            'possibleSpots' => $possibleSpots,
+        ];
+    }
 }

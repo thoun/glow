@@ -113,8 +113,6 @@ class Glow extends Table {
         // (note: statistics used in this file must be defined in your stats.inc.php file)
         //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
         //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
-
-        // TODO: setup the initial game situation here
         
         $this->createDice();
         $this->createMeeples(array_keys($players));

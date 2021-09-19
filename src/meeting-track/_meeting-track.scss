@@ -7,7 +7,7 @@
 
   .meeting-track-zone {
     position: absolute;
-    width: 142px;
+    width: 129px;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -16,7 +16,12 @@
 
     &.dice {      
       top: 20px;
-      height: 60px;
+      height: 60px;      
+
+      &.selectable {
+        cursor: pointer;
+        box-shadow: 0 0 4px 4px red;
+      }
     }
 
     &.footprints {      
@@ -29,6 +34,7 @@
     position: absolute;
     top: 158px;
     height: 250px;
+    width: 129px;
   }
 
   .footprint-token {

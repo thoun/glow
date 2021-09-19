@@ -69,6 +69,16 @@
         self::ajaxResponse();
     }
   	
+    public function moveBlackDie() {
+        self::setAjaxMode();     
+
+        $spot = self::getArg('spot', AT_posint, true);
+
+        $this->game->moveBlackDie($spot);
+
+        self::ajaxResponse();
+    }
+  	
     public function removeCompanion() {
         self::setAjaxMode();     
 

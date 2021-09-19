@@ -423,7 +423,7 @@
 }
 #meeting-track .meeting-track-zone {
   position: absolute;
-  width: 142px;
+  width: 129px;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -434,6 +434,10 @@
   top: 20px;
   height: 60px;
 }
+#meeting-track .meeting-track-zone.dice.selectable {
+  cursor: pointer;
+  box-shadow: 0 0 4px 4px red;
+}
 #meeting-track .meeting-track-zone.footprints {
   top: 85px;
   height: 60px;
@@ -442,6 +446,7 @@
   position: absolute;
   top: 158px;
   height: 250px;
+  width: 129px;
 }
 #meeting-track .footprint-token {
   position: absolute;
@@ -606,7 +611,8 @@ html {
 
 .stockitem {
   border-radius: 10px;
-  margin: 5px;
+  margin-right: 10px;
+  margin-bottom: 10px;
   border: 1px solid gray;
 }
 .stockitem.selectable {

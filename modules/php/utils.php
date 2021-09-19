@@ -157,6 +157,10 @@ trait UtilTrait {
     function moveDice(array $dice, string $location, int $locationArg = 0) {
         $ids = array_map(function ($idie) { return $idie->id; }, $dice);
         self::DbQuery("UPDATE dice SET `location` = '$location', `location_arg` = $locationArg WHERE `die_id` IN (".implode(',', $ids).")");
+        foreach($dice as &$die) {
+            $die->location = $location;
+            $die->location_arg = $locationArg;
+        }
     }
 
     function getPlayerCount() {
@@ -348,7 +352,7 @@ trait UtilTrait {
             $colorDice = array_values(array_filter($smallDice, function ($idie) use ($i) { return $idie->value === $i; }));
             $footprints = 0;
             if (count($colorDice) > 0) {
-                $this->moveDice($colorDice, 'meeting', $this->MEETING_SPOT_BY_COLOR[$i]);
+                $this->moveDice($colorDice, 'meeting', $i);
             } else {
                 // add footprint if no die on track
                 $footprints = 1;
@@ -372,6 +376,13 @@ trait UtilTrait {
         self::notifyAllPlayers('diceRolled', '', [
             'dice' => $dice,
         ] + $params);
+
+        foreach($dice as &$idie) {
+            if ($idie->color == 8 && $idie->face == 6 && $idie->location == 'player') { // we apply black die "-2"
+                $this->applyEffect($idie->location_arg, $idie->value);
+                // TODO notif
+            }
+        }
     }
 
     function sendToCemetery(int $playerId, int $companionId) {
@@ -388,7 +399,7 @@ trait UtilTrait {
         
     function getTopCemeteryCompanion() {
         $companionDb = $this->companions->getCardOnTop('cemetery');
-        //die('cemetery '.json_encode($companionDb));
+        
         if ($companionDb != null) {
             return $this->getCompanionFromDb($companionDb);
         } else {
@@ -511,9 +522,19 @@ trait UtilTrait {
         }
     }
 
+    function getEffectiveDice(int $playerId, $used = null) {
+        $dice = $this->getDiceByLocation('player', $playerId, $used);
+        $blackDie = $this->array_find($dice, function($die) { return $die->color == 8; });
+        if ($blackDie != null) { // got black Die
+            return array_values(array_filter($dice), function($die) use ($blackDie) { return $die->value != $blackDie->value; });
+        } else {
+            return $dice;
+        }
+    }
+
     public function getTriggeredEffectsForPlayer(int $playerId) {
         $effectsCodes = [];
-        $dice = $this->getDiceByLocation('player', $playerId);
+        $dice = $this->getEffectiveDice($playerId);
 
         $adventurer = $this->getAdventurersFromDb($this->adventurers->getCardsInLocation('player', $playerId))[0];
         if ($adventurer->effect != null) {
