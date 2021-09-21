@@ -114,7 +114,7 @@ trait StateTrait {
         self::DbQuery("UPDATE dice SET `used` = false");
 
         $this->placeCompanionsOnMeetingTrack();
-        $this->replaceSmallDiceOnMeetingTrack();
+        $this->addFootprintsOnMeetingTrack();
 
         $nextPlayerTable = self::createNextPlayerTable(array_keys(self::loadPlayersBasicInfos()));
         $newFirstPlayer = intval($nextPlayerTable[intval($this->getGameStateValue(FIRST_PLAYER))]);

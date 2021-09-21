@@ -1447,6 +1447,9 @@ var Glow = /** @class */ (function () {
             playerTable.addHiddenSpell(notif.args.spellsIds[Number(playerId)], notif.args.playerId);
         });
     };
+    Glow.prototype.notif_footprintAdded = function (notif) {
+        this.meetingTrack.setFootprintTokens(notif.args.spot, notif.args.number);
+    };
     Glow.prototype.notif_lastTurn = function () {
         if (document.getElementById('last-round')) {
             return;

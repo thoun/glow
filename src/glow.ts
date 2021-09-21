@@ -1093,6 +1093,10 @@ class Glow implements GlowGame {
         })
     }
 
+    notif_footprintAdded(notif: Notif<NotifFootprintAddedArgs>) {
+        this.meetingTrack.setFootprintTokens(notif.args.spot, notif.args.number);
+    }
+
     notif_lastTurn() {
         if (document.getElementById('last-round')) {
             return;

@@ -339,10 +339,11 @@ trait UtilTrait {
 
         $this->moveSmallDiceToMeetingTrack($smallDice);
     }
+
     
-    function replaceSmallDiceOnMeetingTrack() {
-        $isBlackDieDeck = $this->getBlackDie()->location === 'deck';
-        $smallDice = $this->getSmallDice($isBlackDieDeck);
+    function replaceSmallDiceOnMeetingTrack(int $playerId) {
+        $playerDice = $this->getDiceByLocation('player', $playerId);
+        $smallDice = array_values(array_filter($playerDice, function($die) { return $die->small; }));
 
         // If a die indicates a -2 burst of light or a footprint symbol, it must be rerolled until it indicates a color
         foreach($smallDice as &$idie) {
@@ -364,15 +365,26 @@ trait UtilTrait {
             $footprints = 0;
             if (count($colorDice) > 0) {
                 $this->moveDice($colorDice, 'meeting', $i);
-            } else {
-                // add footprint if no die on track
-                $footprints = 1;
             }
-
-            self::DbQuery("UPDATE meetingtrack SET `footprints` = `footprints` + $footprints WHERE `spot` = $i");
         }
 
         $this->persistDice($smallDice);
+    }
+
+    private function addFootprintsOnMeetingTrack() {
+        for ($i=1; $i<=5; $i++) {
+            $dice = $this->getDiceByLocation('meeting', $spot);
+            if (count($dice) === 0) {
+                // add footprint if no die on track
+                $footprints = 1;
+                self::DbQuery("UPDATE meetingtrack SET `footprints` = `footprints` + $footprints WHERE `spot` = $i");
+
+                self::notifyAllPlayers('footprintAdded', '', [
+                    'spot' => $i,
+                    'number' => intval(self::getUniqueValueFromDB("SELECT `footprints` FROM meetingtrack WHERE `spot` = $i")),
+                ]);
+            }
+        }
     }
 
     function rollPlayerDice($ids = null, $params = []) {

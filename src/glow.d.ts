@@ -225,3 +225,8 @@ interface NotifGiveHiddenSpellsArgs {
     playerId: number;
     spellsIds: { [playerId: number]: number };
 }
+
+interface NotifFootprintAddedArgs {
+    spot: number;
+    number: number;
+}
