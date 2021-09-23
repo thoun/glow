@@ -471,6 +471,22 @@
   border: 0;
   border-radius: 50%;
 }
+#currentplayertable .player-table .player-table-spells .stockitem.selectable, #playerstables .player-table .player-table-spells .stockitem.selectable {
+  cursor: pointer;
+  box-shadow: 0 0 4px 4px red;
+}
+#currentplayertable .player-table .player-table-companion-spell, #playerstables .player-table .player-table-companion-spell {
+  position: absolute;
+  top: 80px;
+  width: 100%;
+}
+#currentplayertable .player-table .player-table-companion-spell .stockitem, #playerstables .player-table .player-table-companion-spell .stockitem {
+  border-radius: 50%;
+}
+#currentplayertable .player-table .player-table-companion-spell .stockitem.selectable, #playerstables .player-table .player-table-companion-spell .stockitem.selectable {
+  cursor: pointer;
+  box-shadow: 0 0 4px 4px red;
+}
 #currentplayertable .player-table .adventurer-and-companions, #playerstables .player-table .adventurer-and-companions {
   display: grid;
   grid-template-columns: 160px auto;

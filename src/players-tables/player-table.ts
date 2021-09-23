@@ -115,17 +115,18 @@ class PlayerTable {
         `, `${this.companionsStock.container_div.id}_item_${lastItemId}`);
 
         this.companionSpellStock = new ebg.stock() as Stock;
+        this.companionSpellStock.centerItems = true;
         this.companionSpellStock.setSelectionAppearance('class');
         this.companionSpellStock.selectionClass = 'selected';
-        this.companionSpellStock.create(this.game, $(`player-table-${this.playerId}-companion-spell`), CARD_WIDTH, CARD_HEIGHT);
+        this.companionSpellStock.create(this.game, $(`player-table-${this.playerId}-companion-spell`), SPELL_DIAMETER, SPELL_DIAMETER);
         this.companionSpellStock.setSelectionMode(0);
         dojo.connect(this.companionSpellStock, 'onChangeSelection', this, (_, itemId: string) => {
             if (this.companionSpellStock.getSelectedItems().length) {
-                this.game.resolveCard(1, Number(itemId));
+                this.game.resolveCard(2, Number(itemId));
             }
             this.companionSpellStock.unselectAll();
         });
-        setupCompanionCards(this.companionSpellStock);
+        setupSpellCards(this.companionSpellStock);
     }
 
     private removeCompanionSpellStock() {
@@ -139,9 +140,11 @@ class PlayerTable {
             return;
         }
 
-        document.getElementById(`${this.companionsStock.container_div.id}_item_${lastItemId}`).appendChild(
-            document.getElementById(`player-table-${this.playerId}-companion-spell`)
-        );
+        if (this.companionSpellStock) {
+            document.getElementById(`${this.companionsStock.container_div.id}_item_${lastItemId}`).appendChild(
+                document.getElementById(`player-table-${this.playerId}-companion-spell`)
+            );
+        }
     }
 
     public setAdventurer(adventurer: Adventurer) {
@@ -161,10 +164,14 @@ class PlayerTable {
         dice.forEach(die => (this.game as any).fadeOutAndDestroy(`die${die.id}`));
     }
     
-    public removeCompanion(companion: Companion) {
+    public removeCompanion(companion: Companion, removedBySpell?: Spell) {
         this.companionsStock.removeFromStockById(''+companion.id, Cemetery);
         // TODO check if it's not too late to move stock
-        this.moveCompanionSpellStock();
+        if (removedBySpell) {
+            this.removeSpell(removedBySpell);
+        } else {
+            this.moveCompanionSpellStock();
+        }
     }
 
     public setUsedDie(dieId: number) {
@@ -185,7 +192,9 @@ class PlayerTable {
             this.createCompanionSpellStock();
             stock = this.companionSpellStock;
         }
-        stock.addToStockWithId(spell.type, ''+spell.id, `${this.spellsStock.container_div.id}_item_${spell.id}`);
+        
+        const hiddenSpellId = `${this.spellsStock.container_div.id}_item_hidden${spell.id}`;
+        stock.addToStockWithId(spell.type, ''+spell.id, document.getElementById(hiddenSpellId) ? hiddenSpellId : undefined );
         if (!tableCreation) {
             this.spellsStock.removeFromStockById('hidden'+spell.id);
         }
@@ -194,6 +203,7 @@ class PlayerTable {
     public removeSpell(spell: Spell) {
         this.spellsStock.removeFromStockById(''+spell.id);
         if (spell.type === 3) {
+            this.companionSpellStock?.removeFromStockById(''+spell.id);
             this.removeCompanionSpellStock();
         }
     }

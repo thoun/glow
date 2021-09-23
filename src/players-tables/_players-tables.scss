@@ -20,7 +20,28 @@
             .stockitem {
                 border: 0;
                 border-radius: 50%;
+
+                &.selectable {
+                  cursor: pointer;
+                  box-shadow: 0 0 4px 4px red;
+                }
             }
+        }
+
+        .player-table-companion-spell {
+            position: absolute;
+            top: 80px;
+            width: 100%;
+
+            .stockitem {
+                border-radius: 50%;
+
+                &.selectable {
+                  cursor: pointer;
+                  box-shadow: 0 0 4px 4px red;
+                }
+            }
+
         }
 
         .adventurer-and-companions {

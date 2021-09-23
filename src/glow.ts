@@ -245,7 +245,12 @@ class Glow implements GlowGame {
                 dojo.addClass(`${playerTable.companionsStock.container_div.id}_item_${cardId}`, 'selectable');
             } if (cardType === 2) { // spells
                 playerTable.spellsStock.setSelectionMode(1);
-                dojo.addClass(`${playerTable.spellsStock.container_div.id}_item_${cardId}`, 'selectable');
+                if (document.getElementById(`${playerTable.spellsStock.container_div.id}_item_${cardId}`)) {
+                    dojo.addClass(`${playerTable.spellsStock.container_div.id}_item_${cardId}`, 'selectable');
+                } else if (playerTable.companionSpellStock && document.getElementById(`${playerTable.companionSpellStock.container_div.id}_item_${cardId}`)) {
+                    playerTable.companionSpellStock.setSelectionMode(1);
+                    dojo.addClass(`${playerTable.companionSpellStock.container_div.id}_item_${cardId}`, 'selectable');
+                }
             }
         });
     }
@@ -1004,7 +1009,7 @@ class Glow implements GlowGame {
             this.meetingTrack.removeCompanion(notif.args.spot);
         } else {
             const playerTable = this.getPlayerTable(notif.args.playerId);
-            playerTable.removeCompanion(notif.args.companion);
+            playerTable.removeCompanion(notif.args.companion, notif.args.removedBySpell);
         }
         this.meetingTrack.setCemeteryTop(notif.args.companion);
     }

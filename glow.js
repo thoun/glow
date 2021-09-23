@@ -526,17 +526,18 @@ var PlayerTable = /** @class */ (function () {
         }
         dojo.place("\n            <div id=\"player-table-" + this.playerId + "-companion-spell\" class=\"player-table-companion-spell\"></div>\n        ", this.companionsStock.container_div.id + "_item_" + lastItemId);
         this.companionSpellStock = new ebg.stock();
+        this.companionSpellStock.centerItems = true;
         this.companionSpellStock.setSelectionAppearance('class');
         this.companionSpellStock.selectionClass = 'selected';
-        this.companionSpellStock.create(this.game, $("player-table-" + this.playerId + "-companion-spell"), CARD_WIDTH, CARD_HEIGHT);
+        this.companionSpellStock.create(this.game, $("player-table-" + this.playerId + "-companion-spell"), SPELL_DIAMETER, SPELL_DIAMETER);
         this.companionSpellStock.setSelectionMode(0);
         dojo.connect(this.companionSpellStock, 'onChangeSelection', this, function (_, itemId) {
             if (_this.companionSpellStock.getSelectedItems().length) {
-                _this.game.resolveCard(1, Number(itemId));
+                _this.game.resolveCard(2, Number(itemId));
             }
             _this.companionSpellStock.unselectAll();
         });
-        setupCompanionCards(this.companionSpellStock);
+        setupSpellCards(this.companionSpellStock);
     };
     PlayerTable.prototype.removeCompanionSpellStock = function () {
         dojo.destroy("player-table-" + this.playerId + "-companion-spell");
@@ -547,7 +548,9 @@ var PlayerTable = /** @class */ (function () {
         if (!lastItemId) {
             return;
         }
-        document.getElementById(this.companionsStock.container_div.id + "_item_" + lastItemId).appendChild(document.getElementById("player-table-" + this.playerId + "-companion-spell"));
+        if (this.companionSpellStock) {
+            document.getElementById(this.companionsStock.container_div.id + "_item_" + lastItemId).appendChild(document.getElementById("player-table-" + this.playerId + "-companion-spell"));
+        }
     };
     PlayerTable.prototype.setAdventurer = function (adventurer) {
         moveToAnotherStock(this.game.adventurersStock, this.adventurerStock, adventurer.color, '' + adventurer.id);
@@ -564,10 +567,15 @@ var PlayerTable = /** @class */ (function () {
         var _this = this;
         dice.forEach(function (die) { return _this.game.fadeOutAndDestroy("die" + die.id); });
     };
-    PlayerTable.prototype.removeCompanion = function (companion) {
+    PlayerTable.prototype.removeCompanion = function (companion, removedBySpell) {
         this.companionsStock.removeFromStockById('' + companion.id, Cemetery);
         // TODO check if it's not too late to move stock
-        this.moveCompanionSpellStock();
+        if (removedBySpell) {
+            this.removeSpell(removedBySpell);
+        }
+        else {
+            this.moveCompanionSpellStock();
+        }
     };
     PlayerTable.prototype.setUsedDie = function (dieId) {
         dojo.addClass("die" + dieId, 'used');
@@ -586,14 +594,17 @@ var PlayerTable = /** @class */ (function () {
             this.createCompanionSpellStock();
             stock = this.companionSpellStock;
         }
-        stock.addToStockWithId(spell.type, '' + spell.id, this.spellsStock.container_div.id + "_item_" + spell.id);
+        var hiddenSpellId = this.spellsStock.container_div.id + "_item_hidden" + spell.id;
+        stock.addToStockWithId(spell.type, '' + spell.id, document.getElementById(hiddenSpellId) ? hiddenSpellId : undefined);
         if (!tableCreation) {
             this.spellsStock.removeFromStockById('hidden' + spell.id);
         }
     };
     PlayerTable.prototype.removeSpell = function (spell) {
+        var _a;
         this.spellsStock.removeFromStockById('' + spell.id);
         if (spell.type === 3) {
+            (_a = this.companionSpellStock) === null || _a === void 0 ? void 0 : _a.removeFromStockById('' + spell.id);
             this.removeCompanionSpellStock();
         }
     };
@@ -798,7 +809,13 @@ var Glow = /** @class */ (function () {
             }
             if (cardType === 2) { // spells
                 playerTable.spellsStock.setSelectionMode(1);
-                dojo.addClass(playerTable.spellsStock.container_div.id + "_item_" + cardId, 'selectable');
+                if (document.getElementById(playerTable.spellsStock.container_div.id + "_item_" + cardId)) {
+                    dojo.addClass(playerTable.spellsStock.container_div.id + "_item_" + cardId, 'selectable');
+                }
+                else if (playerTable.companionSpellStock && document.getElementById(playerTable.companionSpellStock.container_div.id + "_item_" + cardId)) {
+                    playerTable.companionSpellStock.setSelectionMode(1);
+                    dojo.addClass(playerTable.companionSpellStock.container_div.id + "_item_" + cardId, 'selectable');
+                }
             }
         });
     };
@@ -1438,7 +1455,7 @@ var Glow = /** @class */ (function () {
         }
         else {
             var playerTable = this.getPlayerTable(notif.args.playerId);
-            playerTable.removeCompanion(notif.args.companion);
+            playerTable.removeCompanion(notif.args.companion, notif.args.removedBySpell);
         }
         this.meetingTrack.setCemeteryTop(notif.args.companion);
     };

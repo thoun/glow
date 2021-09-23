@@ -164,6 +164,7 @@ interface NotifChosenCompanionArgs {
     companion: Companion;
     spot: number;
     dice: Die[];
+    removedBySpell: Spell;
 }
 
 interface NotifRemoveCompanionsArgs {

@@ -302,7 +302,7 @@ trait UtilTrait {
     }
 
     function createSpells() {
-        foreach($this->SPELLS as $type => $effect) {
+        foreach($this->SPELLS as $type => $effect) {if ($type == 3)
             $spells[] = [ 'type' => $type, 'type_arg' => 0, 'nbr' => 1];
         }
         $this->spells->createCards($spells, 'deck');
@@ -693,13 +693,21 @@ trait UtilTrait {
                 if (count($companions) > 0) {
                     $lastCompanion = $companions[count($companions) - 1];
                     $this->sendToCemetery($playerId, $lastCompanion->id);
+
+                    self::notifyAllPlayers('removeCompanion', '', [
+                        'playerId' => $playerId,
+                        'companion' => $lastCompanion,
+                        'removedBySpell' => $spellCard,
+                    ]);
+
+                    $this->spells->moveCard($spell->id, 'discard');
                 }
             } else {
                 $this->applyEffect($playerId, $effect, $id);
             }
         }
 
-        if ($cardType == 2) { // spells are discarded after usage
+        if ($cardType == 2 && $spellCard->type != COMPANION_SPELL) { // spells are discarded after usage
             $this->discardSpell($playerId, $spellCard);
         }
 
@@ -772,7 +780,7 @@ trait UtilTrait {
     }
 
     public function discardSpell(int $playerId, object $spell) {
-        $this->companions->moveCard($spell->id, 'discard');
+        $this->spells->moveCard($spell->id, 'discard');
 
         self::notifyAllPlayers('removeSpell', '', [
             'playerId' => $playerId,
