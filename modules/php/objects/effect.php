@@ -19,12 +19,13 @@ class Effect {
     } 
 }
 
-class Spell extends Effect {
+class Spell {
     public $id;
     public $location;
     public $location_arg;
     public $type;
     public $visible;
+    public /*Effect|null*/ $effect;
 
     public function __construct($dbCard, $SPELLS) {
         $this->id = intval($dbCard['id']);
@@ -34,8 +35,7 @@ class Spell extends Effect {
         $this->visible = boolval($dbCard['type_arg']);
 
         $spellCard = $SPELLS[$this->type];
-        $this->conditions = $spellCard->conditions;
-        $this->effects = $spellCard->effects;
+        $this->effect = $spellCard;
     } 
 }
 ?>

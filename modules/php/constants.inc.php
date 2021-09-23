@@ -50,5 +50,6 @@ define('BOARD_SIDE', 'BOARD_SIDE');
  */
 define('KAAR', 20);
 define('XARGOK', 10);
+define('COMPANION_SPELL', 3);
 
 ?>

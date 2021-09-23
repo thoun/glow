@@ -179,8 +179,12 @@ trait MapTrait {
                 $usedFootprints = 0;
 
                 foreach($effects as $effect) {
-                    if ($effect >= -5 && $effect <= -1 && $this->array_some($dice, function ($die) use ($effect) { return $die->value == -$effect; })) { // TODO TOCHECK can we bypass with a footprint ?
-                        $canGoToDestination = false;
+                    if ($effect >= -5 && $effect <= -1 && $this->array_some($dice, function ($die) use ($effect) { return $die->value == -$effect; })) {
+                        if ($usedFootprints < $footprints) {
+                            $usedFootprints++;
+                        } else {
+                            $canGoToDestination = false;
+                        }
                     } else if ($effect < -20 && $effect > -30 && $footprints < -($effect + 20)) {
                         $canGoToDestination = false;
                     } else if ($effect >= 1 && $effect <= 5 && !$this->array_some($dice, function ($die) use ($effect) { return $die->value == $effect; })) {

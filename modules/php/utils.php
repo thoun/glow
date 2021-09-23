@@ -373,7 +373,7 @@ trait UtilTrait {
 
     private function addFootprintsOnMeetingTrack() {
         for ($i=1; $i<=5; $i++) {
-            $dice = $this->getDiceByLocation('meeting', $spot);
+            $dice = $this->getDiceByLocation('meeting', $i);
             if (count($dice) === 0) {
                 // add footprint if no die on track
                 $footprints = 1;
@@ -403,7 +403,6 @@ trait UtilTrait {
         foreach($dice as &$idie) {
             if ($idie->color == 8 && $idie->face == 6 && $idie->location == 'player') { // we apply black die "-2"
                 $this->applyEffect($idie->location_arg, $idie->value);
-                // TODO notif
             }
         }
     }
@@ -577,13 +576,12 @@ trait UtilTrait {
             }
         }
 
-        /* TODO add spells
         $spells = $this->getSpellsFromDb($this->spells->getCardsInLocation('player', $playerId));
         foreach($spells as $spell) {
-            if ($this->isTriggeredEffectsForCard($dice, $spell->effect);
+            if ($spell->visible && $this->isTriggeredEffectsForCard($dice, $spell->effect)) {
                 $effectsCodes[] = [2, $spell->id];
             }
-        }*/
+        }
 
         return $effectsCodes;
     }
@@ -658,6 +656,7 @@ trait UtilTrait {
 
     function applyCardEffect(int $playerId, int $cardType, int $id) {
         $cardEffect = null;
+        $spellCard = null;
         switch ($cardType) {
             case 0:
                 $adventurer = $this->getAdventurersFromDb($this->adventurers->getCardsInLocation('player', $playerId))[0];
@@ -673,7 +672,15 @@ trait UtilTrait {
                     }
                 }
                 break;
-            // 2: TODO spells
+            case 2:
+                $spells = $this->getSpellsFromDb($this->spells->getCardsInLocation('player', $playerId));
+                foreach($spells as $spell) {
+                    if ($spell->id == $id) {
+                        $cardEffect = $spell->effect;
+                        $spellCard = $spell;
+                    }
+                }
+                break;
         }
 
         if ($cardEffect === null) {
@@ -681,7 +688,19 @@ trait UtilTrait {
         }
 
         foreach($cardEffect->effects as $effect) {
-            $this->applyEffect($playerId, $effect, $id);
+            if ($spellCard != null && $spellCard->type == COMPANION_SPELL) {
+                $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+                if (count($companions) > 0) {
+                    $lastCompanion = $companions[count($companions) - 1];
+                    $this->sendToCemetery($playerId, $lastCompanion->id);
+                }
+            } else {
+                $this->applyEffect($playerId, $effect, $id);
+            }
+        }
+
+        if ($cardType == 2) { // spells are discarded after usage
+            $this->discardSpell($playerId, $spellCard);
         }
 
         $this->saveAppliedEffect($playerId, [$cardType, $id]);
@@ -735,6 +754,29 @@ trait UtilTrait {
     }
 
     public function revealSpellTokens() {
-        // TODO;
+        $allSpells = $this->getSpellsFromDb($this->spells->getCardsInLocation('player'));
+        $spells = [];
+        foreach ($allSpells as &$spell) {
+            if (!$spell->visible) {
+                self::DbQuery("UPDATE `spells` SET `card_type_arg` = 1 WHERE `card_id` = $spell->id");
+                $spell->visible = true;
+                $spells[] = $spell;
+            }
+        }
+
+        if (count($spells) > 0) {
+            self::notifyAllPlayers('revealSpells', clienttranslate('Hidden spells are revealed !'), [
+                'spells' => $spells,
+            ]);
+        }
+    }
+
+    public function discardSpell(int $playerId, object $spell) {
+        $this->companions->moveCard($spell->id, 'discard');
+
+        self::notifyAllPlayers('removeSpell', '', [
+            'playerId' => $playerId,
+            'spell' => $spell,
+        ]);
     }
 }

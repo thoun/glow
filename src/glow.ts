@@ -244,8 +244,8 @@ class Glow implements GlowGame {
                 playerTable.companionsStock.setSelectionMode(1);
                 dojo.addClass(`${playerTable.companionsStock.container_div.id}_item_${cardId}`, 'selectable');
             } if (cardType === 2) { // spells
-                /*TODO Spells playerTable.adventurerStock.setSelectionMode(1);
-                dojo.addClass(`${playerTable.adventurerStock.container_div.id}_item_${cardId}`, 'selectable');*/
+                playerTable.spellsStock.setSelectionMode(1);
+                dojo.addClass(`${playerTable.spellsStock.container_div.id}_item_${cardId}`, 'selectable');
             }
         });
     }
@@ -307,7 +307,7 @@ class Glow implements GlowGame {
 
     private onLeavingResolveCards() {
         (Array.from(document.getElementsByClassName('selectable')) as HTMLElement[]).forEach(node => dojo.removeClass(node, 'selectable'));
-        [...this.playersTables.map(pt => pt.adventurerStock), ...this.playersTables.map(pt => pt.companionsStock)].forEach(stock => stock.setSelectionMode(0));
+        [...this.playersTables.map(pt => pt.adventurerStock), ...this.playersTables.map(pt => pt.companionsStock), ...this.playersTables.map(pt => pt.spellsStock)].forEach(stock => stock.setSelectionMode(0));
     }
 
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
@@ -966,6 +966,8 @@ class Glow implements GlowGame {
             ['removeSketalDie', ANIMATION_MS],
             ['moveBlackDie', ANIMATION_MS],
             ['giveHiddenSpells', ANIMATION_MS],
+            ['revealSpells', ANIMATION_MS],
+            ['removeSpell', ANIMATION_MS],
             ['resolveCardUpdate', 1],
             ['usedDice', 1],
             ['moveUpdate', 1],
@@ -1095,6 +1097,18 @@ class Glow implements GlowGame {
 
     notif_footprintAdded(notif: Notif<NotifFootprintAddedArgs>) {
         this.meetingTrack.setFootprintTokens(notif.args.spot, notif.args.number);
+    }
+
+    notif_revealSpells(notif: Notif<NotifRevealSpellsArgs>) {
+        notif.args.spells.forEach(spell => {
+            const playerTable = this.getPlayerTable(Number(spell.location_arg));
+            playerTable.revealSpell(spell);
+        });
+    }
+
+    notif_removeSpell(notif: Notif<NotifRemoveSpellArgs>) {
+        const playerTable = this.getPlayerTable(notif.args.playerId);
+        playerTable.removeSpell(notif.args.spell);
     }
 
     notif_lastTurn() {

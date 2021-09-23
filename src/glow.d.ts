@@ -230,3 +230,12 @@ interface NotifFootprintAddedArgs {
     spot: number;
     number: number;
 }
+
+interface NotifRevealSpellsArgs {
+    spells: Spell[];
+}
+
+interface NotifRemoveSpellArgs {
+    playerId: number;
+    spell: Spell;
+}

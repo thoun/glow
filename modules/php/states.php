@@ -99,6 +99,9 @@ trait StateTrait {
         foreach($playersIds as $playerId) {
             if (count($this->getPossibleRoutes($playerId)) > 0) {
                 $playerWithRoutes[] = $playerId;
+            } else {
+                // player finishes its turn, replace die
+                $this->replaceSmallDiceOnMeetingTrack($playerId);
             }
         }
 

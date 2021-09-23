@@ -446,6 +446,7 @@ var MeetingTrack = /** @class */ (function () {
     return MeetingTrack;
 }());
 var Cemetery = 'meeting-track-companion-0';
+var COMPANION_SPELL = 3;
 var PlayerTable = /** @class */ (function () {
     function PlayerTable(game, player) {
         var _this = this;
@@ -497,18 +498,63 @@ var PlayerTable = /** @class */ (function () {
             _this.spellsStock.unselectAll();
         });
         setupSpellCards(this.spellsStock);
-        player.spells.forEach(function (spell) { return _this.spellsStock.addToStockWithId(spell.visible ? spell.type : 0, '' + spell.id); });
+        player.spells.forEach(function (spell) {
+            if (spell.visible) {
+                _this.revealSpell(spell, true);
+            }
+            else {
+                _this.addHiddenSpell(spell.id);
+            }
+        });
         // dice
         player.dice.forEach(function (die) {
             _this.game.createOrMoveDie(die, "player-table-" + _this.playerId + "-dice");
         });
     }
+    PlayerTable.prototype.getLastCompanionId = function () {
+        var _a;
+        return (_a = this.companionsStock.items[this.companionsStock.items.length - 1]) === null || _a === void 0 ? void 0 : _a.id;
+    };
+    PlayerTable.prototype.createCompanionSpellStock = function () {
+        var _this = this;
+        if (this.companionSpellStock) {
+            return;
+        }
+        var lastItemId = this.getLastCompanionId();
+        if (!lastItemId) {
+            return;
+        }
+        dojo.place("\n            <div id=\"player-table-" + this.playerId + "-companion-spell\" class=\"player-table-companion-spell\"></div>\n        ", this.companionsStock.container_div.id + "_item_" + lastItemId);
+        this.companionSpellStock = new ebg.stock();
+        this.companionSpellStock.setSelectionAppearance('class');
+        this.companionSpellStock.selectionClass = 'selected';
+        this.companionSpellStock.create(this.game, $("player-table-" + this.playerId + "-companion-spell"), CARD_WIDTH, CARD_HEIGHT);
+        this.companionSpellStock.setSelectionMode(0);
+        dojo.connect(this.companionSpellStock, 'onChangeSelection', this, function (_, itemId) {
+            if (_this.companionSpellStock.getSelectedItems().length) {
+                _this.game.resolveCard(1, Number(itemId));
+            }
+            _this.companionSpellStock.unselectAll();
+        });
+        setupCompanionCards(this.companionSpellStock);
+    };
+    PlayerTable.prototype.removeCompanionSpellStock = function () {
+        dojo.destroy("player-table-" + this.playerId + "-companion-spell");
+        this.companionSpellStock = null;
+    };
+    PlayerTable.prototype.moveCompanionSpellStock = function () {
+        var lastItemId = this.getLastCompanionId();
+        if (!lastItemId) {
+            return;
+        }
+        document.getElementById(this.companionsStock.container_div.id + "_item_" + lastItemId).appendChild(document.getElementById("player-table-" + this.playerId + "-companion-spell"));
+    };
     PlayerTable.prototype.setAdventurer = function (adventurer) {
-        //this.adventurerStock.removeAll();
         moveToAnotherStock(this.game.adventurersStock, this.adventurerStock, adventurer.color, '' + adventurer.id);
     };
     PlayerTable.prototype.addCompanion = function (companion, from) {
         moveToAnotherStock(from, this.companionsStock, companion.subType, '' + companion.id);
+        this.moveCompanionSpellStock();
     };
     PlayerTable.prototype.addDice = function (dice) {
         var _this = this;
@@ -520,6 +566,8 @@ var PlayerTable = /** @class */ (function () {
     };
     PlayerTable.prototype.removeCompanion = function (companion) {
         this.companionsStock.removeFromStockById('' + companion.id, Cemetery);
+        // TODO check if it's not too late to move stock
+        this.moveCompanionSpellStock();
     };
     PlayerTable.prototype.setUsedDie = function (dieId) {
         dojo.addClass("die" + dieId, 'used');
@@ -528,11 +576,26 @@ var PlayerTable = /** @class */ (function () {
         Array.from(document.getElementsByClassName('die')).forEach(function (die) { return dojo.removeClass(die, 'used'); });
     };
     PlayerTable.prototype.addHiddenSpell = function (id, fromPlayerId) {
-        this.spellsStock.addToStockWithId(0, '' + id, "overall_player_board_" + fromPlayerId);
+        if (fromPlayerId === void 0) { fromPlayerId = undefined; }
+        this.spellsStock.addToStockWithId(0, 'hidden' + id, fromPlayerId ? "overall_player_board_" + fromPlayerId : undefined);
     };
-    PlayerTable.prototype.revealSpell = function (spell) {
-        this.spellsStock.removeFromStockById('0');
-        this.spellsStock.addToStockWithId(spell.type, '' + spell.id);
+    PlayerTable.prototype.revealSpell = function (spell, tableCreation) {
+        if (tableCreation === void 0) { tableCreation = false; }
+        var stock = this.spellsStock;
+        if (spell.type === 3) {
+            this.createCompanionSpellStock();
+            stock = this.companionSpellStock;
+        }
+        stock.addToStockWithId(spell.type, '' + spell.id, this.spellsStock.container_div.id + "_item_" + spell.id);
+        if (!tableCreation) {
+            this.spellsStock.removeFromStockById('hidden' + spell.id);
+        }
+    };
+    PlayerTable.prototype.removeSpell = function (spell) {
+        this.spellsStock.removeFromStockById('' + spell.id);
+        if (spell.type === 3) {
+            this.removeCompanionSpellStock();
+        }
     };
     return PlayerTable;
 }());
@@ -734,8 +797,8 @@ var Glow = /** @class */ (function () {
                 dojo.addClass(playerTable.companionsStock.container_div.id + "_item_" + cardId, 'selectable');
             }
             if (cardType === 2) { // spells
-                /*TODO Spells playerTable.adventurerStock.setSelectionMode(1);
-                dojo.addClass(`${playerTable.adventurerStock.container_div.id}_item_${cardId}`, 'selectable');*/
+                playerTable.spellsStock.setSelectionMode(1);
+                dojo.addClass(playerTable.spellsStock.container_div.id + "_item_" + cardId, 'selectable');
             }
         });
     };
@@ -788,7 +851,7 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.onLeavingResolveCards = function () {
         Array.from(document.getElementsByClassName('selectable')).forEach(function (node) { return dojo.removeClass(node, 'selectable'); });
-        __spreadArray(__spreadArray([], this.playersTables.map(function (pt) { return pt.adventurerStock; })), this.playersTables.map(function (pt) { return pt.companionsStock; })).forEach(function (stock) { return stock.setSelectionMode(0); });
+        __spreadArray(__spreadArray(__spreadArray([], this.playersTables.map(function (pt) { return pt.adventurerStock; })), this.playersTables.map(function (pt) { return pt.companionsStock; })), this.playersTables.map(function (pt) { return pt.spellsStock; })).forEach(function (stock) { return stock.setSelectionMode(0); });
     };
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
@@ -1339,6 +1402,8 @@ var Glow = /** @class */ (function () {
             ['removeSketalDie', ANIMATION_MS],
             ['moveBlackDie', ANIMATION_MS],
             ['giveHiddenSpells', ANIMATION_MS],
+            ['revealSpells', ANIMATION_MS],
+            ['removeSpell', ANIMATION_MS],
             ['resolveCardUpdate', 1],
             ['usedDice', 1],
             ['moveUpdate', 1],
@@ -1449,6 +1514,17 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.notif_footprintAdded = function (notif) {
         this.meetingTrack.setFootprintTokens(notif.args.spot, notif.args.number);
+    };
+    Glow.prototype.notif_revealSpells = function (notif) {
+        var _this = this;
+        notif.args.spells.forEach(function (spell) {
+            var playerTable = _this.getPlayerTable(Number(spell.location_arg));
+            playerTable.revealSpell(spell);
+        });
+    };
+    Glow.prototype.notif_removeSpell = function (notif) {
+        var playerTable = this.getPlayerTable(notif.args.playerId);
+        playerTable.removeSpell(notif.args.spell);
     };
     Glow.prototype.notif_lastTurn = function () {
         if (document.getElementById('last-round')) {
