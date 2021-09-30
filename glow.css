@@ -678,3 +678,17 @@ html {
   background: black;
   color: white;
 }
+
+.bgabutton_blue {
+  background: #525252;
+  border: 1px solid #282828;
+}
+
+.bgabutton_red {
+  background: #2a2a2a;
+  border: 1px solid #000000;
+}
+
+.avatar_active, #active_player_statusbar_icon, #logoiconimg {
+  filter: grayscale(1);
+}

@@ -161,6 +161,19 @@ trait MapTrait {
         self::DbQuery("UPDATE `player` SET `visited_spots` = '$jsonObj' WHERE `player_id` = $playerId");
     }
 
+    private function canPayFootprints($playerId, $costForPlayer) {
+        $footprintsCost = 0;
+        foreach($costForPlayer as $cost) {
+            if ($cost < -20 && $cost > -30) {
+                $footprintsCost += (-$cost) - 20;
+            }
+        }
+
+        return $footprintsCost == 0 ? 
+            true : 
+            $footprintsCost <= $this->getPlayerFootprints($playerId);
+    }
+
     function getPossibleRoutesForPlayer(int $side, int $position, int $playerId) {
         $possibleRoutes = [];
         $routes = $this->getRoutes($side, $position);
@@ -206,8 +219,10 @@ trait MapTrait {
                     } 
 
                     // TODO check player can afford $effects
-
-                    $possibleRoutes[] = $route;
+                    $canPayFootprints = $this->canPayFootprints($playerId, $route->costForPlayer);
+                    if ($canPayFootprints) {
+                        $possibleRoutes[] = $route;
+                    }
                 }
     
             } else if ($side === 2) {
@@ -228,12 +243,13 @@ trait MapTrait {
                 if ($canGoForFree || $canGoByPaying > 0) {
                     $effects = $canGoByPaying > 0 ? array_merge($route->effects, [20 + $canGoByPaying]) : $route->effects;
 
-                    // TODO check player can afford $effects
-
                     $destinationEffects = $this->getMapSpot($side, $route->destination)->effects;
                     $route->costForPlayer = array_merge($effects, $destinationEffects);
 
-                    $possibleRoutes[] = $route;
+                    $canPayFootprints = $this->canPayFootprints($playerId, $route->costForPlayer);
+                    if ($canPayFootprints) {
+                        $possibleRoutes[] = $route;
+                    }
                 }
             }
         }

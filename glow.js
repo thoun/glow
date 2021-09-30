@@ -552,7 +552,6 @@ var PlayerTable = /** @class */ (function () {
     };
     PlayerTable.prototype.removeCompanion = function (companion, removedBySpell) {
         this.companionsStock.removeFromStockById('' + companion.id, Cemetery);
-        // TODO check if it's not too late to move stock
         if (removedBySpell) {
             this.removeSpell(removedBySpell);
         }

@@ -651,7 +651,7 @@ trait UtilTrait {
             $playersIds = $this->getPlayersIds();
             $this->giveSpellToPlayers(array_values(array_filter($playersIds, function($pId) use ($playerId) { return $pId != $playerId; })));
         } else {
-            // TODO 35 resurect, 37 skull/spell
+            // TODO 37 skull/spell
         }
     }
 

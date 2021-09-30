@@ -166,7 +166,7 @@ class PlayerTable {
     
     public removeCompanion(companion: Companion, removedBySpell?: Spell) {
         this.companionsStock.removeFromStockById(''+companion.id, Cemetery);
-        // TODO check if it's not too late to move stock
+        
         if (removedBySpell) {
             this.removeSpell(removedBySpell);
         } else {
