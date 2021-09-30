@@ -134,8 +134,9 @@
         self::setAjaxMode();
 
         $destination = self::getArg('destination', AT_posint, true);
+        $from = self::getArg('from', AT_posint, false);
 
-        $this->game->move($destination);
+        $this->game->move($destination, $from);
 
         self::ajaxResponse();
     }

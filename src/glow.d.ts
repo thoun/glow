@@ -49,6 +49,7 @@ interface MeetingTrackSpot {
 }
 
 interface Route {
+    from: number;
     destination: number;
 }
 
@@ -102,7 +103,7 @@ interface GlowGame extends Game {
     //addRollToDiv(dieDiv: HTMLDivElement, rollClass: string): void;
     createOrMoveDie(die: Die, destinationId: string, rollClass?: string): void;
     resolveCard(type: number, id: number): void;
-    move(destination: number): void;
+    move(destination: number, from?: number): void;
     moveBlackDie(spot: number): void;
 }
 
@@ -132,8 +133,17 @@ interface EnteringMoveBlackDieArgs {
     possibleSpots: number[];
 }
 
+interface CromaugArg {
+    cemeteryCards: Companion[];
+}
+
+interface ResolveCardsForPlayer {
+    remainingEffects: number[][];
+    cromaug: CromaugArg;
+}
+
 interface EnteringResolveCardsArgs {
-    [playerId: number]: number[][];
+    [playerId: number]: ResolveCardsForPlayer;
 }
 
 interface EnteringMoveForPlayer {
@@ -197,7 +207,7 @@ interface NotifDiceUpdateArgs {
 }
 
 interface NotifResolveCardUpdateArgs {
-    remainingEffects: number[][];
+    resolveCardsForPlayer: ResolveCardsForPlayer;
 }
 
 interface NotifMoveUpdateArgs {

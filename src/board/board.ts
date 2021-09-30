@@ -65,18 +65,18 @@ const MAP1: number[][] = [
 ];
 
 const MAP2: number[][] = [
-    [419, 212, 1], // 0
-    [628, 212, 1], // 1
-    [752, 142, 1], // 2
-    [559, 302, 1], // 3
-    [750, 355, 1], // 4
-    [397, 386, 1], // 5
-    [257, 306, 1], // 6
-    [63, 355, 1], // 7
-    [150, 208, 1], // 8
-    [79, 77, 1], // 9
-    [288, 83, 1], // 10
-    [503, 67, 1], // 11
+    [416, 204, 1], // 0
+    [635, 200, 1], // 1
+    [760, 132, 1], // 2
+    [564, 299, 1], // 3
+    [762, 355, 1], // 4
+    [393, 383, 1], // 5
+    [252, 300, 1], // 6
+    [58, 352, 1], // 7
+    [139, 196, 1], // 8
+    [69, 66, 1], // 9
+    [286, 69, 1], // 10
+    [504, 55, 1], // 11
 ];
 const MAPS: number[][][] = [null, MAP1, MAP2];
 
@@ -169,13 +169,33 @@ class Board {
         this.placeMeeple(meeple);
     }
 
-    public createDestinationZones(possibleDestinations: number[]) {
+    public createDestinationZones(possibleDestinations: Route[]) {
         (Array.from(document.getElementsByClassName('destination-zone')) as HTMLElement[]).forEach(node => node.parentElement.removeChild(node));
+        (Array.from(document.getElementsByClassName('destination-arrow')) as HTMLElement[]).forEach(node => node.parentElement.removeChild(node));
 
-        possibleDestinations.forEach(position => {
+        possibleDestinations?.forEach(possibleDestination => {
+            const position = possibleDestination.destination;
+            const showArrow = possibleDestinations.filter(pd => pd.destination == position).length > 1;
             const mapSpot = this.getMapSpot(position);
-            dojo.place(`<div id="destination-zone-${position}" class="destination-zone ${mapSpot[2] ? 'big' : 'small'}" style="left: ${mapSpot[0]}px; top: ${mapSpot[1]}px;"></div>`, 'board');
-            document.getElementById(`destination-zone-${position}`).addEventListener('click', () => this.game.move(position));
+            if (!document.getElementById(`destination-zone-${position}`)) {
+                dojo.place(`<div id="destination-zone-${position}" class="destination-zone ${mapSpot[2] ? 'big' : 'small'} ${showArrow ? 'unselectable' : ''}" style="left: ${mapSpot[0]}px; top: ${mapSpot[1]}px;"></div>`, 'board');
+            }
+
+            if (showArrow) {
+                const from = possibleDestination.from;
+                const mapSpotFrom = this.getMapSpot(from);
+
+                const deltaX = mapSpot[0] - mapSpotFrom[0];
+                const deltaY = mapSpot[1] - mapSpotFrom[1];
+                const rad = Math.atan2(deltaY, deltaX); // In radians
+
+                if (!document.getElementById(`destination-arrow-${position}-from-${from}`)) {
+                    dojo.place(`<div id="destination-arrow-${position}-from-${from}" class="destination-arrow" style="left: ${mapSpot[0]}px; top: ${mapSpot[1]}px; transform: rotate(${rad}rad) translateX(-45px);"></div>`, 'board');
+                    document.getElementById(`destination-arrow-${position}-from-${from}`).addEventListener('click', () => this.game.move(position, from));
+                }
+            } else {
+                document.getElementById(`destination-zone-${position}`).addEventListener('click', () => this.game.move(position));
+            }
         });
         
     }

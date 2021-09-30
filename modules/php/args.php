@@ -91,12 +91,19 @@ trait ArgsTrait {
         return $args;
     }
 
+    function argResolveCardsForPlayer(int $playerId) {        
+        $resolveCardsForPlayer = new stdClass();
+        $resolveCardsForPlayer->remainingEffects = $this->getRemainingEffects($playerId);
+        $resolveCardsForPlayer->cromaug = $this->getCromaugArg($playerId);
+        return $resolveCardsForPlayer;
+    }
+
     function argResolveCards() {
         $playersIds = $this->getPlayersIds();
         $args = [];
 
         foreach($playersIds as $playerId) {
-            $args[$playerId] = $this->getRemainingEffects($playerId);
+            $args[$playerId] = $this->argResolveCardsForPlayer($playerId);
         }
 
         return $args;
@@ -110,8 +117,10 @@ trait ArgsTrait {
         foreach ($meeples as $meeple) {
             if ($meeple->type < 2) {
                 $possibleRoutesForMeeple = $this->getPossibleRoutesForPlayer($side, $meeple->position, $playerId);
-                foreach($possibleRoutesForMeeple as $possibleRoute) {
-                    if (!$this->array_some($possibleRoutes, function($p) use ($possibleRoute) { return $possibleRoute->destination == $p->destination; })) {
+                foreach($possibleRoutesForMeeple as &$possibleRoute) {
+                    $possibleRoute->from = $meeple->position;
+
+                    if (!$this->array_some($possibleRoutes, function($p) use ($possibleRoute) { return $possibleRoute->from == $p->from && $possibleRoute->destination == $p->destination; })) {
                         $possibleRoutes[] = $possibleRoute;
                     }
                 }

@@ -251,13 +251,13 @@ trait ActionTrait {
 
         $this->applyCardEffect($playerId, $cardType, $id);
 
-        $remainingEffects = $this->getRemainingEffects($playerId);
+        $resolveCardsForPlayer = $this->argResolveCardsForPlayer($playerId);
      
         self::notifyPlayer($playerId, 'resolveCardUpdate', '', [
-            'remainingEffects' => $remainingEffects,
+            'resolveCardsForPlayer' => $resolveCardsForPlayer,
         ]);
         
-        if (count($remainingEffects) === 0) {
+        if (count($resolveCardsForPlayer->remainingEffects) === 0 && $resolveCardsForPlayer->cromaug == null) {
             $this->gamestate->setPlayerNonMultiactive($playerId, 'move');
         }
     }
@@ -289,19 +289,19 @@ trait ActionTrait {
                 'args' => $this->argMoveForPlayer($playerId),
             ]);
         } else if ($side === 2) {
-            $this->movePlayerBoat($playerId, $route->destination);
+            $this->movePlayerBoat($playerId, $route->destination, $route->from);
 
             $this->applyEndTurn($playerId);
         }
     }
 
-    public function move(int $destination) {
+    public function move(int $destination, $from = null) {
         self::checkAction('move');
 
         $playerId = intval($this->getCurrentPlayerId());
 
         $possibleRoutes = $this->getPossibleRoutes($playerId);
-        $route = $this->array_find($possibleRoutes, function ($possibleRoute) use ($destination) { return $possibleRoute->destination == $destination; });
+        $route = $this->array_find($possibleRoutes, function ($possibleRoute) use ($destination, $from) { return $possibleRoute->destination == $destination && ($from == null || $possibleRoute->from == $from); });
         if ($route == null) {
             throw new BgaUserException("Impossible to move here");
         }

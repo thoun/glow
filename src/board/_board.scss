@@ -61,5 +61,17 @@
       width: 30px;
       height: 30px;
     }
+
+    &.unselectable {
+      pointer-events: none;
+    }
+  }
+
+  .destination-arrow {
+    position: absolute;
+    background: url('img/arrow.svg') no-repeat center / contain;
+    width: 80px;
+    height: 30px;
+    cursor: pointer;
   }
 }

@@ -14,9 +14,13 @@ trait DebugUtilTrait {
 
         //self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (44, 13, 14, 15, 16, 17)");
         //self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (20)");
-        self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (10)");
+        //self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (10, 20, 41, 44)");
+        //$this->debugSetCompanionForPlayer(2343492, 41);
         //$this->debugSetPoints(19);
         //$this->debugSkipAdventurers();
+
+        $this->debugMoveMeeple(2343492, 6, 0);
+        $this->debugMoveMeeple(2343492, 8, 1);
 
         // Activate first player must be commented in setup if this is used
         //$this->gamestate->changeActivePlayer(2343492);
@@ -27,5 +31,15 @@ trait DebugUtilTrait {
             $this->adventurers->pickCardForLocation('deck', 'player', $playerId);
         }
         //$this->gamestate->jumpToState(ST_START_ROUND);
+    }
+
+    private function debugSetCompanionForPlayer($playerId, $subType) {
+        $card = $this->getCompanionsFromDb($this->companions->getCardsOfType($subType <= 23 ? 1 : 2, $subType))[0];
+        $this->companions->moveCard($card->id, 'player', $playerId);
+    }
+
+    private function debugMoveMeeple($playerId, $spot, $index) {
+        $meepleId = intval(self::getUniqueValueFromDB("SELECT id from meeple WHERE `player_id` = $playerId LIMIT 1 OFFSET $index"));
+        self::DbQuery("UPDATE meeple SET `position` = $spot where `id` = $meepleId");
     }
 }

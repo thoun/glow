@@ -127,6 +127,7 @@ class Glow implements GlowGame {
                 break;
             case 'rollDice':
                 this.onEnteringStateRollDice();
+                break;
             case 'move':
                 this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
                 break;
@@ -228,13 +229,13 @@ class Glow implements GlowGame {
         this.setDiceSelectionActive(true);
     }
 
-    private onEnteringStateResolveCards(possibleEffects: number[][]) {
+    private onEnteringStateResolveCards(resolveCardsForPlayer: ResolveCardsForPlayer) {
         this.onLeavingResolveCards();
 
         const playerId = this.getPlayerId();
         const playerTable = this.getPlayerTable(playerId);
-
-        possibleEffects.forEach(possibleEffect => {
+        
+        resolveCardsForPlayer.remainingEffects.forEach(possibleEffect => {
             const cardType = possibleEffect[0];
             const cardId = possibleEffect[1];
             if (cardType === 0) { // adventurer
@@ -256,7 +257,7 @@ class Glow implements GlowGame {
     }
 
     private onEnteringStateMove(args: EnteringMoveForPlayer) {
-        this.board.createDestinationZones(args.possibleRoutes.map(route => route.destination));
+        this.board.createDestinationZones(args.possibleRoutes?.map(route => route));
         
         if (this.gamedatas.side === 1) {
             if (!document.getElementById(`placeEncampment-button`)) {
@@ -855,13 +856,14 @@ class Glow implements GlowGame {
         });
     }
 
-    public move(destination: number) {
+    public move(destination: number, from?: number) {
         if(!(this as any).checkAction('move')) {
             return;
         }
 
         this.takeAction('move', {
-            destination
+            destination,
+            from
         });
     }
 
@@ -918,21 +920,26 @@ class Glow implements GlowGame {
             var html = `<div id="help-popin">
                 <h1>${_("Specific companions")}</h1>
                 <div id="help-companions" class="help-section">
-                    <table>`;
-                /*.forEach((number, index) => html += `<tr><td><div id="machine${index}" class="machine"></div></td><td>${getMachineTooltip(number)}</td></tr>`);
-                html += `</table>
-                </div>
-                <h1>${_("Projects")}</h1>
-                <div id="help-projects" class="help-section">
-                    <table><tr><td class="grid">`;
-                PROJECTS_IDS.slice(1, 5).forEach((number, index) => html += `<div id="project${index + 1}" class="project"></div>`);
-                html += `</td></tr><tr><td>${getProjectTooltip(11)}</td></tr>
-                <tr><td><div id="project0" class="project"></div></td></tr><tr><td>${getProjectTooltip(10)}</td></tr><tr><td class="grid">`;
-                PROJECTS_IDS.slice(6, 9).forEach((number, index) => html += `<div id="project${index + 6}" class="project"></div>`);
-                html += `</td></tr><tr><td>${getProjectTooltip(21)}</td></tr>
-                <tr><td><div id="project5" class="project"></div></td></tr><tr><td>${getProjectTooltip(20)}</td></tr><tr><td class="grid">`;
-                PROJECTS_IDS.slice(9).forEach((number, index) => html += `<div id="project${index + 9}" class="project"></div>`);*/
-                html += `</td></tr><tr><td>${getProjectTooltip(31)}</td></tr></table>
+                    <h2>${_('The Sketals')}</h2>
+                    <table><tr>
+                    <td><div id="companion44" class="companion"></div></td>
+                        <td>${getCompanionTooltip(44)}</td>
+                    </tr></table>
+                    <h2>Xar’gok</h2>
+                    <table><tr>
+                        <td><div id="companion10" class="companion"></div></td>
+                        <td>${getCompanionTooltip(10)}</td>
+                    </tr></table>
+                    <h2>${_('Kaar and the curse of the black die')}</h2>
+                    <table><tr>
+                        <td><div id="companion20" class="companion"></div></td>
+                        <td>${getCompanionTooltip(20)}</td>
+                    </tr></table>
+                    <h2>Cromaug</h2>
+                    <table><tr>
+                        <td><div id="companion41" class="companion"></div></td>
+                        <td>${getCompanionTooltip(41)}</td>
+                    </tr></table>
                 </div>
             </div>`;
             
@@ -997,7 +1004,7 @@ class Glow implements GlowGame {
         playerTable.addDice(notif.args.dice);
     }
 
-    notif_chosenCompanion(notif: Notif<NotifChosenCompanionArgs>) {console.log(notif.args);
+    notif_chosenCompanion(notif: Notif<NotifChosenCompanionArgs>) {
         const playerTable = this.getPlayerTable(notif.args.playerId);
         playerTable.addCompanion(notif.args.companion, this.meetingTrack.getStock(notif.args.spot));
         playerTable.addDice(notif.args.dice);
@@ -1073,7 +1080,7 @@ class Glow implements GlowGame {
     }
 
     notif_resolveCardUpdate(notif: Notif<NotifResolveCardUpdateArgs>) {
-        this.onEnteringStateResolveCards(notif.args.remainingEffects);
+        this.onEnteringStateResolveCards(notif.args.resolveCardsForPlayer);
     }
 
     notif_usedDice(notif: Notif<NotifUsedDiceArgs>) {

@@ -6,6 +6,7 @@ require_once(__DIR__.'/objects/companion.php');
 require_once(__DIR__.'/objects/dice.php');
 require_once(__DIR__.'/objects/meeple.php');
 require_once(__DIR__.'/objects/meeting-track-spot.php');
+require_once(__DIR__.'/objects/cromaug-arg.php');
 
 trait UtilTrait {
 
@@ -786,5 +787,37 @@ trait UtilTrait {
             'playerId' => $playerId,
             'spell' => $spell,
         ]);
+    }
+
+    public function getCromaugArg(int $playerId) {
+        $dice = $this->getEffectiveDice($playerId);
+        $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+
+        $cromaugCard = null;
+
+        foreach($companions as $companion) {
+            if ($companion->subType == 41) { // Cromaug
+                if ($this->isTriggeredEffectsForCard($dice, $companion->effect)) {
+                    $cromaugCard = $companion;
+                    break;
+                }
+            }
+        }
+
+        if ($cromaugCard == null) {
+            return null;
+        } else {
+            $this->sendToCemetery($playerId, $cromaugCard->id);
+            $companion = $this->getCompanionFromDb($this->companions->getCard($cromaugCard->id));
+            self::notifyAllPlayers('removeCompanion', clienttranslate('${playerName} discard Cromaug and a companion from the cemetery'), [
+                'playerId' => $playerId,
+                'playerName' => $this->getPlayerName($playerId),
+                'companion' => $cromaugCard,
+            ]);
+
+            $cromaugArg = new stdClass();
+            $cromaugArg->cemeteryCards = $this->getCompanionsFromDb($this->companions->getCardsInLocation('cemetery'));
+            return $cromaugArg;
+        }
     }
 }

@@ -64,13 +64,16 @@ trait MapTrait {
         ]);
     }
 
-    function movePlayerBoat(int $playerId, int $position) {
-        // TODO determine which boat to move
+    function movePlayerBoat(int $playerId, int $position, int $from) {
         $boats = $this->getPlayerMeeples($playerId, 0);
-        $boat = $boats[0];
+        $boat = $this->array_find($boats, function ($b) use ($from) { return $b->position == $from; });
 
         $boat->position = $position;
-        self::DbQuery("UPDATE meeple SET `position` = $position WHERE `id` = $boat->id");
+        $sql = "UPDATE meeple SET `position` = $position WHERE `id` = $boat->id";
+        if ($from != null) {
+            $sql .= " AND `position` = $from";
+        }
+        self::DbQuery($sql);
         
         self::notifyAllPlayers('meepleMoved', '', [
             'meeple' => $boat,

@@ -7,6 +7,7 @@ class MapRoute {
     public /*int*/ $max;
 
     public /*int[]*/ $costForPlayer;
+    public /*int*/ $from;
 
     public function __construct(int $destination, $effects = [], $min = null, $max = null) {
         $this->destination = $destination;

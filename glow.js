@@ -59,61 +59,25 @@ function setupSpellCards(spellsStock) {
     }
     spellsStock.addItemType(0, 0, cardsurl, 0);
 }
-function getMachineTooltip(type) {
+function getCompanionTooltip(type) {
     switch (type) {
-        // blue
-        case 11: return _("Earn 1 wood for each machine on the Bric-a-brac with wood in its production zone, including this one.");
-        case 12: return _("Earn 1 charcoalium for each machine on the Bric-a-brac with charcoalium in its production zone, including this one.");
-        case 13: return _("Earn 1 copper for each machine on the Bric-a-brac with copper in its production zone, including this one.");
-        case 14: return _("Earn 1 crystal for each machine on the Bric-a-brac with crystal in its production zone, including this one.");
-        case 15: return formatTextIcons(_("Choose a type of resource ([resource1]|[resource2]|[resource3]). Earn 1 resource of this type for each machine on the Bric-a-brac with the [resource9] symbol in its production zone, including this one."));
-        // purple
-        case 21: return _("Discard a machine from your hand and earn 2 resources of your choice from those needed to repair it.");
-        case 22: return _("Discard 1 of the last 3 machines added to the Bric-a-brac before this one and earn 1 resource of your choice from those needed to repair it.");
-        case 23: return _("Discard 1 of the last 2 machines added to the Bric-a-brac before this one and earn 1 resource of your choice from those needed to repair it and 1 charcoalium.");
-        case 24: return _("You can exchange 1 charcoalium for 1 resource of your choice from the reserve and/or vice versa, up to three times total.");
-        case 25: return _("Discard the last machine added to the Bric-a-brac before this one and earn 2 resources of your choice from those needed to repair it.");
-        // red
-        case 31: return _("Steal from your opponent 1 charcoalium and 1 machine taken randomly from their hand.");
-        case 32: return _("Steal from your opponent 1 resource of your choice and 1 machine taken randomly from their hand.");
-        case 33: return _("Your opponent must randomly discard all but 2 machines from their hand and return 2 charcoalium to the reserve.");
-        case 34: return _("Your opponent must return 2 resources of your choice to the reserve.");
-        // yellow
-        case 41: return _("Draw 2 of the unused project tiles. Choose 1 to place face up in your workshop and return the other to the box. Only you can complete the project in your workshop.");
-        case 42: return _("Copy the effect of 1 machine from the Bric-a-brac of your choice.");
-    }
-    return null;
-}
-function setupMachineCard(game, cardDiv, type) {
-    game.addTooltipHtml(cardDiv.id, getMachineTooltip(type));
-}
-function getProjectTooltip(type) {
-    switch (type) {
-        // colors
-        case 10: return _("You must have at least 1 machine of each color in your workshop.");
-        case 11:
-        case 12:
         case 13:
-        case 14: return _("You must have at least 2 machines of the indicated color in your workshop.");
-        // points
-        case 20: return _("You must have at least 2 identical machines in your workshop.");
-        case 21:
-        case 22:
-        case 23: return _("You must have at least 2 machines worth the indicated number of victory points in your workshop.");
-        // resources
-        case 31:
-        case 32:
-        case 33:
-        case 34:
-        case 35:
-        case 36:
-        case 37:
-        case 38: return formatTextIcons(_("You must have machines in your workshop that have the indicated resources and/or charcoalium in their production zones. [resource9] resources do not count towards these objectives."));
+        case 14:
+        case 15:
+        case 16:
+        case 17:
+        case 44: return "<p>" + _("If the player chooses a Sketal, they immediately take an additional large die from the reserve pool in the color indicated by its power. The Sketal, whose power is a multicolored die, allows the player to take a large die of their choice from those available in the reserve pool. If there are none, it has no effect. If the player forgets to take the die, they can take in a following round. If a Sketal is sent to the cemetery, the corresponding die is replaced in the reserve pool.") + "</p>";
+        case 10: return "<p>" + _("If the player obtains 2 fire symbols, Xar\u2019gok is sent to the cemetery and the spells are cast:") + "</p>\n        <ol class=\"help-list\"><li>" + _("1. The other players take a spell token that they place facedown in front of them.") + "</li>\n        <li>" + _("2. At the beginning of the next round, the spell tokens are revealed.") + "</li>\n        <li>" + _("3. When a player fulfils the condition indicated on their token, the spell is triggered: its effect is applied and the token is replaced in the box.") + "</li></ol>\n        <p>" + _("<b>A spell token works in exactly the same way as a card:</b> the player chooses the order in which they resolve their cards and their spell, the trigger conditions and the effects are the same as those of the cards.") + "</p>\n        <p><div class=\"help-special-spell\"></div>" + _("Only this spell token is played differently: it must always be placed on the last companion to be recruited. The player must move the spell token each time he recruits a new companion.") + "</p>\n        <p>" + _("When the spell is triggered, the companion on which it is placed is sent to the cemetery (without applying any effects, even if it has a skull) and the player replaces the token in the box. As the player can choose the order in which the cards and the spell are resolved, they can benefit from the targeted character\u2019s effect (if their dice allow them to) before it is sent to the cemetery.") + "</p>";
+        case 20: return "<p>" + _("When a player takes Kaar, they take the small black die from the reserve pool, roll it and place it on the space of the meeting track indicated by the result of the die. If the result indicates an empty space, the player must reroll the die. If no player takes Kaar, the black die does not come into play.") + "</p>\n        <p>" + _("During the rest of the game, the player with Kaar is immunized against the curse of the black die. If the black die is placed in front of the companion they want to take, they can move it in front of another companion of their choice.") + "</p>\n        <p>" + _("<b>Curse of the black die:</b> In each round, the player who rolls the black die with their other dice must apply its result: according to the obtained symbol, every other die of the player with the same symbol is not counted in the final result. If the player obtains -2 bursts of light, they move back as many spaces on the score track.") + "</p>\n        <p style=\"color: #D4111F;\">" + _("<b>Important:</b> the black die remains in play until the end of the game, even if Kaar is sent to the cemetery.") + "</p>";
+        case 41: return "<p>" + _("If the player obtains an air symbol, they immediately discard Cromaug and can take another companion of their choice from the cemetery that they place in front of them. The chosen companion becomes the last companion to be recruited.") + "</p>\n        <p>" + _("If it is a Sketal, they take the additional die indicated by its power, if it is available in the reserve pool, and can roll it from the next round. If it is Kaar, the black die comes into play.") + "</p>\n        <p>" + _("If the previously obtained result of the dice allows it, they can immediately trigger the effect of this new companion.") + "</p>";
     }
     return null;
 }
-function setupProjectCard(game, cardDiv, type) {
-    game.addTooltipHtml(cardDiv.id, getProjectTooltip(type));
+function setupCompanionCard(game, cardDiv, type) {
+    var tooltip = getCompanionTooltip(type);
+    if (tooltip) {
+        game.addTooltipHtml(cardDiv.id, tooltip);
+    }
 }
 function moveToAnotherStock(sourceStock, destinationStock, uniqueId, cardId) {
     if (sourceStock === destinationStock) {
@@ -208,18 +172,18 @@ var MAP1 = [
     [74, 319], // 60
 ];
 var MAP2 = [
-    [419, 212, 1],
-    [628, 212, 1],
-    [752, 142, 1],
-    [559, 302, 1],
-    [750, 355, 1],
-    [397, 386, 1],
-    [257, 306, 1],
-    [63, 355, 1],
-    [150, 208, 1],
-    [79, 77, 1],
-    [288, 83, 1],
-    [503, 67, 1], // 11
+    [416, 204, 1],
+    [635, 200, 1],
+    [760, 132, 1],
+    [564, 299, 1],
+    [762, 355, 1],
+    [393, 383, 1],
+    [252, 300, 1],
+    [58, 352, 1],
+    [139, 196, 1],
+    [69, 66, 1],
+    [286, 69, 1],
+    [504, 55, 1], // 11
 ];
 var MAPS = [null, MAP1, MAP2];
 var Board = /** @class */ (function () {
@@ -299,10 +263,28 @@ var Board = /** @class */ (function () {
     Board.prototype.createDestinationZones = function (possibleDestinations) {
         var _this = this;
         Array.from(document.getElementsByClassName('destination-zone')).forEach(function (node) { return node.parentElement.removeChild(node); });
-        possibleDestinations.forEach(function (position) {
+        Array.from(document.getElementsByClassName('destination-arrow')).forEach(function (node) { return node.parentElement.removeChild(node); });
+        possibleDestinations === null || possibleDestinations === void 0 ? void 0 : possibleDestinations.forEach(function (possibleDestination) {
+            var position = possibleDestination.destination;
+            var showArrow = possibleDestinations.filter(function (pd) { return pd.destination == position; }).length > 1;
             var mapSpot = _this.getMapSpot(position);
-            dojo.place("<div id=\"destination-zone-" + position + "\" class=\"destination-zone " + (mapSpot[2] ? 'big' : 'small') + "\" style=\"left: " + mapSpot[0] + "px; top: " + mapSpot[1] + "px;\"></div>", 'board');
-            document.getElementById("destination-zone-" + position).addEventListener('click', function () { return _this.game.move(position); });
+            if (!document.getElementById("destination-zone-" + position)) {
+                dojo.place("<div id=\"destination-zone-" + position + "\" class=\"destination-zone " + (mapSpot[2] ? 'big' : 'small') + " " + (showArrow ? 'unselectable' : '') + "\" style=\"left: " + mapSpot[0] + "px; top: " + mapSpot[1] + "px;\"></div>", 'board');
+            }
+            if (showArrow) {
+                var from_1 = possibleDestination.from;
+                var mapSpotFrom = _this.getMapSpot(from_1);
+                var deltaX = mapSpot[0] - mapSpotFrom[0];
+                var deltaY = mapSpot[1] - mapSpotFrom[1];
+                var rad = Math.atan2(deltaY, deltaX); // In radians
+                if (!document.getElementById("destination-arrow-" + position + "-from-" + from_1)) {
+                    dojo.place("<div id=\"destination-arrow-" + position + "-from-" + from_1 + "\" class=\"destination-arrow\" style=\"left: " + mapSpot[0] + "px; top: " + mapSpot[1] + "px; transform: rotate(" + rad + "rad) translateX(-45px);\"></div>", 'board');
+                    document.getElementById("destination-arrow-" + position + "-from-" + from_1).addEventListener('click', function () { return _this.game.move(position, from_1); });
+                }
+            }
+            else {
+                document.getElementById("destination-zone-" + position).addEventListener('click', function () { return _this.game.move(position); });
+            }
         });
     };
     return Board;
@@ -336,6 +318,7 @@ var MeetingTrack = /** @class */ (function () {
             this_1.companionsStocks[i].selectionClass = 'selected';
             this_1.companionsStocks[i].create(this_1.game, $("meeting-track-companion-" + i), CARD_WIDTH, CARD_HEIGHT);
             this_1.companionsStocks[i].setSelectionMode(0);
+            this_1.companionsStocks[i].onItemCreate = function (cardDiv, type) { return setupCompanionCard(game, cardDiv, type); };
             dojo.connect(this_1.companionsStocks[i], 'onChangeSelection', this_1, function () { return _this.game.selectMeetingTrackCompanion(i); });
             setupCompanionCards(this_1.companionsStocks[i]);
             if (cemetery) {
@@ -460,7 +443,6 @@ var PlayerTable = /** @class */ (function () {
         this.adventurerStock.selectionClass = 'selected';
         this.adventurerStock.create(this.game, $("player-table-" + this.playerId + "-adventurer"), CARD_WIDTH, CARD_HEIGHT);
         this.adventurerStock.setSelectionMode(0);
-        //this.adventurerStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupProjectCard(game, cardDiv, type);
         dojo.connect(this.adventurerStock, 'onChangeSelection', this, function (_, itemId) {
             if (_this.adventurerStock.getSelectedItems().length) {
                 _this.game.resolveCard(0, Number(itemId));
@@ -477,6 +459,7 @@ var PlayerTable = /** @class */ (function () {
         this.companionsStock.selectionClass = 'selected';
         this.companionsStock.create(this.game, $("player-table-" + this.playerId + "-companions"), CARD_WIDTH, CARD_HEIGHT);
         this.companionsStock.setSelectionMode(0);
+        this.companionsStock.onItemCreate = function (cardDiv, type) { return setupCompanionCard(game, cardDiv, type); };
         dojo.connect(this.companionsStock, 'onChangeSelection', this, function (_, itemId) {
             if (_this.companionsStock.getSelectedItems().length) {
                 _this.game.resolveCard(1, Number(itemId));
@@ -704,6 +687,7 @@ var Glow = /** @class */ (function () {
                 break;
             case 'rollDice':
                 this.onEnteringStateRollDice();
+                break;
             case 'move':
                 this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
                 break;
@@ -792,11 +776,11 @@ var Glow = /** @class */ (function () {
     Glow.prototype.onEnteringStateRollDice = function () {
         this.setDiceSelectionActive(true);
     };
-    Glow.prototype.onEnteringStateResolveCards = function (possibleEffects) {
+    Glow.prototype.onEnteringStateResolveCards = function (resolveCardsForPlayer) {
         this.onLeavingResolveCards();
         var playerId = this.getPlayerId();
         var playerTable = this.getPlayerTable(playerId);
-        possibleEffects.forEach(function (possibleEffect) {
+        resolveCardsForPlayer.remainingEffects.forEach(function (possibleEffect) {
             var cardType = possibleEffect[0];
             var cardId = possibleEffect[1];
             if (cardType === 0) { // adventurer
@@ -821,7 +805,8 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.onEnteringStateMove = function (args) {
         var _this = this;
-        this.board.createDestinationZones(args.possibleRoutes.map(function (route) { return route.destination; }));
+        var _a;
+        this.board.createDestinationZones((_a = args.possibleRoutes) === null || _a === void 0 ? void 0 : _a.map(function (route) { return route; }));
         if (this.gamedatas.side === 1) {
             if (!document.getElementById("placeEncampment-button")) {
                 this.addActionButton("placeEncampment-button", _("Place encampment"), function () { return _this.placeEncampment(); });
@@ -1320,12 +1305,13 @@ var Glow = /** @class */ (function () {
             id: id,
         });
     };
-    Glow.prototype.move = function (destination) {
+    Glow.prototype.move = function (destination, from) {
         if (!this.checkAction('move')) {
             return;
         }
         this.takeAction('move', {
-            destination: destination
+            destination: destination,
+            from: from
         });
     };
     Glow.prototype.placeEncampment = function () {
@@ -1372,21 +1358,7 @@ var Glow = /** @class */ (function () {
             this.helpDialog = new ebg.popindialog();
             this.helpDialog.create('glowHelpDialog');
             this.helpDialog.setTitle(_("Cards help"));
-            var html = "<div id=\"help-popin\">\n                <h1>" + _("Specific companions") + "</h1>\n                <div id=\"help-companions\" class=\"help-section\">\n                    <table>";
-            /*.forEach((number, index) => html += `<tr><td><div id="machine${index}" class="machine"></div></td><td>${getMachineTooltip(number)}</td></tr>`);
-            html += `</table>
-            </div>
-            <h1>${_("Projects")}</h1>
-            <div id="help-projects" class="help-section">
-                <table><tr><td class="grid">`;
-            PROJECTS_IDS.slice(1, 5).forEach((number, index) => html += `<div id="project${index + 1}" class="project"></div>`);
-            html += `</td></tr><tr><td>${getProjectTooltip(11)}</td></tr>
-            <tr><td><div id="project0" class="project"></div></td></tr><tr><td>${getProjectTooltip(10)}</td></tr><tr><td class="grid">`;
-            PROJECTS_IDS.slice(6, 9).forEach((number, index) => html += `<div id="project${index + 6}" class="project"></div>`);
-            html += `</td></tr><tr><td>${getProjectTooltip(21)}</td></tr>
-            <tr><td><div id="project5" class="project"></div></td></tr><tr><td>${getProjectTooltip(20)}</td></tr><tr><td class="grid">`;
-            PROJECTS_IDS.slice(9).forEach((number, index) => html += `<div id="project${index + 9}" class="project"></div>`);*/
-            html += "</td></tr><tr><td>" + getProjectTooltip(31) + "</td></tr></table>\n                </div>\n            </div>";
+            var html = "<div id=\"help-popin\">\n                <h1>" + _("Specific companions") + "</h1>\n                <div id=\"help-companions\" class=\"help-section\">\n                    <h2>" + _('The Sketals') + "</h2>\n                    <table><tr>\n                    <td><div id=\"companion44\" class=\"companion\"></div></td>\n                        <td>" + getCompanionTooltip(44) + "</td>\n                    </tr></table>\n                    <h2>Xar\u2019gok</h2>\n                    <table><tr>\n                        <td><div id=\"companion10\" class=\"companion\"></div></td>\n                        <td>" + getCompanionTooltip(10) + "</td>\n                    </tr></table>\n                    <h2>" + _('Kaar and the curse of the black die') + "</h2>\n                    <table><tr>\n                        <td><div id=\"companion20\" class=\"companion\"></div></td>\n                        <td>" + getCompanionTooltip(20) + "</td>\n                    </tr></table>\n                    <h2>Cromaug</h2>\n                    <table><tr>\n                        <td><div id=\"companion41\" class=\"companion\"></div></td>\n                        <td>" + getCompanionTooltip(41) + "</td>\n                    </tr></table>\n                </div>\n            </div>";
             // Show the dialog
             this.helpDialog.setContent(html);
         }
@@ -1443,7 +1415,6 @@ var Glow = /** @class */ (function () {
         playerTable.addDice(notif.args.dice);
     };
     Glow.prototype.notif_chosenCompanion = function (notif) {
-        console.log(notif.args);
         var playerTable = this.getPlayerTable(notif.args.playerId);
         playerTable.addCompanion(notif.args.companion, this.meetingTrack.getStock(notif.args.spot));
         playerTable.addDice(notif.args.dice);
@@ -1507,7 +1478,7 @@ var Glow = /** @class */ (function () {
         this.diceChangedOrRolled(notif.args.dice, true, notif.args.args);
     };
     Glow.prototype.notif_resolveCardUpdate = function (notif) {
-        this.onEnteringStateResolveCards(notif.args.remainingEffects);
+        this.onEnteringStateResolveCards(notif.args.resolveCardsForPlayer);
     };
     Glow.prototype.notif_usedDice = function (notif) {
         var playerTable = this.getPlayerTable(notif.args.playerId);

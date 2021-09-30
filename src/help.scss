@@ -1,6 +1,7 @@
 
-$companion-width: 190px; 
-$companion-height: 190px;
+$companion-width: 129px; 
+$companion-height: 240px;
+$spell-diameter: 64px;
 
 #glow-help-button {
     position: fixed;
@@ -27,7 +28,7 @@ $companion-height: 190px;
 }
 
 #popin_glowHelpDialog {
-    background: url('img/background.jpg') #eae3d3;
+    background: white;
     background-repeat: repeat;
     max-width: 100vw;
     max-height: 80vh;
@@ -54,12 +55,37 @@ $companion-height: 190px;
         .companion {
             width: $companion-width; 
             height: $companion-height;
-            background-image: url('img/cards.jpg');
+            background-image: url('img/companions.png');
+            border-radius: 10px;
+            border: 1px solid gray;
         }
-        @for $i from 0 through 15 {
-            #machine#{$i} {
-                background-position: ($i * 100% / 15) 0%;
-            }
+        
+        #companion44 {
+            background-position: -500% -400%;
+        }
+        #companion10 {
+            background-position: 0% -100%;
+        }
+        #companion20 {
+            background-position: 0% -200%;
+        }
+        #companion41 {
+            background-position: -200% -400%;
         }
     }
+}
+
+ol.help-list {
+    padding: 10px;
+}
+
+.help-special-spell {
+    width: $spell-diameter; 
+    height: $spell-diameter;
+    background-image: url('img/spells.png');
+    background-position: 50% 50%;
+    border-radius: 50%;
+    border: 1px solid gray;
+    float: left;
+    margin: 10px;
 }
