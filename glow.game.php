@@ -201,6 +201,10 @@ class Glow extends Table {
         if (count($result['players']) == 1) { // solo mode
             $result['tom'] = $this->getTom();
         }
+
+        $result['ADVENTURERS_EFFECTS'] = array_map(function ($card) { return $card->effect; }, $this->ADVENTURERS);
+        $result['COMPANIONS_EFFECTS'] = array_map(function ($card) { return $card->effect; }, $this->COMPANIONS);
+        $result['SPELLS_EFFECTS'] = $this->SPELLS;
   
         return $result;
     }

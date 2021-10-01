@@ -52,15 +52,21 @@ html {
   }
 
   &.footprint {
-    background-position: 33.33% 0%;
+    background-position: (1 * 100% / 9) 0%;
   }
 
   &.firefly {
-    background-position: 66.66% 0%;
+    background-position: (2 * 100% / 9) 0%;
   }
 
   &.point {
-    background-position: 100% 0%;
+    background-position: (3 * 100% / 9) 0%;
+  }
+
+  @for $i from 0 through 5 {
+    &.symbol#{$i} {
+        background-position: (($i + 4) * 100% / 9) 100%;
+    }
   }
 }
 
@@ -102,6 +108,18 @@ html {
 .bgabutton_red {
   background: #2a2a2a;
   border: 1px solid #000000;
+}
+
+.tooltip-effect-title {
+  font-weight: bold;
+}
+
+.dijitTooltipContents {
+  .icon {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+  }
 }
 
 .avatar_active, #active_player_statusbar_icon, #logoiconimg {

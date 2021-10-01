@@ -61,6 +61,63 @@ function setupSpellCards(spellsStock) {
     }
     spellsStock.addItemType(0, 0, cardsurl, 0);
 }
+function getEffectExplanation(effect) {
+    if (effect > 100) {
+        return dojo.string.substitute(_("Earn ${points} bursts of light."), { points: "<strong>" + (effect - 100) + "</strong>" });
+    }
+    else if (effect < -100) {
+        return dojo.string.substitute(_("Lose ${points} bursts of light."), { points: "<strong>" + -(effect + 100) + "</strong>" });
+    }
+    else if (effect > 20 && effect < 30) {
+        return dojo.string.substitute(_("Earn ${footprints} footprints."), { footprints: "<strong>" + (effect - 20) + "</strong>" });
+    }
+    else if (effect < -20 && effect > -30) {
+        return dojo.string.substitute(_("Earn ${footprints} footprints."), { footprints: "<strong>" + -(effect + 20) + "</strong>" });
+    }
+    else if (effect > 10 && effect < 20) {
+        return dojo.string.substitute(_("Earn ${fireflies} firefly."), { fireflies: "<strong>" + (effect - 10) + "</strong>" });
+    }
+    else if (effect === 30) {
+        return _("Earn 1 reroll token.");
+    }
+    else if (effect === 33) {
+        return _("The companion is immediately placed in the cemetery.");
+    }
+}
+function getEffectTooltip(effect) {
+    if (!effect) {
+        return null;
+    }
+    var conditions = null;
+    if (effect.conditions.every(function (condition) { return condition > 0; })) {
+        conditions = dojo.string.substitute(_("${symbols} triggers the effect."), {
+            symbols: formatTextIcons(effect.conditions.map(function (condition) { return "[symbol" + condition + "]"; }).join(''))
+        });
+    }
+    else if (effect.conditions.every(function (condition) { return condition == 0; })) {
+        conditions = dojo.string.substitute(formatTextIcons(effect.conditions.map(function (_) { return "[symbol0]"; }).join('')) + ' : ' + _("any ${number} identical symbols."), {
+            number: "<strong>" + effect.conditions.length + "</strong>"
+        });
+    }
+    else if (effect.conditions.every(function (condition) { return condition < 0; })) {
+        conditions = dojo.string.substitute(_("If the symbols ${symbols} are not present on any of the dice, the effect is triggered."), {
+            symbols: formatTextIcons(effect.conditions.map(function (condition) { return "[symbol" + -condition + "]"; }).join(''))
+        });
+    }
+    else if (effect.conditions.some(function (condition) { return condition > 0; }) && effect.conditions.some(function (condition) { return condition < 0; })) {
+        conditions = dojo.string.substitute(_("If the symbols ${forbiddenSymbols} are not present on any of the dice, ${symbols} triggers the effect."), {
+            forbiddenSymbols: formatTextIcons(effect.conditions.filter(function (condition) { return condition < 0; }).map(function (condition) { return "[symbol" + -condition + "]"; }).join('')),
+            symbols: formatTextIcons(effect.conditions.filter(function (condition) { return condition > 0; }).map(function (condition) { return "[symbol" + condition + "]"; }).join('')),
+        });
+    }
+    return "\n    <div class=\"tooltip-effect-title\">" + _("Conditions") + "</div>\n    " + conditions + "\n    <hr>\n    <div class=\"tooltip-effect-title\">" + _("Effects") + "</div>\n    " + effect.effects.map(function (effect) { return getEffectExplanation(effect); }).join('<br>') + "\n    ";
+}
+function setupAdventurerCard(game, cardDiv, type) {
+    var tooltip = getEffectTooltip(game.gamedatas.ADVENTURERS_EFFECTS[type]);
+    if (tooltip) {
+        game.addTooltipHtml(cardDiv.id, tooltip);
+    }
+}
 function getCompanionTooltip(type) {
     switch (type) {
         case 13:
@@ -76,7 +133,20 @@ function getCompanionTooltip(type) {
     return null;
 }
 function setupCompanionCard(game, cardDiv, type) {
-    var tooltip = getCompanionTooltip(type); // TODO add effect (same thing to spells & adventurers)
+    var tooltip = getEffectTooltip(game.gamedatas.COMPANIONS_EFFECTS[type]);
+    var companionTooltip = getCompanionTooltip(type);
+    if (tooltip && companionTooltip) {
+        game.addTooltipHtml(cardDiv.id, tooltip + "<hr>" + companionTooltip);
+    }
+    else if (tooltip) {
+        game.addTooltipHtml(cardDiv.id, tooltip);
+    }
+    else if (companionTooltip) {
+        game.addTooltipHtml(cardDiv.id, companionTooltip);
+    }
+}
+function setupSpellCard(game, cardDiv, type) {
+    var tooltip = getEffectTooltip(game.gamedatas.SPELLS_EFFECTS[type]);
     if (tooltip) {
         game.addTooltipHtml(cardDiv.id, tooltip);
     }
@@ -107,7 +177,8 @@ function addToStockWithId(destinationStock, uniqueId, cardId, from) {
 function formatTextIcons(rawText) {
     return rawText
         .replace(/\[reroll\]/ig, '<span class="icon reroll"></span>')
-        .replace(/\[point\]/ig, '<span class="icon point"></span>');
+        .replace(/\[point\]/ig, '<span class="icon point"></span>')
+        .replace(/\[symbol(\d)\]/ig, '<span class="icon symbol$1"></span>');
 }
 var POINT_CASE_SIZE = 25.5;
 var MAP1 = [
@@ -467,6 +538,7 @@ var PlayerTable = /** @class */ (function () {
         this.spellsStock.selectionClass = 'selected';
         this.spellsStock.create(this.game, $("player-table-" + this.playerId + "-spells"), SPELL_DIAMETER, SPELL_DIAMETER);
         this.spellsStock.setSelectionMode(0);
+        this.spellsStock.onItemCreate = function (cardDiv, type) { return setupSpellCard(game, cardDiv, type); };
         dojo.connect(this.spellsStock, 'onChangeSelection', this, function (_, itemId) {
             if (_this.spellsStock.getSelectedItems().length) {
                 _this.game.resolveCard(2, Number(itemId));
@@ -507,6 +579,7 @@ var PlayerTable = /** @class */ (function () {
         this.companionSpellStock.selectionClass = 'selected';
         this.companionSpellStock.create(this.game, $("player-table-" + this.playerId + "-companion-spell"), SPELL_DIAMETER, SPELL_DIAMETER);
         this.companionSpellStock.setSelectionMode(0);
+        this.companionSpellStock.onItemCreate = function (cardDiv, type) { return setupSpellCard(_this.game, cardDiv, type); };
         dojo.connect(this.companionSpellStock, 'onChangeSelection', this, function (_, itemId) {
             if (_this.companionSpellStock.getSelectedItems().length) {
                 _this.game.resolveCard(2, Number(itemId));
@@ -719,7 +792,7 @@ var Glow = /** @class */ (function () {
             this.adventurersStock.setSelectionAppearance('class');
             this.adventurersStock.selectionClass = 'nothing';
             this.adventurersStock.centerItems = true;
-            // this.adventurersStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupMachineCard(this, cardDiv, type);
+            this.adventurersStock.onItemCreate = function (cardDiv, type) { return setupAdventurerCard(_this, cardDiv, type); };
             dojo.connect(this.adventurersStock, 'onChangeSelection', this, function () { return _this.onAdventurerSelection(_this.adventurersStock.getSelectedItems()); });
             setupAdventurersCards(this.adventurersStock);
             adventurers.forEach(function (adventurer) { return _this.adventurersStock.addToStockWithId(adventurer.color, '' + adventurer.id); });

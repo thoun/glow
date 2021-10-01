@@ -61,6 +61,73 @@ function setupSpellCards(spellsStock: Stock) {
     spellsStock.addItemType(0,  0, cardsurl, 0);
 }
 
+function getEffectExplanation(effect: number) {    
+    if (effect > 100) {
+        return dojo.string.substitute(_("Earn ${points} bursts of light."), { points: `<strong>${effect - 100}</strong>` });
+    } else if (effect < -100) {
+        return dojo.string.substitute(_("Lose ${points} bursts of light."), { points: `<strong>${-(effect + 100)}</strong>` });
+    }
+
+    else if (effect > 20 && effect < 30) {
+        return dojo.string.substitute(_("Earn ${footprints} footprints."), { footprints: `<strong>${effect - 20}</strong>` });
+    } else if (effect < -20 && effect > -30) {
+        return dojo.string.substitute(_("Earn ${footprints} footprints."), { footprints: `<strong>${-(effect + 20)}</strong>` });
+    }
+
+    else if (effect > 10 && effect < 20) {
+        return dojo.string.substitute(_("Earn ${fireflies} firefly."), { fireflies: `<strong>${effect - 10}</strong>` });
+    }
+
+    else if (effect === 30) {
+        return _("Earn 1 reroll token.");
+    }
+
+    else if (effect === 33) {
+        return _("The companion is immediately placed in the cemetery.");
+    }
+}
+
+function getEffectTooltip(effect: Effect) {
+    if (!effect) {
+        return null;
+    }
+
+    let conditions = null;
+    if (effect.conditions.every(condition => condition > 0)) {
+        conditions = dojo.string.substitute(_("${symbols} triggers the effect."), { 
+            symbols: formatTextIcons(effect.conditions.map(condition => `[symbol${condition}]`).join('')) 
+        });
+    } else if (effect.conditions.every(condition => condition == 0)) {
+        conditions = dojo.string.substitute(formatTextIcons(effect.conditions.map(_ => `[symbol0]`).join('')) + ' : ' + _("any ${number} identical symbols."), { 
+            number: `<strong>${effect.conditions.length}</strong>` 
+        });
+    } else if (effect.conditions.every(condition => condition < 0)) {
+        conditions = dojo.string.substitute(_("If the symbols ${symbols} are not present on any of the dice, the effect is triggered."), { 
+            symbols: formatTextIcons(effect.conditions.map(condition => `[symbol${-condition}]`).join('')) 
+        });
+    } else if (effect.conditions.some(condition => condition > 0) && effect.conditions.some(condition => condition < 0)) {
+        conditions = dojo.string.substitute(_("If the symbols ${forbiddenSymbols} are not present on any of the dice, ${symbols} triggers the effect."), { 
+            forbiddenSymbols: formatTextIcons(effect.conditions.filter(condition => condition < 0).map(condition => `[symbol${-condition}]`).join('')),  
+            symbols: formatTextIcons(effect.conditions.filter(condition => condition > 0).map(condition => `[symbol${condition}]`).join('')) ,
+        });
+    }
+    
+    return `
+    <div class="tooltip-effect-title">${_("Conditions")}</div>
+    ${conditions}
+    <hr>
+    <div class="tooltip-effect-title">${_("Effects")}</div>
+    ${effect.effects.map(effect => getEffectExplanation(effect)).join('<br>')}
+    `;
+}
+
+function setupAdventurerCard(game: Game, cardDiv: HTMLDivElement, type: number) {
+    const tooltip = getEffectTooltip(((game as any).gamedatas as GlowGamedatas).ADVENTURERS_EFFECTS[type]);
+    if (tooltip) {
+        (game as any).addTooltipHtml(cardDiv.id, tooltip);
+    }
+}
+
 function getCompanionTooltip(type: number) {
     switch (type) {
         case 13: case 14: case 15: case 16: case 17: case 44: return `<p>` + _(`If the player chooses a Sketal, they immediately take an additional large die from the reserve pool in the color indicated by its power. The Sketal, whose power is a multicolored die, allows the player to take a large die of their choice from those available in the reserve pool. If there are none, it has no effect. If the player forgets to take the die, they can take in a following round. If a Sketal is sent to the cemetery, the corresponding die is replaced in the reserve pool.`) + `</p>`;
@@ -86,7 +153,19 @@ function getCompanionTooltip(type: number) {
 }
 
 function setupCompanionCard(game: Game, cardDiv: HTMLDivElement, type: number) {
-    const tooltip = getCompanionTooltip(type); // TODO add effect (same thing to spells & adventurers)
+    const tooltip = getEffectTooltip(((game as any).gamedatas as GlowGamedatas).COMPANIONS_EFFECTS[type]);
+    const companionTooltip = getCompanionTooltip(type);
+    if (tooltip && companionTooltip) {
+        (game as any).addTooltipHtml(cardDiv.id, `${tooltip}<hr>${companionTooltip}`);
+    } else if (tooltip) {
+        (game as any).addTooltipHtml(cardDiv.id, tooltip);
+    } else if (companionTooltip) {
+        (game as any).addTooltipHtml(cardDiv.id, companionTooltip);
+    }
+}
+
+function setupSpellCard(game: Game, cardDiv: HTMLDivElement, type: number) {
+    const tooltip = getEffectTooltip(((game as any).gamedatas as GlowGamedatas).SPELLS_EFFECTS[type]);
     if (tooltip) {
         (game as any).addTooltipHtml(cardDiv.id, tooltip);
     }

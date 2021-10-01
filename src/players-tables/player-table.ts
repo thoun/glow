@@ -72,6 +72,7 @@ class PlayerTable {
         this.spellsStock.selectionClass = 'selected';
         this.spellsStock.create(this.game, $(`player-table-${this.playerId}-spells`), SPELL_DIAMETER, SPELL_DIAMETER);
         this.spellsStock.setSelectionMode(0);
+        this.spellsStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupSpellCard(game, cardDiv, type);
         dojo.connect(this.spellsStock, 'onChangeSelection', this, (_, itemId: string) => {
             if (this.spellsStock.getSelectedItems().length) {
                 this.game.resolveCard(2, Number(itemId));
@@ -119,6 +120,7 @@ class PlayerTable {
         this.companionSpellStock.selectionClass = 'selected';
         this.companionSpellStock.create(this.game, $(`player-table-${this.playerId}-companion-spell`), SPELL_DIAMETER, SPELL_DIAMETER);
         this.companionSpellStock.setSelectionMode(0);
+        this.companionSpellStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupSpellCard(this.game, cardDiv, type);
         dojo.connect(this.companionSpellStock, 'onChangeSelection', this, (_, itemId: string) => {
             if (this.companionSpellStock.getSelectedItems().length) {
                 this.game.resolveCard(2, Number(itemId));

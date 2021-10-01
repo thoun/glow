@@ -673,13 +673,31 @@ html {
   background-position: 0% 0%;
 }
 .icon.footprint {
-  background-position: 33.33% 0%;
+  background-position: 11.1111111111% 0%;
 }
 .icon.firefly {
-  background-position: 66.66% 0%;
+  background-position: 22.2222222222% 0%;
 }
 .icon.point {
-  background-position: 100% 0%;
+  background-position: 33.3333333333% 0%;
+}
+.icon.symbol0 {
+  background-position: 44.4444444444% 100%;
+}
+.icon.symbol1 {
+  background-position: 55.5555555556% 100%;
+}
+.icon.symbol2 {
+  background-position: 66.6666666667% 100%;
+}
+.icon.symbol3 {
+  background-position: 77.7777777778% 100%;
+}
+.icon.symbol4 {
+  background-position: 88.8888888889% 100%;
+}
+.icon.symbol5 {
+  background-position: 100% 100%;
 }
 
 #page-title .icon {
@@ -717,6 +735,16 @@ html {
 .bgabutton_red {
   background: #2a2a2a;
   border: 1px solid #000000;
+}
+
+.tooltip-effect-title {
+  font-weight: bold;
+}
+
+.dijitTooltipContents .icon {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
 }
 
 .avatar_active, #active_player_statusbar_icon, #logoiconimg {

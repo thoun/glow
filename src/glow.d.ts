@@ -53,6 +53,12 @@ interface Route {
     destination: number;
 }
 
+
+interface Effect {
+    conditions: number[];
+    effects: number[];
+}
+
 interface GlowPlayer extends Player {
     playerNo: number;
     meeples: Meeple[];
@@ -95,6 +101,10 @@ interface GlowGamedatas {
     endTurn: boolean;
 
     tom: GlowPlayer;
+
+    ADVENTURERS_EFFECTS: Effect[];
+    COMPANIONS_EFFECTS: Effect[];
+    SPELLS_EFFECTS: Effect[];
 }
 
 interface GlowGame extends Game {

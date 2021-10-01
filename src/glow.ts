@@ -170,7 +170,7 @@ class Glow implements GlowGame {
             this.adventurersStock.setSelectionAppearance('class');
             this.adventurersStock.selectionClass = 'nothing';
             this.adventurersStock.centerItems = true;
-            // this.adventurersStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupMachineCard(this, cardDiv, type);
+            this.adventurersStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupAdventurerCard(this, cardDiv, type);
             dojo.connect(this.adventurersStock, 'onChangeSelection', this, () => this.onAdventurerSelection(this.adventurersStock.getSelectedItems()));
 
             setupAdventurersCards(this.adventurersStock);
@@ -194,7 +194,7 @@ class Glow implements GlowGame {
                 this.meetingTrack.setCompanion(companion, spot);
             }
         });
-        
+
         this.meetingTrack.setDeckTop(DECK, args.topDeckType);
         
         if((this as any).isCurrentPlayerActive()) {
