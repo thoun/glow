@@ -9,22 +9,23 @@ const MEETING_SPOT_BY_COLOR = [
 
 class MeetingTrack {
     private companionsStocks: Stock[] = [];
+    private deckStock: Stock;
 
     constructor(
         private game: GlowGame,
         meetingTrackSpot: MeetingTrackSpot[],
+        topDeckType: number,
     ) {
 
         for (let i=0; i<=5; i++) {
             let html = '';
             const cemetery = i === 0;
             
+            const left = cemetery ? 55 : 245 + 135*MEETING_SPOT_BY_COLOR[i];
             if (!cemetery) {
-                const left = 240 + 135*MEETING_SPOT_BY_COLOR[i];
                 html += `<div id="meeting-track-dice-${i}" class="meeting-track-zone dice" style="left: ${left}px;"></div>
                 <div id="meeting-track-footprints-${i}" class="meeting-track-zone footprints" style="left: ${left}px;"></div>`;
             }
-            const left = cemetery ? 50 : 240 + 135*MEETING_SPOT_BY_COLOR[i];
             html += `<div id="meeting-track-companion-${i}" class="meeting-track-stock" style="left: ${left}px;"></div>`;
 
             dojo.place(html, 'meeting-track');
@@ -36,8 +37,10 @@ class MeetingTrack {
             this.companionsStocks[i].selectionClass = 'selected';
             this.companionsStocks[i].create(this.game, $(`meeting-track-companion-${i}`), CARD_WIDTH, CARD_HEIGHT);
             this.companionsStocks[i].setSelectionMode(0);
-            this.companionsStocks[i].onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupCompanionCard(game, cardDiv, type);
-            dojo.connect(this.companionsStocks[i], 'onChangeSelection', this, () => this.game.selectMeetingTrackCompanion(i));
+            if (!cemetery) {
+                this.companionsStocks[i].onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupCompanionCard(game, cardDiv, type);
+                dojo.connect(this.companionsStocks[i], 'onChangeSelection', this, () => this.game.selectMeetingTrackCompanion(i));
+            }
 
             setupCompanionCards(this.companionsStocks[i]);
     
@@ -49,6 +52,15 @@ class MeetingTrack {
                 }
                 this.setFootprintTokens(i, spot.footprints);
             }
+
+            // deck
+            this.deckStock = new ebg.stock() as Stock;
+            this.deckStock.setSelectionAppearance('class');
+            this.deckStock.selectionClass = 'selected';
+            this.deckStock.create(this.game, $(`deck`), CARD_WIDTH, CARD_HEIGHT);
+            this.deckStock.setSelectionMode(0);
+            setupCompanionCards(this.deckStock);
+            this.setDeckTop(topDeckType);
         }
         
         for (let i=1; i<=5; i++) {
@@ -138,6 +150,19 @@ class MeetingTrack {
             }
         } else {
             this.companionsStocks[0].removeAll();
+        }
+    }
+
+    public setDeckTop(type?: number) { // TODO update when cards are taken from deck
+        if (type) {
+            if (!this.deckStock.items.length) {
+                this.deckStock.addToStockWithId(1000 + type, '' + type);
+            } else if (Number(this.deckStock.items[0].type) !== type) {
+                this.deckStock.removeAll();
+                this.deckStock.addToStockWithId(1000 + type, '' + type);
+            }
+        } else {
+            this.deckStock.removeAll();
         }
     }
     

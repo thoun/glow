@@ -309,18 +309,17 @@ var MEETING_SPOT_BY_COLOR = [
     2,
 ];
 var MeetingTrack = /** @class */ (function () {
-    function MeetingTrack(game, meetingTrackSpot) {
+    function MeetingTrack(game, meetingTrackSpot, topDeckType) {
         var _this = this;
         this.game = game;
         this.companionsStocks = [];
         var _loop_1 = function (i) {
             var html = '';
             var cemetery = i === 0;
+            var left = cemetery ? 55 : 245 + 135 * MEETING_SPOT_BY_COLOR[i];
             if (!cemetery) {
-                var left_1 = 240 + 135 * MEETING_SPOT_BY_COLOR[i];
-                html += "<div id=\"meeting-track-dice-" + i + "\" class=\"meeting-track-zone dice\" style=\"left: " + left_1 + "px;\"></div>\n                <div id=\"meeting-track-footprints-" + i + "\" class=\"meeting-track-zone footprints\" style=\"left: " + left_1 + "px;\"></div>";
+                html += "<div id=\"meeting-track-dice-" + i + "\" class=\"meeting-track-zone dice\" style=\"left: " + left + "px;\"></div>\n                <div id=\"meeting-track-footprints-" + i + "\" class=\"meeting-track-zone footprints\" style=\"left: " + left + "px;\"></div>";
             }
-            var left = cemetery ? 50 : 240 + 135 * MEETING_SPOT_BY_COLOR[i];
             html += "<div id=\"meeting-track-companion-" + i + "\" class=\"meeting-track-stock\" style=\"left: " + left + "px;\"></div>";
             dojo.place(html, 'meeting-track');
             var spot = meetingTrackSpot[i];
@@ -329,8 +328,10 @@ var MeetingTrack = /** @class */ (function () {
             this_1.companionsStocks[i].selectionClass = 'selected';
             this_1.companionsStocks[i].create(this_1.game, $("meeting-track-companion-" + i), CARD_WIDTH, CARD_HEIGHT);
             this_1.companionsStocks[i].setSelectionMode(0);
-            this_1.companionsStocks[i].onItemCreate = function (cardDiv, type) { return setupCompanionCard(game, cardDiv, type); };
-            dojo.connect(this_1.companionsStocks[i], 'onChangeSelection', this_1, function () { return _this.game.selectMeetingTrackCompanion(i); });
+            if (!cemetery) {
+                this_1.companionsStocks[i].onItemCreate = function (cardDiv, type) { return setupCompanionCard(game, cardDiv, type); };
+                dojo.connect(this_1.companionsStocks[i], 'onChangeSelection', this_1, function () { return _this.game.selectMeetingTrackCompanion(i); });
+            }
             setupCompanionCards(this_1.companionsStocks[i]);
             if (cemetery) {
                 this_1.setCemeteryTop(spot.companion);
@@ -341,6 +342,14 @@ var MeetingTrack = /** @class */ (function () {
                 }
                 this_1.setFootprintTokens(i, spot.footprints);
             }
+            // deck
+            this_1.deckStock = new ebg.stock();
+            this_1.deckStock.setSelectionAppearance('class');
+            this_1.deckStock.selectionClass = 'selected';
+            this_1.deckStock.create(this_1.game, $("deck"), CARD_WIDTH, CARD_HEIGHT);
+            this_1.deckStock.setSelectionMode(0);
+            setupCompanionCards(this_1.deckStock);
+            this_1.setDeckTop(topDeckType);
         };
         var this_1 = this;
         for (var i = 0; i <= 5; i++) {
@@ -427,6 +436,20 @@ var MeetingTrack = /** @class */ (function () {
         }
         else {
             this.companionsStocks[0].removeAll();
+        }
+    };
+    MeetingTrack.prototype.setDeckTop = function (type) {
+        if (type) {
+            if (!this.deckStock.items.length) {
+                this.deckStock.addToStockWithId(1000 + type, '' + type);
+            }
+            else if (Number(this.deckStock.items[0].type) !== type) {
+                this.deckStock.removeAll();
+                this.deckStock.addToStockWithId(1000 + type, '' + type);
+            }
+        }
+        else {
+            this.deckStock.removeAll();
         }
     };
     MeetingTrack.prototype.setSelectableDice = function (possibleSpots) {
@@ -651,7 +674,7 @@ var Glow = /** @class */ (function () {
         dojo.addClass('board', "side" + gamedatas.side);
         this.createPlayerPanels(gamedatas);
         this.board = new Board(this, Object.values(gamedatas.players), gamedatas.tableDice);
-        this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack);
+        this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack, gamedatas.topDeckType);
         this.createPlayerTables(gamedatas);
         if (gamedatas.day > 0) {
             this.roundCounter = new ebg.counter();

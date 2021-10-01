@@ -75,7 +75,7 @@ class Glow implements GlowGame {
         dojo.addClass('board', `side${gamedatas.side}`);
         this.createPlayerPanels(gamedatas);
         this.board = new Board(this, Object.values(gamedatas.players), gamedatas.tableDice);
-        this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack);
+        this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack, gamedatas.topDeckType);
         this.createPlayerTables(gamedatas);
         if (gamedatas.day > 0) {
             this.roundCounter = new ebg.counter();

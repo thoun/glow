@@ -32,7 +32,7 @@
 
   .meeting-track-stock {
     position: absolute;
-    top: 158px;
+    top: 163px;
     height: 250px;
     width: 129px;
   }
@@ -44,5 +44,10 @@
     background-image: url('img/footprint-token.png');
     box-shadow: 0 0 2px 4px white;
     border-radius: 50%;
+  }
+
+  #deck {
+    position: absolute;
+    left: -150px;
   }
 }

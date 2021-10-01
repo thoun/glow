@@ -10,7 +10,9 @@
         <div id="round-counter-wrapper">
             {DAY} <span id="round-counter">-</span>&nbsp;/&nbsp;8
         </div>
-        <div id="meeting-track"></div>
+        <div id="meeting-track">
+            <div id="deck" class="meeting-track-stock"></div>
+        </div>
     </div>
 </div>
 

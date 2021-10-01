@@ -151,7 +151,7 @@ trait ActionTrait {
 
         $die = $this->getDieById($id);
 
-        if ($die->location != 'table') { // TODO deck on table
+        if ($die->location != 'table') {
             throw new BgaUserException("Die not available");
         }
         

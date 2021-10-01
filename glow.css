@@ -425,7 +425,7 @@
 }
 #board #table-dice {
   position: absolute;
-  left: -50px;
+  left: -105px;
   width: 50px;
   height: 100%;
   display: flex;
@@ -463,7 +463,7 @@
 }
 #meeting-track .meeting-track-stock {
   position: absolute;
-  top: 158px;
+  top: 163px;
   height: 250px;
   width: 129px;
 }
@@ -474,6 +474,10 @@
   background-image: url("img/footprint-token.png");
   box-shadow: 0 0 2px 4px white;
   border-radius: 50%;
+}
+#meeting-track #deck {
+  position: absolute;
+  left: -150px;
 }
 
 #currentplayertable .whiteblock, #playerstables .whiteblock {
