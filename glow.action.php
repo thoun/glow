@@ -118,6 +118,24 @@
 
         self::ajaxResponse();
     }
+    
+    public function resurrect() {
+        self::setAjaxMode();
+
+        $id = self::getArg('id', AT_posint, true);
+
+        $this->game->resurrect($id);
+
+        self::ajaxResponse();
+    } 
+
+    public function skipResurrect() {
+        self::setAjaxMode();
+
+        $this->game->skipResurrect();
+
+        self::ajaxResponse();
+    } 
 
     public function resolveCard() {
         self::setAjaxMode();

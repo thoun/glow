@@ -33,6 +33,7 @@ class Glow implements GlowGame {
     private isChangeDie: boolean = false;
 
     public adventurersStock: Stock;
+    public cemetaryCompanionsStock: Stock;
     private board: Board;
     private meetingTrack: MeetingTrack;
     private playersTables: PlayerTable[] = [];
@@ -154,6 +155,7 @@ class Glow implements GlowGame {
     private onEnteringStateStartRound() {
         if (document.getElementById('adventurers-stock')) {
             dojo.destroy('adventurers-stock');
+            this.adventurersStock = null;
         }
     }
 
@@ -164,7 +166,7 @@ class Glow implements GlowGame {
             
             this.adventurersStock = new ebg.stock() as Stock;
             this.adventurersStock.create(this, $('adventurers-stock'), CARD_WIDTH, CARD_HEIGHT);
-            this.adventurersStock.setSelectionMode(1);            
+            this.adventurersStock.setSelectionMode(0);
             this.adventurersStock.setSelectionAppearance('class');
             this.adventurersStock.selectionClass = 'nothing';
             this.adventurersStock.centerItems = true;
@@ -229,6 +231,36 @@ class Glow implements GlowGame {
         this.setDiceSelectionActive(true);
     }
 
+    private onEnteringResurrect(args: EnteringResurrectArgs) {
+        
+        const companions = args.cemeteryCards;
+        if (!document.getElementById('cemetary-companions-stock')) {
+            dojo.place(`<div id="cemetary-companions-stock"></div>`, 'currentplayertable', 'before');
+            
+            this.cemetaryCompanionsStock = new ebg.stock() as Stock;
+            this.cemetaryCompanionsStock.create(this, $('cemetary-companions-stock'), CARD_WIDTH, CARD_HEIGHT);
+            this.cemetaryCompanionsStock.setSelectionMode(0);            
+            this.cemetaryCompanionsStock.setSelectionAppearance('class');
+            this.cemetaryCompanionsStock.selectionClass = 'nothing';
+            this.cemetaryCompanionsStock.centerItems = true;
+            this.cemetaryCompanionsStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupCompanionCard(this, cardDiv, type);
+            dojo.connect(this.cemetaryCompanionsStock, 'onChangeSelection', this, () => this.onCemetarySelection(this.cemetaryCompanionsStock.getSelectedItems()));
+
+            setupCompanionCards(this.cemetaryCompanionsStock);
+
+            companions.forEach(companion => this.cemetaryCompanionsStock.addToStockWithId(companion.subType, ''+companion.id, CEMETERY));
+
+            this.meetingTrack.setCemeteryTop(null);
+        }
+        
+        if((this as any).isCurrentPlayerActive()) {
+            this.cemetaryCompanionsStock.setSelectionMode(1);
+
+            (this as any).addActionButton(`skipResurrect-button`, _("Skip"), () => this.skipResurrect(), null, null, 'red');
+        }
+        
+    }
+
     private onEnteringStateResolveCards(resolveCardsForPlayer: ResolveCardsForPlayer) {
         this.onLeavingResolveCards();
 
@@ -286,8 +318,12 @@ class Glow implements GlowGame {
                 break;
             case 'moveBlackDie':                
                 this.onLeavingMoveBlackDie();
+                break;
             case 'rollDice':
                 this.onLeavingRollDice();
+                break;
+            case 'resurrect':
+                this.onLeavingResurrect();
                 break;
             case 'resolveCards':
                 this.onLeavingResolveCards();
@@ -311,6 +347,14 @@ class Glow implements GlowGame {
         this.setDiceSelectionActive(false);
     }
 
+    private onLeavingResurrect() {
+        if (document.getElementById('cemetary-companions-stock')) {
+            this.cemetaryCompanionsStock.removeAllTo(CEMETERY);
+            (this as any).fadeOutAndDestroy('cemetary-companions-stock');
+            this.cemetaryCompanionsStock = null;
+        }
+    }
+
     private onLeavingResolveCards() {
         (Array.from(document.getElementsByClassName('selectable')) as HTMLElement[]).forEach(node => dojo.removeClass(node, 'selectable'));
         [...this.playersTables.map(pt => pt.adventurerStock), ...this.playersTables.map(pt => pt.companionsStock), ...this.playersTables.map(pt => pt.spellsStock)].forEach(stock => stock.setSelectionMode(0));
@@ -322,7 +366,7 @@ class Glow implements GlowGame {
     public onUpdateActionButtons(stateName: string, args: any) {
         if ((this as any).isCurrentPlayerActive()) {
             switch (stateName) {
-                case 'selectSketalDie':
+                case 'selectSketalDie': case 'selectSketalDieMulti':
                     this.onEnteringSelectSketalDie(args as EnteringSelectSketalDieArgs);
                     break;
                 case 'rollDice':
@@ -340,7 +384,13 @@ class Glow implements GlowGame {
 
             }
         }
-    }    
+
+        switch (stateName) {
+            case 'resurrect':
+                this.onEnteringResurrect(args as EnteringResurrectArgs);
+                break;
+        }
+    }  
 
     ///////////////////////////////////////////////////
     //// Utility methods
@@ -385,7 +435,7 @@ class Glow implements GlowGame {
         this.setZoom(ZOOM_LEVELS[newIndex]);
     }
 
-    private setupPreferences() {
+    /*private setupPreferences() {
         // Extract the ID and value from the UI control
         const onchange = (e) => {
           var match = e.target.id.match(/^preference_control_(\d+)$/);
@@ -415,7 +465,7 @@ class Glow implements GlowGame {
                 document.getElementById('full-table').appendChild(document.getElementById(prefValue == 2 ? 'table-wrapper' : 'playerstables'));
                 break;
         }
-    }
+    }*/
 
     placeFirstPlayerToken(playerId: number) {
         const firstPlayerToken = document.getElementById('firstPlayerToken');
@@ -428,8 +478,11 @@ class Glow implements GlowGame {
         }
     }
 
-    public setHandSelectable(selectable: boolean) {
-        this.adventurersStock.setSelectionMode(selectable ? 1 : 0);
+    public onCemetarySelection(items: any) {
+        if (items.length == 1) {
+            const card = items[0];
+            this.resurrect(card.id);
+        }
     }
 
     public onAdventurerSelection(items: any) {
@@ -462,7 +515,32 @@ class Glow implements GlowGame {
 
     private createPlayerPanels(gamedatas: GlowGamedatas) {
 
-        Object.values(gamedatas.players).forEach(player => {
+        const players = Object.values(gamedatas.players);
+        const solo = players.length === 1;
+
+        if (solo) {
+            dojo.place(`
+            <div id="overall_player_board_0" class="player-board current-player-board">					
+                <div class="player_board_inner" id="player_board_inner_982fff">
+                    
+                    <div class="emblemwrap" id="avatar_active_wrap_0" style="display: block;">
+                        <img src="https://en.1.studio.boardgamearena.com:8083/data/themereleases/210929-0932/img/layout/active_player.gif" alt="" class="avatar avatar_active" id="avatar_active_2343492">    
+                        <div class="icon20 icon20_night this_is_night"></div>
+                    </div>
+                                               
+                    <div class="player-name" id="player_name_0">
+                        Tom
+                    </div>
+                    <div id="player_board_0" class="player_board_content">
+                        <div class="player_score">
+                            <span id="player_score_0" class="player_score_value">10</span> <i class="fa fa-star" id="icon_point_0"></i>           
+                        </div>
+                    </div>
+                </div>
+            </div>`, `overall_player_board_${players[0].id}`, 'after')
+        }
+
+        (solo ? [...players, gamedatas.tom] : players).forEach(player => {
             const playerId = Number(player.id);     
 
             // charcoalium & resources counters
@@ -497,11 +575,13 @@ class Glow implements GlowGame {
             fireflyCounter.setValue(player.fireflies);
             this.fireflyCounters[playerId] = fireflyCounter;     
 
-            // first player token
-            dojo.place(`<div id="player_board_${player.id}_firstPlayerWrapper"></div>`, `player_board_${player.id}`);
+            if (!solo) {
+                // first player token
+                dojo.place(`<div id="player_board_${player.id}_firstPlayerWrapper"></div>`, `player_board_${player.id}`);
 
-            if (gamedatas.firstPlayer === playerId) {
-                this.placeFirstPlayerToken(gamedatas.firstPlayer);
+                if (gamedatas.firstPlayer === playerId) {
+                    this.placeFirstPlayerToken(gamedatas.firstPlayer);
+                }
             }
         });
 
@@ -515,9 +595,7 @@ class Glow implements GlowGame {
         const playerIndex = players.findIndex(player => Number(player.id) === Number((this as any).player_id));
         const orderedPlayers = playerIndex > 0 ? [...players.slice(playerIndex), ...players.slice(0, playerIndex)] : players;
 
-        orderedPlayers.forEach((player, index) => 
-            this.createPlayerTable(gamedatas, Number(player.id))
-        );
+        orderedPlayers.forEach(player => this.createPlayerTable(gamedatas, Number(player.id)) );
     }
 
     private createPlayerTable(gamedatas: GlowGamedatas, playerId: number) {
@@ -845,6 +923,24 @@ class Glow implements GlowGame {
         this.takeAction('keepDice');
     }
 
+    public resurrect(id: number) {
+        if(!(this as any).checkAction('resurrect')) {
+            return;
+        }
+
+        this.takeAction('resurrect', {
+            id
+        });
+    }
+
+    public skipResurrect() {
+        if(!(this as any).checkAction('skipResurrect')) {
+            return;
+        }
+
+        this.takeAction('skipResurrect');
+    }
+
     public resolveCard(type: number, id: number) {
         if(!(this as any).checkAction('resolveCard')) {
             return;
@@ -1005,10 +1101,19 @@ class Glow implements GlowGame {
     }
 
     notif_chosenCompanion(notif: Notif<NotifChosenCompanionArgs>) {
+        const spot = notif.args.spot;
         const playerTable = this.getPlayerTable(notif.args.playerId);
-        playerTable.addCompanion(notif.args.companion, this.meetingTrack.getStock(notif.args.spot));
-        playerTable.addDice(notif.args.dice);
-        this.meetingTrack.clearFootprintTokens(notif.args.spot, notif.args.playerId);
+        const originStock = spot ? this.meetingTrack.getStock(notif.args.spot) : this.cemetaryCompanionsStock;
+        playerTable.addCompanion(notif.args.companion, originStock);
+        if (notif.args.dice?.length) {
+            playerTable.addDice(notif.args.dice);
+        }
+        if (spot) {
+            this.meetingTrack.clearFootprintTokens(spot, notif.args.playerId);
+        }
+        if (notif.args.cemetaryTop) {
+            this.meetingTrack.setCemeteryTop(notif.args.cemetaryTop);
+        }
     }
 
     notif_removeCompanion(notif: Notif<NotifChosenCompanionArgs>) {

@@ -21,6 +21,9 @@ define('ST_END_RECRUIT', 29);
 // late morning
 define('ST_MULTIPLAYER_ROLL_DICE', 30);
 
+// just before noon (Cromaug)
+define('ST_MULTIPLAYER_RESURRECT', 35);
+define('ST_MULTIPLAYER_PLAYER_SELECT_SKETAL_DIE', 36);
 // noon
 define('ST_MULTIPLAYER_RESOLVE_CARDS', 40);
 

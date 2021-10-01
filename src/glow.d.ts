@@ -89,6 +89,8 @@ interface GlowGamedatas {
     meetingTrack: MeetingTrackSpot[];
 
     endTurn: boolean;
+
+    tom: GlowPlayer;
 }
 
 interface GlowGame extends Game {
@@ -133,13 +135,12 @@ interface EnteringMoveBlackDieArgs {
     possibleSpots: number[];
 }
 
-interface CromaugArg {
+interface EnteringResurrectArgs {
     cemeteryCards: Companion[];
 }
 
 interface ResolveCardsForPlayer {
     remainingEffects: number[][];
-    cromaug: CromaugArg;
 }
 
 interface EnteringResolveCardsArgs {
@@ -175,6 +176,7 @@ interface NotifChosenCompanionArgs {
     spot: number;
     dice: Die[];
     removedBySpell: Spell;
+    cemetaryTop?: Companion;
 }
 
 interface NotifRemoveCompanionsArgs {

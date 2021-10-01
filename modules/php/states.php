@@ -71,6 +71,47 @@ trait StateTrait {
         $this->gamestate->setAllPlayersMultiactive();
     }
 
+    function stResurrect() {
+        $playerWithCromaugActivated = [];
+
+        $playersIds = $this->getPlayersIds();
+
+        foreach($playersIds as $playerId) {
+            $dice = $this->getEffectiveDice($playerId);
+            $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+    
+            $cromaugCard = null;
+    
+            foreach($companions as $companion) {
+                if ($companion->subType == 41) { // Cromaug
+                    if ($this->isTriggeredEffectsForCard($dice, $companion->effect)) {
+                        $cromaugCard = $companion;
+                        break;
+                    }
+                }
+            }
+
+            if ($cromaugCard !== null) {
+                $playerWithCromaugActivated[] = $playerId;
+
+                $this->sendToCemetery($playerId, $cromaugCard->id);
+                $companion = $this->getCompanionFromDb($this->companions->getCard($cromaugCard->id));
+                self::notifyAllPlayers('removeCompanion', clienttranslate('${playerName} discard Cromaug and a companion from the cemetery'), [
+                    'playerId' => $playerId,
+                    'playerName' => $this->getPlayerName($playerId),
+                    'companion' => $cromaugCard,
+                ]);
+            }
+        }
+
+        if (count($playerWithCromaugActivated) > 0) {
+            
+            $this->gamestate->setPlayersMultiactive($playerWithCromaugActivated, 'resolveCards', true);
+        } else {
+            $this->gamestate->nextState('resolveCards');
+        }
+    }
+
     function stResolveCards() {
         $playerWithEffects = [];
 
@@ -136,7 +177,8 @@ trait StateTrait {
     }
 
     function stEndScore() {
-        $playersIds = self::createNextPlayerTable(array_keys(self::loadPlayersBasicInfos()));
+        $playersIds = $this->getPlayersIds();
+        $solo = count($playersIds) == 1;
         
         // Adventurer and companions        
         foreach($playersIds as $playerId) {
@@ -188,9 +230,18 @@ trait StateTrait {
 
             $this->incPlayerScore($playerId, $points, _('${playerName} gains ${points} bursts of light with footprints'));
         }
+        
+        if ($solo) { // solo mode
+            $playerId = $playersIds[0];
+            $playerScore = $this->getPlayerScore($playerId);
+            $tom = $this->getTom();
 
-        // Tie
-        self::DbQuery("UPDATE player SET `player_score_aux` = `player_rerolls`");
+            $score = (($playerScore > $tom->score) || ($playerScore == $tom->score && $this->getPlayerFootprints($playerId) > $tom->footprints)) ? 1 : 0;
+            self::DbQuery("UPDATE player SET `player_score` = $score, `player_score_aux` = 0");
+        } else {  
+            // Tie          
+            self::DbQuery("UPDATE player SET `player_score_aux` = `player_rerolls`");
+        }
 
         $this->gamestate->nextState('endGame');
     }

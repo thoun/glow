@@ -80,7 +80,7 @@ const MAP2: number[][] = [
 ];
 const MAPS: number[][][] = [null, MAP1, MAP2];
 
-class Board {
+class Board { // TODO hide score token temporarily on map scores click/hover
     private points = new Map<number, number>();
     private meeples: Meeple[] = [];
 

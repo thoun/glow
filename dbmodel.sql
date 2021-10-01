@@ -78,3 +78,9 @@ ALTER TABLE `player` ADD `player_footprints` TINYINT UNSIGNED NOT NULL DEFAULT '
 ALTER TABLE `player` ADD `player_fireflies` TINYINT UNSIGNED NOT NULL DEFAULT '0';
 ALTER TABLE `player` ADD `applied_effects` json;
 ALTER TABLE `player` ADD `visited_spots` json;
+
+CREATE TABLE IF NOT EXISTS `global_variables` (
+  `name` varchar(50) NOT NULL,
+  `value` json,
+  PRIMARY KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

@@ -6,7 +6,6 @@ require_once(__DIR__.'/objects/companion.php');
 require_once(__DIR__.'/objects/dice.php');
 require_once(__DIR__.'/objects/meeple.php');
 require_once(__DIR__.'/objects/meeting-track-spot.php');
-require_once(__DIR__.'/objects/cromaug-arg.php');
 
 trait UtilTrait {
 
@@ -48,10 +47,14 @@ trait UtilTrait {
         return intval(self::getGameStateValue(BOARD_SIDE));
     }
 
-    function createDice() {
+    function createDice(bool $solo) {
         $sql = "INSERT INTO dice (`color`, `small`, `die_face`) VALUES ";
         $values = [];
         foreach($this->DICES as $color => $counts) {
+            if ($solo && $color == 8) {
+                continue;
+            }
+
             $face = min($color, 6);
 
             // big
@@ -285,21 +288,28 @@ trait UtilTrait {
         $this->adventurers->createCards($adventurers, 'deck');
     }
 
-    function createCompanions() {
+    function createCompanions(bool $solo) {
         foreach($this->COMPANIONS as $subType => $companion) {
+            if ($solo && in_array($subType, $this->REMOVED_COMPANION_FOR_SOLO)) {
+                continue;
+            }
             $companions[] = [ 'type' => $subType > 23 ? 2 : 1, 'type_arg' => $subType, 'nbr' => 1];
         }
         $this->companions->createCards($companions, 'deck');
         $this->companions->shuffle('deck');
 
-        // remove 3 of each face
-        for ($face=1; $face<=2; $face++) {
-            $removed = array_slice($this->getCompanionsFromDb($this->companions->getCardsOfTypeInLocation($face, null, 'deck')), 0, 3);
-            $this->companions->moveCards(array_map(function ($companion) { return $companion->id; }, $removed), 'discard');
+        if ($solo) {
+            // TODO seperate in 2 decks ?
+        } else {
+            // remove 3 of each face
+            for ($face=1; $face<=2; $face++) {
+                $removed = array_slice($this->getCompanionsFromDb($this->companions->getCardsOfTypeInLocation($face, null, 'deck')), 0, 3);
+                $this->companions->moveCards(array_map(function ($companion) { return $companion->id; }, $removed), 'discard');
 
+            }
+            // set face 1 (A) before face 2 (B)
+            self::DbQuery("UPDATE companion SET `card_location_arg` = `card_location_arg` + (100 * (2 - `card_type`)) WHERE `card_location` = 'deck' ");
         }
-        // set face 1 (A) before face 2 (B)
-        self::DbQuery("UPDATE companion SET `card_location_arg` = `card_location_arg` + (100 * (2 - `card_type`)) WHERE `card_location` = 'deck' ");
     }
 
     function createSpells() {
@@ -787,37 +797,5 @@ trait UtilTrait {
             'playerId' => $playerId,
             'spell' => $spell,
         ]);
-    }
-
-    public function getCromaugArg(int $playerId) {
-        $dice = $this->getEffectiveDice($playerId);
-        $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
-
-        $cromaugCard = null;
-
-        foreach($companions as $companion) {
-            if ($companion->subType == 41) { // Cromaug
-                if ($this->isTriggeredEffectsForCard($dice, $companion->effect)) {
-                    $cromaugCard = $companion;
-                    break;
-                }
-            }
-        }
-
-        if ($cromaugCard == null) {
-            return null;
-        } else {
-            $this->sendToCemetery($playerId, $cromaugCard->id);
-            $companion = $this->getCompanionFromDb($this->companions->getCard($cromaugCard->id));
-            self::notifyAllPlayers('removeCompanion', clienttranslate('${playerName} discard Cromaug and a companion from the cemetery'), [
-                'playerId' => $playerId,
-                'playerName' => $this->getPlayerName($playerId),
-                'companion' => $cromaugCard,
-            ]);
-
-            $cromaugArg = new stdClass();
-            $cromaugArg->cemeteryCards = $this->getCompanionsFromDb($this->companions->getCardsInLocation('cemetery'));
-            return $cromaugArg;
-        }
     }
 }

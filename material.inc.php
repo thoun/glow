@@ -94,6 +94,13 @@ $this->COMPANIONS = [ // (string $name, int $points, $effect, bool $reroll, int 
   46 => new CompanionCard('Kapao', 4, new Effect([2, 2], [33, 22])),
 ];
 
+$this->REMOVED_COMPANION_FOR_SOLO = [
+  // A
+  1, 3, 10, 12, 20, 21, 9,
+  // B
+  25, 33, 38, 41, 44, 46, 34,
+];
+
 $this->SPELLS = [
   1 => new Effect([1, 1], [-105]),
   2 => new Effect([2, 2], [-105]),

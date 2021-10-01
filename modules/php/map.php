@@ -218,7 +218,6 @@ trait MapTrait {
                         $route->costForPlayer = array_merge($route->costForPlayer, [-20 - $usedFootprints]);
                     } 
 
-                    // TODO check player can afford $effects
                     $canPayFootprints = $this->canPayFootprints($playerId, $route->costForPlayer);
                     if ($canPayFootprints) {
                         $possibleRoutes[] = $route;

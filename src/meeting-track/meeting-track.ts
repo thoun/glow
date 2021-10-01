@@ -66,7 +66,7 @@ class MeetingTrack {
     public setCompanion(meetingTrackSpot: MeetingTrackSpot, spot: number): void {
         const companion = meetingTrackSpot.companion;
         if (!companion) {
-            this.companionsStocks[spot].removeAllTo(Cemetery);
+            this.companionsStocks[spot].removeAllTo(CEMETERY);
             return;
         }
         
@@ -76,7 +76,7 @@ class MeetingTrack {
         }
 
         if (currentId && Number(currentId) != companion.id) {
-            this.companionsStocks[spot].removeAllTo(Cemetery);
+            this.companionsStocks[spot].removeAllTo(CEMETERY);
         }
 
         this.companionsStocks[spot].addToStockWithId(companion.subType, ''+companion.id);
@@ -86,7 +86,7 @@ class MeetingTrack {
         if (spot == 0) {
             debugger;
         }
-        this.companionsStocks[spot].removeAllTo(Cemetery);
+        this.companionsStocks[spot].removeAllTo(CEMETERY);
     }
 
     public removeCompanions() {

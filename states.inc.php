@@ -194,9 +194,42 @@ $playerActionsGameStates = [
             "keepDice" 
         ],
         "transitions" => [
-            "keepDice" => ST_MULTIPLAYER_RESOLVE_CARDS,
-            "zombiePass" => ST_MULTIPLAYER_RESOLVE_CARDS,
+            "keepDice" => ST_MULTIPLAYER_RESURRECT,
+            "zombiePass" => ST_MULTIPLAYER_RESURRECT,
         ],
+    ],
+
+    ST_MULTIPLAYER_RESURRECT => [
+        "name" => "resurrect",
+        "description" => clienttranslate('Players with Cromaug can take a companion from the cemetery'),
+        "descriptionmyturn" => clienttranslate('${you} can take a companion from the cemetery'),
+        "type" => "multipleactiveplayer",
+        "action" => "stResurrect",
+        "args" => "argResurrect",
+        "possibleactions" => [ 
+            "resurrect", 
+            "skipResurrect", 
+        ],
+        "transitions" => [
+            "selectSketalDie" => ST_MULTIPLAYER_PLAYER_SELECT_SKETAL_DIE,
+            "resolveCards" => ST_MULTIPLAYER_RESOLVE_CARDS,
+            "zombiePass" => ST_MULTIPLAYER_MOVE,
+        ],
+    ],
+
+    ST_MULTIPLAYER_PLAYER_SELECT_SKETAL_DIE => [
+        "name" => "selectSketalDieMulti",
+        "description" => clienttranslate('${actplayer} must choose a new die'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a new die'),
+        "type" => "multipleactiveplayer",
+        "args" => "argSelectSketalDie",
+        "possibleactions" => [ 
+            "selectSketalDie",
+        ],
+        "transitions" => [
+            "resolveCards" => ST_MULTIPLAYER_RESOLVE_CARDS,
+            "zombiePass" => ST_MULTIPLAYER_MOVE,
+        ]
     ],
 
     ST_MULTIPLAYER_RESOLVE_CARDS => [

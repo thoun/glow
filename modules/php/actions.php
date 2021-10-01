@@ -58,6 +58,8 @@ trait ActionTrait {
             'companionName' => $companion->name,
             'spot' => $spot,
             'dice' => $dice,
+            // new cemetaryTop if chosen from cemetary
+            'cemetaryTop' => $spot == null ? $this->getTopCemeteryCompanion() : null,
         ]);
         
         if ($spot !== null) {
@@ -134,19 +136,24 @@ trait ActionTrait {
     }
 
     public function selectSketalDie(int $id) {
-        self::checkAction('selectSketalDie'); 
+        self::checkAction('selectSketalDie');        
+        $multi = ($this->gamestate->state()['name']) == 'selectSketalDieMulti';
 
         $die = $this->getDieById($id);
 
-        if ($die->location != 'deck') {
+        if ($die->location != 'deck') { // TODO show dice & deck on table
             throw new BgaUserException("Die not available");
         }
         
-        $playerId = self::getActivePlayerId();
+        $playerId = $multi ? self::getCurrentPlayerId() : self::getActivePlayerId();
 
-        $this->takeSketalDie($playerId, $die);
+        $this->takeSketalDie($playerId, $die); // TODO lock for next turn if multi
 
-        $this->redirectAfterRecruit();
+        if ($multi) {
+            $this->gamestate->setPlayerNonMultiactive($playerId, 'resolveCards');
+        } else {
+            $this->redirectAfterRecruit();
+        }
     }
     
     public function moveBlackDie(int $spot) {
@@ -241,8 +248,40 @@ trait ActionTrait {
 
     public function keepDice() {
         self::checkAction('keepDice');
-        $this->gamestate->setPlayerNonMultiactive( $this->getCurrentPlayerId(), 'keepDice');
+        $this->gamestate->setPlayerNonMultiactive($this->getCurrentPlayerId(), 'keepDice');
     }
+
+    
+    
+    public function resurrect(int $id) {
+        self::checkAction('resurrect');
+
+        $playerId = intval($this->getCurrentPlayerId());
+
+        $companion = $this->getCompanionFromDb($this->companions->getCard($id));
+
+        if ($companion->location != 'cemetery') {
+            throw new BgaUserException("Companion not available");
+        }
+
+        $this->applyRecruitCompanion($playerId, $companion);
+        // TODO TOCHECK if player resurrects Kaar, 
+
+        if ($companion->die && $companion->dieColor === 0) {
+            $this->gamestate->nextState('selectSketalDie');
+            //$this->gamestate->setPlayerNonMultiactive($playerId, 'selectSketalDie');
+        } else {
+            $this->gamestate->setPlayerNonMultiactive($playerId, 'resolveCards');
+        }
+    } 
+
+    public function skipResurrect() {
+        self::checkAction('skipResurrect');
+
+        $playerId = intval($this->getCurrentPlayerId());
+
+        $this->gamestate->setPlayerNonMultiactive($playerId, 'resolveCards');
+    } 
 
     public function resolveCard(int $cardType, int $id) {
         self::checkAction('resolveCard');
@@ -257,7 +296,7 @@ trait ActionTrait {
             'resolveCardsForPlayer' => $resolveCardsForPlayer,
         ]);
         
-        if (count($resolveCardsForPlayer->remainingEffects) === 0 && $resolveCardsForPlayer->cromaug == null) {
+        if (count($resolveCardsForPlayer->remainingEffects) === 0) {
             $this->gamestate->setPlayerNonMultiactive($playerId, 'move');
         }
     }

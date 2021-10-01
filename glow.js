@@ -353,7 +353,7 @@ var MeetingTrack = /** @class */ (function () {
         var _a;
         var companion = meetingTrackSpot.companion;
         if (!companion) {
-            this.companionsStocks[spot].removeAllTo(Cemetery);
+            this.companionsStocks[spot].removeAllTo(CEMETERY);
             return;
         }
         var currentId = (_a = this.companionsStocks[spot].items[0]) === null || _a === void 0 ? void 0 : _a.id;
@@ -361,7 +361,7 @@ var MeetingTrack = /** @class */ (function () {
             return;
         }
         if (currentId && Number(currentId) != companion.id) {
-            this.companionsStocks[spot].removeAllTo(Cemetery);
+            this.companionsStocks[spot].removeAllTo(CEMETERY);
         }
         this.companionsStocks[spot].addToStockWithId(companion.subType, '' + companion.id);
     };
@@ -369,7 +369,7 @@ var MeetingTrack = /** @class */ (function () {
         if (spot == 0) {
             debugger;
         }
-        this.companionsStocks[spot].removeAllTo(Cemetery);
+        this.companionsStocks[spot].removeAllTo(CEMETERY);
     };
     MeetingTrack.prototype.removeCompanions = function () {
         for (var i = 1; i <= 5; i++) {
@@ -428,7 +428,7 @@ var MeetingTrack = /** @class */ (function () {
     };
     return MeetingTrack;
 }());
-var Cemetery = 'meeting-track-companion-0';
+var CEMETERY = 'meeting-track-companion-0';
 var COMPANION_SPELL = 3;
 var PlayerTable = /** @class */ (function () {
     function PlayerTable(game, player) {
@@ -551,7 +551,7 @@ var PlayerTable = /** @class */ (function () {
         dice.forEach(function (die) { return _this.game.fadeOutAndDestroy("die" + die.id); });
     };
     PlayerTable.prototype.removeCompanion = function (companion, removedBySpell) {
-        this.companionsStock.removeFromStockById('' + companion.id, Cemetery);
+        this.companionsStock.removeFromStockById('' + companion.id, CEMETERY);
         if (removedBySpell) {
             this.removeSpell(removedBySpell);
         }
@@ -712,6 +712,7 @@ var Glow = /** @class */ (function () {
     Glow.prototype.onEnteringStateStartRound = function () {
         if (document.getElementById('adventurers-stock')) {
             dojo.destroy('adventurers-stock');
+            this.adventurersStock = null;
         }
     };
     Glow.prototype.onEnteringStateChooseAdventurer = function (args) {
@@ -721,7 +722,7 @@ var Glow = /** @class */ (function () {
             dojo.place("<div id=\"adventurers-stock\"></div>", 'currentplayertable', 'before');
             this.adventurersStock = new ebg.stock();
             this.adventurersStock.create(this, $('adventurers-stock'), CARD_WIDTH, CARD_HEIGHT);
-            this.adventurersStock.setSelectionMode(1);
+            this.adventurersStock.setSelectionMode(0);
             this.adventurersStock.setSelectionAppearance('class');
             this.adventurersStock.selectionClass = 'nothing';
             this.adventurersStock.centerItems = true;
@@ -774,6 +775,28 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.onEnteringStateRollDice = function () {
         this.setDiceSelectionActive(true);
+    };
+    Glow.prototype.onEnteringResurrect = function (args) {
+        var _this = this;
+        var companions = args.cemeteryCards;
+        if (!document.getElementById('cemetary-companions-stock')) {
+            dojo.place("<div id=\"cemetary-companions-stock\"></div>", 'currentplayertable', 'before');
+            this.cemetaryCompanionsStock = new ebg.stock();
+            this.cemetaryCompanionsStock.create(this, $('cemetary-companions-stock'), CARD_WIDTH, CARD_HEIGHT);
+            this.cemetaryCompanionsStock.setSelectionMode(0);
+            this.cemetaryCompanionsStock.setSelectionAppearance('class');
+            this.cemetaryCompanionsStock.selectionClass = 'nothing';
+            this.cemetaryCompanionsStock.centerItems = true;
+            this.cemetaryCompanionsStock.onItemCreate = function (cardDiv, type) { return setupCompanionCard(_this, cardDiv, type); };
+            dojo.connect(this.cemetaryCompanionsStock, 'onChangeSelection', this, function () { return _this.onCemetarySelection(_this.cemetaryCompanionsStock.getSelectedItems()); });
+            setupCompanionCards(this.cemetaryCompanionsStock);
+            companions.forEach(function (companion) { return _this.cemetaryCompanionsStock.addToStockWithId(companion.subType, '' + companion.id, CEMETERY); });
+            this.meetingTrack.setCemeteryTop(null);
+        }
+        if (this.isCurrentPlayerActive()) {
+            this.cemetaryCompanionsStock.setSelectionMode(1);
+            this.addActionButton("skipResurrect-button", _("Skip"), function () { return _this.skipResurrect(); }, null, null, 'red');
+        }
     };
     Glow.prototype.onEnteringStateResolveCards = function (resolveCardsForPlayer) {
         this.onLeavingResolveCards();
@@ -830,8 +853,12 @@ var Glow = /** @class */ (function () {
                 break;
             case 'moveBlackDie':
                 this.onLeavingMoveBlackDie();
+                break;
             case 'rollDice':
                 this.onLeavingRollDice();
+                break;
+            case 'resurrect':
+                this.onLeavingResurrect();
                 break;
             case 'resolveCards':
                 this.onLeavingResolveCards();
@@ -850,6 +877,13 @@ var Glow = /** @class */ (function () {
     Glow.prototype.onLeavingRollDice = function () {
         this.setDiceSelectionActive(false);
     };
+    Glow.prototype.onLeavingResurrect = function () {
+        if (document.getElementById('cemetary-companions-stock')) {
+            this.cemetaryCompanionsStock.removeAllTo(CEMETERY);
+            this.fadeOutAndDestroy('cemetary-companions-stock');
+            this.cemetaryCompanionsStock = null;
+        }
+    };
     Glow.prototype.onLeavingResolveCards = function () {
         Array.from(document.getElementsByClassName('selectable')).forEach(function (node) { return dojo.removeClass(node, 'selectable'); });
         __spreadArray(__spreadArray(__spreadArray([], this.playersTables.map(function (pt) { return pt.adventurerStock; })), this.playersTables.map(function (pt) { return pt.companionsStock; })), this.playersTables.map(function (pt) { return pt.spellsStock; })).forEach(function (stock) { return stock.setSelectionMode(0); });
@@ -861,6 +895,7 @@ var Glow = /** @class */ (function () {
         if (this.isCurrentPlayerActive()) {
             switch (stateName) {
                 case 'selectSketalDie':
+                case 'selectSketalDieMulti':
                     this.onEnteringSelectSketalDie(args);
                     break;
                 case 'rollDice':
@@ -876,6 +911,11 @@ var Glow = /** @class */ (function () {
                     this.onEnteringStateMove(moveArgs);
                     break;
             }
+        }
+        switch (stateName) {
+            case 'resurrect':
+                this.onEnteringResurrect(args);
+                break;
         }
     };
     ///////////////////////////////////////////////////
@@ -914,32 +954,37 @@ var Glow = /** @class */ (function () {
         var newIndex = ZOOM_LEVELS.indexOf(this.zoom) - 1;
         this.setZoom(ZOOM_LEVELS[newIndex]);
     };
-    Glow.prototype.setupPreferences = function () {
-        var _this = this;
+    /*private setupPreferences() {
         // Extract the ID and value from the UI control
-        var onchange = function (e) {
-            var match = e.target.id.match(/^preference_control_(\d+)$/);
-            if (!match) {
-                return;
-            }
-            var prefId = +match[1];
-            var prefValue = +e.target.value;
-            _this.prefs[prefId].value = prefValue;
-            _this.onPreferenceChange(prefId, prefValue);
-        };
+        const onchange = (e) => {
+          var match = e.target.id.match(/^preference_control_(\d+)$/);
+          if (!match) {
+            return;
+          }
+          var prefId = +match[1];
+          var prefValue = +e.target.value;
+          (this as any).prefs[prefId].value = prefValue;
+          this.onPreferenceChange(prefId, prefValue);
+        }
+        
         // Call onPreferenceChange() when any value changes
         dojo.query(".preference_control").connect("onchange", onchange);
+        
         // Call onPreferenceChange() now
-        dojo.forEach(dojo.query("#ingame_menu_content .preference_control"), function (el) { return onchange({ target: el }); });
-    };
-    Glow.prototype.onPreferenceChange = function (prefId, prefValue) {
+        dojo.forEach(
+          dojo.query("#ingame_menu_content .preference_control"),
+          el => onchange({ target: el })
+        );
+    }
+      
+    private onPreferenceChange(prefId: number, prefValue: number) {
         switch (prefId) {
             // KEEP
             case 201:
                 document.getElementById('full-table').appendChild(document.getElementById(prefValue == 2 ? 'table-wrapper' : 'playerstables'));
                 break;
         }
-    };
+    }*/
     Glow.prototype.placeFirstPlayerToken = function (playerId) {
         var firstPlayerToken = document.getElementById('firstPlayerToken');
         if (firstPlayerToken) {
@@ -950,8 +995,11 @@ var Glow = /** @class */ (function () {
             this.addTooltipHtml('firstPlayerToken', _("First Player token"));
         }
     };
-    Glow.prototype.setHandSelectable = function (selectable) {
-        this.adventurersStock.setSelectionMode(selectable ? 1 : 0);
+    Glow.prototype.onCemetarySelection = function (items) {
+        if (items.length == 1) {
+            var card = items[0];
+            this.resurrect(card.id);
+        }
     };
     Glow.prototype.onAdventurerSelection = function (items) {
         if (items.length == 1) {
@@ -977,7 +1025,12 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.createPlayerPanels = function (gamedatas) {
         var _this = this;
-        Object.values(gamedatas.players).forEach(function (player) {
+        var players = Object.values(gamedatas.players);
+        var solo = players.length === 1;
+        if (solo) {
+            dojo.place("\n            <div id=\"overall_player_board_0\" class=\"player-board current-player-board\">\t\t\t\t\t\n                <div class=\"player_board_inner\" id=\"player_board_inner_982fff\">\n                    \n                    <div class=\"emblemwrap\" id=\"avatar_active_wrap_0\" style=\"display: block;\">\n                        <img src=\"https://en.1.studio.boardgamearena.com:8083/data/themereleases/210929-0932/img/layout/active_player.gif\" alt=\"\" class=\"avatar avatar_active\" id=\"avatar_active_2343492\">    \n                        <div class=\"icon20 icon20_night this_is_night\"></div>\n                    </div>\n                                               \n                    <div class=\"player-name\" id=\"player_name_0\">\n                        Tom\n                    </div>\n                    <div id=\"player_board_0\" class=\"player_board_content\">\n                        <div class=\"player_score\">\n                            <span id=\"player_score_0\" class=\"player_score_value\">10</span> <i class=\"fa fa-star\" id=\"icon_point_0\"></i>           \n                        </div>\n                    </div>\n                </div>\n            </div>", "overall_player_board_" + players[0].id, 'after');
+        }
+        (solo ? __spreadArray(__spreadArray([], players), [gamedatas.tom]) : players).forEach(function (player) {
             var playerId = Number(player.id);
             // charcoalium & resources counters
             dojo.place("\n            <div class=\"counters\">\n                <div id=\"reroll-counter-wrapper-" + player.id + "\" class=\"reroll-counter\">\n                    <div class=\"icon reroll\"></div> \n                    <span id=\"reroll-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"footprint-counter-wrapper-" + player.id + "\" class=\"footprint-counter\">\n                    <div class=\"icon footprint\"></div> \n                    <span id=\"footprint-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"firefly-counter-wrapper-" + player.id + "\" class=\"firefly-counter\">\n                    <div class=\"icon firefly\"></div> \n                    <span id=\"firefly-counter-" + player.id + "\"></span>\n                </div>\n            </div>", "player_board_" + player.id);
@@ -993,10 +1046,12 @@ var Glow = /** @class */ (function () {
             fireflyCounter.create("firefly-counter-" + playerId);
             fireflyCounter.setValue(player.fireflies);
             _this.fireflyCounters[playerId] = fireflyCounter;
-            // first player token
-            dojo.place("<div id=\"player_board_" + player.id + "_firstPlayerWrapper\"></div>", "player_board_" + player.id);
-            if (gamedatas.firstPlayer === playerId) {
-                _this.placeFirstPlayerToken(gamedatas.firstPlayer);
+            if (!solo) {
+                // first player token
+                dojo.place("<div id=\"player_board_" + player.id + "_firstPlayerWrapper\"></div>", "player_board_" + player.id);
+                if (gamedatas.firstPlayer === playerId) {
+                    _this.placeFirstPlayerToken(gamedatas.firstPlayer);
+                }
             }
         });
         this.addTooltipHtmlToClass('reroll-counter', _("Rerolls"));
@@ -1008,9 +1063,7 @@ var Glow = /** @class */ (function () {
         var players = Object.values(gamedatas.players).sort(function (a, b) { return a.playerNo - b.playerNo; });
         var playerIndex = players.findIndex(function (player) { return Number(player.id) === Number(_this.player_id); });
         var orderedPlayers = playerIndex > 0 ? __spreadArray(__spreadArray([], players.slice(playerIndex)), players.slice(0, playerIndex)) : players;
-        orderedPlayers.forEach(function (player, index) {
-            return _this.createPlayerTable(gamedatas, Number(player.id));
-        });
+        orderedPlayers.forEach(function (player) { return _this.createPlayerTable(gamedatas, Number(player.id)); });
     };
     Glow.prototype.createPlayerTable = function (gamedatas, playerId) {
         var playerTable = new PlayerTable(this, gamedatas.players[playerId]);
@@ -1295,6 +1348,20 @@ var Glow = /** @class */ (function () {
         }
         this.takeAction('keepDice');
     };
+    Glow.prototype.resurrect = function (id) {
+        if (!this.checkAction('resurrect')) {
+            return;
+        }
+        this.takeAction('resurrect', {
+            id: id
+        });
+    };
+    Glow.prototype.skipResurrect = function () {
+        if (!this.checkAction('skipResurrect')) {
+            return;
+        }
+        this.takeAction('skipResurrect');
+    };
     Glow.prototype.resolveCard = function (type, id) {
         if (!this.checkAction('resolveCard')) {
             return;
@@ -1414,10 +1481,20 @@ var Glow = /** @class */ (function () {
         playerTable.addDice(notif.args.dice);
     };
     Glow.prototype.notif_chosenCompanion = function (notif) {
+        var _a;
+        var spot = notif.args.spot;
         var playerTable = this.getPlayerTable(notif.args.playerId);
-        playerTable.addCompanion(notif.args.companion, this.meetingTrack.getStock(notif.args.spot));
-        playerTable.addDice(notif.args.dice);
-        this.meetingTrack.clearFootprintTokens(notif.args.spot, notif.args.playerId);
+        var originStock = spot ? this.meetingTrack.getStock(notif.args.spot) : this.cemetaryCompanionsStock;
+        playerTable.addCompanion(notif.args.companion, originStock);
+        if ((_a = notif.args.dice) === null || _a === void 0 ? void 0 : _a.length) {
+            playerTable.addDice(notif.args.dice);
+        }
+        if (spot) {
+            this.meetingTrack.clearFootprintTokens(spot, notif.args.playerId);
+        }
+        if (notif.args.cemetaryTop) {
+            this.meetingTrack.setCemeteryTop(notif.args.cemetaryTop);
+        }
     };
     Glow.prototype.notif_removeCompanion = function (notif) {
         if (notif.args.spot) {

@@ -91,10 +91,15 @@ trait ArgsTrait {
         return $args;
     }
 
-    function argResolveCardsForPlayer(int $playerId) {        
+    function argResurrect() {
+        return [
+            'cemeteryCards' => $this->getCompanionsFromDb($this->companions->getCardsInLocation('cemetery')),
+        ];
+    }
+
+    function argResolveCardsForPlayer(int $playerId) {
         $resolveCardsForPlayer = new stdClass();
         $resolveCardsForPlayer->remainingEffects = $this->getRemainingEffects($playerId);
-        $resolveCardsForPlayer->cromaug = $this->getCromaugArg($playerId);
         return $resolveCardsForPlayer;
     }
 

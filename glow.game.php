@@ -25,6 +25,7 @@ require_once('modules/php/states.php');
 require_once('modules/php/args.php');
 require_once('modules/php/actions.php');
 require_once('modules/php/map.php');
+require_once('modules/php/solo.php');
 require_once('modules/php/debug-util.php');
 
 class Glow extends Table {
@@ -33,6 +34,7 @@ class Glow extends Table {
     use StateTrait;
     use ArgsTrait;
     use MapTrait;
+    use SoloTrait;
     use DebugUtilTrait;
 
 	function __construct() {
@@ -113,12 +115,19 @@ class Glow extends Table {
         // (note: statistics used in this file must be defined in your stats.inc.php file)
         //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
         //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
+
+        $solo = count($players) == 1;
+        if ($solo) {
+            $this->initTom();
+        }
         
-        $this->createDice();
+        $this->createDice($solo);
         $this->createMeeples(array_keys($players));
         $this->createAdventurers();
-        $this->createCompanions();
-        $this->createSpells();
+        $this->createCompanions($solo);
+        if (!$solo) {
+            $this->createSpells();
+        }
 
         // TODO TEMP card to test
         $this->debugSetup();
@@ -184,6 +193,10 @@ class Glow extends Table {
             $player['rerolls'] = intval($player['rerolls']);
             $player['footprints'] = intval($player['footprints']);
             $player['fireflies'] = intval($player['fireflies']);
+        }
+
+        if (count($result['players']) == 1) { // solo mode
+            $result['tom'] = $this->getTom();
         }
   
         return $result;

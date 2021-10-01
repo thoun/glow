@@ -1,4 +1,4 @@
-const Cemetery = 'meeting-track-companion-0';
+const CEMETERY = 'meeting-track-companion-0';
 const COMPANION_SPELL = 3;
 
 class PlayerTable {
@@ -165,7 +165,7 @@ class PlayerTable {
     }
     
     public removeCompanion(companion: Companion, removedBySpell?: Spell) {
-        this.companionsStock.removeFromStockById(''+companion.id, Cemetery);
+        this.companionsStock.removeFromStockById(''+companion.id, CEMETERY);
         
         if (removedBySpell) {
             this.removeSpell(removedBySpell);
