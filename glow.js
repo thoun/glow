@@ -74,7 +74,7 @@ function getCompanionTooltip(type) {
     return null;
 }
 function setupCompanionCard(game, cardDiv, type) {
-    var tooltip = getCompanionTooltip(type);
+    var tooltip = getCompanionTooltip(type); // TODO add effect (same thing to spells & adventurers)
     if (tooltip) {
         game.addTooltipHtml(cardDiv.id, tooltip);
     }
@@ -187,7 +187,7 @@ var MAP2 = [
 ];
 var MAPS = [null, MAP1, MAP2];
 var Board = /** @class */ (function () {
-    function Board(game, players) {
+    function Board(game, players, tableDice) {
         var _this = this;
         this.game = game;
         this.points = new Map();
@@ -205,6 +205,17 @@ var Board = /** @class */ (function () {
         });
         this.movePoints();
         players.forEach(function (player) { return _this.placeMeeples(player); });
+        tableDice.forEach(function (die) { return _this.game.createOrMoveDie(die, 'table-dice'); });
+        document.getElementById('table-dice').addEventListener('click', function (event) {
+            if (!_this.game.gamedatas.gamestate.name.startsWith('selectSketalDie')) {
+                return;
+            }
+            var target = event.target;
+            if (!target || !target.classList.contains('die')) {
+                return;
+            }
+            _this.game.selectSketalDie(Number(target.dataset.dieId));
+        });
     }
     Board.prototype.incPoints = function (playerId, points) {
         this.points.set(playerId, this.points.get(playerId) + points);
@@ -639,7 +650,7 @@ var Glow = /** @class */ (function () {
         log('gamedatas', gamedatas);
         dojo.addClass('board', "side" + gamedatas.side);
         this.createPlayerPanels(gamedatas);
-        this.board = new Board(this, Object.values(gamedatas.players));
+        this.board = new Board(this, Object.values(gamedatas.players), gamedatas.tableDice);
         this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack);
         this.createPlayerTables(gamedatas);
         if (gamedatas.day > 0) {
@@ -1087,6 +1098,7 @@ var Glow = /** @class */ (function () {
         var dieDiv = this.getDieDiv(die);
         if (dieDiv) {
             this.setNewFace(die, true);
+            dojo.toggleClass("die" + die.id, 'used', die.used);
             slideToObjectAndAttach(dieDiv, destinationId);
         }
         else {
@@ -1479,6 +1491,7 @@ var Glow = /** @class */ (function () {
         var playerTable = this.getPlayerTable(notif.args.playerId);
         playerTable.setAdventurer(notif.args.adventurer);
         playerTable.addDice(notif.args.dice);
+        this.createOrMoveDie(notif.args.unusedDie, 'table-dice');
     };
     Glow.prototype.notif_chosenCompanion = function (notif) {
         var _a;

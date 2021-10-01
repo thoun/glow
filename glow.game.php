@@ -163,6 +163,9 @@ class Glow extends Table {
         $result['firstPlayer'] = intval(self::getGameStateValue(FIRST_PLAYER));
         $result['side'] = $this->getSide();
         $result['day'] = intval(self::getGameStateValue(DAY));
+        
+        $result['tableDice'] = $this->getDiceByLocation('table');
+        $result['topDeckType'] = $this->getTopDeckType();
 
         $dice = $this->getDiceByLocation('meeting');
         $meetingTrack = [];

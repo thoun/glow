@@ -120,11 +120,8 @@ trait UtilTrait {
         return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices));
     }
     
-    function getBigDiceByColor(int $color = 0, int $limit = 0) {
-        $sql = "SELECT * FROM dice WHERE `color` = $color AND `small` = false";
-        if ($limit > 0) {
-            $sql .= " LIMIT $limit";
-        }
+    function getBigDiceByColor(int $color, int $limit) {
+        $sql = "SELECT * FROM dice WHERE `location` = 'deck' AND `color` = $color AND `small` = false LIMIT $limit";
         $dbDices = self::getCollectionFromDB($sql);
         return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices));
     }
@@ -158,7 +155,7 @@ trait UtilTrait {
     }
     
     function getAvailableBigDice() {
-        $sql = "SELECT * FROM dice WHERE `location` = 'deck' AND `small` = false";
+        $sql = "SELECT * FROM dice WHERE `location` = 'table' AND `small` = false";
         $dbDices = self::getCollectionFromDB($sql);
         return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices));
     }
@@ -430,14 +427,23 @@ trait UtilTrait {
         }
     }
         
-    function getTopCemeteryCompanion() {
-        $companionDb = $this->companions->getCardOnTop('cemetery');
+    private function getTopCompanion(string $location) {
+        $companionDb = $this->companions->getCardOnTop($location);
         
         if ($companionDb != null) {
             return $this->getCompanionFromDb($companionDb);
         } else {
             return null;
         }
+    }
+        
+    function getTopDeckType() {
+        $topDeckCompanion = $this->getTopCompanion('deck');
+        return $topDeckCompanion != null ? $topDeckCompanion->type : null;
+    }
+        
+    function getTopCemeteryCompanion() {
+        return $this->getTopCompanion('cemetery');
     }
 
     function getRerollScoreCost(int $score) {
@@ -567,7 +573,7 @@ trait UtilTrait {
 
     public function getTriggeredEffectsForPlayer(int $playerId) {
         $effectsCodes = [];
-        $dice = $this->getEffectiveDice($playerId);
+        $dice = $this->getEffectiveDice($playerId, false);
 
         $adventurer = $this->getAdventurersFromDb($this->adventurers->getCardsInLocation('player', $playerId))[0];
         if ($adventurer->effect != null) {

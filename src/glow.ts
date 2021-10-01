@@ -74,7 +74,7 @@ class Glow implements GlowGame {
 
         dojo.addClass('board', `side${gamedatas.side}`);
         this.createPlayerPanels(gamedatas);
-        this.board = new Board(this, Object.values(gamedatas.players));
+        this.board = new Board(this, Object.values(gamedatas.players), gamedatas.tableDice);
         this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack);
         this.createPlayerTables(gamedatas);
         if (gamedatas.day > 0) {
@@ -625,6 +625,7 @@ class Glow implements GlowGame {
 
         if (dieDiv) {
             this.setNewFace(die, true);
+            dojo.toggleClass(`die${die.id}`, 'used', die.used);
 
             slideToObjectAndAttach(dieDiv, destinationId);
         } else {
@@ -1098,6 +1099,7 @@ class Glow implements GlowGame {
         const playerTable = this.getPlayerTable(notif.args.playerId);
         playerTable.setAdventurer(notif.args.adventurer);
         playerTable.addDice(notif.args.dice);
+        this.createOrMoveDie(notif.args.unusedDie, 'table-dice');
     }
 
     notif_chosenCompanion(notif: Notif<NotifChosenCompanionArgs>) {

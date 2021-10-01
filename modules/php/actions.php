@@ -27,6 +27,8 @@ trait ActionTrait {
         // take big dice
         $dice = $this->getBigDiceByColor($adventurer->color, $adventurer->dice);
         $this->moveDice($dice, 'player', $playerId);
+        $unusedDie = $this->getBigDiceByColor($adventurer->color, 1)[0];
+        $this->moveDice([$unusedDie], 'table');
 
         self::notifyAllPlayers('chosenAdventurer', clienttranslate('${player_name} chooses adventurer ${adventurerName}'), [
             'playerId' => $playerId,
@@ -34,6 +36,7 @@ trait ActionTrait {
             'adventurer' => $adventurer,
             'adventurerName' => $adventurer->name,
             'dice' => $dice,
+            'unusedDie' => $unusedDie,
         ]);
 
         $this->gamestate->nextState('nextPlayer');
@@ -72,6 +75,13 @@ trait ActionTrait {
             $dice = $this->getAvailableBigDice();
             foreach($dice as $die) {
                 if ($die->color === $companion->dieColor) {
+
+                    $multi = ($this->gamestate->state()['name']) == 'resurrect';
+                    if ($multi) {
+                        self::DbQuery("UPDATE dice SET `used` = true WHERE die_id = $die->id");
+                        $die->used = true;
+                    }
+
                     $this->takeSketalDie($playerId, $die);
                     break;
                 }
@@ -136,18 +146,23 @@ trait ActionTrait {
     }
 
     public function selectSketalDie(int $id) {
-        self::checkAction('selectSketalDie');        
+        self::checkAction('selectSketalDie');
         $multi = ($this->gamestate->state()['name']) == 'selectSketalDieMulti';
 
         $die = $this->getDieById($id);
 
-        if ($die->location != 'deck') { // TODO show dice & deck on table
+        if ($die->location != 'table') { // TODO deck on table
             throw new BgaUserException("Die not available");
         }
         
         $playerId = $multi ? self::getCurrentPlayerId() : self::getActivePlayerId();
 
-        $this->takeSketalDie($playerId, $die); // TODO lock for next turn if multi
+        if ($multi) {
+            self::DbQuery("UPDATE dice SET `used` = true WHERE die_id = $die->id");
+            $die->used = true;
+        }
+        
+        $this->takeSketalDie($playerId, $die);
 
         if ($multi) {
             $this->gamestate->setPlayerNonMultiactive($playerId, 'resolveCards');
@@ -265,11 +280,9 @@ trait ActionTrait {
         }
 
         $this->applyRecruitCompanion($playerId, $companion);
-        // TODO TOCHECK if player resurrects Kaar, 
 
         if ($companion->die && $companion->dieColor === 0) {
-            $this->gamestate->nextState('selectSketalDie');
-            //$this->gamestate->setPlayerNonMultiactive($playerId, 'selectSketalDie');
+            $this->gamestate->nextState('selectSketalDie'); // we don't disable player so he stays active for selectSketalDieMulti
         } else {
             $this->gamestate->setPlayerNonMultiactive($playerId, 'resolveCards');
         }

@@ -83,7 +83,7 @@ function getCompanionTooltip(type: number) {
 }
 
 function setupCompanionCard(game: Game, cardDiv: HTMLDivElement, type: number) {
-    const tooltip = getCompanionTooltip(type);
+    const tooltip = getCompanionTooltip(type); // TODO add effect (same thing to spells & adventurers)
     if (tooltip) {
         (game as any).addTooltipHtml(cardDiv.id, tooltip);
     }

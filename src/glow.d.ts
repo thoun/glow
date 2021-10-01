@@ -85,6 +85,9 @@ interface GlowGamedatas {
     firstPlayer: number;
     side: number;
     day: number;
+        
+    tableDice: Die[];
+    topDeckType: number;
 
     meetingTrack: MeetingTrackSpot[];
 
@@ -107,6 +110,7 @@ interface GlowGame extends Game {
     resolveCard(type: number, id: number): void;
     move(destination: number, from?: number): void;
     moveBlackDie(spot: number): void;
+    selectSketalDie(dieId: number): void;
 }
 
 interface ChooseAdventurerArgs {
@@ -168,6 +172,7 @@ interface NotifChosenAdventurerArgs {
     playerId: number;
     adventurer: Adventurer;
     dice: Die[];
+    unusedDie: Die;
 }
 
 interface NotifChosenCompanionArgs {

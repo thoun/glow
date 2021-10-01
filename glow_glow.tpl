@@ -4,7 +4,9 @@
 
 <div id="full-board-wrapper">
     <div id="full-board">
-        <div id="board"></div>
+        <div id="board">
+            <div id="table-dice"></div>
+        </div>
         <div id="round-counter-wrapper">
             {DAY} <span id="round-counter">-</span>&nbsp;/&nbsp;8
         </div>

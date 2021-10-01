@@ -87,6 +87,7 @@ class Board { // TODO hide score token temporarily on map scores click/hover
     constructor(
         private game: GlowGame, 
         players: GlowPlayer[],
+        tableDice: Die[],
     ) {
         let html = '';
 
@@ -102,6 +103,21 @@ class Board { // TODO hide score token temporarily on map scores click/hover
         this.movePoints();
 
         players.forEach(player => this.placeMeeples(player));
+
+        tableDice.forEach(die => this.game.createOrMoveDie(die, 'table-dice'));
+
+        document.getElementById('table-dice').addEventListener('click', event => {
+            if (!(this.game as any).gamedatas.gamestate.name.startsWith('selectSketalDie')) {
+                return;
+            }
+
+            const target = event.target as HTMLDivElement;
+            if (!target || !target.classList.contains('die')) {
+                return;
+            }
+
+            this.game.selectSketalDie(Number(target.dataset.dieId));
+        });
     }
 
     public incPoints(playerId: number, points: number) {
