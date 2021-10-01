@@ -166,11 +166,11 @@ class Glow extends Table {
         
         $result['tableDice'] = $this->getDiceByLocation('table');
         $result['topDeckType'] = $this->getTopDeckType();
+        $result['topCemeteryType'] = $this->getTopCemeteryType();
 
         $dice = $this->getDiceByLocation('meeting');
         $meetingTrack = [];
         $meetingTrack[0] = new MeetingTrackSpot();
-        $meetingTrack[0]->companion = $this->getTopCemeteryCompanion();
 
         for ($i=1;$i<=5;$i++) {
             $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting', $i));

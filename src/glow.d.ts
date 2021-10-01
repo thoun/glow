@@ -88,6 +88,7 @@ interface GlowGamedatas {
         
     tableDice: Die[];
     topDeckType: number;
+    topCemeteryType: number;
 
     meetingTrack: MeetingTrackSpot[];
 
@@ -119,6 +120,7 @@ interface ChooseAdventurerArgs {
 
 interface RecruitCompanionArgs {
     companions: MeetingTrackSpot[];
+    topDeckType: number;
 }
 
 interface EnteringRollDiceForPlayer {
@@ -185,7 +187,7 @@ interface NotifChosenCompanionArgs {
 }
 
 interface NotifRemoveCompanionsArgs {
-    cemeteryTop: Companion;
+    topCemeteryType: Companion;
 }
 
 interface NotifPointsArgs {

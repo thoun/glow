@@ -12,6 +12,9 @@ const CARD_HEIGHT = 240;
 
 const SPELL_DIAMETER = 64;
 
+const CEMETERY = 'cemetery';
+const DECK = 'deck';
+
 function setupAdventurersCards(adventurerStock: Stock) {
     const cardsurl = `${g_gamethemeurl}img/adventurers.png`;
 

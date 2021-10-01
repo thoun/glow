@@ -33,7 +33,7 @@
   .meeting-track-stock {
     position: absolute;
     top: 163px;
-    height: 250px;
+    height: 240px;
     width: 129px;
   }
 
@@ -47,7 +47,29 @@
   }
 
   #deck {
-    position: absolute;
     left: -150px;
+  }
+
+  #cemetery {
+    left: 55px;
+  }
+
+  .hidden-pile {
+    background-image: url('img/companions.png');
+    position: absolute;
+    border-radius: 10px;
+    box-shadow: 3px 3px 0px 0px #333, 5px 5px 3px black;
+
+    &[data-type="0"] {
+      visibility: hidden;
+    }
+
+    &[data-type="1"] {
+      background-position: 0% 0%;
+    }
+
+    &[data-type="2"] {
+      background-position: 50% 50%;
+    }
   }
 }

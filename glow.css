@@ -464,7 +464,7 @@
 #meeting-track .meeting-track-stock {
   position: absolute;
   top: 163px;
-  height: 250px;
+  height: 240px;
   width: 129px;
 }
 #meeting-track .footprint-token {
@@ -476,8 +476,25 @@
   border-radius: 50%;
 }
 #meeting-track #deck {
-  position: absolute;
   left: -150px;
+}
+#meeting-track #cemetery {
+  left: 55px;
+}
+#meeting-track .hidden-pile {
+  background-image: url("img/companions.png");
+  position: absolute;
+  border-radius: 10px;
+  box-shadow: 3px 3px 0px 0px #333, 5px 5px 3px black;
+}
+#meeting-track .hidden-pile[data-type="0"] {
+  visibility: hidden;
+}
+#meeting-track .hidden-pile[data-type="1"] {
+  background-position: 0% 0%;
+}
+#meeting-track .hidden-pile[data-type="2"] {
+  background-position: 50% 50%;
 }
 
 #currentplayertable .whiteblock, #playerstables .whiteblock {

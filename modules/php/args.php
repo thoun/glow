@@ -41,6 +41,7 @@ trait ArgsTrait {
 
         return [
            'companions' => $companions,
+           'topDeckType' => $this->getTopDeckType(),
         ];
     }
 

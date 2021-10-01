@@ -37,6 +37,8 @@ declare const board: HTMLDivElement;*/
 var CARD_WIDTH = 129;
 var CARD_HEIGHT = 240;
 var SPELL_DIAMETER = 64;
+var CEMETERY = 'cemetery';
+var DECK = 'deck';
 function setupAdventurersCards(adventurerStock) {
     var cardsurl = g_gamethemeurl + "img/adventurers.png";
     for (var i = 0; i <= 7; i++) {
@@ -309,18 +311,13 @@ var MEETING_SPOT_BY_COLOR = [
     2,
 ];
 var MeetingTrack = /** @class */ (function () {
-    function MeetingTrack(game, meetingTrackSpot, topDeckType) {
+    function MeetingTrack(game, meetingTrackSpot, topDeckType, topCemeteryType) {
         var _this = this;
         this.game = game;
         this.companionsStocks = [];
         var _loop_1 = function (i) {
-            var html = '';
-            var cemetery = i === 0;
-            var left = cemetery ? 55 : 245 + 135 * MEETING_SPOT_BY_COLOR[i];
-            if (!cemetery) {
-                html += "<div id=\"meeting-track-dice-" + i + "\" class=\"meeting-track-zone dice\" style=\"left: " + left + "px;\"></div>\n                <div id=\"meeting-track-footprints-" + i + "\" class=\"meeting-track-zone footprints\" style=\"left: " + left + "px;\"></div>";
-            }
-            html += "<div id=\"meeting-track-companion-" + i + "\" class=\"meeting-track-stock\" style=\"left: " + left + "px;\"></div>";
+            var left = 245 + 135 * MEETING_SPOT_BY_COLOR[i];
+            var html = "\n            <div id=\"meeting-track-dice-" + i + "\" class=\"meeting-track-zone dice\" style=\"left: " + left + "px;\"></div>\n            <div id=\"meeting-track-footprints-" + i + "\" class=\"meeting-track-zone footprints\" style=\"left: " + left + "px;\"></div>\n            <div id=\"meeting-track-companion-" + i + "\" class=\"meeting-track-stock\" style=\"left: " + left + "px;\"></div>\n            ";
             dojo.place(html, 'meeting-track');
             var spot = meetingTrackSpot[i];
             this_1.companionsStocks[i] = new ebg.stock();
@@ -328,31 +325,16 @@ var MeetingTrack = /** @class */ (function () {
             this_1.companionsStocks[i].selectionClass = 'selected';
             this_1.companionsStocks[i].create(this_1.game, $("meeting-track-companion-" + i), CARD_WIDTH, CARD_HEIGHT);
             this_1.companionsStocks[i].setSelectionMode(0);
-            if (!cemetery) {
-                this_1.companionsStocks[i].onItemCreate = function (cardDiv, type) { return setupCompanionCard(game, cardDiv, type); };
-                dojo.connect(this_1.companionsStocks[i], 'onChangeSelection', this_1, function () { return _this.game.selectMeetingTrackCompanion(i); });
-            }
+            this_1.companionsStocks[i].onItemCreate = function (cardDiv, type) { return setupCompanionCard(game, cardDiv, type); };
+            dojo.connect(this_1.companionsStocks[i], 'onChangeSelection', this_1, function () { return _this.game.selectMeetingTrackCompanion(i); });
             setupCompanionCards(this_1.companionsStocks[i]);
-            if (cemetery) {
-                this_1.setCemeteryTop(spot.companion);
+            if (spot.companion) {
+                this_1.companionsStocks[i].addToStockWithId(spot.companion.subType, '' + spot.companion.id);
             }
-            else {
-                if (spot.companion) {
-                    this_1.companionsStocks[i].addToStockWithId(spot.companion.subType, '' + spot.companion.id);
-                }
-                this_1.setFootprintTokens(i, spot.footprints);
-            }
-            // deck
-            this_1.deckStock = new ebg.stock();
-            this_1.deckStock.setSelectionAppearance('class');
-            this_1.deckStock.selectionClass = 'selected';
-            this_1.deckStock.create(this_1.game, $("deck"), CARD_WIDTH, CARD_HEIGHT);
-            this_1.deckStock.setSelectionMode(0);
-            setupCompanionCards(this_1.deckStock);
-            this_1.setDeckTop(topDeckType);
+            this_1.setFootprintTokens(i, spot.footprints);
         };
         var this_1 = this;
-        for (var i = 0; i <= 5; i++) {
+        for (var i = 1; i <= 5; i++) {
             _loop_1(i);
         }
         var _loop_2 = function (i) {
@@ -365,9 +347,12 @@ var MeetingTrack = /** @class */ (function () {
             });
         };
         var this_2 = this;
+        // place dice only after spots creation
         for (var i = 1; i <= 5; i++) {
             _loop_2(i);
         }
+        this.setDeckTop(DECK, topDeckType);
+        this.setDeckTop(CEMETERY, topCemeteryType);
     }
     MeetingTrack.prototype.setCompanion = function (meetingTrackSpot, spot) {
         var _a;
@@ -383,7 +368,7 @@ var MeetingTrack = /** @class */ (function () {
         if (currentId && Number(currentId) != companion.id) {
             this.companionsStocks[spot].removeAllTo(CEMETERY);
         }
-        this.companionsStocks[spot].addToStockWithId(companion.subType, '' + companion.id);
+        this.companionsStocks[spot].addToStockWithId(companion.subType, '' + companion.id, DECK);
     };
     MeetingTrack.prototype.removeCompanion = function (spot) {
         if (spot == 0) {
@@ -424,33 +409,8 @@ var MeetingTrack = /** @class */ (function () {
             _this.game.createOrMoveDie(die, "meeting-track-dice-" + die.value);
         });
     };
-    MeetingTrack.prototype.setCemeteryTop = function (companion) {
-        if (companion) {
-            if (!this.companionsStocks[0].items.length) {
-                this.companionsStocks[0].addToStockWithId(1000 + companion.type, '' + companion.type);
-            }
-            else if (this.companionsStocks[0].items[0].id !== '' + companion.type) {
-                this.companionsStocks[0].removeAll();
-                this.companionsStocks[0].addToStockWithId(1000 + companion.type, '' + companion.type);
-            }
-        }
-        else {
-            this.companionsStocks[0].removeAll();
-        }
-    };
-    MeetingTrack.prototype.setDeckTop = function (type) {
-        if (type) {
-            if (!this.deckStock.items.length) {
-                this.deckStock.addToStockWithId(1000 + type, '' + type);
-            }
-            else if (Number(this.deckStock.items[0].type) !== type) {
-                this.deckStock.removeAll();
-                this.deckStock.addToStockWithId(1000 + type, '' + type);
-            }
-        }
-        else {
-            this.deckStock.removeAll();
-        }
+    MeetingTrack.prototype.setDeckTop = function (deckId, type) {
+        document.getElementById(deckId).dataset.type = "" + (type !== null && type !== void 0 ? type : 0);
     };
     MeetingTrack.prototype.setSelectableDice = function (possibleSpots) {
         var _loop_3 = function (i) {
@@ -462,7 +422,6 @@ var MeetingTrack = /** @class */ (function () {
     };
     return MeetingTrack;
 }());
-var CEMETERY = 'meeting-track-companion-0';
 var COMPANION_SPELL = 3;
 var PlayerTable = /** @class */ (function () {
     function PlayerTable(game, player) {
@@ -674,7 +633,7 @@ var Glow = /** @class */ (function () {
         dojo.addClass('board', "side" + gamedatas.side);
         this.createPlayerPanels(gamedatas);
         this.board = new Board(this, Object.values(gamedatas.players), gamedatas.tableDice);
-        this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack, gamedatas.topDeckType);
+        this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack, gamedatas.topDeckType, gamedatas.topCemeteryType);
         this.createPlayerTables(gamedatas);
         if (gamedatas.day > 0) {
             this.roundCounter = new ebg.counter();
@@ -780,6 +739,7 @@ var Glow = /** @class */ (function () {
                 _this.meetingTrack.setCompanion(companion, spot);
             }
         });
+        this.meetingTrack.setDeckTop(DECK, args.topDeckType);
         if (this.isCurrentPlayerActive()) {
             this.meetingTrack.setSelectionMode(1);
         }
@@ -825,7 +785,7 @@ var Glow = /** @class */ (function () {
             dojo.connect(this.cemetaryCompanionsStock, 'onChangeSelection', this, function () { return _this.onCemetarySelection(_this.cemetaryCompanionsStock.getSelectedItems()); });
             setupCompanionCards(this.cemetaryCompanionsStock);
             companions.forEach(function (companion) { return _this.cemetaryCompanionsStock.addToStockWithId(companion.subType, '' + companion.id, CEMETERY); });
-            this.meetingTrack.setCemeteryTop(null);
+            this.meetingTrack.setDeckTop(CEMETERY, 0);
         }
         if (this.isCurrentPlayerActive()) {
             this.cemetaryCompanionsStock.setSelectionMode(1);
@@ -1517,7 +1477,7 @@ var Glow = /** @class */ (function () {
         this.createOrMoveDie(notif.args.unusedDie, 'table-dice');
     };
     Glow.prototype.notif_chosenCompanion = function (notif) {
-        var _a;
+        var _a, _b;
         var spot = notif.args.spot;
         var playerTable = this.getPlayerTable(notif.args.playerId);
         var originStock = spot ? this.meetingTrack.getStock(notif.args.spot) : this.cemetaryCompanionsStock;
@@ -1529,10 +1489,11 @@ var Glow = /** @class */ (function () {
             this.meetingTrack.clearFootprintTokens(spot, notif.args.playerId);
         }
         if (notif.args.cemetaryTop) {
-            this.meetingTrack.setCemeteryTop(notif.args.cemetaryTop);
+            this.meetingTrack.setDeckTop(CEMETERY, (_b = notif.args.cemetaryTop) === null || _b === void 0 ? void 0 : _b.type);
         }
     };
     Glow.prototype.notif_removeCompanion = function (notif) {
+        var _a;
         if (notif.args.spot) {
             this.meetingTrack.removeCompanion(notif.args.spot);
         }
@@ -1540,11 +1501,12 @@ var Glow = /** @class */ (function () {
             var playerTable = this.getPlayerTable(notif.args.playerId);
             playerTable.removeCompanion(notif.args.companion, notif.args.removedBySpell);
         }
-        this.meetingTrack.setCemeteryTop(notif.args.companion);
+        this.meetingTrack.setDeckTop(CEMETERY, (_a = notif.args.companion) === null || _a === void 0 ? void 0 : _a.type);
     };
     Glow.prototype.notif_removeCompanions = function (notif) {
+        var _a;
         this.meetingTrack.removeCompanions();
-        this.meetingTrack.setCemeteryTop(notif.args.cemeteryTop);
+        this.meetingTrack.setDeckTop(CEMETERY, (_a = notif.args.topCemeteryType) === null || _a === void 0 ? void 0 : _a.type);
     };
     Glow.prototype.notif_takeSketalDie = function (notif) {
         var playerTable = this.getPlayerTable(notif.args.playerId);

@@ -59,7 +59,7 @@ trait StateTrait {
         }
 
         self::notifyAllPlayers('removeCompanions', '', [
-            'cemeteryTop' => $this->getTopCemeteryCompanion(),
+            'topCemeteryType' => $this->getTopCemeteryType(),
         ]);
 
         $this->rollPlayerDice();

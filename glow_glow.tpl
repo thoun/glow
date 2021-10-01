@@ -11,7 +11,8 @@
             {DAY} <span id="round-counter">-</span>&nbsp;/&nbsp;8
         </div>
         <div id="meeting-track">
-            <div id="deck" class="meeting-track-stock"></div>
+            <div id="deck" class="meeting-track-stock hidden-pile"></div>
+            <div id="cemetery" class="meeting-track-stock hidden-pile"></div>
         </div>
     </div>
 </div>

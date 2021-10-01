@@ -442,6 +442,11 @@ trait UtilTrait {
         return $topDeckCompanion != null ? $topDeckCompanion->type : null;
     }
         
+    function getTopCemeteryType() {
+        $topDeckCompanion = $this->getTopCompanion('cemetery');
+        return $topDeckCompanion != null ? $topDeckCompanion->type : null;
+    }
+        
     function getTopCemeteryCompanion() {
         return $this->getTopCompanion('cemetery');
     }

@@ -75,7 +75,7 @@ class Glow implements GlowGame {
         dojo.addClass('board', `side${gamedatas.side}`);
         this.createPlayerPanels(gamedatas);
         this.board = new Board(this, Object.values(gamedatas.players), gamedatas.tableDice);
-        this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack, gamedatas.topDeckType);
+        this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack, gamedatas.topDeckType, gamedatas.topCemeteryType);
         this.createPlayerTables(gamedatas);
         if (gamedatas.day > 0) {
             this.roundCounter = new ebg.counter();
@@ -195,6 +195,8 @@ class Glow implements GlowGame {
             }
         });
         
+        this.meetingTrack.setDeckTop(DECK, args.topDeckType);
+        
         if((this as any).isCurrentPlayerActive()) {
             this.meetingTrack.setSelectionMode(1);
         }
@@ -250,7 +252,7 @@ class Glow implements GlowGame {
 
             companions.forEach(companion => this.cemetaryCompanionsStock.addToStockWithId(companion.subType, ''+companion.id, CEMETERY));
 
-            this.meetingTrack.setCemeteryTop(null);
+            this.meetingTrack.setDeckTop(CEMETERY, 0);
         }
         
         if((this as any).isCurrentPlayerActive()) {
@@ -1114,7 +1116,7 @@ class Glow implements GlowGame {
             this.meetingTrack.clearFootprintTokens(spot, notif.args.playerId);
         }
         if (notif.args.cemetaryTop) {
-            this.meetingTrack.setCemeteryTop(notif.args.cemetaryTop);
+            this.meetingTrack.setDeckTop(CEMETERY, notif.args.cemetaryTop?.type);
         }
     }
 
@@ -1125,12 +1127,12 @@ class Glow implements GlowGame {
             const playerTable = this.getPlayerTable(notif.args.playerId);
             playerTable.removeCompanion(notif.args.companion, notif.args.removedBySpell);
         }
-        this.meetingTrack.setCemeteryTop(notif.args.companion);
+        this.meetingTrack.setDeckTop(CEMETERY, notif.args.companion?.type);
     }
 
     notif_removeCompanions(notif: Notif<NotifRemoveCompanionsArgs>) {
         this.meetingTrack.removeCompanions();
-        this.meetingTrack.setCemeteryTop(notif.args.cemeteryTop);
+        this.meetingTrack.setDeckTop(CEMETERY, notif.args.topCemeteryType?.type);
     }
 
     notif_takeSketalDie(notif: Notif<NotifSketalDieArgs>) {

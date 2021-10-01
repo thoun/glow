@@ -1,4 +1,3 @@
-const CEMETERY = 'meeting-track-companion-0';
 const COMPANION_SPELL = 3;
 
 class PlayerTable {

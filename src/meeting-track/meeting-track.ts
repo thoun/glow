@@ -9,26 +9,24 @@ const MEETING_SPOT_BY_COLOR = [
 
 class MeetingTrack {
     private companionsStocks: Stock[] = [];
-    private deckStock: Stock;
 
     constructor(
         private game: GlowGame,
         meetingTrackSpot: MeetingTrackSpot[],
         topDeckType: number,
+        topCemeteryType: number,
     ) {
 
-        for (let i=0; i<=5; i++) {
-            let html = '';
-            const cemetery = i === 0;
+        for (let i=1; i<=5; i++) {
             
-            const left = cemetery ? 55 : 245 + 135*MEETING_SPOT_BY_COLOR[i];
-            if (!cemetery) {
-                html += `<div id="meeting-track-dice-${i}" class="meeting-track-zone dice" style="left: ${left}px;"></div>
-                <div id="meeting-track-footprints-${i}" class="meeting-track-zone footprints" style="left: ${left}px;"></div>`;
-            }
-            html += `<div id="meeting-track-companion-${i}" class="meeting-track-stock" style="left: ${left}px;"></div>`;
-
+            const left = 245 + 135*MEETING_SPOT_BY_COLOR[i];
+            const html = `
+            <div id="meeting-track-dice-${i}" class="meeting-track-zone dice" style="left: ${left}px;"></div>
+            <div id="meeting-track-footprints-${i}" class="meeting-track-zone footprints" style="left: ${left}px;"></div>
+            <div id="meeting-track-companion-${i}" class="meeting-track-stock" style="left: ${left}px;"></div>
+            `;
             dojo.place(html, 'meeting-track');
+
 
             const spot = meetingTrackSpot[i];
 
@@ -37,32 +35,18 @@ class MeetingTrack {
             this.companionsStocks[i].selectionClass = 'selected';
             this.companionsStocks[i].create(this.game, $(`meeting-track-companion-${i}`), CARD_WIDTH, CARD_HEIGHT);
             this.companionsStocks[i].setSelectionMode(0);
-            if (!cemetery) {
-                this.companionsStocks[i].onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupCompanionCard(game, cardDiv, type);
-                dojo.connect(this.companionsStocks[i], 'onChangeSelection', this, () => this.game.selectMeetingTrackCompanion(i));
-            }
+            this.companionsStocks[i].onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupCompanionCard(game, cardDiv, type);
+            dojo.connect(this.companionsStocks[i], 'onChangeSelection', this, () => this.game.selectMeetingTrackCompanion(i));
 
             setupCompanionCards(this.companionsStocks[i]);
     
-            if (cemetery) {
-                this.setCemeteryTop(spot.companion);
-            } else {
-                if (spot.companion) {
-                    this.companionsStocks[i].addToStockWithId(spot.companion.subType, ''+spot.companion.id);
-                }
-                this.setFootprintTokens(i, spot.footprints);
+            if (spot.companion) {
+                this.companionsStocks[i].addToStockWithId(spot.companion.subType, ''+spot.companion.id);
             }
-
-            // deck
-            this.deckStock = new ebg.stock() as Stock;
-            this.deckStock.setSelectionAppearance('class');
-            this.deckStock.selectionClass = 'selected';
-            this.deckStock.create(this.game, $(`deck`), CARD_WIDTH, CARD_HEIGHT);
-            this.deckStock.setSelectionMode(0);
-            setupCompanionCards(this.deckStock);
-            this.setDeckTop(topDeckType);
+            this.setFootprintTokens(i, spot.footprints);
         }
         
+        // place dice only after spots creation
         for (let i=1; i<=5; i++) {
             const spot = meetingTrackSpot[i];
             this.placeSmallDice(spot.dice);
@@ -73,6 +57,9 @@ class MeetingTrack {
                 }
             });
         }
+
+        this.setDeckTop(DECK, topDeckType);
+        this.setDeckTop(CEMETERY, topCemeteryType);
     }
     
     public setCompanion(meetingTrackSpot: MeetingTrackSpot, spot: number): void {
@@ -91,7 +78,7 @@ class MeetingTrack {
             this.companionsStocks[spot].removeAllTo(CEMETERY);
         }
 
-        this.companionsStocks[spot].addToStockWithId(companion.subType, ''+companion.id);
+        this.companionsStocks[spot].addToStockWithId(companion.subType, ''+companion.id, DECK);
     }
 
     public removeCompanion(spot: number) {
@@ -140,30 +127,8 @@ class MeetingTrack {
         });
     }
 
-    public setCemeteryTop(companion?: Companion) {
-        if (companion) {
-            if (!this.companionsStocks[0].items.length) {
-                this.companionsStocks[0].addToStockWithId(1000 + companion.type, '' + companion.type);
-            } else if (this.companionsStocks[0].items[0].id !== '' + companion.type) {
-                this.companionsStocks[0].removeAll();
-                this.companionsStocks[0].addToStockWithId(1000 + companion.type, '' + companion.type);
-            }
-        } else {
-            this.companionsStocks[0].removeAll();
-        }
-    }
-
-    public setDeckTop(type?: number) { // TODO update when cards are taken from deck
-        if (type) {
-            if (!this.deckStock.items.length) {
-                this.deckStock.addToStockWithId(1000 + type, '' + type);
-            } else if (Number(this.deckStock.items[0].type) !== type) {
-                this.deckStock.removeAll();
-                this.deckStock.addToStockWithId(1000 + type, '' + type);
-            }
-        } else {
-            this.deckStock.removeAll();
-        }
+    public setDeckTop(deckId: string, type?: number) {
+        document.getElementById(deckId).dataset.type = `${type ?? 0}`;
     }
     
     public setSelectableDice(possibleSpots: number[]) {
