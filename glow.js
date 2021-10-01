@@ -181,6 +181,7 @@ function formatTextIcons(rawText) {
         .replace(/\[symbol(\d)\]/ig, '<span class="icon symbol$1"></span>');
 }
 var POINT_CASE_SIZE = 25.5;
+var BOARD_POINTS_MARGIN = 38;
 var MAP1 = [
     [36, 396, 1],
     [157, 382],
@@ -289,7 +290,29 @@ var Board = /** @class */ (function () {
             }
             _this.game.selectSketalDie(Number(target.dataset.dieId));
         });
+        var boardDiv = document.getElementById('board');
+        boardDiv.addEventListener('click', function (event) { return _this.hideTokens(boardDiv, event); });
+        boardDiv.addEventListener('mousemove', function (event) {
+            if (!_this.tokensOpacityTimeout) {
+                _this.hideTokens(boardDiv, event);
+            }
+        });
     }
+    Board.prototype.hideTokens = function (boardDiv, event) {
+        var _this = this;
+        var x = event.offsetX;
+        var y = event.offsetY;
+        if (x < BOARD_POINTS_MARGIN || y < BOARD_POINTS_MARGIN || x > boardDiv.clientWidth - BOARD_POINTS_MARGIN || y > boardDiv.clientHeight - BOARD_POINTS_MARGIN) {
+            dojo.addClass('board', 'hidden-tokens');
+            if (this.tokensOpacityTimeout) {
+                clearTimeout(this.tokensOpacityTimeout);
+            }
+            this.tokensOpacityTimeout = setTimeout(function () {
+                dojo.removeClass('board', 'hidden-tokens');
+                _this.tokensOpacityTimeout = null;
+            }, 2500);
+        }
+    };
     Board.prototype.incPoints = function (playerId, points) {
         this.points.set(playerId, this.points.get(playerId) + points);
         this.movePoints();

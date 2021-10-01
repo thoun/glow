@@ -1,4 +1,5 @@
 const POINT_CASE_SIZE = 25.5;
+const BOARD_POINTS_MARGIN = 38;
 
 const MAP1: number[][] = [
     [36, 396, 1], // 0
@@ -80,9 +81,10 @@ const MAP2: number[][] = [
 ];
 const MAPS: number[][][] = [null, MAP1, MAP2];
 
-class Board { // TODO hide score token temporarily on map scores click/hover
+class Board {
     private points = new Map<number, number>();
     private meeples: Meeple[] = [];
+    private tokensOpacityTimeout: any;
 
     constructor(
         private game: GlowGame, 
@@ -118,6 +120,31 @@ class Board { // TODO hide score token temporarily on map scores click/hover
 
             this.game.selectSketalDie(Number(target.dataset.dieId));
         });
+
+        const boardDiv = document.getElementById('board');
+        boardDiv.addEventListener('click', event => this.hideTokens(boardDiv, event));
+        boardDiv.addEventListener('mousemove', event => {
+            if (!this.tokensOpacityTimeout) {
+                this.hideTokens(boardDiv, event);
+            }
+        });
+    }
+
+    private hideTokens(boardDiv: HTMLElement, event: MouseEvent) {
+        const x = event.offsetX;
+        const y = event.offsetY;
+
+        if (x < BOARD_POINTS_MARGIN || y < BOARD_POINTS_MARGIN || x > boardDiv.clientWidth - BOARD_POINTS_MARGIN || y > boardDiv.clientHeight - BOARD_POINTS_MARGIN) {
+            dojo.addClass('board', 'hidden-tokens');
+
+            if (this.tokensOpacityTimeout) {
+                clearTimeout(this.tokensOpacityTimeout);
+            }
+            this.tokensOpacityTimeout = setTimeout(() => {
+                dojo.removeClass('board', 'hidden-tokens');
+                this.tokensOpacityTimeout = null;
+            }, 2500);
+        }
     }
 
     public incPoints(playerId: number, points: number) {
