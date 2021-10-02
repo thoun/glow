@@ -153,8 +153,10 @@
 
         $destination = self::getArg('destination', AT_posint, true);
         $from = self::getArg('from', AT_posint, false);
+        $type = self::getArg('type', AT_posint, false);
+        $id = self::getArg('id', AT_posint, false);
 
-        $this->game->move($destination, $from);
+        $this->game->move($destination, $from, $type, $id);
 
         self::ajaxResponse();
     }

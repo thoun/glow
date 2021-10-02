@@ -102,12 +102,12 @@ $this->REMOVED_COMPANION_FOR_SOLO = [
 ];
 
 $this->SPELLS = [
-  1 => new Effect([1, 1], [-105]),
-  2 => new Effect([2, 2], [-105]),
-  3 => new Effect([3, 3], [33]),
-  4 => new Effect([4, 4], [-106]),
-  5 => new Effect([5, 5], [-23]),
-  6 => new Effect([0, 0, 0], [-107], 2),
+  1 => new SpellCard(new Effect([1, 1], [-105])),
+  2 => new SpellCard(new Effect([2, 2], [-105])),
+  3 => new SpellCard(new Effect([3, 3], [33])),
+  4 => new SpellCard(new Effect([4, 4], [-106])),
+  5 => new SpellCard(new Effect([5, 5], [-23])),
+  6 => new SpellCard(new Effect([0, 0, 0], [-107]), 2),
 ];
 
 $this->SCORE_TRACK_REROLLS = [0, 1, 2, 3, 4, 5, 7, 9, 11, 13, 16, 19, 22, 26, 31, 36, 44, 52];
@@ -162,7 +162,7 @@ $this->MAP1 = [
   ]),
   new MapSpot(14, [-23], [], 20, true),
   new MapSpot(15, [1], [
-    new MapRoute(16, [-37]),
+    new MapRoute(16, [37]),
     new MapRoute(18),
   ]),
   new MapSpot(16, [3], [

@@ -46,10 +46,10 @@ trait MapTrait {
         return $this->getPlayerMeeples($playerId, 2)[0];
     }
 
-    function movePlayerCompany(int $playerId, int $position) {
+    function movePlayerCompany(int $playerId, int $position, int $from) {
         self::DbQuery("UPDATE meeple SET `position` = $position WHERE `player_id` = $playerId AND `type` = 1");
         
-        $this->addVisitedMapSpot($playerId, $route->destination);
+        $this->addVisitedMapSpot($playerId, $from);
         
         self::notifyAllPlayers('meepleMoved', '', [
             'meeple' => $this->getPlayerCompany($playerId),
@@ -180,7 +180,7 @@ trait MapTrait {
 
         if ($side === 1) {
             $visitedSpots = $this->getVisitedMapSpots($playerId);
-            $routes = array_values(array_filter($routes, function ($route) use ($visitedSpots) { return in_array($route->destination, $visitedSpots); }));
+            $routes = array_values(array_filter($routes, function ($route) use ($visitedSpots) { return !in_array($route->destination, $visitedSpots); }));
         }
 
         $footprints = $this->getPlayerFootprints($playerId);        

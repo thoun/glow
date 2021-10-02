@@ -10,6 +10,7 @@ declare const board: HTMLDivElement;
 const ANIMATION_MS = 500;
 
 const ROLL_DICE_ACTION_BUTTONS_IDS = [`setRollDice-button`, `setChangeDie-button`, `keepDice-button`, `cancelRollDice-button`, `rollDice-button`, `changeDie-button`];
+const MOVE_ACTION_BUTTONS_IDS = [`placeEncampment-button`, `endTurn-button`, `cancelMoveDiscardCampanionOrSpell-button`];
 
 const ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1];
 const ZOOM_LEVELS_MARGIN = [-300, -166, -100, -60, -33, -14, 0];
@@ -30,7 +31,10 @@ class Glow implements GlowGame {
     private selectedDice: Die[] = [];
     private diceSelectionActive: boolean = false;
     private originalTextRollDice: string;
+    private originalTextMove: string;
     private isChangeDie: boolean = false;
+    private selectedRoute: Route;
+    private moveArgs: EnteringMoveForPlayer;
 
     public adventurersStock: Stock;
     public cemetaryCompanionsStock: Stock;
@@ -290,14 +294,14 @@ class Glow implements GlowGame {
         });
     }
 
-    private onEnteringStateMove(args: EnteringMoveForPlayer) {
-        this.board.createDestinationZones(args.possibleRoutes?.map(route => route));
+    private onEnteringStateMove() {
+        this.board.createDestinationZones(this.moveArgs.possibleRoutes?.map(route => route));
         
         if (this.gamedatas.side === 1) {
             if (!document.getElementById(`placeEncampment-button`)) {
                 (this as any).addActionButton(`placeEncampment-button`, _("Place encampment"), () => this.placeEncampment());
             }
-            dojo.toggleClass(`placeEncampment-button`, 'disabled', !args.canSettle);
+            dojo.toggleClass(`placeEncampment-button`, 'disabled', !this.moveArgs.canSettle);
         }
 
         if (!document.getElementById(`endTurn-button`)) {
@@ -380,8 +384,8 @@ class Glow implements GlowGame {
                     this.onEnteringStateResolveCards(resolveCardsArgs);
                     break;
                 case 'move':
-                    const moveArgs = (args as EnteringMoveArgs)[this.getPlayerId()];
-                    this.onEnteringStateMove(moveArgs);
+                    this.moveArgs = (args as EnteringMoveArgs)[this.getPlayerId()];
+                    this.setActionBarMove(false);
                     break;
 
             }
@@ -695,7 +699,7 @@ class Glow implements GlowGame {
 
         const originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
         document.getElementById('pagemaintitletext').innerHTML = property ? 
-            `${originalState['description' + property]}` + this.getRollDiceCost(cost) : 
+            originalState['description' + property] + this.getRollDiceCost(cost) : 
             this.originalTextRollDice;
     }
     
@@ -739,6 +743,56 @@ class Glow implements GlowGame {
         if (this.selectedDice.length === 1) {
             this.onSelectedDiceChange();
         }
+    }
+
+    private removeMoveActionButtons() {
+        const ids = MOVE_ACTION_BUTTONS_IDS;
+        ids.forEach(id => {
+            const elem = document.getElementById(id);
+            if (elem) {
+                elem.parentElement.removeChild(elem);
+            }
+        })
+    }
+    
+    private setMoveGamestateDescription(property?: string) {
+        if (!this.originalTextMove) {
+            this.originalTextMove = document.getElementById('pagemaintitletext').innerHTML;
+        }
+
+        const originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
+        document.getElementById('pagemaintitletext').innerHTML = property ? 
+            originalState['description' + property] : 
+            this.originalTextMove;
+    }
+    
+    private setActionBarMove(fromCancel: boolean) {
+        this.removeMoveActionButtons();
+        if (fromCancel) {
+            this.setMoveGamestateDescription();
+        }            
+        // make cards unselectable
+        this.onLeavingResolveCards();
+        
+        this.onEnteringStateMove();
+    }
+    
+
+    private setActionBarMoveDiscardCampanionOrSpell() {
+        this.removeMoveActionButtons();
+        this.board.createDestinationZones(null);
+        this.setMoveGamestateDescription(`discard`);
+
+        (this as any).addActionButton(`cancelMoveDiscardCampanionOrSpell-button`, _("Cancel"), () => this.setActionBarMove(true));
+
+        // make cards selectable
+        const playerTable = this.getPlayerTable(this.getPlayerId());
+        playerTable.companionsStock?.setSelectionMode(1);
+        playerTable.companionsStock?.items.forEach(item => dojo.addClass(`${playerTable.companionsStock.container_div.id}_item_${item.id}`, 'selectable'));
+        playerTable.spellsStock?.setSelectionMode(1);
+        playerTable.spellsStock?.items.forEach(item => dojo.addClass(`${playerTable.spellsStock.container_div.id}_item_${item.id}`, 'selectable'));
+        playerTable.companionSpellStock?.setSelectionMode(1);
+        playerTable.companionSpellStock?.items.forEach(item => dojo.addClass(`${playerTable.companionSpellStock.container_div.id}_item_${item.id}`, 'selectable'));
     }
 
     private getRollDiceCost(cost: number) {
@@ -838,6 +892,35 @@ class Glow implements GlowGame {
         if (args) {
             this.rollDiceArgs = args[this.getPlayerId()];
             this.setActionBarRollDice(true);
+        }
+    }
+
+    public selectMove(possibleDestination: Route): void {
+        let mustDiscard = possibleDestination.costForPlayer.some(cost => cost == 37);
+        
+        if (mustDiscard) {
+            const playerTable = this.getPlayerTable(this.getPlayerId());
+            mustDiscard = !!(playerTable.companionsStock?.items.length || 
+                playerTable.spellsStock?.items.length || 
+                playerTable.companionSpellStock?.items.length);
+        }
+
+        if (mustDiscard) {
+            this.selectedRoute = possibleDestination;
+            
+            this.setActionBarMoveDiscardCampanionOrSpell();
+        } else {
+            this.move(possibleDestination.destination, possibleDestination.from);
+        }
+    }
+
+    public cardClick(type: number, id: number) {
+        if (this.gamedatas.gamestate.name === 'resolveCards') {
+            this.resolveCard(type, id);
+        } else if (this.gamedatas.gamestate.name === 'move') {
+            this.move(this.selectedRoute.destination, this.selectedRoute.from, type, id);
+        } else {
+            console.error('No card action in the state');
         }
     }
 
@@ -955,14 +1038,16 @@ class Glow implements GlowGame {
         });
     }
 
-    public move(destination: number, from?: number) {
+    public move(destination: number, from?: number, type?: number, id?: number) {
         if(!(this as any).checkAction('move')) {
             return;
         }
 
         this.takeAction('move', {
             destination,
-            from
+            from,
+            type,
+            id,
         });
     }
 
@@ -1101,7 +1186,6 @@ class Glow implements GlowGame {
         const playerTable = this.getPlayerTable(notif.args.playerId);
         playerTable.setAdventurer(notif.args.adventurer);
         playerTable.addDice(notif.args.dice);
-        this.createOrMoveDie(notif.args.unusedDie, 'table-dice');
     }
 
     notif_chosenCompanion(notif: Notif<NotifChosenCompanionArgs>) {
@@ -1198,7 +1282,8 @@ class Glow implements GlowGame {
     }
 
     notif_moveUpdate(notif: Notif<NotifMoveUpdateArgs>) {
-        this.onEnteringStateMove(notif.args.args);
+        this.moveArgs = notif.args.args;
+        this.setActionBarMove(true);
     }
 
     notif_meepleMoved(notif: Notif<NotifMeepleMovedArgs>) {

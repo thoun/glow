@@ -134,6 +134,7 @@ class Glow extends Table {
 
         $this->placeCompanionsOnMeetingTrack();
         $this->initMeetingTrackSmallDice();
+        $this->setDiceOnTable();
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
@@ -204,7 +205,7 @@ class Glow extends Table {
 
         $result['ADVENTURERS_EFFECTS'] = array_map(function ($card) { return $card->effect; }, $this->ADVENTURERS);
         $result['COMPANIONS_EFFECTS'] = array_map(function ($card) { return $card->effect; }, $this->COMPANIONS);
-        $result['SPELLS_EFFECTS'] = $this->SPELLS;
+        $result['SPELLS_EFFECTS'] = array_map(function ($card) { return $card->effect; }, $this->SPELLS);
   
         return $result;
     }

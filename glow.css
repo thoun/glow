@@ -519,6 +519,9 @@
   cursor: pointer;
   box-shadow: 0 0 4px 4px red;
 }
+#currentplayertable .player-table .player-table-spells.normal.hidden, #playerstables .player-table .player-table-spells.normal.hidden {
+  display: none;
+}
 #currentplayertable .player-table .player-table-companion-spell, #playerstables .player-table .player-table-companion-spell {
   position: absolute;
   top: 80px;
@@ -739,6 +742,10 @@ html {
 .bgabutton_red {
   background: #2a2a2a;
   border: 1px solid #000000;
+}
+
+.action-button.bgabutton.disabled {
+  background: #b5b5b5;
 }
 
 .tooltip-effect-title {

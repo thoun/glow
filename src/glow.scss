@@ -110,6 +110,10 @@ html {
   border: 1px solid #000000;
 }
 
+.action-button.bgabutton.disabled {
+  background: #b5b5b5;
+}
+
 .tooltip-effect-title {
   font-weight: bold;
 }

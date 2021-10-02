@@ -26,6 +26,10 @@
                   box-shadow: 0 0 4px 4px red;
                 }
             }
+
+            &.normal.hidden {
+                display: none;
+            }
         }
 
         .player-table-companion-spell {

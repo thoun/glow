@@ -49,6 +49,7 @@ interface MeetingTrackSpot {
 }
 
 interface Route {
+    costForPlayer: number[];
     from: number;
     destination: number;
 }
@@ -118,8 +119,8 @@ interface GlowGame extends Game {
     //getDieDiv(die: Die): HTMLDivElement;
     //addRollToDiv(dieDiv: HTMLDivElement, rollClass: string): void;
     createOrMoveDie(die: Die, destinationId: string, rollClass?: string): void;
-    resolveCard(type: number, id: number): void;
-    move(destination: number, from?: number): void;
+    cardClick(type: number, id: number): void;
+    selectMove(possibleDestination: Route): void;
     moveBlackDie(spot: number): void;
     selectSketalDie(dieId: number): void;
 }
@@ -184,7 +185,6 @@ interface NotifChosenAdventurerArgs {
     playerId: number;
     adventurer: Adventurer;
     dice: Die[];
-    unusedDie: Die;
 }
 
 interface NotifChosenCompanionArgs {

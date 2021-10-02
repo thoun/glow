@@ -3,6 +3,7 @@
 require_once(__DIR__.'/objects/effect.php');
 require_once(__DIR__.'/objects/adventurer.php');
 require_once(__DIR__.'/objects/companion.php');
+require_once(__DIR__.'/objects/spell.php');
 require_once(__DIR__.'/objects/dice.php');
 require_once(__DIR__.'/objects/meeple.php');
 require_once(__DIR__.'/objects/meeting-track-spot.php');
@@ -310,8 +311,8 @@ trait UtilTrait {
     }
 
     function createSpells() {
-        foreach($this->SPELLS as $type => $effect) {if ($type == 3)
-            $spells[] = [ 'type' => $type, 'type_arg' => 0, 'nbr' => 1];
+        foreach($this->SPELLS as $type => $spellCard) {
+            $spells[] = [ 'type' => $type, 'type_arg' => 0, 'nbr' => $spellCard->number];
         }
         $this->spells->createCards($spells, 'deck');
     }
@@ -328,6 +329,15 @@ trait UtilTrait {
         for ($i=1;$i<=5;$i++) {
             $this->companions->pickCardForLocation('deck', 'meeting', $i);
         }
+    }
+    
+    function setDiceOnTable() {
+        for ($i=1; $i<=5; $i++) {
+            $bigDie = $this->getBigDiceByColor($i, 1)[0];            
+            $this->moveDice([$bigDie], 'table');
+        }
+        $blackDie = $this->getBlackDie();     
+        $this->moveDice([$blackDie], 'table');
     }
 
     function initMeetingTrackSmallDice() {

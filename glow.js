@@ -182,6 +182,7 @@ function formatTextIcons(rawText) {
 }
 var POINT_CASE_SIZE = 25.5;
 var BOARD_POINTS_MARGIN = 38;
+var HIDDEN_TOKENS_DELAY = 2000;
 var MAP1 = [
     [36, 396, 1],
     [157, 382],
@@ -297,6 +298,13 @@ var Board = /** @class */ (function () {
                 _this.hideTokens(boardDiv, event);
             }
         });
+        boardDiv.addEventListener('mouseleave', function () {
+            if (_this.tokensOpacityTimeout) {
+                clearTimeout(_this.tokensOpacityTimeout);
+                dojo.removeClass('board', 'hidden-tokens');
+                _this.tokensOpacityTimeout = null;
+            }
+        });
     }
     Board.prototype.hideTokens = function (boardDiv, event) {
         var _this = this;
@@ -310,7 +318,7 @@ var Board = /** @class */ (function () {
             this.tokensOpacityTimeout = setTimeout(function () {
                 dojo.removeClass('board', 'hidden-tokens');
                 _this.tokensOpacityTimeout = null;
-            }, 2500);
+            }, HIDDEN_TOKENS_DELAY);
         }
     };
     Board.prototype.incPoints = function (playerId, points) {
@@ -379,18 +387,18 @@ var Board = /** @class */ (function () {
                 dojo.place("<div id=\"destination-zone-" + position + "\" class=\"destination-zone " + (mapSpot[2] ? 'big' : 'small') + " " + (showArrow ? 'unselectable' : '') + "\" style=\"left: " + mapSpot[0] + "px; top: " + mapSpot[1] + "px;\"></div>", 'board');
             }
             if (showArrow) {
-                var from_1 = possibleDestination.from;
-                var mapSpotFrom = _this.getMapSpot(from_1);
+                var from = possibleDestination.from;
+                var mapSpotFrom = _this.getMapSpot(from);
                 var deltaX = mapSpot[0] - mapSpotFrom[0];
                 var deltaY = mapSpot[1] - mapSpotFrom[1];
                 var rad = Math.atan2(deltaY, deltaX); // In radians
-                if (!document.getElementById("destination-arrow-" + position + "-from-" + from_1)) {
-                    dojo.place("<div id=\"destination-arrow-" + position + "-from-" + from_1 + "\" class=\"destination-arrow\" style=\"left: " + mapSpot[0] + "px; top: " + mapSpot[1] + "px; transform: rotate(" + rad + "rad) translateX(-45px);\"></div>", 'board');
-                    document.getElementById("destination-arrow-" + position + "-from-" + from_1).addEventListener('click', function () { return _this.game.move(position, from_1); });
+                if (!document.getElementById("destination-arrow-" + position + "-from-" + from)) {
+                    dojo.place("<div id=\"destination-arrow-" + position + "-from-" + from + "\" class=\"destination-arrow\" style=\"left: " + mapSpot[0] + "px; top: " + mapSpot[1] + "px; transform: rotate(" + rad + "rad) translateX(-45px);\"></div>", 'board');
+                    document.getElementById("destination-arrow-" + position + "-from-" + from).addEventListener('click', function () { return _this.game.selectMove(possibleDestination); });
                 }
             }
             else {
-                document.getElementById("destination-zone-" + position).addEventListener('click', function () { return _this.game.move(position); });
+                document.getElementById("destination-zone-" + position).addEventListener('click', function () { return _this.game.selectMove(possibleDestination); });
             }
         });
     };
@@ -522,7 +530,7 @@ var PlayerTable = /** @class */ (function () {
         var _this = this;
         this.game = game;
         this.playerId = Number(player.id);
-        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock\">\n            <div class=\"name-column\">\n                <div class=\"player-name\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n                <div id=\"player-table-" + this.playerId + "-dice\" class=\"player-table-dice\"></div>\n                <div id=\"player-table-" + this.playerId + "-spells\" class=\"player-table-spells\"></div>\n            </div>\n            <div class=\"adventurer-and-companions\">\n                <div id=\"player-table-" + this.playerId + "-adventurer\"></div>\n                <div id=\"player-table-" + this.playerId + "-companions\"></div>\n            </div>\n        </div>";
+        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock\">\n            <div class=\"name-column\">\n                <div class=\"player-name\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n                <div id=\"player-table-" + this.playerId + "-dice\" class=\"player-table-dice\"></div>\n                <div id=\"player-table-" + this.playerId + "-spells\" class=\"player-table-spells normal\"></div>\n            </div>\n            <div class=\"adventurer-and-companions\">\n                <div id=\"player-table-" + this.playerId + "-adventurer\"></div>\n                <div id=\"player-table-" + this.playerId + "-companions\"></div>\n            </div>\n        </div>";
         dojo.place(html, this.playerId === this.game.getPlayerId() ? 'currentplayertable' : 'playerstables');
         // adventurer        
         this.adventurerStock = new ebg.stock();
@@ -532,7 +540,7 @@ var PlayerTable = /** @class */ (function () {
         this.adventurerStock.setSelectionMode(0);
         dojo.connect(this.adventurerStock, 'onChangeSelection', this, function (_, itemId) {
             if (_this.adventurerStock.getSelectedItems().length) {
-                _this.game.resolveCard(0, Number(itemId));
+                _this.game.cardClick(0, Number(itemId));
             }
             _this.adventurerStock.unselectAll();
         });
@@ -549,7 +557,7 @@ var PlayerTable = /** @class */ (function () {
         this.companionsStock.onItemCreate = function (cardDiv, type) { return setupCompanionCard(game, cardDiv, type); };
         dojo.connect(this.companionsStock, 'onChangeSelection', this, function (_, itemId) {
             if (_this.companionsStock.getSelectedItems().length) {
-                _this.game.resolveCard(1, Number(itemId));
+                _this.game.cardClick(1, Number(itemId));
             }
             _this.companionsStock.unselectAll();
         });
@@ -564,11 +572,12 @@ var PlayerTable = /** @class */ (function () {
         this.spellsStock.onItemCreate = function (cardDiv, type) { return setupSpellCard(game, cardDiv, type); };
         dojo.connect(this.spellsStock, 'onChangeSelection', this, function (_, itemId) {
             if (_this.spellsStock.getSelectedItems().length) {
-                _this.game.resolveCard(2, Number(itemId));
+                _this.game.cardClick(2, Number(itemId.replace('hidden', '')));
             }
             _this.spellsStock.unselectAll();
         });
         setupSpellCards(this.spellsStock);
+        dojo.toggleClass("player-table-" + this.playerId + "-spells", 'hidden', player.spells.filter(function (spell) { return spell.type != 3 || !spell.visible; }).length == 0);
         player.spells.forEach(function (spell) {
             if (spell.visible) {
                 _this.revealSpell(spell, true);
@@ -605,7 +614,7 @@ var PlayerTable = /** @class */ (function () {
         this.companionSpellStock.onItemCreate = function (cardDiv, type) { return setupSpellCard(_this.game, cardDiv, type); };
         dojo.connect(this.companionSpellStock, 'onChangeSelection', this, function (_, itemId) {
             if (_this.companionSpellStock.getSelectedItems().length) {
-                _this.game.resolveCard(2, Number(itemId));
+                _this.game.cardClick(2, Number(itemId.replace('hidden', '')));
             }
             _this.companionSpellStock.unselectAll();
         });
@@ -656,6 +665,7 @@ var PlayerTable = /** @class */ (function () {
     };
     PlayerTable.prototype.addHiddenSpell = function (id, fromPlayerId) {
         if (fromPlayerId === void 0) { fromPlayerId = undefined; }
+        dojo.addClass("player-table-" + this.playerId + "-spells", 'hidden');
         this.spellsStock.addToStockWithId(0, 'hidden' + id, fromPlayerId ? "overall_player_board_" + fromPlayerId : undefined);
     };
     PlayerTable.prototype.revealSpell = function (spell, tableCreation) {
@@ -670,6 +680,7 @@ var PlayerTable = /** @class */ (function () {
         if (!tableCreation) {
             this.spellsStock.removeFromStockById('hidden' + spell.id);
         }
+        dojo.toggleClass("player-table-" + this.playerId + "-spells", 'hidden', this.spellsStock.items.length == 0);
     };
     PlayerTable.prototype.removeSpell = function (spell) {
         var _a;
@@ -678,6 +689,7 @@ var PlayerTable = /** @class */ (function () {
             (_a = this.companionSpellStock) === null || _a === void 0 ? void 0 : _a.removeFromStockById('' + spell.id);
             this.removeCompanionSpellStock();
         }
+        dojo.toggleClass("player-table-" + this.playerId + "-spells", 'hidden', this.spellsStock.items.length == 0);
     };
     return PlayerTable;
 }());
@@ -688,6 +700,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from) {
 };
 var ANIMATION_MS = 500;
 var ROLL_DICE_ACTION_BUTTONS_IDS = ["setRollDice-button", "setChangeDie-button", "keepDice-button", "cancelRollDice-button", "rollDice-button", "changeDie-button"];
+var MOVE_ACTION_BUTTONS_IDS = ["placeEncampment-button", "endTurn-button", "cancelMoveDiscardCampanionOrSpell-button"];
 var ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1];
 var ZOOM_LEVELS_MARGIN = [-300, -166, -100, -60, -33, -14, 0];
 var LOCAL_STORAGE_ZOOM_KEY = 'Glow-zoom';
@@ -915,15 +928,15 @@ var Glow = /** @class */ (function () {
             }
         });
     };
-    Glow.prototype.onEnteringStateMove = function (args) {
+    Glow.prototype.onEnteringStateMove = function () {
         var _this = this;
         var _a;
-        this.board.createDestinationZones((_a = args.possibleRoutes) === null || _a === void 0 ? void 0 : _a.map(function (route) { return route; }));
+        this.board.createDestinationZones((_a = this.moveArgs.possibleRoutes) === null || _a === void 0 ? void 0 : _a.map(function (route) { return route; }));
         if (this.gamedatas.side === 1) {
             if (!document.getElementById("placeEncampment-button")) {
                 this.addActionButton("placeEncampment-button", _("Place encampment"), function () { return _this.placeEncampment(); });
             }
-            dojo.toggleClass("placeEncampment-button", 'disabled', !args.canSettle);
+            dojo.toggleClass("placeEncampment-button", 'disabled', !this.moveArgs.canSettle);
         }
         if (!document.getElementById("endTurn-button")) {
             this.addActionButton("endTurn-button", _("End turn"), function () { return _this.endTurn(); }, null, null, 'red');
@@ -997,8 +1010,8 @@ var Glow = /** @class */ (function () {
                     this.onEnteringStateResolveCards(resolveCardsArgs);
                     break;
                 case 'move':
-                    var moveArgs = args[this.getPlayerId()];
-                    this.onEnteringStateMove(moveArgs);
+                    this.moveArgs = args[this.getPlayerId()];
+                    this.setActionBarMove(false);
                     break;
             }
         }
@@ -1241,7 +1254,7 @@ var Glow = /** @class */ (function () {
         }
         var originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
         document.getElementById('pagemaintitletext').innerHTML = property ?
-            "" + originalState['description' + property] + this.getRollDiceCost(cost) :
+            originalState['description' + property] + this.getRollDiceCost(cost) :
             this.originalTextRollDice;
     };
     Glow.prototype.setActionBarRollDice = function (fromCancel) {
@@ -1277,6 +1290,49 @@ var Glow = /** @class */ (function () {
         if (this.selectedDice.length === 1) {
             this.onSelectedDiceChange();
         }
+    };
+    Glow.prototype.removeMoveActionButtons = function () {
+        var ids = MOVE_ACTION_BUTTONS_IDS;
+        ids.forEach(function (id) {
+            var elem = document.getElementById(id);
+            if (elem) {
+                elem.parentElement.removeChild(elem);
+            }
+        });
+    };
+    Glow.prototype.setMoveGamestateDescription = function (property) {
+        if (!this.originalTextMove) {
+            this.originalTextMove = document.getElementById('pagemaintitletext').innerHTML;
+        }
+        var originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
+        document.getElementById('pagemaintitletext').innerHTML = property ?
+            originalState['description' + property] :
+            this.originalTextMove;
+    };
+    Glow.prototype.setActionBarMove = function (fromCancel) {
+        this.removeMoveActionButtons();
+        if (fromCancel) {
+            this.setMoveGamestateDescription();
+        }
+        // make cards unselectable
+        this.onLeavingResolveCards();
+        this.onEnteringStateMove();
+    };
+    Glow.prototype.setActionBarMoveDiscardCampanionOrSpell = function () {
+        var _this = this;
+        var _a, _b, _c, _d, _e, _f;
+        this.removeMoveActionButtons();
+        this.board.createDestinationZones(null);
+        this.setMoveGamestateDescription("discard");
+        this.addActionButton("cancelMoveDiscardCampanionOrSpell-button", _("Cancel"), function () { return _this.setActionBarMove(true); });
+        // make cards selectable
+        var playerTable = this.getPlayerTable(this.getPlayerId());
+        (_a = playerTable.companionsStock) === null || _a === void 0 ? void 0 : _a.setSelectionMode(1);
+        (_b = playerTable.companionsStock) === null || _b === void 0 ? void 0 : _b.items.forEach(function (item) { return dojo.addClass(playerTable.companionsStock.container_div.id + "_item_" + item.id, 'selectable'); });
+        (_c = playerTable.spellsStock) === null || _c === void 0 ? void 0 : _c.setSelectionMode(1);
+        (_d = playerTable.spellsStock) === null || _d === void 0 ? void 0 : _d.items.forEach(function (item) { return dojo.addClass(playerTable.spellsStock.container_div.id + "_item_" + item.id, 'selectable'); });
+        (_e = playerTable.companionSpellStock) === null || _e === void 0 ? void 0 : _e.setSelectionMode(1);
+        (_f = playerTable.companionSpellStock) === null || _f === void 0 ? void 0 : _f.items.forEach(function (item) { return dojo.addClass(playerTable.companionSpellStock.container_div.id + "_item_" + item.id, 'selectable'); });
     };
     Glow.prototype.getRollDiceCost = function (cost) {
         var tokenCost = 0;
@@ -1368,6 +1424,34 @@ var Glow = /** @class */ (function () {
         if (args) {
             this.rollDiceArgs = args[this.getPlayerId()];
             this.setActionBarRollDice(true);
+        }
+    };
+    Glow.prototype.selectMove = function (possibleDestination) {
+        var _a, _b, _c;
+        var mustDiscard = possibleDestination.costForPlayer.some(function (cost) { return cost == 37; });
+        if (mustDiscard) {
+            var playerTable = this.getPlayerTable(this.getPlayerId());
+            mustDiscard = !!(((_a = playerTable.companionsStock) === null || _a === void 0 ? void 0 : _a.items.length) ||
+                ((_b = playerTable.spellsStock) === null || _b === void 0 ? void 0 : _b.items.length) ||
+                ((_c = playerTable.companionSpellStock) === null || _c === void 0 ? void 0 : _c.items.length));
+        }
+        if (mustDiscard) {
+            this.selectedRoute = possibleDestination;
+            this.setActionBarMoveDiscardCampanionOrSpell();
+        }
+        else {
+            this.move(possibleDestination.destination, possibleDestination.from);
+        }
+    };
+    Glow.prototype.cardClick = function (type, id) {
+        if (this.gamedatas.gamestate.name === 'resolveCards') {
+            this.resolveCard(type, id);
+        }
+        else if (this.gamedatas.gamestate.name === 'move') {
+            this.move(this.selectedRoute.destination, this.selectedRoute.from, type, id);
+        }
+        else {
+            console.error('No card action in the state');
         }
     };
     Glow.prototype.rollDice = function () {
@@ -1462,13 +1546,15 @@ var Glow = /** @class */ (function () {
             id: id,
         });
     };
-    Glow.prototype.move = function (destination, from) {
+    Glow.prototype.move = function (destination, from, type, id) {
         if (!this.checkAction('move')) {
             return;
         }
         this.takeAction('move', {
             destination: destination,
-            from: from
+            from: from,
+            type: type,
+            id: id,
         });
     };
     Glow.prototype.placeEncampment = function () {
@@ -1570,7 +1656,6 @@ var Glow = /** @class */ (function () {
         var playerTable = this.getPlayerTable(notif.args.playerId);
         playerTable.setAdventurer(notif.args.adventurer);
         playerTable.addDice(notif.args.dice);
-        this.createOrMoveDie(notif.args.unusedDie, 'table-dice');
     };
     Glow.prototype.notif_chosenCompanion = function (notif) {
         var _a, _b;
@@ -1655,7 +1740,8 @@ var Glow = /** @class */ (function () {
         playerTable.setUsedDie(notif.args.dieId);
     };
     Glow.prototype.notif_moveUpdate = function (notif) {
-        this.onEnteringStateMove(notif.args.args);
+        this.moveArgs = notif.args.args;
+        this.setActionBarMove(true);
     };
     Glow.prototype.notif_meepleMoved = function (notif) {
         this.board.moveMeeple(notif.args.meeple);

@@ -254,6 +254,7 @@ $playerActionsGameStates = [
         "descriptionmyturn" => clienttranslate('${you} can move your company'),
         "descriptionboat" => clienttranslate('Players can move their boats'),
         "descriptionmyturnboat" => clienttranslate('${you} can move your boats'),
+        "descriptiondiscard" => clienttranslate('Choose a companion or spell to discard'),
         "type" => "multipleactiveplayer",
         "action" => "stMove",
         "args" => "argMove",

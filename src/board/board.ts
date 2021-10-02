@@ -1,5 +1,6 @@
 const POINT_CASE_SIZE = 25.5;
 const BOARD_POINTS_MARGIN = 38;
+const HIDDEN_TOKENS_DELAY = 2000;
 
 const MAP1: number[][] = [
     [36, 396, 1], // 0
@@ -128,6 +129,13 @@ class Board {
                 this.hideTokens(boardDiv, event);
             }
         });
+        boardDiv.addEventListener('mouseleave', () => {
+            if (this.tokensOpacityTimeout) {
+                clearTimeout(this.tokensOpacityTimeout);
+                dojo.removeClass('board', 'hidden-tokens');
+                this.tokensOpacityTimeout = null;
+            }
+        });
     }
 
     private hideTokens(boardDiv: HTMLElement, event: MouseEvent) {
@@ -143,7 +151,7 @@ class Board {
             this.tokensOpacityTimeout = setTimeout(() => {
                 dojo.removeClass('board', 'hidden-tokens');
                 this.tokensOpacityTimeout = null;
-            }, 2500);
+            }, HIDDEN_TOKENS_DELAY);
         }
     }
 
@@ -234,10 +242,10 @@ class Board {
 
                 if (!document.getElementById(`destination-arrow-${position}-from-${from}`)) {
                     dojo.place(`<div id="destination-arrow-${position}-from-${from}" class="destination-arrow" style="left: ${mapSpot[0]}px; top: ${mapSpot[1]}px; transform: rotate(${rad}rad) translateX(-45px);"></div>`, 'board');
-                    document.getElementById(`destination-arrow-${position}-from-${from}`).addEventListener('click', () => this.game.move(position, from));
+                    document.getElementById(`destination-arrow-${position}-from-${from}`).addEventListener('click', () => this.game.selectMove(possibleDestination));
                 }
             } else {
-                document.getElementById(`destination-zone-${position}`).addEventListener('click', () => this.game.move(position));
+                document.getElementById(`destination-zone-${position}`).addEventListener('click', () => this.game.selectMove(possibleDestination));
             }
         });
         

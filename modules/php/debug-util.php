@@ -20,8 +20,10 @@ trait DebugUtilTrait {
         //$this->debugSetPoints(19);
         //$this->debugSkipAdventurers();
 
-        //$this->debugMoveMeeple(2343492, 6, 0);
-        //$this->debugMoveMeeple(2343492, 8, 1);
+        $this->debugMoveMeeple(2343492, 15, 0);
+        $this->debugMoveMeeple(2343493, 40, 0);
+
+        $this->debugAddSpell(2343492, 1);
 
         // Activate first player must be commented in setup if this is used
         //$this->gamestate->changeActivePlayer(2343492);
@@ -37,6 +39,11 @@ trait DebugUtilTrait {
     private function debugSetCompanionForPlayer($playerId, $subType) {
         $card = $this->getCompanionsFromDb($this->companions->getCardsOfType($subType <= 23 ? 1 : 2, $subType))[0];
         $this->companions->moveCard($card->id, 'player', $playerId);
+    }
+
+    private function debugAddSpell($playerId, $type) {
+        $card = $this->getSpellsFromDb($this->spells->getCardsOfType($type))[0];
+        $this->spells->moveCard($card->id, 'player', $playerId);
     }
 
     private function debugMoveMeeple($playerId, $spot, $index) {

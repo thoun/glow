@@ -18,7 +18,7 @@ class PlayerTable {
             <div class="name-column">
                 <div class="player-name" style="color: #${player.color};">${player.name}</div>
                 <div id="player-table-${this.playerId}-dice" class="player-table-dice"></div>
-                <div id="player-table-${this.playerId}-spells" class="player-table-spells"></div>
+                <div id="player-table-${this.playerId}-spells" class="player-table-spells normal"></div>
             </div>
             <div class="adventurer-and-companions">
                 <div id="player-table-${this.playerId}-adventurer"></div>
@@ -37,7 +37,7 @@ class PlayerTable {
         this.adventurerStock.setSelectionMode(0);
         dojo.connect(this.adventurerStock, 'onChangeSelection', this, (_, itemId: string) => {
             if (this.adventurerStock.getSelectedItems().length) {
-                this.game.resolveCard(0, Number(itemId));
+                this.game.cardClick(0, Number(itemId));
             }
             this.adventurerStock.unselectAll();
         });
@@ -57,7 +57,7 @@ class PlayerTable {
         this.companionsStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupCompanionCard(game, cardDiv, type);
         dojo.connect(this.companionsStock, 'onChangeSelection', this, (_, itemId: string) => {
             if (this.companionsStock.getSelectedItems().length) {
-                this.game.resolveCard(1, Number(itemId));
+                this.game.cardClick(1, Number(itemId));
             }
             this.companionsStock.unselectAll();
         });
@@ -75,12 +75,13 @@ class PlayerTable {
         this.spellsStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupSpellCard(game, cardDiv, type);
         dojo.connect(this.spellsStock, 'onChangeSelection', this, (_, itemId: string) => {
             if (this.spellsStock.getSelectedItems().length) {
-                this.game.resolveCard(2, Number(itemId));
+                this.game.cardClick(2, Number(itemId.replace('hidden', '')));
             }
             this.spellsStock.unselectAll();
         });
         setupSpellCards(this.spellsStock);
 
+        dojo.toggleClass(`player-table-${this.playerId}-spells`, 'hidden', player.spells.filter(spell => spell.type != 3 || !spell.visible).length == 0);
         player.spells.forEach(spell => {
             if (spell.visible) {
                 this.revealSpell(spell, true);
@@ -90,7 +91,6 @@ class PlayerTable {
         });
 
         // dice
-
         player.dice.forEach(die => {
             this.game.createOrMoveDie(die, `player-table-${this.playerId}-dice`);
         });
@@ -123,7 +123,7 @@ class PlayerTable {
         this.companionSpellStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupSpellCard(this.game, cardDiv, type);
         dojo.connect(this.companionSpellStock, 'onChangeSelection', this, (_, itemId: string) => {
             if (this.companionSpellStock.getSelectedItems().length) {
-                this.game.resolveCard(2, Number(itemId));
+                this.game.cardClick(2, Number(itemId.replace('hidden', '')));
             }
             this.companionSpellStock.unselectAll();
         });
@@ -184,6 +184,7 @@ class PlayerTable {
     }
 
     public addHiddenSpell(id: number, fromPlayerId: number = undefined) {
+        dojo.addClass(`player-table-${this.playerId}-spells`, 'hidden');
         this.spellsStock.addToStockWithId(0, 'hidden'+id, fromPlayerId ? `overall_player_board_${fromPlayerId}` : undefined);
     }
 
@@ -199,6 +200,7 @@ class PlayerTable {
         if (!tableCreation) {
             this.spellsStock.removeFromStockById('hidden'+spell.id);
         }
+        dojo.toggleClass(`player-table-${this.playerId}-spells`, 'hidden', this.spellsStock.items.length == 0);
     }
 
     public removeSpell(spell: Spell) {
@@ -207,5 +209,6 @@ class PlayerTable {
             this.companionSpellStock?.removeFromStockById(''+spell.id);
             this.removeCompanionSpellStock();
         }
+        dojo.toggleClass(`player-table-${this.playerId}-spells`, 'hidden', this.spellsStock.items.length == 0);
     }
 }

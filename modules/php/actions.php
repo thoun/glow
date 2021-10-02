@@ -27,8 +27,6 @@ trait ActionTrait {
         // take big dice
         $dice = $this->getBigDiceByColor($adventurer->color, $adventurer->dice);
         $this->moveDice($dice, 'player', $playerId);
-        $unusedDie = $this->getBigDiceByColor($adventurer->color, 1)[0];
-        $this->moveDice([$unusedDie], 'table');
 
         self::notifyAllPlayers('chosenAdventurer', clienttranslate('${player_name} chooses adventurer ${adventurerName}'), [
             'playerId' => $playerId,
@@ -36,7 +34,6 @@ trait ActionTrait {
             'adventurer' => $adventurer,
             'adventurerName' => $adventurer->name,
             'dice' => $dice,
-            'unusedDie' => $unusedDie,
         ]);
 
         $this->gamestate->nextState('nextPlayer');
@@ -335,11 +332,16 @@ trait ActionTrait {
 
         $side = $this->getSide();
         if ($side === 1) {
-            $this->movePlayerCompany($playerId, $route->destination);
+            $this->movePlayerCompany($playerId, $route->destination, $route->from);
 
-            self::notifyPlayer($playerId, 'moveUpdate', '', [
-                'args' => $this->argMoveForPlayer($playerId),
-            ]);
+            $args = $this->argMoveForPlayer($playerId);
+            if (count($args->possibleRoutes) == 0 && $args->canSettle != true) {
+                $this->applyEndTurn($playerId);
+            } else {                
+                self::notifyPlayer($playerId, 'moveUpdate', '', [
+                    'args' => $args,
+                ]);
+            }
         } else if ($side === 2) {
             $this->movePlayerBoat($playerId, $route->destination, $route->from);
 
@@ -347,7 +349,7 @@ trait ActionTrait {
         }
     }
 
-    public function move(int $destination, $from = null) {
+    public function move(int $destination, $from = null, $type = null, $id = null) {
         self::checkAction('move');
 
         $playerId = intval($this->getCurrentPlayerId());
@@ -356,6 +358,34 @@ trait ActionTrait {
         $route = $this->array_find($possibleRoutes, function ($possibleRoute) use ($destination, $from) { return $possibleRoute->destination == $destination && ($from == null || $possibleRoute->from == $from); });
         if ($route == null) {
             throw new BgaUserException("Impossible to move here");
+        }
+
+        // if we pass a discard companion/spell
+        if ($type != null && $id != null) {
+            if ($type == 1) {
+                $companion = $this->getCompanionFromDb($this->companions->getCard($id));
+
+                if ($companion->location != 'player' || $companion->location_arg != $playerId) {
+                    throw new BgaUserException("Player doesn't have selected companion");
+                }
+
+                $this->sendToCemetery($playerId, $companion->id);
+
+                self::notifyAllPlayers('removeCompanion', clienttranslate('${player_name} removes companion ${companionName}'), [
+                    'playerId' => $playerId,
+                    'player_name' => self::getActivePlayerName(),
+                    'companion' => $companion,
+                    'companionName' => $companion->name,
+                ]);
+            } else if ($type == 2) {
+                $spell = $this->getSpellFromDb($this->spells->getCard($id));
+
+                if ($spell->location != 'player' || $spell->location_arg != $playerId) {
+                    throw new BgaUserException("Player doesn't have selected spell");
+                }
+
+                $this->discardSpell($playerId, $spell);
+            }
         }
 
         $this->applyMove($playerId, $route);
