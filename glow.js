@@ -39,6 +39,7 @@ var CARD_HEIGHT = 240;
 var SPELL_DIAMETER = 64;
 var CEMETERY = 'cemetery';
 var DECK = 'deck';
+var SOLO_TILES = 'solo-tiles';
 function setupAdventurersCards(adventurerStock) {
     var cardsurl = g_gamethemeurl + "img/adventurers.png";
     for (var i = 0; i <= 7; i++) {
@@ -60,6 +61,13 @@ function setupSpellCards(spellsStock) {
         spellsStock.addItemType(type, type, cardsurl, type);
     }
     spellsStock.addItemType(0, 0, cardsurl, 0);
+}
+function setupSoloTileCards(soloTilesStock) {
+    var cardsurl = g_gamethemeurl + "img/solo-tiles.png";
+    for (var type = 1; type <= 8; type++) {
+        soloTilesStock.addItemType(type, type, cardsurl, type);
+    }
+    soloTilesStock.addItemType(0, 0, cardsurl, 0);
 }
 function getEffectExplanation(effect) {
     if (effect > 100) {
@@ -149,6 +157,33 @@ function setupSpellCard(game, cardDiv, type) {
     var tooltip = getEffectTooltip(game.gamedatas.SPELLS_EFFECTS[type]);
     if (tooltip) {
         game.addTooltipHtml(cardDiv.id, tooltip);
+    }
+}
+function setupSoloTileCard(game, cardDiv, type) {
+    var effect = game.gamedatas.SOLO_TILES[type];
+    var html = "";
+    if (effect.moveCompany > 0) {
+        html += "<div>" + dojo.string.substitute(_("Move Tom’s band token forward ${spaces} spaces. Then Tom’s score token is moved the number of spaces corresponding to the band token’s position on the score track."), { spaces: "<strong>" + effect.moveCompany + "</strong>" }) + "</div>";
+    }
+    if (effect.moveScore > 0) {
+        html += "<div>" + dojo.string.substitute(_("Move Tom’s score token forward ${number} shards of light"), { number: "<strong>" + effect.moveScore + "</strong>" }) + "</div>";
+    }
+    if (effect.moveMeeple > 0) {
+        var side = game.getBoardSide();
+        if (side == 1) {
+            html += "<div>" + _("Move Tom’s camp to the village with a higher number of shards of light.") + "</div>";
+        }
+        else if (side == 2) {
+            if (effect.moveMeeple == 2) {
+                html += "<div>" + _("Move one of Tom’s boats via the path by the highest value") + "</div>";
+            }
+            else if (effect.moveMeeple == 1) {
+                html += "<div>" + _("Move one of Tom’s boats via the path by the lowest value") + "</div>";
+            }
+        }
+    }
+    if (html != "") {
+        game.addTooltipHtml(cardDiv.id, html);
     }
 }
 function moveToAnotherStock(sourceStock, destinationStock, uniqueId, cardId) {
@@ -417,11 +452,17 @@ var MeetingTrack = /** @class */ (function () {
         var _this = this;
         this.game = game;
         this.companionsStocks = [];
+        this.soloTilesStocks = [];
+        var solo = this.game.isSolo();
         var _loop_1 = function (i) {
             var left = 245 + 135 * MEETING_SPOT_BY_COLOR[i];
             var html = "\n            <div id=\"meeting-track-dice-" + i + "\" class=\"meeting-track-zone dice\" style=\"left: " + left + "px;\"></div>\n            <div id=\"meeting-track-footprints-" + i + "\" class=\"meeting-track-zone footprints\" style=\"left: " + left + "px;\"></div>\n            <div id=\"meeting-track-companion-" + i + "\" class=\"meeting-track-stock\" style=\"left: " + left + "px;\"></div>\n            ";
+            if (solo) {
+                html += "<div id=\"meeting-track-soloTile-" + i + "\" class=\"meeting-track-solo-tile\" style=\"left: " + left + "px;\"></div>";
+            }
             dojo.place(html, 'meeting-track');
             var spot = meetingTrackSpot[i];
+            // companions
             this_1.companionsStocks[i] = new ebg.stock();
             this_1.companionsStocks[i].setSelectionAppearance('class');
             this_1.companionsStocks[i].selectionClass = 'selected';
@@ -433,7 +474,21 @@ var MeetingTrack = /** @class */ (function () {
             if (spot.companion) {
                 this_1.companionsStocks[i].addToStockWithId(spot.companion.subType, '' + spot.companion.id);
             }
+            // footprints
             this_1.setFootprintTokens(i, spot.footprints);
+            if (solo) {
+                // solo tiles
+                this_1.soloTilesStocks[i] = new ebg.stock();
+                this_1.soloTilesStocks[i].setSelectionAppearance('class');
+                this_1.soloTilesStocks[i].selectionClass = 'selected';
+                this_1.soloTilesStocks[i].create(this_1.game, $("meeting-track-soloTile-" + i), CARD_WIDTH, CARD_WIDTH);
+                this_1.soloTilesStocks[i].setSelectionMode(0);
+                this_1.soloTilesStocks[i].onItemCreate = function (cardDiv, type) { return setupSoloTileCard(game, cardDiv, type); };
+                setupSoloTileCards(this_1.soloTilesStocks[i]);
+                if (spot.soloTile) {
+                    this_1.soloTilesStocks[i].addToStockWithId(spot.soloTile.type, '' + spot.soloTile.id);
+                }
+            }
         };
         var this_1 = this;
         for (var i = 1; i <= 5; i++) {
@@ -475,6 +530,22 @@ var MeetingTrack = /** @class */ (function () {
             this.companionsStocks[spot].removeAllTo(CEMETERY);
         }
         this.companionsStocks[spot].addToStockWithId(companion.subType, '' + companion.id, DECK);
+    };
+    MeetingTrack.prototype.setSoloTile = function (meetingTrackSpot, spot) {
+        var _a;
+        var soloTile = meetingTrackSpot.soloTile;
+        if (!soloTile) {
+            this.soloTilesStocks[spot].removeAll();
+            return;
+        }
+        var currentId = (_a = this.soloTilesStocks[spot].items[0]) === null || _a === void 0 ? void 0 : _a.id;
+        if (currentId && Number(currentId) === soloTile.id) {
+            return;
+        }
+        if (currentId && Number(currentId) != soloTile.id) {
+            this.soloTilesStocks[spot].removeAll();
+        }
+        this.soloTilesStocks[spot].addToStockWithId(soloTile.type, '' + soloTile.id, SOLO_TILES);
     };
     MeetingTrack.prototype.removeCompanion = function (spot) {
         if (spot == 0) {
@@ -697,17 +768,6 @@ var PlayerTable = /** @class */ (function () {
     };
     return PlayerTable;
 }());
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __spreadArray = (this && this.__spreadArray) || function (to, from) {
     for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
         to[j] = from[i];
@@ -858,15 +918,29 @@ var Glow = /** @class */ (function () {
     Glow.prototype.onEnteringStateRecruitCompanion = function (args) {
         var _this = this;
         this.meetingTrackClickAction = 'recruit';
+        var solo = this.isSolo();
         args.companions.forEach(function (companion, spot) {
             if (spot >= 1 && spot <= 5) {
                 _this.meetingTrack.setCompanion(companion, spot);
+                if (solo) {
+                    _this.meetingTrack.setSoloTile(companion, spot);
+                }
             }
         });
         this.meetingTrack.setDeckTop(DECK, args.topDeckType);
         if (this.isCurrentPlayerActive()) {
             this.meetingTrack.setSelectionMode(1);
         }
+    };
+    Glow.prototype.onEnteringChooseTomDice = function (args) {
+        var _this = this;
+        // remove color duplicates
+        args.dice.filter(function (die, index, self) { return index === self.findIndex(function (t) { return t.color === die.color; }); }).forEach(function (die) {
+            var html = "<div class=\"die-item color" + die.color + " side" + Math.min(6, die.color) + "\"></div>";
+            _this.addActionButton("selectTomDie" + die.color + "-button", html, function () { return _this.onTomDiceSelection(die); }, null, null, 'gray');
+        });
+        this.addActionButton("confirmTomDice-button", _("Confirm"), function () { return _this.chooseTomDice(); });
+        dojo.addClass("confirmTomDice-button", 'disabled');
     };
     Glow.prototype.onEnteringSelectSketalDie = function (args) {
         var _this = this;
@@ -966,6 +1040,9 @@ var Glow = /** @class */ (function () {
             case 'chooseAdventurer':
                 this.onLeavingChooseAdventurer();
                 break;
+            case 'chooseTomDice':
+                this.selectedDice = [];
+                break;
             case 'recruitCompanion':
                 this.onLeavingRecruitCompanion();
                 break;
@@ -1012,6 +1089,9 @@ var Glow = /** @class */ (function () {
     Glow.prototype.onUpdateActionButtons = function (stateName, args) {
         if (this.isCurrentPlayerActive()) {
             switch (stateName) {
+                case 'chooseTomDice':
+                    this.onEnteringChooseTomDice(args);
+                    break;
                 case 'selectSketalDie':
                 case 'selectSketalDieMulti':
                     this.onEnteringSelectSketalDie(args);
@@ -1106,6 +1186,32 @@ var Glow = /** @class */ (function () {
     Glow.prototype.isSolo = function () {
         return Object.keys(this.gamedatas.players).length == 1;
     };
+    Glow.prototype.onTomDiceSelection = function (die) {
+        var index = this.selectedDice.findIndex(function (d) { return d.id == die.id; });
+        if (index !== -1) {
+            // we deselect
+            this.selectedDice.splice(index, 1);
+            if (die.color == 6) {
+                dojo.removeClass("selectTomDie7-button", 'disabled');
+            }
+            else if (die.color == 7) {
+                dojo.removeClass("selectTomDie6-button", 'disabled');
+            }
+        }
+        else {
+            // we select
+            this.selectedDice.push(die);
+            if (die.color == 6) {
+                dojo.addClass("selectTomDie7-button", 'disabled');
+            }
+            else if (die.color == 7) {
+                dojo.addClass("selectTomDie6-button", 'disabled');
+            }
+        }
+        dojo.toggleClass("selectTomDie" + die.color + "-button", 'bgabutton_blue', index === -1);
+        dojo.toggleClass("selectTomDie" + die.color + "-button", 'bgabutton_gray', index !== -1);
+        dojo.toggleClass("confirmTomDice-button", 'disabled', this.selectedDice.length != 2);
+    };
     Glow.prototype.placeFirstPlayerToken = function (playerId) {
         var firstPlayerToken = document.getElementById('firstPlayerToken');
         if (firstPlayerToken) {
@@ -1151,7 +1257,7 @@ var Glow = /** @class */ (function () {
         if (solo) {
             dojo.place("\n            <div id=\"overall_player_board_0\" class=\"player-board current-player-board\">\t\t\t\t\t\n                <div class=\"player_board_inner\" id=\"player_board_inner_982fff\">\n                    \n                    <div class=\"emblemwrap\" id=\"avatar_active_wrap_0\" style=\"display: block;\">\n                        <img src=\"https://en.1.studio.boardgamearena.com:8083/data/themereleases/210929-0932/img/layout/active_player.gif\" alt=\"\" class=\"avatar avatar_active\" id=\"avatar_active_2343492\">    \n                        <div class=\"icon20 icon20_night this_is_night\"></div>\n                    </div>\n                                               \n                    <div class=\"player-name\" id=\"player_name_0\">\n                        Tom\n                    </div>\n                    <div id=\"player_board_0\" class=\"player_board_content\">\n                        <div class=\"player_score\">\n                            <span id=\"player_score_0\" class=\"player_score_value\">10</span> <i class=\"fa fa-star\" id=\"icon_point_0\"></i>           \n                        </div>\n                    </div>\n                </div>\n            </div>", "overall_player_board_" + players[0].id, 'after');
         }
-        (solo ? __spreadArray(__spreadArray([], players), [__assign(__assign({}, gamedatas.tom), { id: 0 })]) : players).forEach(function (player) {
+        (solo ? __spreadArray(__spreadArray([], players), [gamedatas.tom]) : players).forEach(function (player) {
             var playerId = Number(player.id);
             // charcoalium & resources counters
             dojo.place("\n            <div class=\"counters\">\n                <div id=\"reroll-counter-wrapper-" + player.id + "\" class=\"reroll-counter\">\n                    <div class=\"icon reroll\"></div> \n                    <span id=\"reroll-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"footprint-counter-wrapper-" + player.id + "\" class=\"footprint-counter\">\n                    <div class=\"icon footprint\"></div> \n                    <span id=\"footprint-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"firefly-counter-wrapper-" + player.id + "\" class=\"firefly-counter\">\n                    <div class=\"icon firefly\"></div> \n                    <span id=\"firefly-counter-" + player.id + "\"></span>\n                </div>\n            </div>", "player_board_" + player.id);
@@ -1501,6 +1607,14 @@ var Glow = /** @class */ (function () {
         }
         this.takeAction('chooseAdventurer', {
             id: id
+        });
+    };
+    Glow.prototype.chooseTomDice = function () {
+        if (!this.checkAction('chooseTomDice')) {
+            return;
+        }
+        this.takeAction('chooseTomDice', {
+            dice: this.selectedDice.map(function (die) { return die.id; }).join(',')
         });
     };
     Glow.prototype.recruitCompanion = function (spot) {

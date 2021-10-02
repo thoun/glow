@@ -24,6 +24,19 @@ interface Spell {
     location_arg: number;
 }
 
+interface SoloTileCard {
+    moveCompany: number;
+    moveScore: number;
+    moveMeeple: number; // 0 for nothing, 1 for min, 2 for max
+}
+
+interface SoloTile extends SoloTileCard {
+    id: number;
+    type: number;
+    location: string;
+    location_arg: number;
+}
+
 interface Die {
     id: number;
     face: number;
@@ -32,7 +45,6 @@ interface Die {
     small: boolean;
     used: boolean;
 }
-
 
 interface Meeple {
     id: number;
@@ -46,6 +58,7 @@ interface MeetingTrackSpot {
     companion: Companion;
     dice: Die[];
     footprints: number;
+    soloTile: SoloTile;
 }
 
 interface Route {
@@ -106,6 +119,7 @@ interface GlowGamedatas {
     ADVENTURERS_EFFECTS: Effect[];
     COMPANIONS_EFFECTS: Effect[];
     SPELLS_EFFECTS: Effect[];
+    SOLO_TILES: SoloTileCard[];
 }
 
 interface GlowGame extends Game {

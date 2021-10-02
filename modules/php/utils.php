@@ -327,6 +327,7 @@ trait UtilTrait {
             $spells[] = [ 'type' => $type, 'type_arg' => 0, 'nbr' => $spellCard->number];
         }
         $this->spells->createCards($spells, 'deck');
+        $this->spells->shuffle('deck');
     }
 
     function createSoloTiles() {
@@ -334,6 +335,7 @@ trait UtilTrait {
             $soloTiles[] = [ 'type' => $type, 'type_arg' => 0, 'nbr' => 1];
         }
         $this->soloTiles->createCards($soloTiles, 'deck');
+        $this->soloTiles->shuffle('deck');
     }
 
     function getMeetingTrackFootprints(int $spot) {
@@ -344,14 +346,28 @@ trait UtilTrait {
         self::DbQuery("UPDATE meetingtrack SET `footprints` = 0 WHERE `spot` = $spot");
     }
 
-    function placeCompanionsOnMeetingTrack() {
+    function placeCompanionsOnMeetingTrack() {        
+        $solo = $this->isSoloMode();
+
         for ($i=1;$i<=5;$i++) {
-            $this->companions->pickCardForLocation('deck', 'meeting', $i);
+            $bigDieInSpot = false;
+            if ($solo) {
+                $dice = $this->getDiceByLocation('meeting', $i);
+                foreach($dice as $die) {
+                    if (!$die->small) {
+                        $bigDieInSpot = true;
+                    }
+                }
+            }
+            if (!$bigDieInSpot) {
+                $this->companions->pickCardForLocation('deck', 'meeting', $i);
+            }
         }
     }
     
     function setDiceOnTable(bool $solo) {
-        for ($i=1; $i<=5; $i++) {
+        $maxBigDieOnTable = $solo ? 7 : 5;
+        for ($i=1; $i<=$maxBigDieOnTable; $i++) {
             $bigDie = $this->getBigDiceByColor($i, 1)[0];            
             $this->moveDice([$bigDie], 'table');
         }

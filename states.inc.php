@@ -116,7 +116,7 @@ $playerActionsGameStates = [
 
     ST_PLAYER_CHOOSE_TOM_DICE => [
         "name" => "chooseTomDice",
-        "description" => clienttranslate('${actplayer} must choose Tom dice'),
+        "description" => '',
         "descriptionmyturn" => clienttranslate('${you} must choose Tom dice'),
         "type" => "activeplayer",
         "args" => "argChooseTomDice",
@@ -124,7 +124,7 @@ $playerActionsGameStates = [
             "chooseTomDice",
         ],
         "transitions" => [
-            "nextPlayer" => ST_START_ROUND,
+            "startRound" => ST_START_ROUND,
             "zombiePass" => ST_START_ROUND,
         ]
     ],

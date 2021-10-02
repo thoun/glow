@@ -39,8 +39,9 @@ trait ActionTrait {
         if ($this->isSoloMode()) {
             self::giveExtraTime($playerId);
             $this->gamestate->nextState('chooseTomDice');
+        } else {
+            $this->gamestate->nextState('nextPlayer');
         }
-        $this->gamestate->nextState('nextPlayer');
     }
 
     public function applyRecruitCompanion(int $playerId, object $companion, $spot = null) {

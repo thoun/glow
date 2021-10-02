@@ -193,9 +193,14 @@ class Glow implements GlowGame {
     private onEnteringStateRecruitCompanion(args: RecruitCompanionArgs) {
         this.meetingTrackClickAction = 'recruit';
 
+        const solo = this.isSolo();
+
         args.companions.forEach((companion, spot) =>  {
             if (spot >=1 && spot <=5) {
                 this.meetingTrack.setCompanion(companion, spot);
+                if (solo) {
+                    this.meetingTrack.setSoloTile(companion, spot);
+                }
             }
         });
 
@@ -204,6 +209,18 @@ class Glow implements GlowGame {
         if((this as any).isCurrentPlayerActive()) {
             this.meetingTrack.setSelectionMode(1);
         }
+    }
+
+    private onEnteringChooseTomDice(args: EnteringSelectSketalDieArgs) {
+        // remove color duplicates
+        args.dice.filter((die, index, self) => index === self.findIndex((t) => t.color === die.color)).forEach(die => {
+            const html = `<div class="die-item color${die.color} side${Math.min(6, die.color)}"></div>`;
+
+            (this as any).addActionButton(`selectTomDie${die.color}-button`, html, () => this.onTomDiceSelection(die), null, null, 'gray');
+        });
+
+        (this as any).addActionButton(`confirmTomDice-button`, _("Confirm"), () => this.chooseTomDice());
+        dojo.addClass(`confirmTomDice-button`, 'disabled');
     }
 
     private onEnteringSelectSketalDie(args: EnteringSelectSketalDieArgs) {
@@ -319,6 +336,9 @@ class Glow implements GlowGame {
             case 'chooseAdventurer':
                 this.onLeavingChooseAdventurer();
                 break;
+            case 'chooseTomDice':
+                this.selectedDice = [];
+                break;
             case 'recruitCompanion':
                 this.onLeavingRecruitCompanion();
                 break;
@@ -372,6 +392,9 @@ class Glow implements GlowGame {
     public onUpdateActionButtons(stateName: string, args: any) {
         if ((this as any).isCurrentPlayerActive()) {
             switch (stateName) {
+                case 'chooseTomDice':
+                    this.onEnteringChooseTomDice(args as EnteringSelectSketalDieArgs);
+                    break;
                 case 'selectSketalDie': case 'selectSketalDieMulti':
                     this.onEnteringSelectSketalDie(args as EnteringSelectSketalDieArgs);
                     break;
@@ -477,6 +500,34 @@ class Glow implements GlowGame {
         return Object.keys(this.gamedatas.players).length == 1;
     }
 
+    private onTomDiceSelection(die: Die) {
+        const index = this.selectedDice.findIndex(d => d.id == die.id);
+        if (index !== -1) {
+            // we deselect
+            this.selectedDice.splice(index, 1);
+
+            if (die.color == 6) {
+                dojo.removeClass(`selectTomDie7-button`, 'disabled');
+            } else if (die.color == 7) {
+                dojo.removeClass(`selectTomDie6-button`, 'disabled');
+            }
+        } else {
+            // we select
+            this.selectedDice.push(die);
+
+            if (die.color == 6) {
+                dojo.addClass(`selectTomDie7-button`, 'disabled');
+            } else if (die.color == 7) {
+                dojo.addClass(`selectTomDie6-button`, 'disabled');
+            }
+        }
+
+        dojo.toggleClass(`selectTomDie${die.color}-button`, 'bgabutton_blue', index === -1);
+        dojo.toggleClass(`selectTomDie${die.color}-button`, 'bgabutton_gray', index !== -1);
+
+        dojo.toggleClass(`confirmTomDice-button`, 'disabled', this.selectedDice.length != 2);
+    }
+
     placeFirstPlayerToken(playerId: number) {
         const firstPlayerToken = document.getElementById('firstPlayerToken');
         if (firstPlayerToken) {
@@ -550,7 +601,7 @@ class Glow implements GlowGame {
             </div>`, `overall_player_board_${players[0].id}`, 'after')
         }
 
-        (solo ? [...players, {...gamedatas.tom, id: 0}] : players).forEach(player => {
+        (solo ? [...players, gamedatas.tom] : players).forEach(player => {
             const playerId = Number(player.id);     
 
             // charcoalium & resources counters
@@ -962,6 +1013,17 @@ class Glow implements GlowGame {
 
         this.takeAction('chooseAdventurer', {
             id
+        });
+    }
+
+    
+    public chooseTomDice() {
+        if(!(this as any).checkAction('chooseTomDice')) {
+            return;
+        }
+
+        this.takeAction('chooseTomDice', {
+            dice: this.selectedDice.map(die => die.id).join(',')
         });
     }
 

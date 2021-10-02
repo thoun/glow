@@ -27,6 +27,7 @@ require_once('modules/php/actions.php');
 require_once('modules/php/map.php');
 require_once('modules/php/solo-util.php');
 require_once('modules/php/solo-args.php');
+require_once('modules/php/solo-actions.php');
 require_once('modules/php/debug-util.php');
 
 class Glow extends Table {
@@ -38,6 +39,7 @@ class Glow extends Table {
 
     use SoloUtilTrait;
     use SoloArgsTrait;
+    use SoloActionTrait;
 
     use DebugUtilTrait;
 
@@ -141,10 +143,6 @@ class Glow extends Table {
         // TODO TEMP card to test
         //$this->debugSetup();
 
-        if (!$solo) {
-            $this->placeCompanionsOnMeetingTrack();
-            $this->initMeetingTrackSmallDice();
-        }
         $this->setDiceOnTable($solo);
 
         // Activate first player (which is in general a good idea :) )
@@ -217,6 +215,7 @@ class Glow extends Table {
         $result['ADVENTURERS_EFFECTS'] = array_map(function ($card) { return $card->effect; }, $this->ADVENTURERS);
         $result['COMPANIONS_EFFECTS'] = array_map(function ($card) { return $card->effect; }, $this->COMPANIONS);
         $result['SPELLS_EFFECTS'] = array_map(function ($card) { return $card->effect; }, $this->SPELLS);
+        $result['SOLO_TILES'] = $this->SOLO_TILES;
   
         return $result;
     }

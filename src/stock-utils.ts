@@ -14,6 +14,7 @@ const SPELL_DIAMETER = 64;
 
 const CEMETERY = 'cemetery';
 const DECK = 'deck';
+const SOLO_TILES = 'solo-tiles';
 
 function setupAdventurersCards(adventurerStock: Stock) {
     const cardsurl = `${g_gamethemeurl}img/adventurers.png`;
@@ -59,6 +60,21 @@ function setupSpellCards(spellsStock: Stock) {
     }
 
     spellsStock.addItemType(0,  0, cardsurl, 0);
+}
+
+function setupSoloTileCards(soloTilesStock: Stock) {
+    const cardsurl = `${g_gamethemeurl}img/solo-tiles.png`;
+
+    for (let type=1; type<=8;type++) {
+        soloTilesStock.addItemType(
+            type, 
+            type, 
+            cardsurl, 
+            type
+        );
+    }
+
+    soloTilesStock.addItemType(0,  0, cardsurl, 0);
 }
 
 function getEffectExplanation(effect: number) {    
@@ -168,6 +184,37 @@ function setupSpellCard(game: Game, cardDiv: HTMLDivElement, type: number) {
     const tooltip = getEffectTooltip(((game as any).gamedatas as GlowGamedatas).SPELLS_EFFECTS[type]);
     if (tooltip) {
         (game as any).addTooltipHtml(cardDiv.id, tooltip);
+    }
+}
+
+function setupSoloTileCard(game: GlowGame, cardDiv: HTMLDivElement, type: number) {
+    const effect = ((game as any).gamedatas as GlowGamedatas).SOLO_TILES[type];
+
+    let html = ``;
+
+    if (effect.moveCompany > 0) {
+        html += `<div>${dojo.string.substitute(_("Move Tom’s band token forward ${spaces} spaces. Then Tom’s score token is moved the number of spaces corresponding to the band token’s position on the score track."), { spaces: `<strong>${effect.moveCompany}</strong>` })}</div>`;
+    }
+
+    if (effect.moveScore > 0) {
+        html += `<div>${dojo.string.substitute(_("Move Tom’s score token forward ${number} shards of light"), { number: `<strong>${effect.moveScore}</strong>` })}</div>`;
+    }
+
+    if (effect.moveMeeple > 0) {
+        const side = game.getBoardSide();
+        if (side == 1) {
+            html += `<div>${_("Move Tom’s camp to the village with a higher number of shards of light.")}</div>`;
+        } else if (side == 2) {
+            if (effect.moveMeeple == 2) {
+                html += `<div>${_("Move one of Tom’s boats via the path by the highest value")}</div>`;
+            } else  if (effect.moveMeeple == 1) {
+                html += `<div>${_("Move one of Tom’s boats via the path by the lowest value")}</div>`;
+            }
+        }
+    }
+
+    if (html != ``) {
+        (game as any).addTooltipHtml(cardDiv.id, html);
     }
 }
 

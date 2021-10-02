@@ -9,6 +9,7 @@ const MEETING_SPOT_BY_COLOR = [
 
 class MeetingTrack {
     private companionsStocks: Stock[] = [];
+    private soloTilesStocks: Stock[] = [];
 
     constructor(
         private game: GlowGame,
@@ -16,19 +17,24 @@ class MeetingTrack {
         topDeckType: number,
         topCemeteryType: number,
     ) {
+        const solo = this.game.isSolo();
 
         for (let i=1; i<=5; i++) {
             
             const left = 245 + 135*MEETING_SPOT_BY_COLOR[i];
-            const html = `
+            let html = `
             <div id="meeting-track-dice-${i}" class="meeting-track-zone dice" style="left: ${left}px;"></div>
             <div id="meeting-track-footprints-${i}" class="meeting-track-zone footprints" style="left: ${left}px;"></div>
             <div id="meeting-track-companion-${i}" class="meeting-track-stock" style="left: ${left}px;"></div>
             `;
+            if (solo) {
+                html += `<div id="meeting-track-soloTile-${i}" class="meeting-track-solo-tile" style="left: ${left}px;"></div>`;
+            }
             dojo.place(html, 'meeting-track');
 
-
             const spot = meetingTrackSpot[i];
+
+            // companions
 
             this.companionsStocks[i] = new ebg.stock() as Stock;
             this.companionsStocks[i].setSelectionAppearance('class');
@@ -43,7 +49,27 @@ class MeetingTrack {
             if (spot.companion) {
                 this.companionsStocks[i].addToStockWithId(spot.companion.subType, ''+spot.companion.id);
             }
+
+            // footprints
+
             this.setFootprintTokens(i, spot.footprints);
+
+            if (solo) {
+                // solo tiles
+
+                this.soloTilesStocks[i] = new ebg.stock() as Stock;
+                this.soloTilesStocks[i].setSelectionAppearance('class');
+                this.soloTilesStocks[i].selectionClass = 'selected';
+                this.soloTilesStocks[i].create(this.game, $(`meeting-track-soloTile-${i}`), CARD_WIDTH, CARD_WIDTH);
+                this.soloTilesStocks[i].setSelectionMode(0);
+                this.soloTilesStocks[i].onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupSoloTileCard(game, cardDiv, type);
+
+                setupSoloTileCards(this.soloTilesStocks[i]);
+        
+                if (spot.soloTile) {
+                    this.soloTilesStocks[i].addToStockWithId(spot.soloTile.type, ''+spot.soloTile.id);
+                }
+            }
         }
         
         // place dice only after spots creation
@@ -84,6 +110,25 @@ class MeetingTrack {
         }
 
         this.companionsStocks[spot].addToStockWithId(companion.subType, ''+companion.id, DECK);
+    }
+    
+    public setSoloTile(meetingTrackSpot: MeetingTrackSpot, spot: number): void {
+        const soloTile = meetingTrackSpot.soloTile;
+        if (!soloTile) {
+            this.soloTilesStocks[spot].removeAll();
+            return;
+        }
+        
+        const currentId = this.soloTilesStocks[spot].items[0]?.id;
+        if (currentId && Number(currentId) === soloTile.id) {
+            return;
+        }
+
+        if (currentId && Number(currentId) != soloTile.id) {
+            this.soloTilesStocks[spot].removeAll();
+        }
+
+        this.soloTilesStocks[spot].addToStockWithId(soloTile.type, ''+soloTile.id, SOLO_TILES);
     }
 
     public removeCompanion(spot: number) {

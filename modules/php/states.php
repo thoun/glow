@@ -34,6 +34,15 @@ trait StateTrait {
             'day' => $day,
         ]);
 
+        if ($day == 1) {
+            $solo = $this->isSoloMode();
+            if ($solo) {
+                $this->placeCompanionsOnMeetingTrack();
+            }
+            $this->placeCompanionsOnMeetingTrack();
+            $this->initMeetingTrackSmallDice();
+        }
+
         $this->revealSpellTokens();
 
         $this->gamestate->nextState('morning');

@@ -37,6 +37,14 @@
     width: 129px;
   }
 
+  .meeting-track-solo-tile {
+    position: absolute;
+    top: -137px;
+    height: 129px;
+    width: 129px;
+
+  }
+
   .footprint-token {
     position: absolute;
     width: 32px;
@@ -75,7 +83,7 @@
     }
 
     &[data-type="2"] {
-      background-position: 50% 50%;
+      background-position: 44.444% 50%;
     }
 
     &#solo-tiles {

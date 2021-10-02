@@ -471,6 +471,12 @@
   height: 240px;
   width: 129px;
 }
+#meeting-track .meeting-track-solo-tile {
+  position: absolute;
+  top: -137px;
+  height: 129px;
+  width: 129px;
+}
 #meeting-track .footprint-token {
   position: absolute;
   width: 32px;
@@ -503,7 +509,7 @@
   background-position: 0% 0%;
 }
 #meeting-track .hidden-pile[data-type="2"] {
-  background-position: 50% 50%;
+  background-position: 44.444% 50%;
 }
 #meeting-track .hidden-pile#solo-tiles {
   background: white;

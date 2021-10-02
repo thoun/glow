@@ -25,6 +25,8 @@ trait ArgsTrait {
     function argRecuitCompanion() {
         $companions = [];
         $companions[0] = null;
+        
+        $solo = $this->isSoloMode();
 
         $dice = $this->getDiceByLocation('meeting');
 
@@ -36,7 +38,13 @@ trait ArgsTrait {
 
             $footprints = $this->getMeetingTrackFootprints($i);
 
-            $companions[$i] = new MeetingTrackSpot($companion, $spotDice, $footprints);
+            $soloTile = null;
+            if ($solo) {
+                $soloTilesFromDb = $this->getSoloTilesFromDb($this->soloTiles->getCardsInLocation('meeting', $i));
+                $soloTile = count($soloTilesFromDb) > 0 ? $soloTile[0] : null;
+            }
+
+            $companions[$i] = new MeetingTrackSpot($companion, $spotDice, $footprints, $soloTile);
         }
 
         return [

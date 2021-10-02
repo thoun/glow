@@ -48,6 +48,16 @@
 
         self::ajaxResponse();
     }
+
+    public function chooseTomDice() {
+        self::setAjaxMode();     
+
+        $dice = self::getArg("dice", AT_numberlist, true);
+
+        $this->game->chooseTomDice(array_map(function($idStr) { return intval($idStr); }, explode(',', $dice)));
+
+        self::ajaxResponse();
+    }
   	
     public function recruitCompanion() {
         self::setAjaxMode();     

@@ -15,13 +15,13 @@ trait SoloArgsTrait {
 
     function argChooseTomDice() {
         $adventurers = $this->getAdventurersFromDb($this->adventurers->getCardsInLocation('deck'));
-        $adventurersColors = $this->array_map(function ($adventurer) { return $adventurer->color; }, $adventurers);
+        $adventurersColors = array_map(function ($adventurer) { return $adventurer->color; }, $adventurers);
         $dice = $this->getAvailableBigDice();
 
-        $availableDice = array_filter($dice, function ($die) use ($adventurersColors) { return in_array($die->color, $adventurersColors); });
+        $availableDice = array_values(array_filter($dice, function ($die) use ($adventurersColors) { return in_array($die->color, $adventurersColors); }));
 
         return [
-           'availableDice' => $availableDice,
+           'dice' => $availableDice,
         ];
     }
 }
