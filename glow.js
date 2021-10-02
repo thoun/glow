@@ -455,6 +455,10 @@ var MeetingTrack = /** @class */ (function () {
         }
         this.setDeckTop(DECK, topDeckType);
         this.setDeckTop(CEMETERY, topCemeteryType);
+        if (game.isSolo()) {
+            dojo.place("<div id=\"solo-tiles\" class=\"meeting-track-stock hidden-pile\"></div>", 'meeting-track');
+            dojo.addClass('middle-band', 'solo');
+        }
     }
     MeetingTrack.prototype.setCompanion = function (meetingTrackSpot, spot) {
         var _a;
@@ -693,6 +697,17 @@ var PlayerTable = /** @class */ (function () {
     };
     return PlayerTable;
 }());
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __spreadArray = (this && this.__spreadArray) || function (to, from) {
     for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
         to[j] = from[i];
@@ -1088,6 +1103,9 @@ var Glow = /** @class */ (function () {
                 break;
         }
     }*/
+    Glow.prototype.isSolo = function () {
+        return Object.keys(this.gamedatas.players).length == 1;
+    };
     Glow.prototype.placeFirstPlayerToken = function (playerId) {
         var firstPlayerToken = document.getElementById('firstPlayerToken');
         if (firstPlayerToken) {
@@ -1133,7 +1151,7 @@ var Glow = /** @class */ (function () {
         if (solo) {
             dojo.place("\n            <div id=\"overall_player_board_0\" class=\"player-board current-player-board\">\t\t\t\t\t\n                <div class=\"player_board_inner\" id=\"player_board_inner_982fff\">\n                    \n                    <div class=\"emblemwrap\" id=\"avatar_active_wrap_0\" style=\"display: block;\">\n                        <img src=\"https://en.1.studio.boardgamearena.com:8083/data/themereleases/210929-0932/img/layout/active_player.gif\" alt=\"\" class=\"avatar avatar_active\" id=\"avatar_active_2343492\">    \n                        <div class=\"icon20 icon20_night this_is_night\"></div>\n                    </div>\n                                               \n                    <div class=\"player-name\" id=\"player_name_0\">\n                        Tom\n                    </div>\n                    <div id=\"player_board_0\" class=\"player_board_content\">\n                        <div class=\"player_score\">\n                            <span id=\"player_score_0\" class=\"player_score_value\">10</span> <i class=\"fa fa-star\" id=\"icon_point_0\"></i>           \n                        </div>\n                    </div>\n                </div>\n            </div>", "overall_player_board_" + players[0].id, 'after');
         }
-        (solo ? __spreadArray(__spreadArray([], players), [gamedatas.tom]) : players).forEach(function (player) {
+        (solo ? __spreadArray(__spreadArray([], players), [__assign(__assign({}, gamedatas.tom), { id: 0 })]) : players).forEach(function (player) {
             var playerId = Number(player.id);
             // charcoalium & resources counters
             dojo.place("\n            <div class=\"counters\">\n                <div id=\"reroll-counter-wrapper-" + player.id + "\" class=\"reroll-counter\">\n                    <div class=\"icon reroll\"></div> \n                    <span id=\"reroll-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"footprint-counter-wrapper-" + player.id + "\" class=\"footprint-counter\">\n                    <div class=\"icon footprint\"></div> \n                    <span id=\"footprint-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"firefly-counter-wrapper-" + player.id + "\" class=\"firefly-counter\">\n                    <div class=\"icon firefly\"></div> \n                    <span id=\"firefly-counter-" + player.id + "\"></span>\n                </div>\n            </div>", "player_board_" + player.id);

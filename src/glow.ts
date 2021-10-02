@@ -473,6 +473,10 @@ class Glow implements GlowGame {
         }
     }*/
 
+    public isSolo(): boolean {
+        return Object.keys(this.gamedatas.players).length == 1;
+    }
+
     placeFirstPlayerToken(playerId: number) {
         const firstPlayerToken = document.getElementById('firstPlayerToken');
         if (firstPlayerToken) {
@@ -546,7 +550,7 @@ class Glow implements GlowGame {
             </div>`, `overall_player_board_${players[0].id}`, 'after')
         }
 
-        (solo ? [...players, gamedatas.tom] : players).forEach(player => {
+        (solo ? [...players, {...gamedatas.tom, id: 0}] : players).forEach(player => {
             const playerId = Number(player.id);     
 
             // charcoalium & resources counters

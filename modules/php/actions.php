@@ -36,6 +36,10 @@ trait ActionTrait {
             'dice' => $dice,
         ]);
 
+        if ($this->isSoloMode()) {
+            self::giveExtraTime($playerId);
+            $this->gamestate->nextState('chooseTomDice');
+        }
         $this->gamestate->nextState('nextPlayer');
     }
 

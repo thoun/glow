@@ -25,7 +25,8 @@ require_once('modules/php/states.php');
 require_once('modules/php/args.php');
 require_once('modules/php/actions.php');
 require_once('modules/php/map.php');
-require_once('modules/php/solo.php');
+require_once('modules/php/solo-util.php');
+require_once('modules/php/solo-args.php');
 require_once('modules/php/debug-util.php');
 
 class Glow extends Table {
@@ -34,7 +35,10 @@ class Glow extends Table {
     use StateTrait;
     use ArgsTrait;
     use MapTrait;
-    use SoloTrait;
+
+    use SoloUtilTrait;
+    use SoloArgsTrait;
+
     use DebugUtilTrait;
 
 	function __construct() {
@@ -61,6 +65,9 @@ class Glow extends Table {
 		
         $this->spells = self::getNew("module.common.deck");
         $this->spells->init("spells");
+		
+        $this->soloTiles = self::getNew("module.common.deck");
+        $this->soloTiles->init("solotiles");
 	}
 	
     protected function getGameName() {
@@ -125,16 +132,20 @@ class Glow extends Table {
         $this->createMeeples(array_keys($players));
         $this->createAdventurers();
         $this->createCompanions($solo);
-        if (!$solo) {
+        if ($solo) {
+            $this->createSoloTiles();
+        } else {
             $this->createSpells();
         }
 
         // TODO TEMP card to test
-        $this->debugSetup();
+        //$this->debugSetup();
 
-        $this->placeCompanionsOnMeetingTrack();
-        $this->initMeetingTrackSmallDice();
-        $this->setDiceOnTable();
+        if (!$solo) {
+            $this->placeCompanionsOnMeetingTrack();
+            $this->initMeetingTrackSmallDice();
+        }
+        $this->setDiceOnTable($solo);
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();

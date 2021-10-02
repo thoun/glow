@@ -7,8 +7,10 @@
         <div id="board">
             <div id="table-dice"></div>
         </div>
-        <div id="round-counter-wrapper">
-            {DAY} <span id="round-counter">-</span>&nbsp;/&nbsp;8
+        <div id="middle-band">
+            <div id="round-counter-wrapper">
+                {DAY} <span id="round-counter">-</span>&nbsp;/&nbsp;8
+            </div>
         </div>
         <div id="meeting-track">
             <div id="deck" class="meeting-track-stock hidden-pile"></div>

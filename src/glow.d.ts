@@ -123,6 +123,7 @@ interface GlowGame extends Game {
     selectMove(possibleDestination: Route): void;
     moveBlackDie(spot: number): void;
     selectSketalDie(dieId: number): void;
+    isSolo(): boolean;
 }
 
 interface ChooseAdventurerArgs {

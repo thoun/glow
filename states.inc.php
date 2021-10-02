@@ -109,7 +109,23 @@ $playerActionsGameStates = [
         ],
         "transitions" => [
             "nextPlayer" => ST_NEXT_PLAYER_CHOOSE_ADVENTURER,
+            "chooseTomDice" => ST_PLAYER_CHOOSE_TOM_DICE,
             "zombiePass" => ST_NEXT_PLAYER_CHOOSE_ADVENTURER,
+        ]
+    ],
+
+    ST_PLAYER_CHOOSE_TOM_DICE => [
+        "name" => "chooseTomDice",
+        "description" => clienttranslate('${actplayer} must choose Tom dice'),
+        "descriptionmyturn" => clienttranslate('${you} must choose Tom dice'),
+        "type" => "activeplayer",
+        "args" => "argChooseTomDice",
+        "possibleactions" => [ 
+            "chooseTomDice",
+        ],
+        "transitions" => [
+            "nextPlayer" => ST_START_ROUND,
+            "zombiePass" => ST_START_ROUND,
         ]
     ],
 

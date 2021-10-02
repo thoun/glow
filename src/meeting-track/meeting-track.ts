@@ -60,6 +60,11 @@ class MeetingTrack {
 
         this.setDeckTop(DECK, topDeckType);
         this.setDeckTop(CEMETERY, topCemeteryType);
+
+        if (game.isSolo()) {
+            dojo.place(`<div id="solo-tiles" class="meeting-track-stock hidden-pile"></div>`, 'meeting-track');
+            dojo.addClass('middle-band', 'solo');
+        }
     }
     
     public setCompanion(meetingTrackSpot: MeetingTrackSpot, spot: number): void {

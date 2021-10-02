@@ -4,6 +4,7 @@ require_once(__DIR__.'/objects/effect.php');
 require_once(__DIR__.'/objects/adventurer.php');
 require_once(__DIR__.'/objects/companion.php');
 require_once(__DIR__.'/objects/spell.php');
+require_once(__DIR__.'/objects/solo-tile.php');
 require_once(__DIR__.'/objects/dice.php');
 require_once(__DIR__.'/objects/meeple.php');
 require_once(__DIR__.'/objects/meeting-track-spot.php');
@@ -110,6 +111,17 @@ trait UtilTrait {
 
     function getSpellsFromDb(array $dbObjects) {
         return array_map(function($dbObject) { return $this->getSpellFromDb($dbObject); }, array_values($dbObjects));
+    }
+
+    function getSoloTileFromDb($dbObject) {
+        if (!$dbObject || !array_key_exists('id', $dbObject)) {
+            throw new BgaSystemException("Solo tile doesn't exists ".json_encode($dbObject));
+        }
+        return new SoloTile($dbObject, $this->SOLO_TILE);
+    }
+
+    function getSoloTilesFromDb(array $dbObjects) {
+        return array_map(function($dbObject) { return $this->getSoloTileFromDb($dbObject); }, array_values($dbObjects));
     }
     
     function getSmallDice(bool $ignoreBlack) {
@@ -317,6 +329,13 @@ trait UtilTrait {
         $this->spells->createCards($spells, 'deck');
     }
 
+    function createSoloTiles() {
+        foreach($this->SOLO_TILES as $type => $tile) {
+            $soloTiles[] = [ 'type' => $type, 'type_arg' => 0, 'nbr' => 1];
+        }
+        $this->soloTiles->createCards($soloTiles, 'deck');
+    }
+
     function getMeetingTrackFootprints(int $spot) {
         return intval(self::getUniqueValueFromDB("SELECT `footprints` FROM meetingtrack WHERE `spot` = $spot"));
     }
@@ -331,13 +350,15 @@ trait UtilTrait {
         }
     }
     
-    function setDiceOnTable() {
+    function setDiceOnTable(bool $solo) {
         for ($i=1; $i<=5; $i++) {
             $bigDie = $this->getBigDiceByColor($i, 1)[0];            
             $this->moveDice([$bigDie], 'table');
         }
-        $blackDie = $this->getBlackDie();     
-        $this->moveDice([$blackDie], 'table');
+        if (!$solo) {
+            $blackDie = $this->getBlackDie();
+            $this->moveDice([$blackDie], 'table');
+        }
     }
 
     function initMeetingTrackSmallDice() {

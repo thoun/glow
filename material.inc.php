@@ -110,6 +110,17 @@ $this->SPELLS = [
   6 => new SpellCard(new Effect([0, 0, 0], [-107]), 2),
 ];
 
+$this->SOLO_TILES = [
+  1 => new SoloTileCard(2),
+  2 => new SoloTileCard(2, 0, 1),
+  3 => new SoloTileCard(3),
+  4 => new SoloTileCard(2, 1, 2),
+  5 => new SoloTileCard(1, 2, 1),
+  6 => new SoloTileCard(2, 3, 2),
+  7 => new SoloTileCard(0, 4, 1),
+  8 => new SoloTileCard(1, 5, 2),
+];
+
 $this->SCORE_TRACK_REROLLS = [0, 1, 2, 3, 4, 5, 7, 9, 11, 13, 16, 19, 22, 26, 31, 36, 44, 52];
 
 $this->MAP1 = [

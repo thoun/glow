@@ -54,6 +54,12 @@
     left: 55px;
   }
 
+  #solo-tiles {
+    left: -150px;
+    top: -137px;
+    height: 129px;
+  }
+
   .hidden-pile {
     background-image: url('img/companions.png');
     position: absolute;
@@ -70,6 +76,11 @@
 
     &[data-type="2"] {
       background-position: 50% 50%;
+    }
+
+    &#solo-tiles {
+      background: white;
+      border: 1px solid gray;
     }
   }
 }

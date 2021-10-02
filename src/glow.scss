@@ -85,12 +85,28 @@ html {
     margin-bottom: 20px;
 }
 
-#round-counter-wrapper {
-  text-align: center;
+#middle-band {
   background: white;
-  font-size: 16px;
-  font-weight: 700;
-  padding: 8px;
+  display: flex;
+  align-items: center;
+
+  #round-counter-wrapper {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 8px;
+    vertical-align: middle;
+    flex: 1;
+  }
+
+  &.solo {
+    height: 139px;
+
+    #round-counter-wrapper {
+      width: 245px;
+      flex: unset;
+    }
+  }
 }
 
 #last-round {
