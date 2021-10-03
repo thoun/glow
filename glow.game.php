@@ -131,7 +131,11 @@ class Glow extends Table {
         }
         
         $this->createDice($solo);
-        $this->createMeeples(array_keys($players));
+        $meeplePlayersIds = array_keys($players);
+        if ($solo) {
+            $meeplePlayersIds[] = 0;
+        }
+        $this->createMeeples($meeplePlayersIds);
         $this->createAdventurers();
         $this->createCompanions($solo);
         if ($solo) {
@@ -210,6 +214,8 @@ class Glow extends Table {
 
         if (count($result['players']) == 1) { // solo mode
             $result['tom'] = $this->getTom();
+            $result['tom']->meeples = $this->getPlayerMeeples(0);
+            $result['tom']->color = '000000';
         }
 
         $result['ADVENTURERS_EFFECTS'] = array_map(function ($card) { return $card->effect; }, $this->ADVENTURERS);
@@ -217,7 +223,7 @@ class Glow extends Table {
         $result['SPELLS_EFFECTS'] = array_map(function ($card) { return $card->effect; }, $this->SPELLS);
         $result['SOLO_TILES'] = $this->SOLO_TILES;
   
-        return $result;
+        return $result; // TODO change player colors to adventurer color
     }
 
     /*

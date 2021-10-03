@@ -41,7 +41,7 @@ trait ArgsTrait {
             $soloTile = null;
             if ($solo) {
                 $soloTilesFromDb = $this->getSoloTilesFromDb($this->soloTiles->getCardsInLocation('meeting', $i));
-                $soloTile = count($soloTilesFromDb) > 0 ? $soloTile[0] : null;
+                $soloTile = count($soloTilesFromDb) > 0 ? $soloTilesFromDb[0] : null;
             }
 
             $companions[$i] = new MeetingTrackSpot($companion, $spotDice, $footprints, $soloTile);

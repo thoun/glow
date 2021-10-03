@@ -24,8 +24,12 @@ trait StateTrait {
     }
 
     function stStartRound() {
+        $solo = $this->isSoloMode();
+
         $day = intval($this->getGameStateValue(DAY)) + 1;
-        self::setGameStateValue(DAY, $day);
+        if (!$solo || $day == 1) {
+            self::setGameStateValue(DAY, $day);
+        }
 
         self::DbQuery("UPDATE companion SET `reroll_used` = false");
         self::DbQuery("UPDATE player SET `applied_effects` = null, visited_spots = null");
@@ -35,9 +39,8 @@ trait StateTrait {
         ]);
 
         if ($day == 1) {
-            $solo = $this->isSoloMode();
             if ($solo) {
-                $this->placeCompanionsOnMeetingTrack();
+                $this->placeSoloTilesOnMeetingTrack();
             }
             $this->placeCompanionsOnMeetingTrack();
             $this->initMeetingTrackSmallDice();
@@ -178,7 +181,9 @@ trait StateTrait {
             'player_name' => $this->getPlayerName($newFirstPlayer),
         ]);
 
-        if (intval($this->companions->countCardInLocation('deck')) == 0 || intval($this->getGameStateValue(DAY)) >= 8) {
+        $endDay = $this->isSoloMode() ? 3 : 8;
+
+        if (intval($this->companions->countCardInLocation('deck')) == 0 || intval($this->getGameStateValue(DAY)) >= $endDay) {
             $this->gamestate->nextState('endScore');
         } else {
             $this->gamestate->nextState('newRound');
@@ -188,20 +193,26 @@ trait StateTrait {
     function stEndScore() {
         $playersIds = $this->getPlayersIds();
         $solo = count($playersIds) == 1;
+
+        if ($solo) {
+            $playersIds[] = 0;
+        }
         
         // Adventurer and companions        
         foreach($playersIds as $playerId) {
-            $points = 0;
-            $adventurers = $this->getAdventurersFromDb($this->adventurers->getCardsInLocation('player', $playerId));
-            if (count($adventurers) > 0) {
-                $points += $adventurers[0]->points;
-            }
-            $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
-            foreach($companions as $companion) {
-                $points += $companion->points;
-            }
+            if ($playerId != 0) {
+                $points = 0;
+                $adventurers = $this->getAdventurersFromDb($this->adventurers->getCardsInLocation('player', $playerId));
+                if (count($adventurers) > 0) {
+                    $points += $adventurers[0]->points;
+                }
+                $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+                foreach($companions as $companion) {
+                    $points += $companion->points;
+                }
 
-            $this->incPlayerScore($playerId, $points, _('${playerName} gains ${points} bursts of light with adventurer and companions'));
+                $this->incPlayerScore($playerId, $points, _('${playerName} gains ${points} bursts of light with adventurer and companions'));
+            }
         }
 
         // Journey board 
@@ -221,7 +232,7 @@ trait StateTrait {
 
         // Fireflies
         foreach($playersIds as $playerId) {
-            $points = $this->getPlayerFireflies($playerId);
+            $points = $this->getPlayerFireflies($playerId); // TOCHECK does Tom almost always win 10 as he has no companion ?
             $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
             foreach($companions as $companion) {
                 $points += $companion->fireflies;

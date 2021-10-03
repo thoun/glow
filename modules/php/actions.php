@@ -123,6 +123,10 @@ trait ActionTrait {
         
         $playerId = self::getActivePlayerId();
 
+        if ($this->isSoloMode()) {
+            $this->applyTomEffects($spot);
+        }
+
         $spotDice = $this->getDiceByLocation('meeting', $spot);
         if ($this->array_some($spotDice, function($die) { return $die->color == 8; })) {
             $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));

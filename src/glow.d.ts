@@ -218,6 +218,7 @@ interface NotifRemoveCompanionsArgs {
 interface NotifPointsArgs {
     playerId: number;
     points: number;
+    incCompany?: number;
 }
 
 interface NotifRerollsArgs {

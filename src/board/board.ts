@@ -160,6 +160,11 @@ class Board {
         this.movePoints();
     }
 
+    public incCompany(incCompany: number) {
+        // TODO
+        throw new Error("Method not implemented.");
+    }
+
     private getPointsCoordinates(points: number) {
         const cases = points === 10 ? 11 :
             (points > 10 ? points + 2 : points);

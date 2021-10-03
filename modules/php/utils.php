@@ -117,7 +117,7 @@ trait UtilTrait {
         if (!$dbObject || !array_key_exists('id', $dbObject)) {
             throw new BgaSystemException("Solo tile doesn't exists ".json_encode($dbObject));
         }
-        return new SoloTile($dbObject, $this->SOLO_TILE);
+        return new SoloTile($dbObject, $this->SOLO_TILES);
     }
 
     function getSoloTilesFromDb(array $dbObjects) {
@@ -224,6 +224,10 @@ trait UtilTrait {
     }
 
     function getPlayerRerolls(int $playerId) {
+        if ($playerId == 0) {
+            return $this->getTomRerolls();
+        }
+
         return intval(self::getUniqueValueFromDB("SELECT `player_rerolls` FROM player where `player_id` = $playerId"));
     }
 
@@ -251,6 +255,10 @@ trait UtilTrait {
     }
 
     function getPlayerFootprints(int $playerId) {
+        if ($playerId == 0) {
+            return $this->getTomFootprints();
+        }
+
         return intval(self::getUniqueValueFromDB("SELECT `player_footprints` FROM player where `player_id` = $playerId"));
     }
 
@@ -278,6 +286,10 @@ trait UtilTrait {
     }
 
     function getPlayerFireflies(int $playerId) {
+        if ($playerId == 0) {
+            return $this->getTomFireflies();
+        }
+
         return intval(self::getUniqueValueFromDB("SELECT `player_fireflies` FROM player where `player_id` = $playerId"));
     }
 

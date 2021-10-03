@@ -65,7 +65,7 @@ function setupSpellCards(spellsStock) {
 function setupSoloTileCards(soloTilesStock) {
     var cardsurl = g_gamethemeurl + "img/solo-tiles.png";
     for (var type = 1; type <= 8; type++) {
-        soloTilesStock.addItemType(type, type, cardsurl, type);
+        soloTilesStock.addItemType(type, type, cardsurl, type - 1);
     }
     soloTilesStock.addItemType(0, 0, cardsurl, 0);
 }
@@ -174,12 +174,7 @@ function setupSoloTileCard(game, cardDiv, type) {
             html += "<div>" + _("Move Tom’s camp to the village with a higher number of shards of light.") + "</div>";
         }
         else if (side == 2) {
-            if (effect.moveMeeple == 2) {
-                html += "<div>" + _("Move one of Tom’s boats via the path by the highest value") + "</div>";
-            }
-            else if (effect.moveMeeple == 1) {
-                html += "<div>" + _("Move one of Tom’s boats via the path by the lowest value") + "</div>";
-            }
+            html += "<div>" + dojo.string.substitute(_("Move one of Tom’s boats via the path by the ${lowesthighest} value"), { lowesthighest: effect.moveMeeple == 2 ? _("highest") : _("lowest") }) + "</div>";
         }
     }
     if (html != "") {
@@ -359,6 +354,10 @@ var Board = /** @class */ (function () {
     Board.prototype.incPoints = function (playerId, points) {
         this.points.set(playerId, this.points.get(playerId) + points);
         this.movePoints();
+    };
+    Board.prototype.incCompany = function (incCompany) {
+        // TODO
+        throw new Error("Method not implemented.");
     };
     Board.prototype.getPointsCoordinates = function (points) {
         var cases = points === 10 ? 11 :
@@ -816,7 +815,11 @@ var Glow = /** @class */ (function () {
         log('gamedatas', gamedatas);
         dojo.addClass('board', "side" + gamedatas.side);
         this.createPlayerPanels(gamedatas);
-        this.board = new Board(this, Object.values(gamedatas.players), gamedatas.tableDice);
+        var players = Object.values(gamedatas.players);
+        if (players.length == 1) {
+            players.push(gamedatas.tom);
+        }
+        this.board = new Board(this, players, gamedatas.tableDice);
         this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack, gamedatas.topDeckType, gamedatas.topCemeteryType);
         this.createPlayerTables(gamedatas);
         if (gamedatas.day > 0) {
@@ -1256,6 +1259,10 @@ var Glow = /** @class */ (function () {
         var solo = players.length === 1;
         if (solo) {
             dojo.place("\n            <div id=\"overall_player_board_0\" class=\"player-board current-player-board\">\t\t\t\t\t\n                <div class=\"player_board_inner\" id=\"player_board_inner_982fff\">\n                    \n                    <div class=\"emblemwrap\" id=\"avatar_active_wrap_0\" style=\"display: block;\">\n                        <img src=\"https://en.1.studio.boardgamearena.com:8083/data/themereleases/210929-0932/img/layout/active_player.gif\" alt=\"\" class=\"avatar avatar_active\" id=\"avatar_active_2343492\">    \n                        <div class=\"icon20 icon20_night this_is_night\"></div>\n                    </div>\n                                               \n                    <div class=\"player-name\" id=\"player_name_0\">\n                        Tom\n                    </div>\n                    <div id=\"player_board_0\" class=\"player_board_content\">\n                        <div class=\"player_score\">\n                            <span id=\"player_score_0\" class=\"player_score_value\">10</span> <i class=\"fa fa-star\" id=\"icon_point_0\"></i>           \n                        </div>\n                    </div>\n                </div>\n            </div>", "overall_player_board_" + players[0].id, 'after');
+            var tomScoreCounter = new ebg.counter();
+            tomScoreCounter.create("player_score_0");
+            tomScoreCounter.setValue(gamedatas.tom.score);
+            this.scoreCtrl[0] = tomScoreCounter;
         }
         (solo ? __spreadArray(__spreadArray([], players), [gamedatas.tom]) : players).forEach(function (player) {
             var playerId = Number(player.id);
@@ -1831,6 +1838,9 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.notif_points = function (notif) {
         this.incPoints(notif.args.playerId, notif.args.points);
+        if (notif.args.incCompany) {
+            this.board.incCompany(notif.args.incCompany);
+        }
     };
     Glow.prototype.notif_rerolls = function (notif) {
         this.incRerolls(notif.args.playerId, notif.args.rerolls);

@@ -19,7 +19,7 @@ const LOCAL_STORAGE_ZOOM_KEY = 'Glow-zoom';
 const isDebug = window.location.host == 'studio.boardgamearena.com';
 const log = isDebug ? console.log.bind(window.console) : function () { };
 
-class Glow implements GlowGame {
+class Glow implements GlowGame { // TODO zoom
     private gamedatas: GlowGamedatas;
     private rerollCounters: Counter[] = [];
     private footprintCounters: Counter[] = [];
@@ -78,7 +78,11 @@ class Glow implements GlowGame {
 
         dojo.addClass('board', `side${gamedatas.side}`);
         this.createPlayerPanels(gamedatas);
-        this.board = new Board(this, Object.values(gamedatas.players), gamedatas.tableDice);
+        const players = Object.values(gamedatas.players);
+        if (players.length == 1) {
+            players.push(gamedatas.tom);
+        }
+        this.board = new Board(this, players, gamedatas.tableDice);
         this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack, gamedatas.topDeckType, gamedatas.topCemeteryType);
         this.createPlayerTables(gamedatas);
         if (gamedatas.day > 0) {
@@ -598,7 +602,12 @@ class Glow implements GlowGame {
                         </div>
                     </div>
                 </div>
-            </div>`, `overall_player_board_${players[0].id}`, 'after')
+            </div>`, `overall_player_board_${players[0].id}`, 'after');
+
+            const tomScoreCounter = new ebg.counter();
+            tomScoreCounter.create(`player_score_0`);
+            tomScoreCounter.setValue(gamedatas.tom.score);
+            (this as any).scoreCtrl[0] = tomScoreCounter;
         }
 
         (solo ? [...players, gamedatas.tom] : players).forEach(player => {
@@ -1297,6 +1306,9 @@ class Glow implements GlowGame {
 
     notif_points(notif: Notif<NotifPointsArgs>) {
         this.incPoints(notif.args.playerId, notif.args.points);
+        if (notif.args.incCompany) {
+            this.board.incCompany(notif.args.incCompany);
+        }
     }
 
     notif_rerolls(notif: Notif<NotifRerollsArgs>) {

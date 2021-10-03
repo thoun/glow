@@ -70,7 +70,7 @@ function setupSoloTileCards(soloTilesStock: Stock) {
             type, 
             type, 
             cardsurl, 
-            type
+            type - 1
         );
     }
 
@@ -205,11 +205,7 @@ function setupSoloTileCard(game: GlowGame, cardDiv: HTMLDivElement, type: number
         if (side == 1) {
             html += `<div>${_("Move Tom’s camp to the village with a higher number of shards of light.")}</div>`;
         } else if (side == 2) {
-            if (effect.moveMeeple == 2) {
-                html += `<div>${_("Move one of Tom’s boats via the path by the highest value")}</div>`;
-            } else  if (effect.moveMeeple == 1) {
-                html += `<div>${_("Move one of Tom’s boats via the path by the lowest value")}</div>`;
-            }
+            html += `<div>${dojo.string.substitute(_("Move one of Tom’s boats via the path by the ${lowesthighest} value"), { lowesthighest: effect.moveMeeple == 2 ? _("highest") : _("lowest") })}</div>`;
         }
     }
 
