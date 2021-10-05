@@ -18,11 +18,11 @@ class PlayerTable {
             <div class="name-column">
                 <div class="player-name" style="color: #${player.color};">${player.name}</div>
                 <div id="player-table-${this.playerId}-dice" class="player-table-dice"></div>
-                <div id="player-table-${this.playerId}-spells" class="player-table-spells normal"></div>
             </div>
             <div class="adventurer-and-companions">
-                <div id="player-table-${this.playerId}-adventurer"></div>
-                <div id="player-table-${this.playerId}-companions"></div>
+                <div id="player-table-${this.playerId}-spells" class="player-table-spells normal"></div>
+                <div id="player-table-${this.playerId}-adventurer" class="player-table-adventurer"></div>
+                <div id="player-table-${this.playerId}-companions" class="player-table-companions"></div>
             </div>
         </div>`;
 

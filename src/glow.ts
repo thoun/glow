@@ -19,7 +19,7 @@ const LOCAL_STORAGE_ZOOM_KEY = 'Glow-zoom';
 const isDebug = window.location.host == 'studio.boardgamearena.com';
 const log = isDebug ? console.log.bind(window.console) : function () { };
 
-class Glow implements GlowGame { // TODO zoom
+class Glow implements GlowGame {
     private gamedatas: GlowGamedatas;
     private rerollCounters: Counter[] = [];
     private footprintCounters: Counter[] = [];
@@ -98,13 +98,13 @@ class Glow implements GlowGame { // TODO zoom
         this.addHelp();
         this.setupNotifications();
 
-        /*this.setupPreferences();
+        //this.setupPreferences();
 
         document.getElementById('zoom-out').addEventListener('click', () => this.zoomOut());
         document.getElementById('zoom-in').addEventListener('click', () => this.zoomIn());
         if (this.zoom !== 1) {
             this.setZoom(this.zoom);
-        }*/
+        }
 
         log( "Ending game setup" );
     }
@@ -447,7 +447,11 @@ class Glow implements GlowGame { // TODO zoom
             div.style.margin = `0 ${ZOOM_LEVELS_MARGIN[newIndex]}% ${(1-zoom)*-100}% 0`;
         }
 
-        [this.adventurersStock,  ...this.playersTables.map(pt => pt.companionsStock)].forEach(stock => stock.updateDisplay());
+        const stocks = this.playersTables.map(pt => pt.companionsStock);
+        if (this.adventurersStock) {
+            stocks.push(this.adventurersStock);
+        }
+        stocks.forEach(stock => stock.updateDisplay());
 
         document.getElementById('zoom-wrapper').style.height = `${div.getBoundingClientRect().height}px`;
     }

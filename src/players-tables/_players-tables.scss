@@ -17,6 +17,7 @@
         }
 
         .player-table-spells {
+            
             .stockitem {
                 border: 0;
                 border-radius: 50%;
@@ -27,8 +28,12 @@
                 }
             }
 
-            &.normal.hidden {
-                display: none;
+            &.normal {
+                width: 70px;
+
+                &.hidden {
+                    display: none;
+                }
             }
         }
 
@@ -49,8 +54,14 @@
         }
 
         .adventurer-and-companions {
-            display: grid;
-            grid-template-columns: 160px auto;
+            display: flex;
+
+            .player-table-adventurer {
+                width: 160px;
+            }
+            .player-table-companions {
+                flex: 1;
+            }
         }
     }
 }

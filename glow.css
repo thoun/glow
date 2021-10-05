@@ -534,6 +534,9 @@
   cursor: pointer;
   box-shadow: 0 0 4px 4px red;
 }
+#currentplayertable .player-table .player-table-spells.normal, #playerstables .player-table .player-table-spells.normal {
+  width: 70px;
+}
 #currentplayertable .player-table .player-table-spells.normal.hidden, #playerstables .player-table .player-table-spells.normal.hidden {
   display: none;
 }
@@ -550,8 +553,13 @@
   box-shadow: 0 0 4px 4px red;
 }
 #currentplayertable .player-table .adventurer-and-companions, #playerstables .player-table .adventurer-and-companions {
-  display: grid;
-  grid-template-columns: 160px auto;
+  display: flex;
+}
+#currentplayertable .player-table .adventurer-and-companions .player-table-adventurer, #playerstables .player-table .adventurer-and-companions .player-table-adventurer {
+  width: 160px;
+}
+#currentplayertable .player-table .adventurer-and-companions .player-table-companions, #playerstables .player-table .adventurer-and-companions .player-table-companions {
+  flex: 1;
 }
 
 #glow-help-button {
@@ -662,6 +670,37 @@ html {
 .mode_3d #game_play_area_background {
   background: url("img/background.jpg");
   background-repeat: repeat;
+}
+
+#zoom-wrapper {
+  position: relative;
+}
+#zoom-wrapper #zoom-controls {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+#zoom-wrapper #zoom-controls button {
+  width: 40px;
+  height: 40px;
+  background: url("img/zoom.svg");
+  background-size: auto 220%;
+}
+#zoom-wrapper #zoom-controls button:not(.disabled) {
+  cursor: pointer;
+}
+#zoom-wrapper #zoom-controls button.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+#zoom-wrapper #zoom-controls #zoom-in {
+  background-position: 6% 94%;
+}
+#zoom-wrapper #zoom-controls #zoom-out {
+  background-position: 82% 94%;
+}
+#zoom-wrapper #full-table {
+  transform-origin: left top;
 }
 
 #full-board-wrapper {

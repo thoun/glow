@@ -604,7 +604,7 @@ var PlayerTable = /** @class */ (function () {
         var _this = this;
         this.game = game;
         this.playerId = Number(player.id);
-        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock\">\n            <div class=\"name-column\">\n                <div class=\"player-name\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n                <div id=\"player-table-" + this.playerId + "-dice\" class=\"player-table-dice\"></div>\n                <div id=\"player-table-" + this.playerId + "-spells\" class=\"player-table-spells normal\"></div>\n            </div>\n            <div class=\"adventurer-and-companions\">\n                <div id=\"player-table-" + this.playerId + "-adventurer\"></div>\n                <div id=\"player-table-" + this.playerId + "-companions\"></div>\n            </div>\n        </div>";
+        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock\">\n            <div class=\"name-column\">\n                <div class=\"player-name\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n                <div id=\"player-table-" + this.playerId + "-dice\" class=\"player-table-dice\"></div>\n            </div>\n            <div class=\"adventurer-and-companions\">\n                <div id=\"player-table-" + this.playerId + "-spells\" class=\"player-table-spells normal\"></div>\n                <div id=\"player-table-" + this.playerId + "-adventurer\" class=\"player-table-adventurer\"></div>\n                <div id=\"player-table-" + this.playerId + "-companions\" class=\"player-table-companions\"></div>\n            </div>\n        </div>";
         dojo.place(html, this.playerId === this.game.getPlayerId() ? 'currentplayertable' : 'playerstables');
         // adventurer        
         this.adventurerStock = new ebg.stock();
@@ -808,6 +808,7 @@ var Glow = /** @class */ (function () {
         "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
     */
     Glow.prototype.setup = function (gamedatas) {
+        var _this = this;
         this.dontPreloadImage('publisher.png');
         this.dontPreloadImage("side" + (gamedatas.side == 2 ? 1 : 2) + ".png");
         log("Starting game setup");
@@ -832,13 +833,12 @@ var Glow = /** @class */ (function () {
         }
         this.addHelp();
         this.setupNotifications();
-        /*this.setupPreferences();
-
-        document.getElementById('zoom-out').addEventListener('click', () => this.zoomOut());
-        document.getElementById('zoom-in').addEventListener('click', () => this.zoomIn());
+        //this.setupPreferences();
+        document.getElementById('zoom-out').addEventListener('click', function () { return _this.zoomOut(); });
+        document.getElementById('zoom-in').addEventListener('click', function () { return _this.zoomIn(); });
         if (this.zoom !== 1) {
             this.setZoom(this.zoom);
-        }*/
+        }
         log("Ending game setup");
     };
     ///////////////////////////////////////////////////
@@ -1138,7 +1138,11 @@ var Glow = /** @class */ (function () {
             div.style.transform = "scale(" + zoom + ")";
             div.style.margin = "0 " + ZOOM_LEVELS_MARGIN[newIndex] + "% " + (1 - zoom) * -100 + "% 0";
         }
-        __spreadArray([this.adventurersStock], this.playersTables.map(function (pt) { return pt.companionsStock; })).forEach(function (stock) { return stock.updateDisplay(); });
+        var stocks = this.playersTables.map(function (pt) { return pt.companionsStock; });
+        if (this.adventurersStock) {
+            stocks.push(this.adventurersStock);
+        }
+        stocks.forEach(function (stock) { return stock.updateDisplay(); });
         document.getElementById('zoom-wrapper').style.height = div.getBoundingClientRect().height + "px";
     };
     Glow.prototype.zoomIn = function () {
