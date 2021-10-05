@@ -730,8 +730,6 @@ trait UtilTrait {
         } else if ($effect === 36) { // spell
             $playersIds = $this->getPlayersIds();
             $this->giveSpellToPlayers(array_values(array_filter($playersIds, function($pId) use ($playerId) { return $pId != $playerId; })));
-        } else {
-            // TODO 37 skull/spell
         }
     }
 

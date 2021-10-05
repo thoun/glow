@@ -127,6 +127,7 @@ interface GlowGame extends Game {
     
     getPlayerId(): number;
     getBoardSide(): number;
+    isColorBlindMode(): boolean;
     chooseAdventurer(id: number): void;
     selectMeetingTrackCompanion(spot: number): void;
     //createAndPlaceDieHtml(die: Die, destinationId: string): void;    

@@ -41,7 +41,7 @@ $game_options = [
     ],
 ];
 
-$game_preferences = [ // TODO
+$game_preferences = [
     201 => [
         'name' => totranslate('Show color-blind indications'),
         'needReload' => true,

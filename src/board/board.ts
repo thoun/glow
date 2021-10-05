@@ -89,14 +89,14 @@ class Board {
 
     constructor(
         private game: GlowGame, 
-        players: GlowPlayer[],
+        private players: GlowPlayer[],
         tableDice: Die[],
     ) {
         let html = '';
 
         // points
         players.forEach(player =>
-            html += `<div id="player-${player.id}-point-marker" class="point-marker" style="background: #${player.color};"></div>`
+            html += `<div id="player-${player.id}-point-marker" class="point-marker ${this.game.isColorBlindMode() ? 'color-blind' : ''}" data-player-no="${player.playerNo}" style="background: #${player.color};"></div>`
         );
         dojo.place(html, 'board');
         players.forEach(player => {
@@ -215,7 +215,7 @@ class Board {
         if (div) {
             div.style.transform = transform;
         } else {
-            dojo.place(`<div id="meeple${meeple.id}" class="token meeple${meeple.type}" style="background-color: #${color}; transform: ${transform}"></div>`, 'board');
+            dojo.place(`<div id="meeple${meeple.id}" class="token meeple${meeple.type} ${this.game.isColorBlindMode() ? 'color-blind' : ''}" data-player-no="${this.players.find(p => Number(p.id) == meeple.playerId).playerNo}" style="background-color: #${color}; transform: ${transform}"></div>`, 'board');
         }
     }
 

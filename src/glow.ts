@@ -569,6 +569,9 @@ class Glow implements GlowGame {
     public getBoardSide(): number {
         return this.gamedatas.side;
     }
+    public isColorBlindMode(): boolean {
+        return (this as any).prefs[201].value == 1;
+    }
 
     public getOpponentId(playerId: number): number {
         return Number(Object.values(this.gamedatas.players).find(player => Number(player.id) != playerId).id);
@@ -617,7 +620,7 @@ class Glow implements GlowGame {
         (solo ? [...players, gamedatas.tom] : players).forEach(player => {
             const playerId = Number(player.id);     
 
-            // charcoalium & resources counters
+            // counters
             dojo.place(`
             <div class="counters">
                 <div id="reroll-counter-wrapper-${player.id}" class="reroll-counter">
@@ -632,7 +635,8 @@ class Glow implements GlowGame {
                     <div class="icon firefly"></div> 
                     <span id="firefly-counter-${player.id}"></span>
                 </div>
-            </div>`, `player_board_${player.id}`);
+            </div>
+            `, `player_board_${player.id}`);
 
             const rerollCounter = new ebg.counter();
             rerollCounter.create(`reroll-counter-${playerId}`);
@@ -647,7 +651,7 @@ class Glow implements GlowGame {
             const fireflyCounter = new ebg.counter();
             fireflyCounter.create(`firefly-counter-${playerId}`);
             fireflyCounter.setValue(player.fireflies);
-            this.fireflyCounters[playerId] = fireflyCounter;     
+            this.fireflyCounters[playerId] = fireflyCounter;
 
             if (!solo) {
                 // first player token
@@ -656,6 +660,12 @@ class Glow implements GlowGame {
                 if (gamedatas.firstPlayer === playerId) {
                     this.placeFirstPlayerToken(gamedatas.firstPlayer);
                 }
+            }  
+            
+            if (this.isColorBlindMode() && playerId != 0) {
+            dojo.place(`
+            <div class="token meeple${this.gamedatas.side == 2 ? 0 : 1} color-blind" data-player-no="${player.playerNo}" style="background-color: #${player.color};"></div>
+            `, `player_board_${player.id}`);
             }
         });
 

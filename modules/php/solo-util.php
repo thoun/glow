@@ -14,6 +14,7 @@ trait SoloUtilTrait {
         $tom = new stdClass();
         $tom->id = 0;
         $tom->score = 10;
+        $tom->playerNo = 2;
         $tom->company = 0;
         $tom->rerolls = 0;
         $tom->footprints = 0;

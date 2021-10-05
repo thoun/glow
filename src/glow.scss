@@ -180,3 +180,46 @@ html {
 .avatar_active, #active_player_statusbar_icon, #logoiconimg {
   filter: grayscale(1);
 }
+
+.token {
+  width: 24px; 
+  height: 24px;  
+  
+  &.meeple1 {
+    mask: url('img/company.svg') no-repeat center / contain;
+    -webkit-mask: url('img/company.svg') no-repeat center / contain;    
+  }
+  &.meeple2 {
+    mask: url('img/encampment.svg') no-repeat center / contain;
+    -webkit-mask: url('img/encampment.svg') no-repeat center / contain;    
+  }
+  &.meeple0 {
+    mask: url('img/boat.svg') no-repeat center / contain;
+    -webkit-mask: url('img/boat.svg') no-repeat center / contain;    
+  }
+
+  &.color-blind {
+    &::after {
+      font-size: 120%;
+      display: flex;
+      align-content: center;
+      justify-content: center;
+    }
+
+    &[data-player-no="1"]::after {
+      content: '●'; // circle
+    }
+
+    &[data-player-no="2"]::after {
+      content: '▲'; // triangle
+    }
+
+    &[data-player-no="3"]::after {
+      content: '■'; // square
+    }
+
+    &[data-player-no="4"]::after {
+      content: '◆'; // diamond
+    }
+  }
+}

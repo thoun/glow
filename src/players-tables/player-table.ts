@@ -35,6 +35,7 @@ class PlayerTable {
         this.adventurerStock.selectionClass = 'selected';
         this.adventurerStock.create(this.game, $(`player-table-${this.playerId}-adventurer`), CARD_WIDTH, CARD_HEIGHT);
         this.adventurerStock.setSelectionMode(0);
+        this.adventurerStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupAdventurerCard(game, cardDiv, type);
         dojo.connect(this.adventurerStock, 'onChangeSelection', this, (_, itemId: string) => {
             if (this.adventurerStock.getSelectedItems().length) {
                 this.game.cardClick(0, Number(itemId));

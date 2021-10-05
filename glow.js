@@ -295,12 +295,13 @@ var Board = /** @class */ (function () {
     function Board(game, players, tableDice) {
         var _this = this;
         this.game = game;
+        this.players = players;
         this.points = new Map();
         this.meeples = [];
         var html = '';
         // points
         players.forEach(function (player) {
-            return html += "<div id=\"player-" + player.id + "-point-marker\" class=\"point-marker\" style=\"background: #" + player.color + ";\"></div>";
+            return html += "<div id=\"player-" + player.id + "-point-marker\" class=\"point-marker " + (_this.game.isColorBlindMode() ? 'color-blind' : '') + "\" data-player-no=\"" + player.playerNo + "\" style=\"background: #" + player.color + ";\"></div>";
         });
         dojo.place(html, 'board');
         players.forEach(function (player) {
@@ -402,7 +403,7 @@ var Board = /** @class */ (function () {
             div.style.transform = transform;
         }
         else {
-            dojo.place("<div id=\"meeple" + meeple.id + "\" class=\"token meeple" + meeple.type + "\" style=\"background-color: #" + color + "; transform: " + transform + "\"></div>", 'board');
+            dojo.place("<div id=\"meeple" + meeple.id + "\" class=\"token meeple" + meeple.type + " " + (this.game.isColorBlindMode() ? 'color-blind' : '') + "\" data-player-no=\"" + this.players.find(function (p) { return Number(p.id) == meeple.playerId; }).playerNo + "\" style=\"background-color: #" + color + "; transform: " + transform + "\"></div>", 'board');
         }
     };
     Board.prototype.moveMeeple = function (meeple) {
@@ -612,6 +613,7 @@ var PlayerTable = /** @class */ (function () {
         this.adventurerStock.selectionClass = 'selected';
         this.adventurerStock.create(this.game, $("player-table-" + this.playerId + "-adventurer"), CARD_WIDTH, CARD_HEIGHT);
         this.adventurerStock.setSelectionMode(0);
+        this.adventurerStock.onItemCreate = function (cardDiv, type) { return setupAdventurerCard(game, cardDiv, type); };
         dojo.connect(this.adventurerStock, 'onChangeSelection', this, function (_, itemId) {
             if (_this.adventurerStock.getSelectedItems().length) {
                 _this.game.cardClick(0, Number(itemId));
@@ -1247,6 +1249,9 @@ var Glow = /** @class */ (function () {
     Glow.prototype.getBoardSide = function () {
         return this.gamedatas.side;
     };
+    Glow.prototype.isColorBlindMode = function () {
+        return this.prefs[201].value == 1;
+    };
     Glow.prototype.getOpponentId = function (playerId) {
         return Number(Object.values(this.gamedatas.players).find(function (player) { return Number(player.id) != playerId; }).id);
     };
@@ -1270,8 +1275,8 @@ var Glow = /** @class */ (function () {
         }
         (solo ? __spreadArray(__spreadArray([], players), [gamedatas.tom]) : players).forEach(function (player) {
             var playerId = Number(player.id);
-            // charcoalium & resources counters
-            dojo.place("\n            <div class=\"counters\">\n                <div id=\"reroll-counter-wrapper-" + player.id + "\" class=\"reroll-counter\">\n                    <div class=\"icon reroll\"></div> \n                    <span id=\"reroll-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"footprint-counter-wrapper-" + player.id + "\" class=\"footprint-counter\">\n                    <div class=\"icon footprint\"></div> \n                    <span id=\"footprint-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"firefly-counter-wrapper-" + player.id + "\" class=\"firefly-counter\">\n                    <div class=\"icon firefly\"></div> \n                    <span id=\"firefly-counter-" + player.id + "\"></span>\n                </div>\n            </div>", "player_board_" + player.id);
+            // counters
+            dojo.place("\n            <div class=\"counters\">\n                <div id=\"reroll-counter-wrapper-" + player.id + "\" class=\"reroll-counter\">\n                    <div class=\"icon reroll\"></div> \n                    <span id=\"reroll-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"footprint-counter-wrapper-" + player.id + "\" class=\"footprint-counter\">\n                    <div class=\"icon footprint\"></div> \n                    <span id=\"footprint-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"firefly-counter-wrapper-" + player.id + "\" class=\"firefly-counter\">\n                    <div class=\"icon firefly\"></div> \n                    <span id=\"firefly-counter-" + player.id + "\"></span>\n                </div>\n            </div>\n            ", "player_board_" + player.id);
             var rerollCounter = new ebg.counter();
             rerollCounter.create("reroll-counter-" + playerId);
             rerollCounter.setValue(player.rerolls);
@@ -1290,6 +1295,9 @@ var Glow = /** @class */ (function () {
                 if (gamedatas.firstPlayer === playerId) {
                     _this.placeFirstPlayerToken(gamedatas.firstPlayer);
                 }
+            }
+            if (_this.isColorBlindMode() && playerId != 0) {
+                dojo.place("\n            <div class=\"token meeple" + (_this.gamedatas.side == 2 ? 0 : 1) + " color-blind\" data-player-no=\"" + player.playerNo + "\" style=\"background-color: #" + player.color + ";\"></div>\n            ", "player_board_" + player.id);
             }
         });
         this.addTooltipHtmlToClass('reroll-counter', _("Rerolls"));

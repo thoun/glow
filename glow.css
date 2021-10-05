@@ -1,3 +1,4 @@
+@charset "UTF-8";
 @import url(../../../css/csslayer.css);
 .die {
   display: inline-block;
@@ -380,28 +381,27 @@
   transition: transform 0.5s, opacity 0.5s;
   pointer-events: none;
 }
+#board .point-marker.color-blind::after {
+  font-size: 120%;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  margin-top: -4px;
+}
+#board .point-marker.color-blind[data-player-no="1"]::after {
+  content: "●";
+}
+#board .point-marker.color-blind[data-player-no="2"]::after {
+  content: "▲";
+}
+#board .point-marker.color-blind[data-player-no="3"]::after {
+  content: "■";
+}
+#board .point-marker.color-blind[data-player-no="4"]::after {
+  content: "◆";
+}
 #board.hidden-tokens .point-marker {
   opacity: 0.2;
-}
-#board .token {
-  width: 24px;
-  height: 24px;
-  transition: transform 0.5s linear;
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-#board .token.meeple1 {
-  mask: url("img/company.svg") no-repeat center/contain;
-  -webkit-mask: url("img/company.svg") no-repeat center/contain;
-}
-#board .token.meeple2 {
-  mask: url("img/encampment.svg") no-repeat center/contain;
-  -webkit-mask: url("img/encampment.svg") no-repeat center/contain;
-}
-#board .token.meeple0 {
-  mask: url("img/boat.svg") no-repeat center/contain;
-  -webkit-mask: url("img/boat.svg") no-repeat center/contain;
 }
 #board .destination-zone {
   position: absolute;
@@ -435,6 +435,12 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+#board .token {
+  transition: transform 0.5s linear;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 #meeting-track {
@@ -655,6 +661,9 @@ ol.help-list {
 .player-board .counters .icon {
   margin-right: 5px;
 }
+.player-board .token {
+  margin: 5px;
+}
 .player-board #firstPlayerToken {
   background: url("img/first-player.png");
   border-radius: 50%;
@@ -825,4 +834,39 @@ html {
 
 .avatar_active, #active_player_statusbar_icon, #logoiconimg {
   filter: grayscale(1);
+}
+
+.token {
+  width: 24px;
+  height: 24px;
+}
+.token.meeple1 {
+  mask: url("img/company.svg") no-repeat center/contain;
+  -webkit-mask: url("img/company.svg") no-repeat center/contain;
+}
+.token.meeple2 {
+  mask: url("img/encampment.svg") no-repeat center/contain;
+  -webkit-mask: url("img/encampment.svg") no-repeat center/contain;
+}
+.token.meeple0 {
+  mask: url("img/boat.svg") no-repeat center/contain;
+  -webkit-mask: url("img/boat.svg") no-repeat center/contain;
+}
+.token.color-blind::after {
+  font-size: 120%;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+}
+.token.color-blind[data-player-no="1"]::after {
+  content: "●";
+}
+.token.color-blind[data-player-no="2"]::after {
+  content: "▲";
+}
+.token.color-blind[data-player-no="3"]::after {
+  content: "■";
+}
+.token.color-blind[data-player-no="4"]::after {
+  content: "◆";
 }
