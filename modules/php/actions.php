@@ -28,12 +28,17 @@ trait ActionTrait {
         $dice = $this->getBigDiceByColor($adventurer->color, $adventurer->dice);
         $this->moveDice($dice, 'player', $playerId);
 
+        $newPlayerColor = $this->ADVENTURERS_COLORS[$adventurer->color];
+        self::DbQuery("UPDATE player SET `player_color` = '$newPlayerColor' WHERE player_id = $playerId");
+        self::reloadPlayersBasicInfos();
+
         self::notifyAllPlayers('chosenAdventurer', clienttranslate('${player_name} chooses adventurer ${adventurerName}'), [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
             'adventurer' => $adventurer,
             'adventurerName' => $adventurer->name,
             'dice' => $dice,
+            'newPlayerColor' => $newPlayerColor,
         ]);
 
         if ($this->isSoloMode()) {

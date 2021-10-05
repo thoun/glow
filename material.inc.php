@@ -356,3 +356,13 @@ $this->MAPS = [
   1 => $this->MAP1,
   2 => $this->MAP2,
 ];
+
+$this->ADVENTURERS_COLORS = [  
+  1 => '00995c',
+  2 => '0077ba',
+  3 => '57cbf5',
+  4 => 'bf1e2e',
+  5 => 'ea7d28',
+  6 => '8a298a',
+  7 => 'ffd503',
+];

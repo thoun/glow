@@ -201,6 +201,7 @@ interface NotifChosenAdventurerArgs {
     playerId: number;
     adventurer: Adventurer;
     dice: Die[];
+    newPlayerColor: string; // without #
 }
 
 interface NotifChosenCompanionArgs {

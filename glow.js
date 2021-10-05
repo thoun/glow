@@ -403,7 +403,7 @@ var Board = /** @class */ (function () {
             div.style.transform = transform;
         }
         else {
-            dojo.place("<div id=\"meeple" + meeple.id + "\" class=\"token meeple" + meeple.type + " " + (this.game.isColorBlindMode() ? 'color-blind' : '') + "\" data-player-no=\"" + this.players.find(function (p) { return Number(p.id) == meeple.playerId; }).playerNo + "\" style=\"background-color: #" + color + "; transform: " + transform + "\"></div>", 'board');
+            dojo.place("<div id=\"meeple" + meeple.id + "\" class=\"token meeple" + meeple.type + " " + (this.game.isColorBlindMode() ? 'color-blind' : '') + " meeple-player-" + meeple.playerId + "\" data-player-no=\"" + this.players.find(function (p) { return Number(p.id) == meeple.playerId; }).playerNo + "\" style=\"background-color: #" + color + "; transform: " + transform + "\"></div>", 'board');
         }
     };
     Board.prototype.moveMeeple = function (meeple) {
@@ -436,6 +436,10 @@ var Board = /** @class */ (function () {
                 document.getElementById("destination-zone-" + position).addEventListener('click', function () { return _this.game.selectMove(possibleDestination); });
             }
         });
+    };
+    Board.prototype.setColor = function (playerId, newPlayerColor) {
+        document.getElementById("player-" + playerId + "-point-marker").style.background = "#" + newPlayerColor;
+        Array.from(document.getElementsByClassName("meeple-player-" + playerId)).forEach(function (elem) { return elem.style.background = "#" + newPlayerColor; });
     };
     return Board;
 }());
@@ -605,7 +609,7 @@ var PlayerTable = /** @class */ (function () {
         var _this = this;
         this.game = game;
         this.playerId = Number(player.id);
-        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock\">\n            <div class=\"name-column\">\n                <div class=\"player-name\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n                <div id=\"player-table-" + this.playerId + "-dice\" class=\"player-table-dice\"></div>\n            </div>\n            <div class=\"adventurer-and-companions\">\n                <div id=\"player-table-" + this.playerId + "-spells\" class=\"player-table-spells normal\"></div>\n                <div id=\"player-table-" + this.playerId + "-adventurer\" class=\"player-table-adventurer\"></div>\n                <div id=\"player-table-" + this.playerId + "-companions\" class=\"player-table-companions\"></div>\n            </div>\n        </div>";
+        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock\">\n            <div class=\"name-column\">\n                <div id=\"player-table-" + this.playerId + "-name\" class=\"player-name\" style=\"color: #" + player.color + ";\">" + player.name + "</div>\n                <div id=\"player-table-" + this.playerId + "-dice\" class=\"player-table-dice\"></div>\n            </div>\n            <div class=\"adventurer-and-companions\">\n                <div id=\"player-table-" + this.playerId + "-spells\" class=\"player-table-spells normal\"></div>\n                <div id=\"player-table-" + this.playerId + "-adventurer\" class=\"player-table-adventurer\"></div>\n                <div id=\"player-table-" + this.playerId + "-companions\" class=\"player-table-companions\"></div>\n            </div>\n        </div>";
         dojo.place(html, this.playerId === this.game.getPlayerId() ? 'currentplayertable' : 'playerstables');
         // adventurer        
         this.adventurerStock = new ebg.stock();
@@ -766,6 +770,9 @@ var PlayerTable = /** @class */ (function () {
             this.removeCompanionSpellStock();
         }
         dojo.toggleClass("player-table-" + this.playerId + "-spells", 'hidden', this.spellsStock.items.length == 0);
+    };
+    PlayerTable.prototype.setColor = function (newPlayerColor) {
+        document.getElementById("player-table-" + this.playerId + "-name").style.color = "#" + newPlayerColor;
     };
     return PlayerTable;
 }());
@@ -1297,7 +1304,7 @@ var Glow = /** @class */ (function () {
                 }
             }
             if (_this.isColorBlindMode() && playerId != 0) {
-                dojo.place("\n            <div class=\"token meeple" + (_this.gamedatas.side == 2 ? 0 : 1) + " color-blind\" data-player-no=\"" + player.playerNo + "\" style=\"background-color: #" + player.color + ";\"></div>\n            ", "player_board_" + player.id);
+                dojo.place("\n            <div class=\"token meeple" + (_this.gamedatas.side == 2 ? 0 : 1) + " color-blind meeple-player-" + player.id + "\" data-player-no=\"" + player.playerNo + "\" style=\"background-color: #" + player.color + ";\"></div>\n            ", "player_board_" + player.id);
             }
         });
         this.addTooltipHtmlToClass('reroll-counter', _("Rerolls"));
@@ -1807,6 +1814,17 @@ var Glow = /** @class */ (function () {
         var playerTable = this.getPlayerTable(notif.args.playerId);
         playerTable.setAdventurer(notif.args.adventurer);
         playerTable.addDice(notif.args.dice);
+        var newPlayerColor = notif.args.newPlayerColor;
+        var nameLink = document.getElementById("player_name_" + notif.args.playerId).getElementsByTagName('a')[0];
+        if (nameLink) {
+            nameLink.style.color = "#" + newPlayerColor;
+        }
+        /*const colorBlindToken = document.getElementById(`player-board-${notif.args.playerId}-color-blind-token`);
+        if (colorBlindToken) {
+            colorBlindToken.style.color = `#${newPlayerColor}`;
+        };*/
+        this.board.setColor(notif.args.playerId, newPlayerColor);
+        playerTable.setColor(newPlayerColor);
     };
     Glow.prototype.notif_chosenCompanion = function (notif) {
         var _a, _b;

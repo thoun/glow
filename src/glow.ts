@@ -664,7 +664,7 @@ class Glow implements GlowGame {
             
             if (this.isColorBlindMode() && playerId != 0) {
             dojo.place(`
-            <div class="token meeple${this.gamedatas.side == 2 ? 0 : 1} color-blind" data-player-no="${player.playerNo}" style="background-color: #${player.color};"></div>
+            <div class="token meeple${this.gamedatas.side == 2 ? 0 : 1} color-blind meeple-player-${player.id}" data-player-no="${player.playerNo}" style="background-color: #${player.color};"></div>
             `, `player_board_${player.id}`);
             }
         });
@@ -1275,6 +1275,18 @@ class Glow implements GlowGame {
         const playerTable = this.getPlayerTable(notif.args.playerId);
         playerTable.setAdventurer(notif.args.adventurer);
         playerTable.addDice(notif.args.dice);
+
+        const newPlayerColor = notif.args.newPlayerColor;
+        const nameLink = document.getElementById(`player_name_${notif.args.playerId}`).getElementsByTagName('a')[0];
+        if (nameLink) {
+            nameLink.style.color = `#${newPlayerColor}`;
+        }
+        /*const colorBlindToken = document.getElementById(`player-board-${notif.args.playerId}-color-blind-token`);
+        if (colorBlindToken) {
+            colorBlindToken.style.color = `#${newPlayerColor}`;
+        };*/
+        this.board.setColor(notif.args.playerId, newPlayerColor)
+        playerTable.setColor(newPlayerColor);
     }
 
     notif_chosenCompanion(notif: Notif<NotifChosenCompanionArgs>) {

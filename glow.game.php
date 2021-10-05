@@ -85,24 +85,17 @@ class Glow extends Table {
         the game is ready to be played.
     */
     protected function setupNewGame($players, $options = []) {    
-        // Set the colors of the players with HTML color code
-        // The default below is red/green/blue/orange/brown
-        // The number of colors defined here must correspond to the maximum number of players allowed for the gams
-        $gameinfos = self::getGameinfos();
-        $default_colors = $gameinfos['player_colors'];
- 
         // Create players
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
         $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_score, player_avatar, player_rerolls) VALUES ";
         $values = [];
         $i = 0;
         foreach($players as $playerId => $player) {
-            $color = array_shift($default_colors);
 
             // The player on the right of first player receives 2 reroll tokens.
             $lastPlayer = $i > 0 && $i == count($players) - 1;
 
-            $values[] = "('".$playerId."','$color','".$player['player_canal']."','".addslashes( $player['player_name'] )."', 10, '".addslashes( $player['player_avatar'] )."', ".($lastPlayer ? 2 : 0).")";
+            $values[] = "('".$playerId."','000000','".$player['player_canal']."','".addslashes( $player['player_name'] )."', 10, '".addslashes( $player['player_avatar'] )."', ".($lastPlayer ? 2 : 0).")";
 
             if ($i == 0) {
                 self::setGameStateValue(FIRST_PLAYER, $playerId);
@@ -112,7 +105,6 @@ class Glow extends Table {
         }
         $sql .= implode($values, ',');
         self::DbQuery( $sql );
-        self::reattributeColorsBasedOnPreferences($players, $gameinfos['player_colors']);
         self::reloadPlayersBasicInfos();
         
         /************ Start the game initialization *****/
@@ -223,7 +215,7 @@ class Glow extends Table {
         $result['SPELLS_EFFECTS'] = array_map(function ($card) { return $card->effect; }, $this->SPELLS);
         $result['SOLO_TILES'] = $this->SOLO_TILES;
   
-        return $result; // TODO change player colors to adventurer color
+        return $result;
     }
 
     /*

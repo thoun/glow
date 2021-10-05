@@ -16,7 +16,7 @@ class PlayerTable {
         let html = `
         <div id="player-table-${this.playerId}" class="player-table whiteblock">
             <div class="name-column">
-                <div class="player-name" style="color: #${player.color};">${player.name}</div>
+                <div id="player-table-${this.playerId}-name" class="player-name" style="color: #${player.color};">${player.name}</div>
                 <div id="player-table-${this.playerId}-dice" class="player-table-dice"></div>
             </div>
             <div class="adventurer-and-companions">
@@ -211,5 +211,9 @@ class PlayerTable {
             this.removeCompanionSpellStock();
         }
         dojo.toggleClass(`player-table-${this.playerId}-spells`, 'hidden', this.spellsStock.items.length == 0);
+    }
+    
+    public setColor(newPlayerColor: string) {
+        document.getElementById(`player-table-${this.playerId}-name`).style.color = `#${newPlayerColor}`;
     }
 }

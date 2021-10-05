@@ -215,7 +215,7 @@ class Board {
         if (div) {
             div.style.transform = transform;
         } else {
-            dojo.place(`<div id="meeple${meeple.id}" class="token meeple${meeple.type} ${this.game.isColorBlindMode() ? 'color-blind' : ''}" data-player-no="${this.players.find(p => Number(p.id) == meeple.playerId).playerNo}" style="background-color: #${color}; transform: ${transform}"></div>`, 'board');
+            dojo.place(`<div id="meeple${meeple.id}" class="token meeple${meeple.type} ${this.game.isColorBlindMode() ? 'color-blind' : ''} meeple-player-${meeple.playerId}" data-player-no="${this.players.find(p => Number(p.id) == meeple.playerId).playerNo}" style="background-color: #${color}; transform: ${transform}"></div>`, 'board');
         }
     }
 
@@ -254,5 +254,10 @@ class Board {
             }
         });
         
+    }
+
+    public setColor(playerId: number, newPlayerColor: string) {
+        document.getElementById(`player-${playerId}-point-marker`).style.background = `#${newPlayerColor}`;
+        (Array.from(document.getElementsByClassName(`meeple-player-${playerId}`)) as HTMLDivElement[]).forEach(elem => elem.style.background = `#${newPlayerColor}`);
     }
 }
