@@ -515,18 +515,18 @@ class Glow implements GlowGame {
             this.selectedDice.splice(index, 1);
 
             if (die.color == 6) {
-                dojo.removeClass(`selectTomDie7-button`, 'disabled');
+                document.getElementById(`selectTomDie7-button`)?.classList.remove('disabled');
             } else if (die.color == 7) {
-                dojo.removeClass(`selectTomDie6-button`, 'disabled');
+                document.getElementById(`selectTomDie6-button`)?.classList.remove('disabled');
             }
         } else {
             // we select
             this.selectedDice.push(die);
 
             if (die.color == 6) {
-                dojo.addClass(`selectTomDie7-button`, 'disabled');
+                document.getElementById(`selectTomDie7-button`)?.classList.add('disabled');
             } else if (die.color == 7) {
-                dojo.addClass(`selectTomDie6-button`, 'disabled');
+                document.getElementById(`selectTomDie6-button`)?.classList.add('disabled');
             }
         }
 
@@ -660,7 +660,12 @@ class Glow implements GlowGame {
                 if (gamedatas.firstPlayer === playerId) {
                     this.placeFirstPlayerToken(gamedatas.firstPlayer);
                 }
-            }  
+            } else if (playerId == 0) {
+                dojo.place(`<div id="tomDiceWrapper"></div>`, `player_board_${player.id}`);
+                if (gamedatas.tom.dice) {
+                    this.setTomDice(gamedatas.tom.dice);
+                }
+            }
             
             if (this.isColorBlindMode() && playerId != 0) {
             dojo.place(`
@@ -871,6 +876,10 @@ class Glow implements GlowGame {
         playerTable.spellsStock?.items.forEach(item => dojo.addClass(`${playerTable.spellsStock.container_div.id}_item_${item.id}`, 'selectable'));
         playerTable.companionSpellStock?.setSelectionMode(1);
         playerTable.companionSpellStock?.items.forEach(item => dojo.addClass(`${playerTable.companionSpellStock.container_div.id}_item_${item.id}`, 'selectable'));
+    }
+
+    private setTomDice(dice: Die[]) {
+        dice.forEach(die => this.createOrMoveDie({...die, id: 1000 + die.id}, `tomDiceWrapper`));
     }
 
     private getRollDiceCost(cost: number) {
@@ -1263,6 +1272,7 @@ class Glow implements GlowGame {
             ['lastTurn', 1],
             ['newFirstPlayer', 1],
             ['newDay', 1],
+            ['setTomDice', 1],
         ];
 
         notifs.forEach((notif) => {
@@ -1332,8 +1342,8 @@ class Glow implements GlowGame {
 
     notif_points(notif: Notif<NotifPointsArgs>) {
         this.incPoints(notif.args.playerId, notif.args.points);
-        if (notif.args.incCompany) {
-            this.board.incCompany(notif.args.incCompany);
+        if (notif.args.company !== undefined) {
+            this.board.setTomCompany(notif.args.company);
         }
     }
 
@@ -1419,6 +1429,10 @@ class Glow implements GlowGame {
     notif_removeSpell(notif: Notif<NotifRemoveSpellArgs>) {
         const playerTable = this.getPlayerTable(notif.args.playerId);
         playerTable.removeSpell(notif.args.spell);
+    }
+
+    notif_setTomDice(notif: Notif<NotifChosenAdventurerArgs>) {
+        this.setTomDice(notif.args.dice);
     }
 
     notif_lastTurn() {

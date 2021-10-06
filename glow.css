@@ -400,8 +400,12 @@
 #board .point-marker.color-blind[data-player-no="4"]::after {
   content: "◆";
 }
-#board.hidden-tokens .point-marker {
+#board.hidden-tokens .point-marker, #board.hidden-tokens #meeple0 {
   opacity: 0.2;
+}
+#board #meeple0 {
+  top: -5px;
+  left: -5px;
 }
 #board .destination-zone {
   position: absolute;

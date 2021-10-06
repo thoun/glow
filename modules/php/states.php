@@ -172,16 +172,20 @@ trait StateTrait {
         $this->placeCompanionsOnMeetingTrack();
         $this->addFootprintsOnMeetingTrack();
 
-        $nextPlayerTable = self::createNextPlayerTable(array_keys(self::loadPlayersBasicInfos()));
-        $newFirstPlayer = intval($nextPlayerTable[intval($this->getGameStateValue(FIRST_PLAYER))]);
-        $this->setGameStateValue(FIRST_PLAYER, $newFirstPlayer);
+        $solo = $this->isSoloMode();
 
-        self::notifyAllPlayers('newFirstPlayer', clienttranslate('${player_name} is the new First player'), [
-            'playerId' => $newFirstPlayer,
-            'player_name' => $this->getPlayerName($newFirstPlayer),
-        ]);
+        if (!$solo) {
+            $nextPlayerTable = self::createNextPlayerTable(array_keys(self::loadPlayersBasicInfos()));
+            $newFirstPlayer = intval($nextPlayerTable[intval($this->getGameStateValue(FIRST_PLAYER))]);
+            $this->setGameStateValue(FIRST_PLAYER, $newFirstPlayer);
 
-        $endDay = $this->isSoloMode() ? 3 : 8;
+            self::notifyAllPlayers('newFirstPlayer', clienttranslate('${player_name} is the new First player'), [
+                'playerId' => $newFirstPlayer,
+                'player_name' => $this->getPlayerName($newFirstPlayer),
+            ]);
+        }
+
+        $endDay = $solo ? 3 : 8;
 
         if (intval($this->companions->countCardInLocation('deck')) == 0 || intval($this->getGameStateValue(DAY)) >= $endDay) {
             $this->gamestate->nextState('endScore');

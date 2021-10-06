@@ -83,6 +83,7 @@ interface GlowPlayer extends Player {
     rerolls: number;
     footprints: number;
     fireflies: number;
+    company?: number; // tom company score
 }
 
 /**
@@ -221,6 +222,7 @@ interface NotifPointsArgs {
     playerId: number;
     points: number;
     incCompany?: number;
+    company?: number;
 }
 
 interface NotifRerollsArgs {

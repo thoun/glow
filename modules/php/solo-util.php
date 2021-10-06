@@ -65,7 +65,7 @@ trait SoloUtilTrait {
 
         self::notifyAllPlayers('points', $message, $params + [
             'playerId' => 0,
-            'playerName' => 'Tom',
+            'player_name' => 'Tom',
             'points' => $incScore,
         ]);
     }
@@ -103,13 +103,14 @@ trait SoloUtilTrait {
 
         if ($soloTile->moveCompany > 0) {
             $company = $this->incTomCompany($soloTile->moveCompany);
-            $this->incTomScore($company, _('${playerName} moves band token ${incCompany} spaces and gains ${points} bursts of light with played tile'), [
+            $this->incTomScore($company, _('${player_name} moves band token ${incCompany} spaces and gains ${points} bursts of light with played tile'), [
                 'incCompany' => $soloTile->moveCompany,
+                'company' => $company,
             ]);
         }
 
         if ($soloTile->moveScore > 0) {
-            $this->incTomScore($soloTile->moveScore, _('${playerName} gains ${points} bursts of light with played tile'));
+            $this->incTomScore($soloTile->moveScore, _('${player_name} gains ${points} bursts of light with played tile'));
         }
 
         if ($soloTile->moveMeeple > 0) {            

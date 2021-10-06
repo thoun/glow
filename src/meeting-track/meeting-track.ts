@@ -19,6 +19,11 @@ class MeetingTrack {
     ) {
         const solo = this.game.isSolo();
 
+        if (solo) {
+            dojo.place(`<div id="meeting-track-dice-0" class="meeting-track-zone dice" style="left: 57px;"></div>`, 'meeting-track');
+            meetingTrackSpot[0].dice.forEach(die => this.game.createOrMoveDie(die, `meeting-track-dice-0`));
+        }
+
         for (let i=1; i<=5; i++) {
             
             const left = 245 + 135*MEETING_SPOT_BY_COLOR[i];

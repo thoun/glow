@@ -137,7 +137,7 @@ class Glow extends Table {
         }
 
         // TODO TEMP card to test
-        $this->debugSetup();
+        //$this->debugSetup();
 
         $this->setDiceOnTable($solo);
 
@@ -176,7 +176,8 @@ class Glow extends Table {
 
         $dice = $this->getDiceByLocation('meeting');
         $meetingTrack = [];
-        $meetingTrack[0] = new MeetingTrackSpot();
+        $tomDiceSetAside = array_values(array_filter($dice, function($idie) { return $idie->location_arg === 0; }));
+        $meetingTrack[0] = new MeetingTrackSpot(null, $tomDiceSetAside);
 
         for ($i=1;$i<=5;$i++) {
             $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting', $i));

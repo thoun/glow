@@ -22,6 +22,9 @@ trait SoloActionTrait {
 
         $this->persistDice($dice);
 
+        self::notifyAllPlayers('setTomDice', '', [
+            'dice' => $dice,
+        ]);
         self::notifyAllPlayers('diceRolled', '', [
             'dice' => $dice,
         ]);
@@ -30,7 +33,7 @@ trait SoloActionTrait {
         foreach($dice as &$idie) {
             if ($idie->value > 5) { // we apply black die "-2"
                 $this->applyEffect(0, $idie->value);
-                $this->moveDice([$idie], 'table');
+                $this->moveDice([$idie], 'meeting', 0);
             } else {
                 $this->moveDice([$idie], 'meeting', $idie->value);
 

@@ -52,9 +52,14 @@
   }
 
   &.hidden-tokens {
-    .point-marker {
+    .point-marker, #meeple0 {
       opacity: 0.2;
-    }    
+    } 
+  }
+
+  #meeple0 {
+    top: -5px;
+    left: -5px;
   }
 
   .destination-zone {

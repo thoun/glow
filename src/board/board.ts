@@ -85,6 +85,7 @@ const MAPS: number[][][] = [null, MAP1, MAP2];
 class Board {
     private points = new Map<number, number>();
     private meeples: Meeple[] = [];
+    private tomCompany: number;
     private tokensOpacityTimeout: any;
 
     constructor(
@@ -102,6 +103,14 @@ class Board {
         players.forEach(player => {
             this.points.set(Number(player.id), Number(player.score));
             this.meeples.push(...player.meeples);
+
+            if (Number(player.id) == 0) { // tom
+                const coordinates = this.getPointsCoordinates(player.company);
+                const left = coordinates[0];
+                const top = coordinates[1];
+                const transform = `translateX(${left}px) translateY(${top}px)`;
+                dojo.place(`<div id="meeple0" class="token meeple1 ${this.game.isColorBlindMode() ? 'color-blind' : ''} meeple-player-0" style="background-color: black; transform: ${transform}"></div>`, 'board');
+            }
         });
         this.movePoints();
 
@@ -160,9 +169,11 @@ class Board {
         this.movePoints();
     }
 
-    public incCompany(incCompany: number) {
-        // TODO
-        throw new Error("Method not implemented.");
+    public setTomCompany(company: number) {
+        const coordinates = this.getPointsCoordinates(company);
+        const left = coordinates[0];
+        const top = coordinates[1];
+        document.getElementById(`meeple0`).style.transform = `translateX(${left}px) translateY(${top}px)`;
     }
 
     private getPointsCoordinates(points: number) {
