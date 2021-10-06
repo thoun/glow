@@ -88,72 +88,141 @@ trait SoloUtilTrait {
         return $tom->rerolls;
     }
 
+    
+    function rollAndPlaceTomDice(array $dice) {
+        // roll dice
+        foreach($dice as &$idie) {
+            if ($idie->value > 5) { // we apply black die "-2"
+                $this->applyEffect(0, $idie->value);
+                $this->moveDice([$idie], 'meeting', 0);
+            } else {
+                $this->moveDice([$idie], 'meeting', $idie->value);
+            }
+
+            self::notifyAllPlayers('moveBlackDie', '', [
+                'die' => $idie,
+            ]);
+        }
+
+        $this->persistDice($dice);
+    }
+
     function placeSoloTilesOnMeetingTrack() {
         for ($i=1;$i<=5;$i++) {
             $this->soloTiles->pickCardForLocation('deck', 'meeting', $i);
         }
     }
+
+    function getPossibleSoloRoutesForBoat(object $boat, int $moveMeeple, array $allBoats) {
+        $currentDistanceFromCenter = $this->MAP2[$boat->position]->distanceFromCenter;
+        $routes = $this->getRoutes(2, $boat->position);
+
+        $route = null;
+        foreach($routes as $iRoute) {
+            $distanceFromCenter = $this->MAP2[$iRoute->destination]->distanceFromCenter;
+
+            // remove backward routes
+            if ($distanceFromCenter <= $currentDistanceFromCenter) {
+                continue;
+            }
+
+            // remove routes leading to other boat
+            if ($this->array_some($allBoats, function ($aBoat) use ($iRoute) { return $aBoat->position == $iRoute->destination; })) {
+                continue;
+            }
+
+
+            if ($route == null || 
+                ($moveMeeple == 1 && $iRoute->min < $route->min) || 
+                ($moveMeeple == 2 && $iRoute->max > $route->max)
+            ) {
+                $route = $iRoute;
+            }
+        }
+        return $route;
+    }
+
+    function applyTomCompanyEffect(int $moveCompany) {
+        $company = $this->incTomCompany($moveCompany);
+        $this->incTomScore($company, _('${player_name} moves band token ${incCompany} spaces and gains ${points} bursts of light with played tile'), [
+            'incCompany' => $moveCompany,
+            'company' => $company,
+        ]);
+    }
+
+    function applyTomScoreEffect(int $moveScore) {
+        $this->incTomScore($moveScore, _('${player_name} gains ${points} bursts of light with played tile'));
+    }
+
+    function applyTomMeepleEffectForSide1() {
+        $currentPosition = $this->getPlayerEncampment(0)->position;
+        $currentPoints = $this->MAP1[$currentPosition]->points;
+        $mapSpot = $this->MAP1[14]; 
+        $mapSpotPosition = 14;
+
+        foreach($this->MAP1 as $position => $iMapSpot) { 
+            if ($iMapSpot->points > $currentPoints && $iMapSpot->points < $mapSpot->points) {
+                $mapSpot = $iMapSpot;
+                $mapSpotPosition = $position;
+            }
+        }
+
+        $this->movePlayerCompany(0, $mapSpotPosition, 0);
+    }
+
+    function applyTomMeepleEffectForSide2(int $moveMeeple) {        
+        $allBoats = $this->getPlayerMeeples(0);
+        foreach($allBoats as $boat) {
+            // remove boats that can't move (max distance or all > distances)
+            if ($this->getPossibleSoloRoutesForBoat($boat, $moveMeeple, $allBoats) != null) {
+                $boats[] = $boat;
+            }
+        }        
+
+        // get closest to central island
+        usort($boats, function($a, $b) {
+            $distanceFromCenterA = $this->MAP2[$a->position]->distanceFromCenter;
+            $distanceFromCenterB = $this->MAP2[$b->position]->distanceFromCenter;
+            if ($distanceFromCenterA == $distanceFromCenterB) {
+                return 0;
+            }
+            return ($distanceFromCenterA < $distanceFromCenterB) ? -1 : 1;
+        });
+
+        // select boat closest to center island
+        $boat = $boats[0];
+
+        $route = $this->getPossibleSoloRoutesForBoat($boat, $moveMeeple, $allBoats);
+        $this->movePlayerBoat($playerId, $route->destination, $route->from);
+    }
     
-    function applyTomEffects(int $spot) {
-        $soloTile = $this->getSoloTilesFromDb($this->soloTiles->getCardsInLocation('meeting', $spot))[0];
+    function applyTomEffects(object $soloTile) {
 
         if ($soloTile->location != 'meeting') {
             throw new BgaUserException("Solo tile not available");
         }
 
         if ($soloTile->moveCompany > 0) {
-            $company = $this->incTomCompany($soloTile->moveCompany);
-            $this->incTomScore($company, _('${player_name} moves band token ${incCompany} spaces and gains ${points} bursts of light with played tile'), [
-                'incCompany' => $soloTile->moveCompany,
-                'company' => $company,
-            ]);
+            $this->applyTomCompanyEffect($soloTile->moveCompany);
         }
 
         if ($soloTile->moveScore > 0) {
-            $this->incTomScore($soloTile->moveScore, _('${player_name} gains ${points} bursts of light with played tile'));
+            $this->applyTomScoreEffect($soloTile->moveScore);
         }
 
         if ($soloTile->moveMeeple > 0) {            
             $side = $this->getSide();
             if ($side == 1) {
-                $currentPosition = $this->getPlayerEncampment(0)->position;
-                $currentPoints = $this->MAP1[$currentPosition]->points;
-                $mapSpot = $this->MAP1[14]; 
-                $mapSpotPosition = 14;
-
-                foreach($this->MAP1 as $position => $iMapSpot) { 
-                    if ($iMapSpot->points > $currentPoints && $iMapSpot->points < $mapSpot->points) {
-                        $mapSpot = $iMapSpot;
-                        $mapSpotPosition = $position;
-                    }
-                }
-
-                $this->movePlayerCompany(0, $mapSpotPosition, 0);
+                $this->applyTomMeepleEffectForSide1();
             } else if ($side == 2) {
-                /*$this->movePlayerBoat($playerId, $route->destination, $route->from);*/
-                // TODO `<div>${dojo.string.substitute(_("Move one of Tom’s boats via the path by the ${lowesthighest} value"), { lowesthighest: $soloTile->moveMeeple == 2 ? _("highest") : _("lowest") })}</div>`;
-                /*
-                Important: the path with a value of 1/2 on the right of the
-central island is forbidden.
-Example: from the central island, if the tile is marked
-“max” the player moves one of the boats to the next island
-via the path with a value of 4. If the tile is marked “min”,
-the player moves it via the path with a value of 1/2 on the
-bottom left.
-Choosing which boat to move:
-Take into account all boats which can still move away
-from the central island. A boat that has gone as far as
-possible from the central island cannot be moved any
-more.
-First move a boat that is on the central island. If there is
-none, move the one closest to that island. If there is more
-than one boat to choose from, the choice is yours.
-*/
+                $this->applyTomMeepleEffectForSide2($soloTile->moveMeeple);
             }
         }
 
         $this->soloTiles->moveCard($soloTile->id, 'discard');
+    }
 
+    function updateSoloDeck(int $spot) {
         if (intval($this->soloTiles->countCardInLocation('deck')) == 0) {
             $day = intval($this->getGameStateValue(DAY));
             if ($day == 1) { // we finish solo tiles for the first time
@@ -162,16 +231,51 @@ than one boat to choose from, the choice is yours.
                 $this->soloTiles->moveAllCardsInLocation('discard', 'deck');
                 $this->soloTiles->shuffle('deck');
 
-                // TODO move all type1 companions from the deck to discard
-
-                // TODO notif
+                // move all type1 companions from the deck to discard and use B cards
+                $this->companions->moveAllCardsInLocation('deck', 'discard');
+                $this->companions->moveAllCardsInLocation('deckB', 'deck');
             } else if ($day == 2) { // we finish solo tiles for the second time
                 self::setGameStateValue(DAY, 3);
             }
         }
 
-        $this->soloTiles->pickCardForLocation('deck', 'meeting', $spot);
-        // TODO notif
+        $newSoloTile = $this->getSoloTileFromDb($this->soloTiles->pickCardForLocation('deck', 'meeting', $spot));
+
+        self::notifyAllPlayers('updateSoloTiles', '', [
+            'topDeckType' => $this->getTopDeckType(),
+            'topDeckBType' => intval($this->companions->countCardInLocation('deckB')) > 0 ? 2 : 0,
+            'discardedSoloTiles' => intval($this->soloTiles->countCardInLocation('discard')),
+            'spot' => $spot,
+            'soloTile' => $newSoloTile,
+        ]);
+    }
+
+    function soloEndRecruit() {
+        $dice = $this->getDiceByLocation('meeting');
+        $bigDice = [];
+        $smallDice = [];
+
+        // remove footprints tokens on big dice and roll big & small dice
+        foreach($dice as $die) {
+            if ($die->small) {
+                $smallDice[] = $die;
+            } else {
+                $bigDice[] = $die;
+                $spot = $die->location_arg;
+                $this->removeMeetingTrackFootprints($spot);
+            }
+        }
+
+        $this->rollAndPlaceTomDice($bigDice);
+
+        // If a die indicates a -2 burst of light or a footprint symbol, it must be rerolled until it indicates a color
+        foreach($smallDice as &$idie) {
+            while ($idie->value > 6 || $idie->value < 0) {
+                $idie->roll();
+            }
+        }
+
+        $this->moveSmallDiceToMeetingTrack($smallDice);
     }
 
 }

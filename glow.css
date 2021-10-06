@@ -498,13 +498,17 @@
 #meeting-track #deck {
   left: -150px;
 }
+#meeting-track #deckB {
+  left: -300px;
+}
 #meeting-track #cemetery {
   left: 55px;
 }
 #meeting-track #solo-tiles {
   left: -150px;
-  top: -135px;
-  height: 129px;
+}
+#meeting-track #solo-tiles-discard {
+  left: 55px;
 }
 #meeting-track .hidden-pile {
   background-image: url("img/companions.png");
@@ -521,9 +525,14 @@
 #meeting-track .hidden-pile[data-type="2"] {
   background-position: 44.444% 50%;
 }
-#meeting-track .hidden-pile#solo-tiles {
+#meeting-track .hidden-pile.solo-tiles {
+  top: -135px;
+  height: 129px;
   background: white;
   border: 1px solid gray;
+}
+#meeting-track .hidden-pile.solo-tiles.hidden {
+  display: none;
 }
 
 #currentplayertable .whiteblock, #playerstables .whiteblock {

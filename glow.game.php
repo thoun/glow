@@ -165,6 +165,8 @@ class Glow extends Table {
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
         $sql = "SELECT player_id id, player_score score, player_no playerNo, player_rerolls rerolls, player_footprints footprints, player_fireflies fireflies FROM player ";
         $result['players'] = self::getCollectionFromDb($sql);
+
+        $solo = count($result['players']) == 1;
   
         $result['firstPlayer'] = intval(self::getGameStateValue(FIRST_PLAYER));
         $result['side'] = $this->getSide();
@@ -173,6 +175,9 @@ class Glow extends Table {
         $result['tableDice'] = $this->getDiceByLocation('table');
         $result['topDeckType'] = $this->getTopDeckType();
         $result['topCemeteryType'] = $this->getTopCemeteryType();
+        $result['topDeckType'] = $this->getTopDeckType();
+        $result['topDeckBType'] = $solo && intval($this->companions->countCardInLocation('deckB')) > 0 ? 2 : 0;
+        $result['discardedSoloTiles'] = $solo ? intval($this->soloTiles->countCardInLocation('discard')) : 0;
 
         $dice = $this->getDiceByLocation('meeting');
         $meetingTrack = [];
@@ -205,7 +210,7 @@ class Glow extends Table {
             $player['fireflies'] = intval($player['fireflies']);
         }
 
-        if (count($result['players']) == 1) { // solo mode
+        if ($solo) {
             $result['tom'] = $this->getTom();
             $result['tom']->meeples = $this->getPlayerMeeples(0);
             $result['tom']->color = '000000';

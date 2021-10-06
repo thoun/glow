@@ -15,6 +15,7 @@
                     </div>
                 </div>
                 <div id="meeting-track">
+                    <div id="deckB" class="meeting-track-stock hidden-pile"></div>
                     <div id="deck" class="meeting-track-stock hidden-pile"></div>
                     <div id="cemetery" class="meeting-track-stock hidden-pile"></div>
                 </div>

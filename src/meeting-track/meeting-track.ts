@@ -15,7 +15,9 @@ class MeetingTrack {
         private game: GlowGame,
         meetingTrackSpot: MeetingTrackSpot[],
         topDeckType: number,
+        topDeckBType: number,
         topCemeteryType: number,
+        discardedSoloTiles: number,
     ) {
         const solo = this.game.isSolo();
 
@@ -90,10 +92,12 @@ class MeetingTrack {
         }
 
         this.setDeckTop(DECK, topDeckType);
+        this.setDeckTop(DECKB, topDeckBType);
         this.setDeckTop(CEMETERY, topCemeteryType);
 
         if (game.isSolo()) {
-            dojo.place(`<div id="solo-tiles" class="meeting-track-stock hidden-pile"></div>`, 'meeting-track');
+            dojo.place(`<div id="solo-tiles" class="meeting-track-stock solo-tiles hidden-pile"></div>`, 'meeting-track');
+            dojo.place(`<div id="solo-tiles-discard" class="meeting-track-stock solo-tiles hidden-pile ${discardedSoloTiles ? '' : 'hidden'}"></div>`, 'meeting-track');
             dojo.addClass('middle-band', 'solo');
         }
     }
@@ -190,5 +194,13 @@ class MeetingTrack {
         for (let i=1; i<=5; i++) {
             dojo.toggleClass(`meeting-track-dice-${i}`, 'selectable', possibleSpots.some(ps => ps === i));
         }
+    }
+    
+    public updateSoloTiles(args: NotifUpdateSoloTilesArgs) {
+        this.setDeckTop(DECK, args.topDeckType);
+        this.setDeckTop(DECKB, args.topDeckBType);
+        dojo.toggleClass('solo-tiles-discard', 'hidden', !args.discardedSoloTiles);
+        this.soloTilesStocks[args.spot].removeAllTo('solo-tiles-discard');
+        this.soloTilesStocks[args.spot].addToStockWithId(args.soloTile.type, ''+args.soloTile.id, 'solo-tiles-discard');
     }
 }

@@ -109,7 +109,9 @@ interface GlowGamedatas {
         
     tableDice: Die[];
     topDeckType: number;
+    topDeckBType: number;
     topCemeteryType: number;
+    discardedSoloTiles: number;
 
     meetingTrack: MeetingTrackSpot[];
 
@@ -288,4 +290,12 @@ interface NotifRevealSpellsArgs {
 interface NotifRemoveSpellArgs {
     playerId: number;
     spell: Spell;
+}
+
+interface NotifUpdateSoloTilesArgs {
+    topDeckType: number;
+    topDeckBType: number;
+    discardedSoloTiles: number;
+    spot: number;
+    soloTile: SoloTile;
 }

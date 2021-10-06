@@ -39,6 +39,7 @@ var CARD_HEIGHT = 240;
 var SPELL_DIAMETER = 64;
 var CEMETERY = 'cemetery';
 var DECK = 'deck';
+var DECKB = 'deckB';
 var SOLO_TILES = 'solo-tiles';
 function setupAdventurersCards(adventurerStock) {
     var cardsurl = g_gamethemeurl + "img/adventurers.png";
@@ -461,7 +462,7 @@ var MEETING_SPOT_BY_COLOR = [
     2,
 ];
 var MeetingTrack = /** @class */ (function () {
-    function MeetingTrack(game, meetingTrackSpot, topDeckType, topCemeteryType) {
+    function MeetingTrack(game, meetingTrackSpot, topDeckType, topDeckBType, topCemeteryType, discardedSoloTiles) {
         var _this = this;
         this.game = game;
         this.companionsStocks = [];
@@ -526,9 +527,11 @@ var MeetingTrack = /** @class */ (function () {
             _loop_2(i);
         }
         this.setDeckTop(DECK, topDeckType);
+        this.setDeckTop(DECKB, topDeckBType);
         this.setDeckTop(CEMETERY, topCemeteryType);
         if (game.isSolo()) {
-            dojo.place("<div id=\"solo-tiles\" class=\"meeting-track-stock hidden-pile\"></div>", 'meeting-track');
+            dojo.place("<div id=\"solo-tiles\" class=\"meeting-track-stock solo-tiles hidden-pile\"></div>", 'meeting-track');
+            dojo.place("<div id=\"solo-tiles-discard\" class=\"meeting-track-stock solo-tiles hidden-pile " + (discardedSoloTiles ? '' : 'hidden') + "\"></div>", 'meeting-track');
             dojo.addClass('middle-band', 'solo');
         }
     }
@@ -613,6 +616,13 @@ var MeetingTrack = /** @class */ (function () {
         for (var i = 1; i <= 5; i++) {
             _loop_3(i);
         }
+    };
+    MeetingTrack.prototype.updateSoloTiles = function (args) {
+        this.setDeckTop(DECK, args.topDeckType);
+        this.setDeckTop(DECKB, args.topDeckBType);
+        dojo.toggleClass('solo-tiles-discard', 'hidden', !args.discardedSoloTiles);
+        this.soloTilesStocks[args.spot].removeAllTo('solo-tiles-discard');
+        this.soloTilesStocks[args.spot].addToStockWithId(args.soloTile.type, '' + args.soloTile.id, 'solo-tiles-discard');
     };
     return MeetingTrack;
 }());
@@ -854,7 +864,7 @@ var Glow = /** @class */ (function () {
             players.push(gamedatas.tom);
         }
         this.board = new Board(this, players, gamedatas.tableDice);
-        this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack, gamedatas.topDeckType, gamedatas.topCemeteryType);
+        this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack, gamedatas.topDeckType, gamedatas.topDeckBType, gamedatas.topCemeteryType, gamedatas.discardedSoloTiles);
         this.createPlayerTables(gamedatas);
         if (gamedatas.day > 0) {
             this.roundCounter = new ebg.counter();
@@ -1829,6 +1839,7 @@ var Glow = /** @class */ (function () {
             ['giveHiddenSpells', ANIMATION_MS],
             ['revealSpells', ANIMATION_MS],
             ['removeSpell', ANIMATION_MS],
+            ['updateSoloTiles', ANIMATION_MS],
             ['resolveCardUpdate', 1],
             ['usedDice', 1],
             ['moveUpdate', 1],
@@ -1980,6 +1991,9 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.notif_setTomDice = function (notif) {
         this.setTomDice(notif.args.dice);
+    };
+    Glow.prototype.notif_updateSoloTiles = function (notif) {
+        this.meetingTrack.updateSoloTiles(notif.args);
     };
     Glow.prototype.notif_lastTurn = function () {
         if (document.getElementById('last-round')) {

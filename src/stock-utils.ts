@@ -14,6 +14,7 @@ const SPELL_DIAMETER = 64;
 
 const CEMETERY = 'cemetery';
 const DECK = 'deck';
+const DECKB = 'deckB';
 const SOLO_TILES = 'solo-tiles';
 
 function setupAdventurersCards(adventurerStock: Stock) {

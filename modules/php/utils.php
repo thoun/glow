@@ -311,18 +311,26 @@ trait UtilTrait {
     }
 
     function createCompanions(bool $solo) {
+        $companions = [];
+        $companionsB = [];
         foreach($this->COMPANIONS as $subType => $companion) {
             if ($solo && in_array($subType, $this->REMOVED_COMPANION_FOR_SOLO)) {
                 continue;
             }
-            $companions[] = [ 'type' => $subType > 23 ? 2 : 1, 'type_arg' => $subType, 'nbr' => 1];
+            $card = [ 'type' => $subType > 23 ? 2 : 1, 'type_arg' => $subType, 'nbr' => 1];
+            if ($solo && $subType > 23) {
+                $companionsB[] = $card;
+            } else {
+                $companions[] = $card;
+            }
         }
         $this->companions->createCards($companions, 'deck');
+        if (count($companionsB) > 0) {
+            $this->companions->createCards($companionsB, 'deckB');
+        } 
         $this->companions->shuffle('deck');
 
-        if ($solo) {
-            // TODO seperate in 2 decks ?
-        } else {
+        if (!$solo) {
             // remove 3 of each face
             for ($face=1; $face<=2; $face++) {
                 $removed = array_slice($this->getCompanionsFromDb($this->companions->getCardsOfTypeInLocation($face, null, 'deck')), 0, 3);
@@ -356,6 +364,11 @@ trait UtilTrait {
 
     function removeMeetingTrackFootprints(int $spot) {
         self::DbQuery("UPDATE meetingtrack SET `footprints` = 0 WHERE `spot` = $spot");
+
+        self::notifyAllPlayers('footprintAdded', '', [
+            'spot' => $spot,
+            'number' => 0,
+        ]);
     }
 
     function placeCompanionsOnMeetingTrack() {        

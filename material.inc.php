@@ -124,232 +124,235 @@ $this->SOLO_TILES = [
 $this->SCORE_TRACK_REROLLS = [0, 1, 2, 3, 4, 5, 7, 9, 11, 13, 16, 19, 22, 26, 31, 36, 44, 52];
 
 $this->MAP1 = [
-  new MapSpot(0, [], [
+  new MapSpot1(0, [], [
     new MapRoute(1),
     new MapRoute(44),
   ]),
-  new MapSpot(1, [4], [
+  new MapSpot1(1, [4], [
     new MapRoute(2),
   ]),
-  new MapSpot(2, [4], [
+  new MapSpot1(2, [4], [
     new MapRoute(3),
     new MapRoute(45),
   ]),
-  new MapSpot(3, [4], [
+  new MapSpot1(3, [4], [
     new MapRoute(4),
   ]),
-  new MapSpot(4, [2], [
+  new MapSpot1(4, [2], [
     new MapRoute(5),
   ]),
-  new MapSpot(5, [-21, 11], [
+  new MapSpot1(5, [-21, 11], [
     new MapRoute(6),
     new MapRoute(51),
   ], 5, true),
-  new MapSpot(6, [2], [
+  new MapSpot1(6, [2], [
     new MapRoute(7),
   ]),
-  new MapSpot(7, [1], [
+  new MapSpot1(7, [1], [
     new MapRoute(8),
   ]),
-  new MapSpot(8, [-4], [
+  new MapSpot1(8, [-4], [
     new MapRoute(9),
     new MapRoute(32),
   ]),
-  new MapSpot(9, [3], [
+  new MapSpot1(9, [3], [
     new MapRoute(10),
   ]),
-  new MapSpot(10, [3], [
+  new MapSpot1(10, [3], [
     new MapRoute(11, [11]),
   ]),
-  new MapSpot(11, [-2], [
+  new MapSpot1(11, [-2], [
     new MapRoute(12, [-105]),
     new MapRoute(15),
   ]),
-  new MapSpot(12, [5], [
+  new MapSpot1(12, [5], [
     new MapRoute(13),
   ]),
-  new MapSpot(13, [4], [
+  new MapSpot1(13, [4], [
     new MapRoute(14),
   ]),
-  new MapSpot(14, [-23], [], 20, true),
-  new MapSpot(15, [1], [
+  new MapSpot1(14, [-23], [], 20, true),
+  new MapSpot1(15, [1], [
     new MapRoute(16, [37]),
     new MapRoute(18),
   ]),
-  new MapSpot(16, [3], [
+  new MapSpot1(16, [3], [
     new MapRoute(17),
   ]),
-  new MapSpot(17, [-21], [
+  new MapSpot1(17, [-21], [
     new MapRoute(18),
     new MapRoute(27),
   ], 12, true),
-  new MapSpot(18, [1], [
+  new MapSpot1(18, [1], [
     new MapRoute(19),
   ]),
-  new MapSpot(19, [3], [
+  new MapSpot1(19, [3], [
     new MapRoute(20),
   ]),
-  new MapSpot(20, [3], [
+  new MapSpot1(20, [3], [
     new MapRoute(21),
   ]),
-  new MapSpot(21, [5], [
+  new MapSpot1(21, [5], [
     new MapRoute(22),
   ]),
-  new MapSpot(22, [-1], [
+  new MapSpot1(22, [-1], [
     new MapRoute(23, [30]),
   ]),
-  new MapSpot(23, [5], [
+  new MapSpot1(23, [5], [
     new MapRoute(24),
   ]),
-  new MapSpot(24, [-3], [
+  new MapSpot1(24, [-3], [
     new MapRoute(25),
     new MapRoute(43),
   ]),
-  new MapSpot(25, [5], [
+  new MapSpot1(25, [5], [
     new MapRoute(26),
   ]),
-  new MapSpot(26, [3], [
+  new MapSpot1(26, [3], [
     new MapRoute(28),
   ]),
-  new MapSpot(27, [4], [
+  new MapSpot1(27, [4], [
     new MapRoute(28),
   ]),
-  new MapSpot(28, [3], [
+  new MapSpot1(28, [3], [
     new MapRoute(29),
     new MapRoute(39),
   ]),
-  new MapSpot(29, [4], [
+  new MapSpot1(29, [4], [
     new MapRoute(30),
   ]),
-  new MapSpot(30, [4], [
+  new MapSpot1(30, [4], [
     new MapRoute(31),
     new MapRoute(36),
     new MapRoute(37),
   ]),
-  new MapSpot(31, [2], [
+  new MapSpot1(31, [2], [
     new MapRoute(33),
   ]),
-  new MapSpot(32, [2], [
+  new MapSpot1(32, [2], [
     new MapRoute(33),
   ]),
-  new MapSpot(33, [11, -21], [
+  new MapSpot1(33, [11, -21], [
     new MapRoute(34),
   ], 8, true),
-  new MapSpot(34, [2], [
+  new MapSpot1(34, [2], [
     new MapRoute(35),
   ]),
-  new MapSpot(35, [2], [
+  new MapSpot1(35, [2], [
     new MapRoute(36),
     new MapRoute(50),
     new MapRoute(52),
   ]),
-  new MapSpot(36, [4], []),
-  new MapSpot(37, [-5], [
+  new MapSpot1(36, [4], []),
+  new MapSpot1(37, [-5], [
     new MapRoute(38),
   ]),
-  new MapSpot(38, [30, -21], [
+  new MapSpot1(38, [30, -21], [
     new MapRoute(39),
     new MapRoute(40),
   ], 10, true),
-  new MapSpot(39, [5], []),
-  new MapSpot(40, [1], [
+  new MapSpot1(39, [5], []),
+  new MapSpot1(40, [1], [
     new MapRoute(41, [37]),
     new MapRoute(53),
   ]),
-  new MapSpot(41, [-2], [
+  new MapSpot1(41, [-2], [
     new MapRoute(42),
   ]),
-  new MapSpot(42, [5], [
+  new MapSpot1(42, [5], [
     new MapRoute(43),
   ]),
-  new MapSpot(43, [-22], [], 43, true),
-  new MapSpot(44, [1], [
+  new MapSpot1(43, [-22], [], 43, true),
+  new MapSpot1(44, [1], [
     new MapRoute(45),
   ]),
-  new MapSpot(45, [1], [
+  new MapSpot1(45, [1], [
     new MapRoute(46),
     new MapRoute(60),
   ]),
-  new MapSpot(46, [1], [
+  new MapSpot1(46, [1], [
     new MapRoute(47),
   ]),
-  new MapSpot(47, [1], [
+  new MapSpot1(47, [1], [
     new MapRoute(48),
   ]),
-  new MapSpot(48, [2], [
+  new MapSpot1(48, [2], [
     new MapRoute(49),
     new MapRoute(58),
   ]),
-  new MapSpot(49, [2], [
+  new MapSpot1(49, [2], [
     new MapRoute(50),
   ]),
-  new MapSpot(50, [2], [
+  new MapSpot1(50, [2], [
     new MapRoute(51),
   ]),
-  new MapSpot(51, [-1], []),
-  new MapSpot(52, [3], [
+  new MapSpot1(51, [-1], []),
+  new MapSpot1(52, [3], [
     new MapRoute(54, [11]),
   ]),
-  new MapSpot(53, [1], [
+  new MapSpot1(53, [1], [
     new MapRoute(54),
   ]),
-  new MapSpot(54, [1], [
+  new MapSpot1(54, [1], [
     new MapRoute(55),
   ]),
-  new MapSpot(55, [4], [
+  new MapSpot1(55, [4], [
     new MapRoute(56),
   ]),
-  new MapSpot(56, [-4], [
+  new MapSpot1(56, [-4], [
     new MapRoute(57),
   ]),
-  new MapSpot(57, [-5], [
+  new MapSpot1(57, [-5], [
     new MapRoute(59),
   ]),
-  new MapSpot(58, [-3], [
+  new MapSpot1(58, [-3], [
     new MapRoute(59),
   ]),
-  new MapSpot(59, [-21, 30], [
+  new MapSpot1(59, [-21, 30], [
     new MapRoute(60),
   ], 3, true),
-  new MapSpot(60, [3], []),
+  new MapSpot1(60, [3], []),
 ];
 
 $this->MAP2 = [
-  new MapSpot(0, [], [
+  new MapSpot2(0, [], [
     new MapRoute(1, [], 1, 2),
     new MapRoute(3, [], 3),
     new MapRoute(6, [], 1, 2),    
     new MapRoute(8, [], 3),
     new MapRoute(10, [], 4),
-  ]),
-  new MapSpot(1, [22], [
+  ], 0, 0),
+  new MapSpot2(1, [22], [
     new MapRoute(2),
-  ]),
-  new MapSpot(2, [37], []),
-  new MapSpot(3, [12], [
+  ], 0, -1),
+  new MapSpot2(2, [37], [
+  ], 0, -1),
+  new MapSpot2(3, [12], [
     new MapRoute(4, [], 1, 2),
     new MapRoute(5, [-21], 5),
-  ]),
-  new MapSpot(4, [21], [], 5),
-  new MapSpot(5, [], [
+  ], 0, 1),
+  new MapSpot2(4, [21], [
+  ], 5, 2),
+  new MapSpot2(5, [], [
     new MapRoute(6, [-21], 5),
-  ], 4),
-  new MapSpot(6, [30], [
+  ], 4, 2),
+  new MapSpot2(6, [30], [
     new MapRoute(7, [], 4),
-  ], 2),
-  new MapSpot(7, [30], [
+  ], 2, 1),
+  new MapSpot2(7, [30], [
     new MapRoute(8, [], 4),
-  ], 2),
-  new MapSpot(8, [], [
+  ], 2, 2),
+  new MapSpot2(8, [], [
     new MapRoute(9, [-21], 1, 2),
-  ]),
-  new MapSpot(9, [], [
+  ], 0, 1),
+  new MapSpot2(9, [], [
     new MapRoute(10, [-21], 1, 2),
-  ], 8),
-  new MapSpot(10, [30], [
+  ], 8, 2),
+  new MapSpot2(10, [30], [
     new MapRoute(11, [], 5),
-  ]),
-  new MapSpot(11, [], [], 3),
+  ], 0, 1),
+  new MapSpot2(11, [], [
+  ], 3, 2),
 ];
 
 $this->MAPS = [

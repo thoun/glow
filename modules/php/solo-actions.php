@@ -25,23 +25,8 @@ trait SoloActionTrait {
         self::notifyAllPlayers('setTomDice', '', [
             'dice' => $dice,
         ]);
-        self::notifyAllPlayers('diceRolled', '', [
-            'dice' => $dice,
-        ]);
 
-        // roll dice
-        foreach($dice as &$idie) {
-            if ($idie->value > 5) { // we apply black die "-2"
-                $this->applyEffect(0, $idie->value);
-                $this->moveDice([$idie], 'meeting', 0);
-            } else {
-                $this->moveDice([$idie], 'meeting', $idie->value);
-
-                self::notifyAllPlayers('moveBlackDie', '', [
-                    'die' => $idie,
-                ]);
-            }
-        }
+        $this->rollAndPlaceTomDice($dice);
 
         $this->gamestate->nextState('startRound');
     }

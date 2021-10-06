@@ -83,7 +83,7 @@ class Glow implements GlowGame {
             players.push(gamedatas.tom);
         }
         this.board = new Board(this, players, gamedatas.tableDice);
-        this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack, gamedatas.topDeckType, gamedatas.topCemeteryType);
+        this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack, gamedatas.topDeckType, gamedatas.topDeckBType, gamedatas.topCemeteryType, gamedatas.discardedSoloTiles);
         this.createPlayerTables(gamedatas);
         if (gamedatas.day > 0) {
             this.roundCounter = new ebg.counter();
@@ -1262,6 +1262,7 @@ class Glow implements GlowGame {
             ['giveHiddenSpells', ANIMATION_MS],
             ['revealSpells', ANIMATION_MS],
             ['removeSpell', ANIMATION_MS],
+            ['updateSoloTiles', ANIMATION_MS],
             ['resolveCardUpdate', 1],
             ['usedDice', 1],
             ['moveUpdate', 1],
@@ -1433,6 +1434,10 @@ class Glow implements GlowGame {
 
     notif_setTomDice(notif: Notif<NotifChosenAdventurerArgs>) {
         this.setTomDice(notif.args.dice);
+    }
+
+    notif_updateSoloTiles(notif: Notif<NotifUpdateSoloTilesArgs>) {
+        this.meetingTrack.updateSoloTiles(notif.args);
     }
 
     notif_lastTurn() {

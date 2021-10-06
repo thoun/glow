@@ -127,9 +127,11 @@ trait ActionTrait {
         }
         
         $playerId = self::getActivePlayerId();
-
-        if ($this->isSoloMode()) {
-            $this->applyTomEffects($spot);
+        $solo = $this->isSoloMode();
+        if ($solo) {
+            $soloTile = $this->getSoloTilesFromDb($this->soloTiles->getCardsInLocation('meeting', $spot))[0];
+            $this->applyTomEffects($soloTile);
+            $this->updateSoloDeck($spot);
         }
 
         $spotDice = $this->getDiceByLocation('meeting', $spot);
@@ -148,6 +150,11 @@ trait ActionTrait {
         }
 
         $this->applyRecruitCompanion($playerId, $companion, $spot);
+
+        
+        if ($solo) {
+            $this->soloEndRecruit();
+        }
 
         if ($companion->die && $companion->dieColor === 0) {
             $this->gamestate->nextState('selectSketalDie');
