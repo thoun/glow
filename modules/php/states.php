@@ -34,8 +34,9 @@ trait StateTrait {
         self::DbQuery("UPDATE companion SET `reroll_used` = false");
         self::DbQuery("UPDATE player SET `applied_effects` = null, visited_spots = null");
 
-        self::notifyAllPlayers('newDay', clienttranslate('Day ${day} begins'), [
-            'day' => $day,
+        $message = $solo ? clienttranslate('A new day begins') : clienttranslate('Day ${day} begins');
+        self::notifyAllPlayers('newDay', $message, [
+            'day' => $solo ? 0 : $day,
         ]);
 
         if ($day == 1) {
@@ -177,12 +178,16 @@ trait StateTrait {
         if (!$solo) {
             $nextPlayerTable = self::createNextPlayerTable(array_keys(self::loadPlayersBasicInfos()));
             $newFirstPlayer = intval($nextPlayerTable[intval($this->getGameStateValue(FIRST_PLAYER))]);
+
+            $this->gamestate->changeActivePlayer($newFirstPlayer);
+            
             $this->setGameStateValue(FIRST_PLAYER, $newFirstPlayer);
 
             self::notifyAllPlayers('newFirstPlayer', clienttranslate('${player_name} is the new First player'), [
                 'playerId' => $newFirstPlayer,
                 'player_name' => $this->getPlayerName($newFirstPlayer),
             ]);
+
         }
 
         $endDay = $solo ? 3 : 8;

@@ -23,7 +23,7 @@ interface Notif<T> {
 
 /* TODO repace Function by (..params) => void */
 interface Dojo {
-    place: (html: string, nodeId: string, action?: string) => void;
+    place: (html: string, nodeId: string | HTMLElement, action?: string) => void;
     style: Function;
     hitch: Function;
     hasClass: (nodeId: string, className: string) => boolean;
@@ -40,7 +40,7 @@ interface Dojo {
     fadeIn: Function;
     trim: Function;
     stopEvent: (evt) => void;
-    destroy: (nodeId: string) => void;
+    destroy: (nodeId: string | HTMLElement) => void;
     forEach: Function;
 }
 

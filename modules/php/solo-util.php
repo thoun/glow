@@ -167,7 +167,7 @@ trait SoloUtilTrait {
             }
         }
 
-        $this->movePlayerCompany(0, $mapSpotPosition, 0);
+        $this->movePlayerEncampment(0, $mapSpotPosition, 0);
     }
 
     function applyTomMeepleEffectForSide2(int $moveMeeple) {        

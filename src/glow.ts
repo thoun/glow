@@ -1272,7 +1272,7 @@ class Glow implements GlowGame {
             ['fireflies', 1],
             ['lastTurn', 1],
             ['newFirstPlayer', 1],
-            ['newDay', 1],
+            ['newDay', 3200],
             ['setTomDice', 1],
         ];
 
@@ -1373,6 +1373,11 @@ class Glow implements GlowGame {
         } else {
             this.roundCounter.toValue(day);
         }
+
+        dojo.place(`<div id="new-day"><span>${notif.log.replace('${day}', ''+notif.args.day)}</span></div>`, document.body);
+        const div = document.getElementById(`new-day`);
+        div.addEventListener('animationend', () => dojo.destroy(div));
+        div.classList.add('new-day-animation');
     }
 
     notif_replaceSmallDice(notif: Notif<NotifDiceUpdateArgs>) {

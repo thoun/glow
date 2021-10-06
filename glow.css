@@ -883,3 +883,33 @@ html {
 .token.color-blind[data-player-no="4"]::after {
   content: "◆";
 }
+
+#new-day {
+  position: fixed;
+  width: 100%;
+  height: 100vh;
+  background: black;
+  color: white;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 200%;
+  opacity: 0;
+}
+#new-day.new-day-animation {
+  animation: new-day-animation 3s 1 forwards;
+}
+
+@keyframes new-day-animation {
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

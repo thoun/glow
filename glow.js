@@ -1849,7 +1849,7 @@ var Glow = /** @class */ (function () {
             ['fireflies', 1],
             ['lastTurn', 1],
             ['newFirstPlayer', 1],
-            ['newDay', 1],
+            ['newDay', 3200],
             ['setTomDice', 1],
         ];
         notifs.forEach(function (notif) {
@@ -1941,6 +1941,10 @@ var Glow = /** @class */ (function () {
         else {
             this.roundCounter.toValue(day);
         }
+        dojo.place("<div id=\"new-day\"><span>" + notif.log.replace('${day}', '' + notif.args.day) + "</span></div>", document.body);
+        var div = document.getElementById("new-day");
+        div.addEventListener('animationend', function () { return dojo.destroy(div); });
+        div.classList.add('new-day-animation');
     };
     Glow.prototype.notif_replaceSmallDice = function (notif) {
         this.meetingTrack.placeSmallDice(notif.args.dice);
