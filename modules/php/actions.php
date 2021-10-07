@@ -56,8 +56,12 @@ trait ActionTrait {
         $dice = null;
         if ($spot !== null) {
             $dice = $this->getDiceByLocation('meeting', $spot);
-            if (count($dice) > 0) {
+            $count = count($dice);
+            if ($count > 0) {
                 $this->moveDice($dice, 'player', $playerId);
+
+                self::incStat($count, 'collectedSmallDice');
+                self::incStat($count, 'collectedSmallDice', $playerId);
             }
         }
 
@@ -259,6 +263,9 @@ trait ActionTrait {
         ];
 
         $this->rollPlayerDice($ids, $params);
+
+        self::incStat(count($ids), 'rerolledDice');
+        self::incStat(count($ids), 'rerolledDice', $playerId);
     }
 
     public function changeDie(int $id, int $face) {
@@ -277,6 +284,9 @@ trait ActionTrait {
             'dice' => [$die],
             'args' => $this->argRollDice(),
         ]);
+
+        self::incStat(1, 'rerolledDice');
+        self::incStat(1, 'rerolledDice', $playerId);
     }
 
     public function keepDice() {
@@ -330,6 +340,9 @@ trait ActionTrait {
         if (count($resolveCardsForPlayer->remainingEffects) === 0) {
             $this->gamestate->setPlayerNonMultiactive($playerId, 'move');
         }
+
+        self::incStat(1, 'resolvedCards');
+        self::incStat(1, 'resolvedCards', $playerId);
     }
 
     private function applyMove(int $playerId, object $route) {
@@ -352,6 +365,18 @@ trait ActionTrait {
         }
 
         $side = $this->getSide();
+
+        $footprintEffect = $this->array_find($route->costForPlayer, function($effect) { return $effect < -20 && $effect > -30; });
+        if ($footprintEffect != null) {
+            $destination = $this->getMapSpot($side, $route->destination);
+            if (!$this->array_some($destination->effects, function($effect) { return $effect < -20 && $effect > -30; })) {
+                // we count footprints as joker only if we are not in a spot that require footprint cost
+                $footprintCost = -($footprintEffect + 20);
+                self::incStat($footprintCost, 'footprintsAsJokers');
+                self::incStat($footprintCost, 'footprintsAsJokers', $playerId);
+            }
+        }
+
         if ($side === 1) {
             $this->movePlayerCompany($playerId, $route->destination, $route->from);
 
@@ -368,6 +393,9 @@ trait ActionTrait {
 
             $this->applyEndTurn($playerId);
         }
+
+        self::incStat(1, 'moves');
+        self::incStat(1, 'moves', $playerId);
     }
 
     public function move(int $destination, $from = null, $type = null, $id = null) {

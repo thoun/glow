@@ -114,8 +114,23 @@ class Glow extends Table {
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
-        //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
-        //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
+        self::initStat('table', 'days', 0);
+        self::initStat('table', 'collectedSmallDice', 0);
+        self::initStat('player', 'collectedSmallDice', 0);
+        self::initStat('table', 'rerolledDice', 0);
+        self::initStat('player', 'rerolledDice', 0);
+        self::initStat('table', 'changedDice', 0);
+        self::initStat('player', 'changedDice', 0);
+        self::initStat('table', 'scoreBack', 0);
+        self::initStat('player', 'scoreBack', 0);
+        self::initStat('table', 'resolvedCards', 0);
+        self::initStat('player', 'resolvedCards', 0);
+        self::initStat('table', 'discardedCompanions', 0);
+        self::initStat('player', 'discardedCompanions', 0);
+        self::initStat('table', 'moves', 0);
+        self::initStat('player', 'moves', 0);
+        self::initStat('table', 'footprintsAsJokers', 0);
+        self::initStat('player', 'footprintsAsJokers', 0);
 
         $solo = count($players) == 1;
         if ($solo) {

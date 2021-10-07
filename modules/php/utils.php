@@ -497,6 +497,11 @@ trait UtilTrait {
                 $this->removeSketalDie($playerId, $this->getDieById($dieId));
             }
         }
+
+        if ($playerId > 0) {
+            self::incStat(1, 'discardedCompanions');
+            self::incStat(1, 'discardedCompanions', $playerId);
+        }
     }
         
     private function getTopCompanion(string $location) {
@@ -583,6 +588,9 @@ trait UtilTrait {
         
         if ($remainingCost > 0 && count($args['rerollScore']) > 0) {
             $scoreCost = min(count($args['rerollScore']), $remainingCost);
+
+            self::incStat($scoreCost, 'scoreBack');
+            self::incStat($scoreCost, 'scoreBack', $playerId);
 
             $this->decPlayerScore($playerId, $args['rerollScore'][$scoreCost]);
 

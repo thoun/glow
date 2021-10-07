@@ -47,49 +47,91 @@
     
 */
 
-$stats_type = array(
+$commonStats = [
+    "collectedSmallDice" => [
+        "id" => 11,
+        "name" => totranslate("Collected small dice"),
+        "type" => "int"
+    ],
+    "rerolledDice" => [
+        "id" => 12,
+        "name" => totranslate("Rerolled dice"),
+        "type" => "int"
+    ],
+    "changedDice" => [
+        "id" => 13,
+        "name" => totranslate("Changed dice"),
+        "type" => "int"
+    ],
+    "scoreBack" => [
+        "id" => 14,
+        "name" => totranslate("Score track cases back to get reroll"),
+        "type" => "int"
+    ],
+    "resolvedCards" => [
+        "id" => 15,
+        "name" => totranslate("Resolved cards"),
+        "type" => "int"
+    ],
+    "discardedCompanions" => [
+        "id" => 16,
+        "name" => totranslate("Discarded companions"),
+        "type" => "int"
+    ],
+    "moves" => [
+        "id" => 17,
+        "name" => totranslate("Moves"),
+        "type" => "int"
+    ],
+    "footprintsAsJokers" => [
+        "id" => 18,
+        "name" => totranslate("Footprints used as jokers"),
+        "type" => "int"
+    ],
+];
+
+$stats_type = [
 
     // Statistics global to table
-    "table" => array(
-
-        "turns_number" => array("id"=> 10,
-                    "name" => totranslate("Number of turns"),
-                    "type" => "int" ),
-
-/*
-        Examples:
-
-
-        "table_teststat1" => array(   "id"=> 10,
-                                "name" => totranslate("table test stat 1"), 
-                                "type" => "int" ),
-                                
-        "table_teststat2" => array(   "id"=> 11,
-                                "name" => totranslate("table test stat 2"), 
-                                "type" => "float" )
-*/  
-    ),
+    "table" => $commonStats + [
+        "day" => [
+            "id" => 10,
+            "name" => totranslate("Days"),
+            "type" => "int"
+        ], 
+    ],
     
     // Statistics existing for each player
-    "player" => array(
-
-        "turns_number" => array("id"=> 10,
-                    "name" => totranslate("Number of turns"),
-                    "type" => "int" ),
-    
-/*
-        Examples:    
-        
-        
-        "player_teststat1" => array(   "id"=> 10,
-                                "name" => totranslate("player test stat 1"), 
-                                "type" => "int" ),
-                                
-        "player_teststat2" => array(   "id"=> 11,
-                                "name" => totranslate("player test stat 2"), 
-                                "type" => "float" )
-
-*/    
-    )
-
-);
+    "player" => $commonStats + [
+        "cardsEndPoints" => [
+            "id" => 20,
+            "name" => totranslate("Points gained with adventurers and companions"),
+            "type" => "int"
+        ],
+        "meepleEndPoints" => [
+            "id" => 21,
+            "name" => totranslate("Points gained with encampment or boats"),
+            "type" => "int"
+        ],
+        "endFirefliesTokens" => [
+            "id" => 22,
+            "name" => totranslate("Fireflies tokens"),
+            "type" => "int"
+        ],
+        "endCompanionCount" => [
+            "id" => 23,
+            "name" => totranslate("Companion count"),
+            "type" => "int"
+        ],
+        "endFirefliesBonus" => [
+            "id" => 24,
+            "name" => totranslate("Fireflies bonus"),
+            "type" => "bool"
+        ],
+        "endFootprintsCount" => [
+            "id" => 25,
+            "name" => totranslate("Points gained with footprints"),
+            "type" => "int"
+        ],
+    ]
+];

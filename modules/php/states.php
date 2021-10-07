@@ -180,7 +180,7 @@ trait StateTrait {
             $newFirstPlayer = intval($nextPlayerTable[intval($this->getGameStateValue(FIRST_PLAYER))]);
 
             $this->gamestate->changeActivePlayer($newFirstPlayer);
-            
+
             $this->setGameStateValue(FIRST_PLAYER, $newFirstPlayer);
 
             self::notifyAllPlayers('newFirstPlayer', clienttranslate('${player_name} is the new First player'), [
@@ -191,6 +191,8 @@ trait StateTrait {
         }
 
         $endDay = $solo ? 3 : 8;
+
+        self::incStat(1, 'days');
 
         if (intval($this->companions->countCardInLocation('deck')) == 0 || intval($this->getGameStateValue(DAY)) >= $endDay) {
             $this->gamestate->nextState('endScore');
@@ -221,6 +223,8 @@ trait StateTrait {
                 }
 
                 $this->incPlayerScore($playerId, $points, _('${playerName} gains ${points} bursts of light with adventurer and companions'));
+                
+                self::setStat($points, 'cardsEndPoints', $playerId);
             }
         }
 
@@ -237,19 +241,31 @@ trait StateTrait {
             }
 
             $this->incPlayerScore($playerId, $points, $message);
+
+            if ($playerId != 0) {
+                self::setStat($meepleEndPoints, 'cardsEndPoints', $playerId);
+            }
         }
 
         // Fireflies
         foreach($playersIds as $playerId) {
             $points = $this->getPlayerFireflies($playerId); // TOCHECK does Tom almost always win 10 as he has no companion ?
             $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+            $companionCount = count($companions);
+
             foreach($companions as $companion) {
                 $points += $companion->fireflies;
             }
 
             // If they have as many or more fireflies than companions, they score 10 bursts of light.
-            if ($points > count($companions)) {
+            if ($points > $companionCount) {
                 $this->incPlayerScore($playerId, 10, _('${playerName} gains ${points} bursts of light with fireflies (more fireflies than companions)'));
+            }
+
+            if ($playerId != 0) {
+                self::setStat($points, 'endFirefliesTokens', $playerId);
+                self::setStat($companionCount, 'endCompanionCount', $playerId);
+                self::setStat($points > $companionCount ? 1 : 0, 'endFirefliesBonus', $playerId);
             }
         }
 
@@ -258,6 +274,10 @@ trait StateTrait {
             $points = $this->getPlayerFootprints($playerId);
 
             $this->incPlayerScore($playerId, $points, _('${playerName} gains ${points} bursts of light with footprints'));
+
+            if ($playerId != 0) {
+                self::setStat($points, 'endFootprintsCount', $playerId);
+            }
         }
         
         if ($solo) { // solo mode
