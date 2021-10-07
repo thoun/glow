@@ -199,11 +199,12 @@ class Glow implements GlowGame {
 
         const solo = this.isSolo();
 
-        args.companions.forEach((companion, spot) =>  {
+        args.companions.forEach((meetingTrackSpot, spot) =>  {
             if (spot >=1 && spot <=5) {
-                this.meetingTrack.setCompanion(companion, spot);
+                this.meetingTrack.setCompanion(meetingTrackSpot.companion, spot);
+                this.meetingTrack.placeSmallDice(meetingTrackSpot.dice);
                 if (solo) {
-                    this.meetingTrack.setSoloTile(companion, spot);
+                    this.meetingTrack.setSoloTile(meetingTrackSpot, spot);
                 }
             }
         });
@@ -239,9 +240,9 @@ class Glow implements GlowGame {
     private onEnteringStateRemoveCompanion(args: RecruitCompanionArgs) {
         this.meetingTrackClickAction = 'remove';
 
-        args.companions.forEach((companion, spot) =>  {
+        args.companions.forEach((meetingTrackSpot, spot) =>  {
             if (spot >=1 && spot <=5) {
-                this.meetingTrack.setCompanion(companion, spot);
+                this.meetingTrack.setCompanion(meetingTrackSpot.companion, spot);
             }
         });
         

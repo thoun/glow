@@ -535,9 +535,8 @@ var MeetingTrack = /** @class */ (function () {
             dojo.addClass('middle-band', 'solo');
         }
     }
-    MeetingTrack.prototype.setCompanion = function (meetingTrackSpot, spot) {
+    MeetingTrack.prototype.setCompanion = function (companion, spot) {
         var _a;
-        var companion = meetingTrackSpot.companion;
         if (!companion) {
             this.companionsStocks[spot].removeAllTo(CEMETERY);
             return;
@@ -603,7 +602,7 @@ var MeetingTrack = /** @class */ (function () {
     MeetingTrack.prototype.placeSmallDice = function (dice) {
         var _this = this;
         dice.forEach(function (die) {
-            _this.game.createOrMoveDie(die, "meeting-track-dice-" + die.value);
+            return _this.game.createOrMoveDie(die, "meeting-track-dice-" + die.value);
         });
     };
     MeetingTrack.prototype.setDeckTop = function (deckId, type) {
@@ -965,11 +964,12 @@ var Glow = /** @class */ (function () {
         var _this = this;
         this.meetingTrackClickAction = 'recruit';
         var solo = this.isSolo();
-        args.companions.forEach(function (companion, spot) {
+        args.companions.forEach(function (meetingTrackSpot, spot) {
             if (spot >= 1 && spot <= 5) {
-                _this.meetingTrack.setCompanion(companion, spot);
+                _this.meetingTrack.setCompanion(meetingTrackSpot.companion, spot);
+                _this.meetingTrack.placeSmallDice(meetingTrackSpot.dice);
                 if (solo) {
-                    _this.meetingTrack.setSoloTile(companion, spot);
+                    _this.meetingTrack.setSoloTile(meetingTrackSpot, spot);
                 }
             }
         });
@@ -999,9 +999,9 @@ var Glow = /** @class */ (function () {
     Glow.prototype.onEnteringStateRemoveCompanion = function (args) {
         var _this = this;
         this.meetingTrackClickAction = 'remove';
-        args.companions.forEach(function (companion, spot) {
+        args.companions.forEach(function (meetingTrackSpot, spot) {
             if (spot >= 1 && spot <= 5) {
-                _this.meetingTrack.setCompanion(companion, spot);
+                _this.meetingTrack.setCompanion(meetingTrackSpot.companion, spot);
             }
         });
         if (this.isCurrentPlayerActive()) {

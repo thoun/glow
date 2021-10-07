@@ -102,8 +102,7 @@ class MeetingTrack {
         }
     }
     
-    public setCompanion(meetingTrackSpot: MeetingTrackSpot, spot: number): void {
-        const companion = meetingTrackSpot.companion;
+    public setCompanion(companion: Companion, spot: number): void {
         if (!companion) {
             this.companionsStocks[spot].removeAllTo(CEMETERY);
             return;
@@ -181,9 +180,9 @@ class MeetingTrack {
     }
     
     public placeSmallDice(dice: Die[]) {
-        dice.forEach(die => {
-            this.game.createOrMoveDie(die, `meeting-track-dice-${die.value}`);
-        });
+        dice.forEach(die => 
+            this.game.createOrMoveDie(die, `meeting-track-dice-${die.value}`)
+        );
     }
 
     public setDeckTop(deckId: string, type?: number) {
