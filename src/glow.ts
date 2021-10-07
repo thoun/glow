@@ -251,7 +251,9 @@ class Glow implements GlowGame {
     }
 
     private onEnteringStateMoveBlackDie(args: EnteringMoveBlackDieArgs) {
-        this.meetingTrack.setSelectableDice(args.possibleSpots);
+        if ((this as any).isCurrentPlayerActive()) {
+            this.meetingTrack.setSelectableDice(args.possibleSpots);
+        }
     }
 
     private onEnteringStateRollDice() {
@@ -1272,7 +1274,7 @@ class Glow implements GlowGame {
             ['fireflies', 1],
             ['lastTurn', 1],
             ['newFirstPlayer', 1],
-            ['newDay', 3200],
+            ['newDay', 2800],
             ['setTomDice', 1],
         ];
 

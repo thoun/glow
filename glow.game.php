@@ -84,7 +84,7 @@ class Glow extends Table {
         In this method, you must setup the game according to the game rules, so that
         the game is ready to be played.
     */
-    protected function setupNewGame($players, $options = []) {    
+    protected function setupNewGame($players, $options = []) {   
         // Create players
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
         $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_score, player_avatar, player_rerolls) VALUES ";
@@ -131,6 +131,10 @@ class Glow extends Table {
         self::initStat('player', 'moves', 0);
         self::initStat('table', 'footprintsAsJokers', 0);
         self::initStat('player', 'footprintsAsJokers', 0);
+        foreach($this->ADVENTURERS as $adventurer) {            
+            self::initStat('table', $adventurer->name, 0);
+            self::initStat('player', $adventurer->name, 0);
+        }
 
         $solo = count($players) == 1;
         if ($solo) {

@@ -90,11 +90,30 @@ $commonStats = [
     ],
 ];
 
+
+$ADVENTURERS = [
+    1 => 'Braccio',
+    2 => 'Taetyss',
+    3 => 'Eoles',
+    4 => 'Pocana',
+    5 => 'Moloc\'h',
+    6 => 'Noctiluca',
+    7 => 'Orium',
+];
+
+foreach($ADVENTURERS as $id => $adventurer) {
+    $commonStats[$adventurer] = [
+        "id" => 50+$id,
+        "name" => $adventurer,
+        "type" => "bool"
+    ];
+}
+
 $stats_type = [
 
     // Statistics global to table
     "table" => $commonStats + [
-        "day" => [
+        "days" => [
             "id" => 10,
             "name" => totranslate("Days"),
             "type" => "int"

@@ -243,7 +243,7 @@ trait StateTrait {
             $this->incPlayerScore($playerId, $points, $message);
 
             if ($playerId != 0) {
-                self::setStat($meepleEndPoints, 'cardsEndPoints', $playerId);
+                self::setStat($points, 'meepleEndPoints', $playerId);
             }
         }
 

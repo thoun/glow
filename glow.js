@@ -1009,7 +1009,9 @@ var Glow = /** @class */ (function () {
         }
     };
     Glow.prototype.onEnteringStateMoveBlackDie = function (args) {
-        this.meetingTrack.setSelectableDice(args.possibleSpots);
+        if (this.isCurrentPlayerActive()) {
+            this.meetingTrack.setSelectableDice(args.possibleSpots);
+        }
     };
     Glow.prototype.onEnteringStateRollDice = function () {
         this.setDiceSelectionActive(true);
@@ -1849,7 +1851,7 @@ var Glow = /** @class */ (function () {
             ['fireflies', 1],
             ['lastTurn', 1],
             ['newFirstPlayer', 1],
-            ['newDay', 3200],
+            ['newDay', 2800],
             ['setTomDice', 1],
         ];
         notifs.forEach(function (notif) {

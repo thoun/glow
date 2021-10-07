@@ -41,6 +41,9 @@ trait ActionTrait {
             'newPlayerColor' => $newPlayerColor,
         ]);
 
+        self::setStat(1, $adventurer->name);
+        self::setStat(1, $adventurer->name, $playerId);
+
         if ($this->isSoloMode()) {
             self::giveExtraTime($playerId);
             $this->gamestate->nextState('chooseTomDice');
@@ -146,7 +149,7 @@ trait ActionTrait {
                 return;
             }
         }
-
+        
         $companion = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting', $spot))[0];
 
         if ($companion->location != 'meeting') {
@@ -285,8 +288,8 @@ trait ActionTrait {
             'args' => $this->argRollDice(),
         ]);
 
-        self::incStat(1, 'rerolledDice');
-        self::incStat(1, 'rerolledDice', $playerId);
+        self::incStat(1, 'changedDice');
+        self::incStat(1, 'changedDice', $playerId);
     }
 
     public function keepDice() {
