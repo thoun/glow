@@ -621,7 +621,9 @@ var MeetingTrack = /** @class */ (function () {
         this.setDeckTop(DECKB, args.topDeckBType);
         dojo.toggleClass('solo-tiles-discard', 'hidden', !args.discardedSoloTiles);
         this.soloTilesStocks[args.spot].removeAllTo('solo-tiles-discard');
-        this.soloTilesStocks[args.spot].addToStockWithId(args.soloTile.type, '' + args.soloTile.id, 'solo-tiles-discard');
+        if (args.soloTile) {
+            this.soloTilesStocks[args.spot].addToStockWithId(args.soloTile.type, '' + args.soloTile.id, 'solo-tiles-discard');
+        }
     };
     return MeetingTrack;
 }());
@@ -1851,7 +1853,7 @@ var Glow = /** @class */ (function () {
             ['fireflies', 1],
             ['lastTurn', 1],
             ['newFirstPlayer', 1],
-            ['newDay', 2800],
+            ['newDay', 2500],
             ['setTomDice', 1],
         ];
         notifs.forEach(function (notif) {

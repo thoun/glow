@@ -193,7 +193,11 @@ trait UtilTrait {
     }
 
     function getPlayerName(int $playerId) {
-        return self::getUniqueValueFromDb("SELECT player_name FROM player WHERE player_id = $playerId");
+        if ($playerId == 0) {
+            return 'Tom';
+        } else {
+            return self::getUniqueValueFromDb("SELECT player_name FROM player WHERE player_id = $playerId");
+        }
     }
 
     function getPlayerScore(int $playerId) {

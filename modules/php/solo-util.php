@@ -193,7 +193,7 @@ trait SoloUtilTrait {
         $boat = $boats[0];
 
         $route = $this->getPossibleSoloRoutesForBoat($boat, $moveMeeple, $allBoats);
-        $this->movePlayerBoat($playerId, $route->destination, $route->from);
+        $this->movePlayerBoat(0, $route->destination, $boat->position);
     }
     
     function applyTomEffects(object $soloTile) {
@@ -239,7 +239,8 @@ trait SoloUtilTrait {
             }
         }
 
-        $newSoloTile = $this->getSoloTileFromDb($this->soloTiles->pickCardForLocation('deck', 'meeting', $spot));
+        $newSoloTileDb = $this->soloTiles->pickCardForLocation('deck', 'meeting', $spot);
+        $newSoloTile = $newSoloTileDb != null ? $this->getSoloTileFromDb($newSoloTileDb) : null;
 
         self::notifyAllPlayers('updateSoloTiles', '', [
             'topDeckType' => $this->getTopDeckType(),

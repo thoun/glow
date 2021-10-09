@@ -200,6 +200,8 @@ class MeetingTrack {
         this.setDeckTop(DECKB, args.topDeckBType);
         dojo.toggleClass('solo-tiles-discard', 'hidden', !args.discardedSoloTiles);
         this.soloTilesStocks[args.spot].removeAllTo('solo-tiles-discard');
-        this.soloTilesStocks[args.spot].addToStockWithId(args.soloTile.type, ''+args.soloTile.id, 'solo-tiles-discard');
+        if (args.soloTile) {
+            this.soloTilesStocks[args.spot].addToStockWithId(args.soloTile.type, ''+args.soloTile.id, 'solo-tiles-discard');
+        }
     }
 }

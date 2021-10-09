@@ -1275,7 +1275,7 @@ class Glow implements GlowGame {
             ['fireflies', 1],
             ['lastTurn', 1],
             ['newFirstPlayer', 1],
-            ['newDay', 2800],
+            ['newDay', 2500],
             ['setTomDice', 1],
         ];
 

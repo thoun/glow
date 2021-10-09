@@ -119,7 +119,6 @@ trait MapTrait {
             
             $boats = $this->getPlayerMeeples($playerId, 0);
             foreach($boats as $boat) {
-                $mapSpot = $this->getMapSpot($position);
                 $points += $this->getMapSpotPoints($side, $boat->position);
             }
             
