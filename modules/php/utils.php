@@ -24,6 +24,17 @@ trait UtilTrait {
         return null;
     }
 
+    function array_findIndex(array $array, callable $fn) {
+        $index = 0;
+        foreach ($array as $value) {
+            if($fn($value)) {
+                return $index;
+            }
+            $index++;
+        }
+        return null;
+    }
+
     function array_some(array $array, callable $fn) {
         foreach ($array as $value) {
             if($fn($value)) {
@@ -700,11 +711,11 @@ trait UtilTrait {
             $appliedEffects = json_decode($json_obj, true);
         }
 
-        $remainingEffects = [];
-        foreach($allEffects as $effect) {
-            if (!$this->array_some($appliedEffects, function ($appliedEffect) use ($effect) { return $appliedEffect[0] == $effect[0] && $appliedEffect[1] == $effect[1]; })) {
-                $remainingEffects[] = $effect;
-            }
+        $remainingEffects = $allEffects;
+        foreach($appliedEffects as $effect) {
+            $index = $this->array_findIndex($remainingEffects, function ($remainingEffect) use ($effect) { return $remainingEffect[0] == $effect[0] && $remainingEffect[1] == $effect[1]; });
+            unset($remainingEffects[$index]); 
+            $remainingEffects = array_values($remainingEffects);
         }
 
         return $remainingEffects;

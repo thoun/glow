@@ -294,4 +294,14 @@ trait StateTrait {
 
         $this->gamestate->nextState('endGame');
     }
+
+    /*function stGameEnd() {
+        $playersIds = $this->getPlayersIds();
+        $solo = count($playersIds) == 1;
+        if ($solo && boolval(self::getGameStateValue('game_result_neutralized'))) {
+            self::DbQuery("UPDATE player SET `player_score` = 0, `player_score_aux` = 0");
+        }
+
+        parent::stGameEnd();
+    }*/
 }
