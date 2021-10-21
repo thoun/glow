@@ -109,7 +109,7 @@ trait StateTrait {
 
                 $this->sendToCemetery($playerId, $cromaugCard->id);
                 $companion = $this->getCompanionFromDb($this->companions->getCard($cromaugCard->id));
-                self::notifyAllPlayers('removeCompanion', clienttranslate('${playerName} discard Cromaug and a companion from the cemetery'), [
+                self::notifyAllPlayers('removeCompanion', clienttranslate('${playerName} discards Cromaug and takes a companion from the cemetery'), [
                     'playerId' => $playerId,
                     'playerName' => $this->getPlayerName($playerId),
                     'companion' => $cromaugCard,
