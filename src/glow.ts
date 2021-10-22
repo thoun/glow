@@ -598,9 +598,8 @@ class Glow implements GlowGame {
             <div id="overall_player_board_0" class="player-board current-player-board">					
                 <div class="player_board_inner" id="player_board_inner_982fff">
                     
-                    <div class="emblemwrap" id="avatar_active_wrap_0" style="display: block;">
-                        <img src="https://en.1.studio.boardgamearena.com:8083/data/themereleases/210929-0932/img/layout/active_player.gif" alt="" class="avatar avatar_active" id="avatar_active_2343492">    
-                        <div class="icon20 icon20_night this_is_night"></div>
+                    <div class="emblemwrap" id="avatar_active_wrap_0">
+                        <div src="img/gear.png" alt="" class="avatar avatar_active" id="avatar_active_0"></div>
                     </div>
                                                
                     <div class="player-name" id="player_name_0">
