@@ -179,6 +179,10 @@ function setupCompanionCard(game: Game, cardDiv: HTMLDivElement, type: number) {
     } else if (companionTooltip) {
         (game as any).addTooltipHtml(cardDiv.id, companionTooltip);
     }
+
+    cardDiv.classList.add('card-inner');
+    dojo.place(`<div class="card-front" style="${cardDiv.attributes.getNamedItem('style').nodeValue.replaceAll('"', '\'')}"></div>`, cardDiv);
+    dojo.place(`<div class="card-back back${type > 23 ? 'B' : 'A'}"></div>`, cardDiv);
 }
 
 function setupSpellCard(game: Game, cardDiv: HTMLDivElement, type: number) {

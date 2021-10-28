@@ -153,6 +153,9 @@ function setupCompanionCard(game, cardDiv, type) {
     else if (companionTooltip) {
         game.addTooltipHtml(cardDiv.id, companionTooltip);
     }
+    cardDiv.classList.add('card-inner');
+    dojo.place("<div class=\"card-front\" style=\"" + cardDiv.attributes.getNamedItem('style').nodeValue.replaceAll('"', '\'') + "\"></div>", cardDiv);
+    dojo.place("<div class=\"card-back back" + (type > 23 ? 'B' : 'A') + "\"></div>", cardDiv);
 }
 function setupSpellCard(game, cardDiv, type) {
     var tooltip = getEffectTooltip(game.gamedatas.SPELLS_EFFECTS[type]);
@@ -567,10 +570,14 @@ var MeetingTrack = /** @class */ (function () {
         this.soloTilesStocks[spot].addToStockWithId(soloTile.type, '' + soloTile.id, SOLO_TILES);
     };
     MeetingTrack.prototype.removeCompanion = function (spot) {
-        if (spot == 0) {
-            debugger;
-        }
+        var _a;
+        var id = this.companionsStocks[spot].container_div.id + "_item_" + ((_a = this.companionsStocks[spot].items[0]) === null || _a === void 0 ? void 0 : _a.id);
+        var card = document.getElementById(id);
         this.companionsStocks[spot].removeAllTo(CEMETERY);
+        if (card) {
+            card.classList.add('flipped');
+            setTimeout(function () { return card.style.visibility = 'hidden'; }, 500);
+        }
     };
     MeetingTrack.prototype.removeCompanions = function () {
         for (var i = 1; i <= 5; i++) {
@@ -753,7 +760,13 @@ var PlayerTable = /** @class */ (function () {
         dice.forEach(function (die) { return _this.game.fadeOutAndDestroy("die" + die.id); });
     };
     PlayerTable.prototype.removeCompanion = function (companion, removedBySpell) {
+        var id = this.companionsStock.container_div.id + "_item_" + companion.id;
+        var card = document.getElementById(id);
         this.companionsStock.removeFromStockById('' + companion.id, CEMETERY);
+        if (card) {
+            card.classList.add('flipped');
+            setTimeout(function () { return card.style.visibility = 'hidden'; }, 500);
+        }
         if (removedBySpell) {
             this.removeSpell(removedBySpell);
         }

@@ -140,10 +140,13 @@ class MeetingTrack {
     }
 
     public removeCompanion(spot: number) {
-        if (spot == 0) {
-            debugger;
-        }
+        const id = `${this.companionsStocks[spot].container_div.id}_item_${this.companionsStocks[spot].items[0]?.id}`;
+        const card = document.getElementById(id);
         this.companionsStocks[spot].removeAllTo(CEMETERY);
+        if (card) {
+            card.classList.add('flipped');
+            setTimeout(() => card.style.visibility = 'hidden', 500);
+        }
     }
 
     public removeCompanions() {

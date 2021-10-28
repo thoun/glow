@@ -256,3 +256,51 @@ html {
     opacity: 0;
   }
 }
+
+.card-inner {
+  position: relative;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+
+  &.flipped {    
+    border: 0;
+    background: unset;
+    transform: rotateY(180deg);
+  }
+
+  &:not(.flipped) {
+    .card-front, .card-back {
+      display: none;
+    }
+  }
+}
+
+.card-front, .card-back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 10px;
+  border: 1px solid gray;
+
+  transition: transform 0.5s;
+  transform-style: preserve-3d;
+
+  -webkit-backface-visibility: hidden; /* Safari */
+  backface-visibility: hidden;
+}
+
+.card-back {  
+  transform: rotateY(180deg);
+
+  background-image: url('img/companions.png');
+
+  &.backA {
+    background-position: 0% 0%;
+  }
+
+  &.backB {
+    background-position: 44.444% 50%;
+  }
+}

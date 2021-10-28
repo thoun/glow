@@ -167,7 +167,13 @@ class PlayerTable {
     }
     
     public removeCompanion(companion: Companion, removedBySpell?: Spell) {
+        const id = `${this.companionsStock.container_div.id}_item_${companion.id}`;
+        const card = document.getElementById(id);
         this.companionsStock.removeFromStockById(''+companion.id, CEMETERY);
+        if (card) {
+            card.classList.add('flipped');
+            setTimeout(() => card.style.visibility = 'hidden', 500);
+        }        
         
         if (removedBySpell) {
             this.removeSpell(removedBySpell);
