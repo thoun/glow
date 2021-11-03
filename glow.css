@@ -403,6 +403,9 @@
 #board.hidden-tokens .point-marker, #board.hidden-tokens #meeple0 {
   opacity: 0.2;
 }
+#board.hidden-meeples .token {
+  opacity: 0.3;
+}
 #board #meeple0 {
   top: -5px;
   left: -5px;

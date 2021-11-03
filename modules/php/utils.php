@@ -665,7 +665,7 @@ trait UtilTrait {
         $dice = $this->getDiceByLocation('player', $playerId, $used);
         $blackDie = $this->array_find($dice, function($die) { return $die->color == 8; });
         if ($blackDie != null) { // got black Die
-            return array_values(array_filter($dice), function($die) use ($blackDie) { return $die->value != $blackDie->value; });
+            return array_values(array_filter($dice, function($die) use ($blackDie) { return $die->value != $blackDie->value; }));
         } else {
             return $dice;
         }

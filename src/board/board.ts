@@ -142,6 +142,7 @@ class Board {
             if (this.tokensOpacityTimeout) {
                 clearTimeout(this.tokensOpacityTimeout);
                 dojo.removeClass('board', 'hidden-tokens');
+                dojo.removeClass('board', 'hidden-meeples');
                 this.tokensOpacityTimeout = null;
             }
         });
@@ -151,17 +152,19 @@ class Board {
         const x = event.offsetX;
         const y = event.offsetY;
 
-        if (x < BOARD_POINTS_MARGIN || y < BOARD_POINTS_MARGIN || x > boardDiv.clientWidth - BOARD_POINTS_MARGIN || y > boardDiv.clientHeight - BOARD_POINTS_MARGIN) {
+        //if (x < BOARD_POINTS_MARGIN || y < BOARD_POINTS_MARGIN || x > boardDiv.clientWidth - BOARD_POINTS_MARGIN || y > boardDiv.clientHeight - BOARD_POINTS_MARGIN) {
             dojo.addClass('board', 'hidden-tokens');
+            dojo.addClass('board', 'hidden-meeples');
 
             if (this.tokensOpacityTimeout) {
                 clearTimeout(this.tokensOpacityTimeout);
             }
             this.tokensOpacityTimeout = setTimeout(() => {
                 dojo.removeClass('board', 'hidden-tokens');
+                dojo.removeClass('board', 'hidden-meeples');
                 this.tokensOpacityTimeout = null;
             }, HIDDEN_TOKENS_DELAY);
-        }
+        //}
     }
 
     public incPoints(playerId: number, points: number) {

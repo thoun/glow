@@ -14,10 +14,7 @@ function slideToObjectAndAttach(object: HTMLElement, destinationId: string, posX
         const deltaX = destinationCR.left - objectCR.left + (posX ?? 0);
         const deltaY = destinationCR.top - objectCR.top + (posY ?? 0);
 
-        object.style.transition = `transform 0.5s ease-in`;
-        object.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-
-        const transitionend = () => {
+        const attachToNewParent = () => {
             object.style.top = posY !== undefined ? `${posY}px` : 'unset';
             object.style.left = posX !== undefined ? `${posX}px` : 'unset';
             object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
@@ -25,12 +22,24 @@ function slideToObjectAndAttach(object: HTMLElement, destinationId: string, posX
             object.style.transform = 'unset';
             object.style.transition = 'unset';
             destination.appendChild(object);
+        }
 
-            object.removeEventListener('transitionend', transitionend);
+        if (document.visibilityState === 'hidden') {
+            // if tab is not visible, we skip animation (else they could be delayed or cancelled by browser)
+            attachToNewParent();
+        } else {
+            object.style.transition = `transform 0.5s ease-in`;
+            object.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
 
-            resolve(true);
-        };
+            const transitionend = () => {
+                attachToNewParent();
 
-        object.addEventListener('transitionend', transitionend);
+                object.removeEventListener('transitionend', transitionend);
+
+                resolve(true);
+            };
+
+            object.addEventListener('transitionend', transitionend);
+        }
     });
 }

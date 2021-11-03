@@ -10,9 +10,7 @@ function slideToObjectAndAttach(object, destinationId, posX, posY) {
         var destinationCR = destination.getBoundingClientRect();
         var deltaX = destinationCR.left - objectCR.left + (posX !== null && posX !== void 0 ? posX : 0);
         var deltaY = destinationCR.top - objectCR.top + (posY !== null && posY !== void 0 ? posY : 0);
-        object.style.transition = "transform 0.5s ease-in";
-        object.style.transform = "translate(" + deltaX + "px, " + deltaY + "px)";
-        var transitionend = function () {
+        var attachToNewParent = function () {
             object.style.top = posY !== undefined ? posY + "px" : 'unset';
             object.style.left = posX !== undefined ? posX + "px" : 'unset';
             object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
@@ -20,10 +18,21 @@ function slideToObjectAndAttach(object, destinationId, posX, posY) {
             object.style.transform = 'unset';
             object.style.transition = 'unset';
             destination.appendChild(object);
-            object.removeEventListener('transitionend', transitionend);
-            resolve(true);
         };
-        object.addEventListener('transitionend', transitionend);
+        if (document.visibilityState === 'hidden') {
+            // if tab is not visible, we skip animation (else they could be delayed or cancelled by browser)
+            attachToNewParent();
+        }
+        else {
+            object.style.transition = "transform 0.5s ease-in";
+            object.style.transform = "translate(" + deltaX + "px, " + deltaY + "px)";
+            var transitionend_1 = function () {
+                attachToNewParent();
+                object.removeEventListener('transitionend', transitionend_1);
+                resolve(true);
+            };
+            object.addEventListener('transitionend', transitionend_1);
+        }
     });
 }
 /*declare const define;
@@ -344,6 +353,7 @@ var Board = /** @class */ (function () {
             if (_this.tokensOpacityTimeout) {
                 clearTimeout(_this.tokensOpacityTimeout);
                 dojo.removeClass('board', 'hidden-tokens');
+                dojo.removeClass('board', 'hidden-meeples');
                 _this.tokensOpacityTimeout = null;
             }
         });
@@ -352,16 +362,18 @@ var Board = /** @class */ (function () {
         var _this = this;
         var x = event.offsetX;
         var y = event.offsetY;
-        if (x < BOARD_POINTS_MARGIN || y < BOARD_POINTS_MARGIN || x > boardDiv.clientWidth - BOARD_POINTS_MARGIN || y > boardDiv.clientHeight - BOARD_POINTS_MARGIN) {
-            dojo.addClass('board', 'hidden-tokens');
-            if (this.tokensOpacityTimeout) {
-                clearTimeout(this.tokensOpacityTimeout);
-            }
-            this.tokensOpacityTimeout = setTimeout(function () {
-                dojo.removeClass('board', 'hidden-tokens');
-                _this.tokensOpacityTimeout = null;
-            }, HIDDEN_TOKENS_DELAY);
+        //if (x < BOARD_POINTS_MARGIN || y < BOARD_POINTS_MARGIN || x > boardDiv.clientWidth - BOARD_POINTS_MARGIN || y > boardDiv.clientHeight - BOARD_POINTS_MARGIN) {
+        dojo.addClass('board', 'hidden-tokens');
+        dojo.addClass('board', 'hidden-meeples');
+        if (this.tokensOpacityTimeout) {
+            clearTimeout(this.tokensOpacityTimeout);
         }
+        this.tokensOpacityTimeout = setTimeout(function () {
+            dojo.removeClass('board', 'hidden-tokens');
+            dojo.removeClass('board', 'hidden-meeples');
+            _this.tokensOpacityTimeout = null;
+        }, HIDDEN_TOKENS_DELAY);
+        //}
     };
     Board.prototype.incPoints = function (playerId, points) {
         this.points.set(playerId, this.points.get(playerId) + points);
@@ -1476,7 +1488,7 @@ var Glow = /** @class */ (function () {
         var possibleRerolls = this.rollDiceArgs.rerollCompanion + this.rollDiceArgs.rerollTokens + Object.values(this.rollDiceArgs.rerollScore).length;
         this.addActionButton("setRollDice-button", _("Reroll 1 or 2 dice") + formatTextIcons(' (1 [reroll] )'), function () { return _this.setActionBarSelectRollDice(); });
         this.addActionButton("setChangeDie-button", _("Change die face") + formatTextIcons(' (3 [reroll] )'), function () { return _this.setActionBarSelectChangeDie(); });
-        this.addActionButton("keepDice-button", _("Keep"), function () { return _this.keepDice(); }, null, null, 'red');
+        this.addActionButton("keepDice-button", _("Keep current dice"), function () { return _this.keepDice(); }, null, null, 'red');
         dojo.toggleClass("setRollDice-button", 'disabled', possibleRerolls < 1);
         dojo.toggleClass("setChangeDie-button", 'disabled', possibleRerolls < 3);
     };

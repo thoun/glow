@@ -800,7 +800,7 @@ class Glow implements GlowGame {
 
         (this as any).addActionButton(`setRollDice-button`, _("Reroll 1 or 2 dice") + formatTextIcons(' (1 [reroll] )'), () => this.setActionBarSelectRollDice());
         (this as any).addActionButton(`setChangeDie-button`, _("Change die face") + formatTextIcons(' (3 [reroll] )'), () => this.setActionBarSelectChangeDie());
-        (this as any).addActionButton(`keepDice-button`, _("Keep"), () => this.keepDice(), null, null, 'red');
+        (this as any).addActionButton(`keepDice-button`, _("Keep current dice"), () => this.keepDice(), null, null, 'red');
 
         dojo.toggleClass(`setRollDice-button`, 'disabled', possibleRerolls < 1);
         dojo.toggleClass(`setChangeDie-button`, 'disabled', possibleRerolls < 3);

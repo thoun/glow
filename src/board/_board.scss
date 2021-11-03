@@ -57,6 +57,12 @@
     } 
   }
 
+  &.hidden-meeples {
+    .token {
+      opacity: 0.3;
+    }
+  }
+
   #meeple0 {
     top: -5px;
     left: -5px;

@@ -194,7 +194,13 @@ trait StateTrait {
 
         self::incStat(1, 'days');
 
-        if (intval($this->companions->countCardInLocation('deck')) == 0 || intval($this->getGameStateValue(DAY)) >= $endDay) {
+        $day = intval($this->getGameStateValue(DAY));
+        $message = $solo ? clienttranslate('Day ends') : clienttranslate('Day ${day} begins');
+        self::notifyAllPlayers('endDay', $message, [
+            'day' => $solo ? 0 : $day,
+        ]);
+
+        if (intval($this->companions->countCardInLocation('deck')) == 0 || $day >= $endDay) {
             $this->gamestate->nextState('endScore');
         } else {
             $this->gamestate->nextState('newRound');
