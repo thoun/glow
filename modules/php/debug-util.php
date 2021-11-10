@@ -12,17 +12,17 @@ trait DebugUtilTrait {
         }
 
         //self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (44, 13, 14, 15, 16, 17)");
-        //self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (20)");
+        self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (20)");
         //self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (10, 20, 41, 44)");
         //self::DbQuery("UPDATE companion SET `card_location` = 'cemetery' where `card_type_arg` in (44, 13, 14, 15, 16, 17)");
         //$this->debugSetCompanionForPlayer(2343492, 41);
         //$this->debugSetPoints(19);
         //$this->debugSkipAdventurers();
 
-        $this->debugMoveMeeple(2343492, 15, 0);
-        $this->debugMoveMeeple(2343493, 40, 0);
+        //$this->debugMoveMeeple(2343492, 15, 0);
+        //$this->debugMoveMeeple(2343493, 40, 0);
 
-        $this->debugAddSpell(2343492, 1);
+        //$this->debugAddSpell(2343492, 1);
 
         // Activate first player must be commented in setup if this is used
         //$this->gamestate->changeActivePlayer(2343492);

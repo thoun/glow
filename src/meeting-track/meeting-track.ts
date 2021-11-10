@@ -49,7 +49,7 @@ class MeetingTrack {
             this.companionsStocks[i].create(this.game, $(`meeting-track-companion-${i}`), CARD_WIDTH, CARD_HEIGHT);
             this.companionsStocks[i].setSelectionMode(0);
             this.companionsStocks[i].onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupCompanionCard(game, cardDiv, type);
-            dojo.connect(this.companionsStocks[i], 'onChangeSelection', this, () => this.game.selectMeetingTrackCompanion(i));
+            dojo.connect(this.companionsStocks[i], 'onChangeSelection', this, (_, id) => id && this.game.selectMeetingTrackCompanion(i));
 
             setupCompanionCards(this.companionsStocks[i]);
     

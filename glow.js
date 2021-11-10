@@ -503,7 +503,7 @@ var MeetingTrack = /** @class */ (function () {
             this_1.companionsStocks[i].create(this_1.game, $("meeting-track-companion-" + i), CARD_WIDTH, CARD_HEIGHT);
             this_1.companionsStocks[i].setSelectionMode(0);
             this_1.companionsStocks[i].onItemCreate = function (cardDiv, type) { return setupCompanionCard(game, cardDiv, type); };
-            dojo.connect(this_1.companionsStocks[i], 'onChangeSelection', this_1, function () { return _this.game.selectMeetingTrackCompanion(i); });
+            dojo.connect(this_1.companionsStocks[i], 'onChangeSelection', this_1, function (_, id) { return id && _this.game.selectMeetingTrackCompanion(i); });
             setupCompanionCards(this_1.companionsStocks[i]);
             if (spot.companion) {
                 this_1.companionsStocks[i].addToStockWithId(spot.companion.subType, '' + spot.companion.id);
