@@ -254,12 +254,12 @@ trait ActionTrait {
         $this->gamestate->nextState('nextPlayer');
     }
 
-    public function rollDice(array $ids) {
+    public function rollDice(array $ids, array $cost) {
         self::checkAction('rollDice');
 
         $playerId = $this->getCurrentPlayerId();
 
-        $this->applyRollDieCost($playerId, 1);
+        $this->applyRollDieCost($playerId, 1, $cost);
 
         $params = [
             'args' => $this->argRollDice(),
@@ -271,12 +271,12 @@ trait ActionTrait {
         self::incStat(count($ids), 'rerolledDice', $playerId);
     }
 
-    public function changeDie(int $id, int $face) {
+    public function changeDie(int $id, int $face, array $cost) {
         self::checkAction('changeDie');
 
         $playerId = $this->getCurrentPlayerId();
 
-        $this->applyRollDieCost($playerId, 3);
+        $this->applyRollDieCost($playerId, 3, $cost);
 
         $die = $this->getDieById($id);
         $originalDiceStr = $this->getDieFaceLogName($die);

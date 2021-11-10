@@ -586,47 +586,47 @@ trait UtilTrait {
         return $rerolls;
     }
 
-    public function applyRollDieCost(int $playerId, int $cost) {
-        $args = $this->argRollDiceForPlayer($playerId);
-        $remainingCost = $cost;
+    public function applyRollDieCost(int $playerId, int $costNumber, array $cost) {
+        $costNumberSum = array_reduce($cost, function ($carry, $item) { return $carry + $item; }, 0);
+        if ($costNumberSum != $costNumber) {
+            throw new BgaUserException('Invalid roll die cost');
+        }
 
-        if ($remainingCost > 0 && $args['rerollCompanion'] > 0) {
-            $companionsToFlag = min($args['rerollCompanion'], $remainingCost);
+        $args = $this->argRollDiceForPlayer($playerId);
+
+        if ($cost[0] > 0) {
+            if ($args['rerollCompanion'] < $cost[0]) {
+                throw new BgaUserException('Not enough reroll available (companion)');
+            }
 
             $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
             $companionsFlagged = 0;
             foreach($companions as $companion) {
-                if ($companionsFlagged < $companionsToFlag && $companion->reroll && !$this->getRerollUsed($companion)) {
+                if ($companionsFlagged < $cost[0] && $companion->reroll && !$this->getRerollUsed($companion)) {
                     self::DbQuery("UPDATE companion SET `reroll_used` = true WHERE card_id = $companion->id");
                     $companionsFlagged++;
                 }
             }
-
-            $remainingCost = max(0, $remainingCost - $companionsFlagged);
-        }
-        
-        if ($remainingCost > 0 && $args['rerollTokens'] > 0) {
-            $tokenCost = min($args['rerollTokens'], $remainingCost);
-
-            $this->removePlayerRerolls($playerId, $tokenCost);
-
-            $remainingCost -= $tokenCost;
-        }
-        
-        if ($remainingCost > 0 && count($args['rerollScore']) > 0) {
-            $scoreCost = min(count($args['rerollScore']), $remainingCost);
-
-            self::incStat($scoreCost, 'scoreBack');
-            self::incStat($scoreCost, 'scoreBack', $playerId);
-
-            $this->decPlayerScore($playerId, $args['rerollScore'][$scoreCost]);
-
-            $remainingCost -= $scoreCost;
         }
 
-        if ($remainingCost > 0) {
-            throw new BgaUserException('Not enough reroll available');
+        if ($cost[1] > 0) {
+            if ($args['rerollTokens'] < $cost[1]) {
+                throw new BgaUserException('Not enough reroll available (token)');
+            }
+
+            $this->removePlayerRerolls($playerId, $cost[1]);
         }
+
+        if ($cost[2] > 0) {
+            if (count($args['rerollScore']) < $cost[2]) {
+                throw new BgaUserException('Not enough reroll available (score)');
+            }
+
+            self::incStat($cost[2], 'scoreBack');
+            self::incStat($cost[2], 'scoreBack', $playerId);
+
+            $this->decPlayerScore($playerId, $args['rerollScore'][$cost[2]]);
+        }        
     }
 
     private function countRepetitionInDiceForEffectCondition(array $diceValues, array $conditions) { // here conditions are always >=1 and <=5

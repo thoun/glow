@@ -104,7 +104,8 @@
 
         $idsStr = explode(',', self::getArg("ids", AT_numberlist, true));
         $ids = array_map(function($idStr) { return intval($idStr); }, $idsStr);
-        $this->game->rollDice($ids);
+        $cost = explode(',', self::getArg("cost", AT_numberlist, true)); // cost : [companion, tokens, score]
+        $this->game->rollDice($ids, $cost);
 
         self::ajaxResponse();
 
@@ -115,7 +116,8 @@
 
         $id = self::getArg('id', AT_posint, true);
         $value = self::getArg('value', AT_posint, true);
-        $this->game->changeDie($id, $value);
+        $cost = explode(',', self::getArg("cost", AT_numberlist, true)); // cost : [companion, tokens, score]
+        $this->game->changeDie($id, $value, $cost);
 
         self::ajaxResponse();
 
