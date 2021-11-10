@@ -75,7 +75,10 @@ trait StateTrait {
             'topCemeteryType' => $this->getTopCemeteryType(),
         ]);
 
-        $this->rollPlayerDice();
+        $playersIds = $this->getPlayersIds();      
+        foreach($playersIds as $playerId) {
+            $this->rollPlayerDice($playerId, null, clienttranslate('${player_name} rolls dice ${rolledDice}'));
+        }
 
         $this->gamestate->nextState('');
     }

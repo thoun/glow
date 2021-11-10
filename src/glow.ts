@@ -1482,6 +1482,14 @@ class Glow implements GlowGame {
                 if (typeof args.companionName == 'string' && args.companionName[0] != '<') {
                     args.companionName = `<strong>${args.companionName}</strong>`;
                 }
+
+                for (const property in args) {
+                    if (args[property]?.indexOf?.(']') > 0) {
+                        args[property] = formatTextIcons(_(args[property]));
+                    }
+                }
+
+                log = formatTextIcons(_(log));
             }
         } catch (e) {
             console.error(log,args,"Exception thrown", e.stack);

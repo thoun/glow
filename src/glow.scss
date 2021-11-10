@@ -258,7 +258,7 @@ html {
 }
 
 .card-inner {
-  position: relative;
+  position: absolute;
   transition: transform 0.8s;
   transform-style: preserve-3d;
 
@@ -302,5 +302,45 @@ html {
 
   &.backB {
     background-position: 44.444% 50%;
+  }
+}
+
+.die-icon {
+  border-radius: 20%;  
+  background-size: auto 100%;
+  display: inline-block;
+  margin-bottom: -4px;
+
+  @for $i from 1 through 6 {
+      &[data-color="#{$i}"] {
+        background-image: url('img/die#{$i}.png');
+      }
+  }
+
+  @for $i from 1 through 6 {
+      &[data-face="#{$i}"] {
+          background-position: (($i - 1) * 20%) 100%;
+      }
+  }
+
+}
+
+
+
+.log {
+  .die-icon {
+    width: 20px;
+    height: 20px;
+    margin-left: 2px;
+    margin-right: 2px;
+  }
+}
+
+.gamelogreview {
+  .die-icon {
+    width: 20px;
+    height: 20px;
+    margin-left: 2px;
+    margin-right: 2px;
   }
 }

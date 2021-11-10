@@ -376,8 +376,6 @@
   height: 16px;
   box-shadow: 1px 1px 1px 1px black;
   border-radius: 50%;
-  background-image: url("img/points.png");
-  background-size: auto 100%;
   transition: transform 0.5s, opacity 0.5s;
   pointer-events: none;
 }
@@ -925,7 +923,7 @@ html {
   }
 }
 .card-inner {
-  position: relative;
+  position: absolute;
   transition: transform 0.8s;
   transform-style: preserve-3d;
 }
@@ -962,4 +960,61 @@ html {
 }
 .card-back.backB {
   background-position: 44.444% 50%;
+}
+
+.die-icon {
+  border-radius: 20%;
+  background-size: auto 100%;
+  display: inline-block;
+  margin-bottom: -4px;
+}
+.die-icon[data-color="1"] {
+  background-image: url("img/die1.png");
+}
+.die-icon[data-color="2"] {
+  background-image: url("img/die2.png");
+}
+.die-icon[data-color="3"] {
+  background-image: url("img/die3.png");
+}
+.die-icon[data-color="4"] {
+  background-image: url("img/die4.png");
+}
+.die-icon[data-color="5"] {
+  background-image: url("img/die5.png");
+}
+.die-icon[data-color="6"] {
+  background-image: url("img/die6.png");
+}
+.die-icon[data-face="1"] {
+  background-position: 0% 100%;
+}
+.die-icon[data-face="2"] {
+  background-position: 20% 100%;
+}
+.die-icon[data-face="3"] {
+  background-position: 40% 100%;
+}
+.die-icon[data-face="4"] {
+  background-position: 60% 100%;
+}
+.die-icon[data-face="5"] {
+  background-position: 80% 100%;
+}
+.die-icon[data-face="6"] {
+  background-position: 100% 100%;
+}
+
+.log .die-icon {
+  width: 20px;
+  height: 20px;
+  margin-left: 2px;
+  margin-right: 2px;
+}
+
+.gamelogreview .die-icon {
+  width: 20px;
+  height: 20px;
+  margin-left: 2px;
+  margin-right: 2px;
 }

@@ -221,7 +221,8 @@ function formatTextIcons(rawText) {
     return rawText
         .replace(/\[reroll\]/ig, '<span class="icon reroll"></span>')
         .replace(/\[point\]/ig, '<span class="icon point"></span>')
-        .replace(/\[symbol(\d)\]/ig, '<span class="icon symbol$1"></span>');
+        .replace(/\[symbol(\d)\]/ig, '<span class="icon symbol$1"></span>')
+        .replace(/\[die:(\d):(\d)\]/ig, '<span class="die-icon" data-color="$1" data-face="$2"></span>');
 }
 var POINT_CASE_SIZE = 25.5;
 var BOARD_POINTS_MARGIN = 38;
@@ -2050,7 +2051,7 @@ var Glow = /** @class */ (function () {
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */
     Glow.prototype.format_string_recursive = function (log, args) {
-        var _a;
+        var _a, _b, _c;
         try {
             if (log && args && !args.processed) {
                 if (typeof args.adventurerName == 'string' && args.adventurerName[0] != '<') {
@@ -2059,6 +2060,12 @@ var Glow = /** @class */ (function () {
                 if (typeof args.companionName == 'string' && args.companionName[0] != '<') {
                     args.companionName = "<strong>" + args.companionName + "</strong>";
                 }
+                for (var property in args) {
+                    if (((_c = (_b = args[property]) === null || _b === void 0 ? void 0 : _b.indexOf) === null || _c === void 0 ? void 0 : _c.call(_b, ']')) > 0) {
+                        args[property] = formatTextIcons(_(args[property]));
+                    }
+                }
+                log = formatTextIcons(_(log));
             }
         }
         catch (e) {

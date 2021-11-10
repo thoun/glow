@@ -265,7 +265,7 @@ trait ActionTrait {
             'args' => $this->argRollDice(),
         ];
 
-        $this->rollPlayerDice($ids, $params);
+        $this->rollPlayerDice($playerId, $ids, clienttranslate('${player_name} rerolls dice ${originalDice} and gets ${rolledDice}'), $params);
 
         self::incStat(count($ids), 'rerolledDice');
         self::incStat(count($ids), 'rerolledDice', $playerId);
@@ -279,13 +279,19 @@ trait ActionTrait {
         $this->applyRollDieCost($playerId, 3);
 
         $die = $this->getDieById($id);
+        $originalDiceStr = $this->getDieFaceLogName($die);
         $die->setFace($face);
+        $rolledDiceStr = $this->getDieFaceLogName($die);
 
         $this->persistDice([$die]);
 
-        self::notifyAllPlayers('diceChanged', '', [
+        self::notifyAllPlayers('diceChanged', clienttranslate('${player_name} change die ${originalDice} to ${rolledDice}'), [
+            'playerId' => $playerId,
+            'player_name' => $this->getPlayerName($playerId),
             'dice' => [$die],
             'args' => $this->argRollDice(),
+            'originalDice' => $originalDiceStr,
+            'rolledDice' => $rolledDiceStr,
         ]);
 
         self::incStat(1, 'changedDice');

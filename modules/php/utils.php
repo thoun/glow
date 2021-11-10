@@ -482,17 +482,29 @@ trait UtilTrait {
         }
     }
 
-    function rollPlayerDice($ids = null, $params = []) {
-        $dice = $ids === null ? $this->getDiceByLocation('player') : $this->getDiceByIds($ids);
+    function getDieFaceLogName(object $die) {
+        return "[die:$die->color:$die->face]";
+    }
 
+    function rollPlayerDice(int $playerId, $ids = null, $message = '', $params = []) {
+        $dice = $ids === null ? $this->getDiceByLocation('player', $playerId) : $this->getDiceByIds($ids);
+
+        $originalDiceStr = '';
+        $rolledDiceStr = '';
         foreach($dice as &$idie) {
+            $originalDiceStr .= $this->getDieFaceLogName($idie);
             $idie->roll();
+            $rolledDiceStr .= $this->getDieFaceLogName($idie);
         }
 
         $this->persistDice($dice);
 
-        self::notifyAllPlayers('diceRolled', '', [
+        self::notifyAllPlayers('diceRolled', $message, [
+            'playerId' => $playerId,
+            'player_name' => $this->getPlayerName($playerId),
             'dice' => $dice,
+            'originalDice' => $originalDiceStr,
+            'rolledDice' => $rolledDiceStr,
         ] + $params);
 
         foreach($dice as &$idie) {
