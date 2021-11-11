@@ -46,6 +46,8 @@ class Glow implements GlowGame {
 
     private meetingTrackClickAction: 'recruit' | 'remove';
 
+    private DICE_FACES_TOOLTIP: string[] = [];
+
     constructor() {    
         const zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
@@ -71,6 +73,14 @@ class Glow implements GlowGame {
         (this as any).dontPreloadImage(`side${gamedatas.side == 2 ? 1 : 2}.png`);
 
         log( "Starting game setup" );
+
+        for (let color=1; color<=8; color++) {
+            let facesStr = '';
+            for (let face=1; face<=6; face++) {
+                facesStr += `[die:${color}:${face}]`;
+            }
+            this.DICE_FACES_TOOLTIP[color] = `<h3>${_("Die faces")}</h3> <div>${formatTextIcons(facesStr)}</div>`;
+        }
         
         this.gamedatas = gamedatas;
 
@@ -709,6 +719,8 @@ class Glow implements GlowGame {
         dojo.place(html, destinationId);
 
         document.getElementById(`die${die.id}`).addEventListener('click', () => this.onDiceClick(die));
+
+        (this as any).addTooltipHtml(`die${die.id}`, this.DICE_FACES_TOOLTIP[die.color]);        
     }
 
     public createOrMoveDie(die: Die, destinationId: string, rollClass: string = 'no-roll') {

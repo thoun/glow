@@ -986,6 +986,12 @@ html {
 .die-icon[data-color="6"] {
   background-image: url("img/die6.png");
 }
+.die-icon[data-color="7"] {
+  background-image: url("img/die7.png");
+}
+.die-icon[data-color="8"] {
+  background-image: url("img/die8.png");
+}
 .die-icon[data-face="1"] {
   background-position: 0% 100%;
 }
@@ -1003,6 +1009,12 @@ html {
 }
 .die-icon[data-face="6"] {
   background-position: 100% 100%;
+}
+
+.dijitTooltipContents .die-icon {
+  width: 32px;
+  height: 32px;
+  margin: 5px;
 }
 
 .log .die-icon {

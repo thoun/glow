@@ -861,6 +861,7 @@ var Glow = /** @class */ (function () {
         this.isChangeDie = false;
         this.playersTables = [];
         this.zoom = 1;
+        this.DICE_FACES_TOOLTIP = [];
         var zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
             this.zoom = Number(zoomStr);
@@ -883,6 +884,13 @@ var Glow = /** @class */ (function () {
         this.dontPreloadImage('publisher.png');
         this.dontPreloadImage("side" + (gamedatas.side == 2 ? 1 : 2) + ".png");
         log("Starting game setup");
+        for (var color = 1; color <= 8; color++) {
+            var facesStr = '';
+            for (var face = 1; face <= 6; face++) {
+                facesStr += "[die:" + color + ":" + face + "]";
+            }
+            this.DICE_FACES_TOOLTIP[color] = "<h3>" + _("Die faces") + "</h3> <div>" + formatTextIcons(facesStr) + "</div>";
+        }
         this.gamedatas = gamedatas;
         log('gamedatas', gamedatas);
         dojo.addClass('board', "side" + gamedatas.side);
@@ -1406,6 +1414,7 @@ var Glow = /** @class */ (function () {
         //dieDiv?.parentNode.removeChild(dieDiv);
         dojo.place(html, destinationId);
         document.getElementById("die" + die.id).addEventListener('click', function () { return _this.onDiceClick(die); });
+        this.addTooltipHtml("die" + die.id, this.DICE_FACES_TOOLTIP[die.color]);
     };
     Glow.prototype.createOrMoveDie = function (die, destinationId, rollClass) {
         if (rollClass === void 0) { rollClass = 'no-roll'; }
