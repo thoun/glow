@@ -506,12 +506,6 @@ trait UtilTrait {
             'originalDice' => $originalDiceStr,
             'rolledDice' => $rolledDiceStr,
         ] + $params);
-
-        foreach($dice as &$idie) {
-            if ($idie->color == 8 && $idie->face == 6 && $idie->location == 'player') { // we apply black die "-2"
-                $this->applyEffect($idie->location_arg, $idie->value);
-            }
-        }
     }
 
     function sendToCemetery(int $playerId, int $companionId) {

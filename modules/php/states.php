@@ -129,12 +129,22 @@ trait StateTrait {
     }
 
     function stResolveCards() {
+
         $playerWithEffects = [];
 
         $playersIds = $this->getPlayersIds();
         $args = [];
 
         foreach($playersIds as $playerId) {
+            $dice = $this->getDiceByLocation('player', $playerId);
+
+            foreach($dice as &$idie) {
+                if ($idie->color > 5 && $idie->face == 6 && $idie->location == 'player') { // we apply yellow/purple/black die special effect
+                    $this->applyEffect($idie->location_arg, $idie->value);
+                }
+            }
+
+
             if (count($this->getRemainingEffects($playerId)) > 0) {
                 $playerWithEffects[] = $playerId;
             }
