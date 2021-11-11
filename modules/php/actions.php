@@ -331,13 +331,9 @@ trait ActionTrait {
         $playerId = intval($this->getCurrentPlayerId());
 
         $this->gamestate->setPlayerNonMultiactive($playerId, 'resolveCards');
-    } 
+    }
 
-    public function resolveCard(int $cardType, int $id) {
-        self::checkAction('resolveCard');
-
-        $playerId = intval($this->getCurrentPlayerId());
-
+    public function applyResolveCard(int $playerId, int $cardType, int $id) {
         $this->applyCardEffect($playerId, $cardType, $id);
 
         $resolveCardsForPlayer = $this->argResolveCardsForPlayer($playerId);
@@ -345,13 +341,38 @@ trait ActionTrait {
         self::notifyPlayer($playerId, 'resolveCardUpdate', '', [
             'resolveCardsForPlayer' => $resolveCardsForPlayer,
         ]);
+
+        self::incStat(1, 'resolvedCards');
+        self::incStat(1, 'resolvedCards', $playerId);
+
+        return $resolveCardsForPlayer;
+    }
+
+    public function resolveCard(int $cardType, int $id) {
+        self::checkAction('resolveCard');
+
+        $playerId = intval($this->getCurrentPlayerId());
+
+        $resolveCardsForPlayer = $this->applyResolveCard($playerId, $cardType, $id);
         
         if (count($resolveCardsForPlayer->remainingEffects) === 0) {
             $this->gamestate->setPlayerNonMultiactive($playerId, 'move');
         }
+    }
 
-        self::incStat(1, 'resolvedCards');
-        self::incStat(1, 'resolvedCards', $playerId);
+    public function resolveAll() {
+        self::checkAction('resolveAll');
+
+        $playerId = intval($this->getCurrentPlayerId());
+
+        $resolveCardsForPlayer = $this->argResolveCardsForPlayer($playerId);
+        
+        while (count($resolveCardsForPlayer->remainingEffects) > 0) {
+            $firstRemainingEffect = $resolveCardsForPlayer->remainingEffects[0];
+            $resolveCardsForPlayer = $this->applyResolveCard($playerId, $firstRemainingEffect[0], $firstRemainingEffect[1]);
+        }
+        
+        $this->gamestate->setPlayerNonMultiactive($playerId, 'move');
     }
 
     private function applyMove(int $playerId, object $route) {

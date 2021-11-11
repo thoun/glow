@@ -422,6 +422,7 @@ class Glow implements GlowGame {
                 case 'resolveCards':
                     const resolveCardsArgs = (args as EnteringResolveCardsArgs)[this.getPlayerId()];
                     this.onEnteringStateResolveCards(resolveCardsArgs);
+                    (this as any).addActionButton(`resolveAll-button`, _("Resolve all"), () => this.resolveAll(), null, null, 'red');
                     break;
                 case 'move':
                     this.moveArgs = (args as EnteringMoveArgs)[this.getPlayerId()];
@@ -1211,6 +1212,14 @@ class Glow implements GlowGame {
             type,
             id,
         });
+    }
+
+    public resolveAll() {
+        if(!(this as any).checkAction('resolveAll')) {
+            return;
+        }
+
+        this.takeAction('resolveAll');
     }
 
     public move(destination: number, from?: number, type?: number, id?: number) {

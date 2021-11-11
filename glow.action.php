@@ -160,6 +160,14 @@
         self::ajaxResponse();
     }
 
+    public function resolveAll() {
+        self::setAjaxMode();
+
+        $this->game->resolveAll();
+
+        self::ajaxResponse();
+    }
+
     public function move() {
         self::setAjaxMode();
 

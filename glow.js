@@ -1172,6 +1172,7 @@ var Glow = /** @class */ (function () {
     //                        action status bar (ie: the HTML links in the status bar).
     //
     Glow.prototype.onUpdateActionButtons = function (stateName, args) {
+        var _this = this;
         if (this.isCurrentPlayerActive()) {
             switch (stateName) {
                 case 'chooseTomDice':
@@ -1188,6 +1189,7 @@ var Glow = /** @class */ (function () {
                 case 'resolveCards':
                     var resolveCardsArgs = args[this.getPlayerId()];
                     this.onEnteringStateResolveCards(resolveCardsArgs);
+                    this.addActionButton("resolveAll-button", _("Resolve all"), function () { return _this.resolveAll(); }, null, null, 'red');
                     break;
                 case 'move':
                     this.moveArgs = args[this.getPlayerId()];
@@ -1849,6 +1851,12 @@ var Glow = /** @class */ (function () {
             type: type,
             id: id,
         });
+    };
+    Glow.prototype.resolveAll = function () {
+        if (!this.checkAction('resolveAll')) {
+            return;
+        }
+        this.takeAction('resolveAll');
     };
     Glow.prototype.move = function (destination, from, type, id) {
         if (!this.checkAction('move')) {

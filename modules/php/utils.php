@@ -782,12 +782,14 @@ trait UtilTrait {
     }
 
     function applyCardEffect(int $playerId, int $cardType, int $id) {
+        $card = null;
         $cardEffect = null;
         $spellCard = null;
         switch ($cardType) {
             case 0:
                 $adventurer = $this->getAdventurersFromDb($this->adventurers->getCardsInLocation('player', $playerId))[0];
                 if ($adventurer->id == $id) {
+                    $card = $adventurer;
                     $cardEffect = $adventurer->effect;
                 }
                 break;
@@ -795,6 +797,7 @@ trait UtilTrait {
                 $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
                 foreach($companions as $companion) {
                     if ($companion->id == $id) {
+                        $card = $companion;
                         $cardEffect = $companion->effect;
                     }
                 }
@@ -803,6 +806,7 @@ trait UtilTrait {
                 $spells = $this->getSpellsFromDb($this->spells->getCardsInLocation('player', $playerId));
                 foreach($spells as $spell) {
                     if ($spell->id == $id) {
+                        $card = $spell;
                         $cardEffect = $spell->effect;
                         $spellCard = $spell;
                     }
@@ -837,6 +841,31 @@ trait UtilTrait {
         if ($cardType == 2 && $spellCard->type != COMPANION_SPELL) { // spells are discarded after usage
             $this->discardSpell($playerId, $spellCard);
         }
+
+        switch ($cardType) {
+            case 0:
+                self::notifyAllPlayers('resolveCardLog', clienttranslate('${player_name} resolves adventurer ${adventurerName} effects'), [
+                    'playerId' => $playerId,
+                    'player_name' => $this->getPlayerName($playerId),
+                    'adventurer' => $card,
+                    'adventurerName' => $card->name,
+                ]);
+                break;
+            case 1:
+                self::notifyAllPlayers('resolveCardLog', clienttranslate('${player_name} resolves companion ${companionName} effects'), [
+                    'playerId' => $playerId,
+                    'player_name' => $this->getPlayerName($playerId),
+                    'companionName' => $card->name,
+                ]);
+                break;
+            case 2:
+                self::notifyAllPlayers('resolveCardLog', clienttranslate('${player_name} resolves spell effects'), [
+                    'playerId' => $playerId,
+                    'player_name' => $this->getPlayerName($playerId),
+                ]);
+                break;
+        }
+        
 
         $this->saveAppliedEffect($playerId, [$cardType, $id]);
     }

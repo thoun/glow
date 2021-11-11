@@ -257,6 +257,7 @@ $playerActionsGameStates = [
         "args" => "argResolveCards",
         "possibleactions" => [ 
             "resolveCard", 
+            "resolveAll", 
         ],
         "transitions" => [
             "move" => ST_MULTIPLAYER_MOVE,
