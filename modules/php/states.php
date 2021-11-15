@@ -208,12 +208,12 @@ trait StateTrait {
         self::incStat(1, 'days');
 
         $day = intval($this->getGameStateValue(DAY));
-        $message = $solo ? clienttranslate('Day ends') : clienttranslate('Day ${day} begins');
+        $message = $solo ? clienttranslate('Day ends') : clienttranslate('Day ${day} ends');
         self::notifyAllPlayers('endDay', $message, [
             'day' => $solo ? 0 : $day,
         ]);
 
-        if (intval($this->companions->countCardInLocation('deck')) == 0 || $day >= $endDay) {
+        if ($day >= $endDay) {
             $this->gamestate->nextState('endScore');
         } else {
             $this->gamestate->nextState('newRound');

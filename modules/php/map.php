@@ -89,7 +89,7 @@ trait MapTrait {
     }
 
     function getMapSpotPoints(int $side, int $position) {
-        $mapSpot = $this->getMapSpot(1, $position);
+        $mapSpot = $this->getMapSpot($side, $position);
         return $mapSpot->points;
     }
 
@@ -121,7 +121,6 @@ trait MapTrait {
             foreach($boats as $boat) {
                 $points += $this->getMapSpotPoints($side, $boat->position);
             }
-            
         }
         
         return $points;
