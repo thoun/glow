@@ -1641,9 +1641,7 @@ var Glow = /** @class */ (function () {
     Glow.prototype.onSelectedDiceChange = function () {
         var _this = this;
         var count = this.selectedDice.length;
-        if (document.getElementById("rollDice-button")) {
-            dojo.toggleClass("rollDice-button", 'disabled', count < 1 || count > 2);
-        }
+        this.getRollDiceButtons().forEach(function (button) { return dojo.toggleClass(button, 'disabled', count < 1 || count > 2); });
         if (this.isChangeDie) {
             if (count === 1) {
                 this.selectedDieFace = null;
@@ -1684,12 +1682,12 @@ var Glow = /** @class */ (function () {
         }
     };
     Glow.prototype.onDiceClick = function (die, force) {
-        if (force === void 0) { force = false; }
+        if (force === void 0) { force = null; }
         if (!this.diceSelectionActive && !force) {
             return;
         }
         var index = this.selectedDice.findIndex(function (d) { return d.id === die.id; });
-        var selected = index !== -1;
+        var selected = force !== null ? !force : index !== -1;
         if (selected) {
             this.selectedDice.splice(index, 1);
         }
@@ -1701,7 +1699,7 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.unselectDice = function () {
         var _this = this;
-        this.selectedDice.forEach(function (die) { return _this.onDiceClick(die, true); });
+        this.selectedDice.forEach(function (die) { return _this.onDiceClick(die, false); });
     };
     Glow.prototype.setDiceSelectionActive = function (active) {
         this.unselectDice();
@@ -1710,6 +1708,7 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.diceChangedOrRolled = function (dice, changed, args) {
         var _this = this;
+        this.unselectDice();
         dice.forEach(function (die) {
             dojo.removeClass("die" + die.id, 'selected');
             _this.setNewFace(die);

@@ -24,7 +24,6 @@ class Glow implements GlowGame {
     private rerollCounters: Counter[] = [];
     private footprintCounters: Counter[] = [];
     private fireflyCounters: Counter[] = [];
-    private companionCounter: Counter;
     private roundCounter: Counter;
     private helpDialog: any;
     private selectedDice: Die[] = [];
@@ -973,9 +972,8 @@ class Glow implements GlowGame {
 
     private onSelectedDiceChange() {
         const count = this.selectedDice.length;
-        if (document.getElementById(`rollDice-button`)) {
-            dojo.toggleClass(`rollDice-button`, 'disabled', count < 1 || count > 2);
-        }
+        this.getRollDiceButtons().forEach(button => dojo.toggleClass(button, 'disabled', count < 1 || count > 2));
+
         if (this.isChangeDie) {
             if (count === 1) {
                 this.selectedDieFace = null;
@@ -1015,13 +1013,13 @@ class Glow implements GlowGame {
         }
     }
 
-    private onDiceClick(die: Die, force: boolean = false) {
+    private onDiceClick(die: Die, force: boolean = null) {
         if (!this.diceSelectionActive && !force) {
             return;
         }
 
         const index = this.selectedDice.findIndex(d => d.id === die.id);
-        const selected = index !== -1;
+        const selected = force !== null ? !force : index !== -1;
 
         if (selected) {
             this.selectedDice.splice(index, 1);
@@ -1030,11 +1028,12 @@ class Glow implements GlowGame {
         }
 
         dojo.toggleClass(`die${die.id}`, 'selected', !selected);
+
         this.onSelectedDiceChange();
     }
 
     private unselectDice() {
-        this.selectedDice.forEach(die => this.onDiceClick(die, true));
+        this.selectedDice.forEach(die => this.onDiceClick(die, false));
     }
 
     private setDiceSelectionActive(active: boolean) {        
@@ -1044,6 +1043,7 @@ class Glow implements GlowGame {
     }
 
     private diceChangedOrRolled(dice: Die[], changed: boolean, args: EnteringRollDiceArgs) {
+        this.unselectDice();
         dice.forEach(die => {
             dojo.removeClass(`die${die.id}`, 'selected');
             this.setNewFace(die);
