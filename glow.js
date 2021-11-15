@@ -1716,7 +1716,9 @@ var Glow = /** @class */ (function () {
         });
         if (args) {
             this.gamedatas.gamestate.args[this.getPlayerId()] = args[this.getPlayerId()];
-            this.setActionBarRollDice(true);
+            if (this.isCurrentPlayerActive()) {
+                this.setActionBarRollDice(true);
+            }
         }
     };
     Glow.prototype.selectMove = function (possibleDestination) {

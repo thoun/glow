@@ -1052,7 +1052,9 @@ class Glow implements GlowGame {
 
         if (args) {
             this.gamedatas.gamestate.args[this.getPlayerId()] = args[this.getPlayerId()];
-            this.setActionBarRollDice(true);
+            if((this as any).isCurrentPlayerActive()) {
+                this.setActionBarRollDice(true);
+            }
         }
     }
 
