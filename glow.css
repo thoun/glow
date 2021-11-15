@@ -428,9 +428,10 @@
 #board .destination-arrow {
   position: absolute;
   background: url("img/arrow.svg") no-repeat center/contain;
-  width: 80px;
-  height: 30px;
+  width: 85px;
+  height: 50px;
   cursor: pointer;
+  transform-origin: center center;
 }
 #board #table-dice {
   position: absolute;

@@ -442,7 +442,7 @@ var Board = /** @class */ (function () {
         Array.from(document.getElementsByClassName('destination-arrow')).forEach(function (node) { return node.parentElement.removeChild(node); });
         possibleDestinations === null || possibleDestinations === void 0 ? void 0 : possibleDestinations.forEach(function (possibleDestination) {
             var position = possibleDestination.destination;
-            var showArrow = possibleDestinations.filter(function (pd) { return pd.destination == position; }).length > 1;
+            var showArrow = _this.game.getBoardSide() == 2;
             var mapSpot = _this.getMapSpot(position);
             if (!document.getElementById("destination-zone-" + position)) {
                 dojo.place("<div id=\"destination-zone-" + position + "\" class=\"destination-zone " + (mapSpot[2] ? 'big' : 'small') + " " + (showArrow ? 'unselectable' : '') + "\" style=\"left: " + mapSpot[0] + "px; top: " + mapSpot[1] + "px;\"></div>", 'board');
@@ -453,8 +453,10 @@ var Board = /** @class */ (function () {
                 var deltaX = mapSpot[0] - mapSpotFrom[0];
                 var deltaY = mapSpot[1] - mapSpotFrom[1];
                 var rad = Math.atan2(deltaY, deltaX); // In radians
+                var left = (mapSpot[0] + mapSpotFrom[0]) / 2;
+                var top_2 = (mapSpot[1] + mapSpotFrom[1]) / 2;
                 if (!document.getElementById("destination-arrow-" + position + "-from-" + from)) {
-                    dojo.place("<div id=\"destination-arrow-" + position + "-from-" + from + "\" class=\"destination-arrow\" style=\"left: " + mapSpot[0] + "px; top: " + mapSpot[1] + "px; transform: rotate(" + rad + "rad) translateX(-45px);\"></div>", 'board');
+                    dojo.place("<div id=\"destination-arrow-" + position + "-from-" + from + "\" class=\"destination-arrow\" style=\"left: " + left + "px; top: " + top_2 + "px; transform: rotate(" + rad + "rad)\"></div>", 'board');
                     document.getElementById("destination-arrow-" + position + "-from-" + from).addEventListener('click', function () { return _this.game.selectMove(possibleDestination); });
                 }
             }
