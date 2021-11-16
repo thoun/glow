@@ -134,7 +134,10 @@ trait ArgsTrait {
                 foreach($possibleRoutesForMeeple as &$possibleRoute) {
                     $possibleRoute->from = $meeple->position;
 
-                    if (!$this->array_some($possibleRoutes, function($p) use ($possibleRoute) { return $possibleRoute->from == $p->from && $possibleRoute->destination == $p->destination; })) {
+                    if (
+                        !$this->array_some($possibleRoutes, function($p) use ($possibleRoute) { return $possibleRoute->from == $p->from && $possibleRoute->destination == $p->destination; })
+                        && !$this->array_some($meeples, function($m) use ($possibleRoute) { return $possibleRoute->destination == $m->position; })
+                    ) {
                         $possibleRoutes[] = $possibleRoute;
                     }
                 }

@@ -220,7 +220,7 @@ trait UtilTrait {
 
         self::notifyAllPlayers('points', $message, $params + [
             'playerId' => $playerId,
-            'playerName' => $this->getPlayerName($playerId),
+            'player_name' => $this->getPlayerName($playerId),
             'points' => $incScore,
         ]);
     }
@@ -231,7 +231,7 @@ trait UtilTrait {
 
         self::notifyAllPlayers('points', $message, $params + [
             'playerId' => $playerId,
-            'playerName' => $this->getPlayerName($playerId),
+            'player_name' => $this->getPlayerName($playerId),
             'points' => -$decScore,
         ]);
 
@@ -251,7 +251,7 @@ trait UtilTrait {
 
         self::notifyAllPlayers('rerolls', $message, $params + [
             'playerId' => $playerId,
-            'playerName' => $this->getPlayerName($playerId),
+            'player_name' => $this->getPlayerName($playerId),
             'rerolls' => $rerolls,
         ]);
     }
@@ -262,7 +262,7 @@ trait UtilTrait {
 
         self::notifyAllPlayers('rerolls', $message, $params + [
             'playerId' => $playerId,
-            'playerName' => $this->getPlayerName($playerId),
+            'player_name' => $this->getPlayerName($playerId),
             'rerolls' => -$dec,
         ]);
 
@@ -282,7 +282,7 @@ trait UtilTrait {
 
         self::notifyAllPlayers('footprints', $message, $params + [
             'playerId' => $playerId,
-            'playerName' => $this->getPlayerName($playerId),
+            'player_name' => $this->getPlayerName($playerId),
             'footprints' => $footprints,
         ]);
     }
@@ -293,7 +293,7 @@ trait UtilTrait {
 
         self::notifyAllPlayers('footprints', $message, $params + [
             'playerId' => $playerId,
-            'playerName' => $this->getPlayerName($playerId),
+            'player_name' => $this->getPlayerName($playerId),
             'footprints' => -$dec,
         ]);
 
@@ -313,7 +313,7 @@ trait UtilTrait {
 
         self::notifyAllPlayers('fireflies', $message, $params + [
             'playerId' => $playerId,
-            'playerName' => $this->getPlayerName($playerId),
+            'player_name' => $this->getPlayerName($playerId),
             'fireflies' => $fireflies,
         ]);
     }

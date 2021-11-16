@@ -34,7 +34,7 @@ trait ActionTrait {
 
         self::notifyAllPlayers('chosenAdventurer', clienttranslate('${player_name} chooses adventurer ${adventurerName}'), [
             'playerId' => $playerId,
-            'player_name' => self::getActivePlayerName(),
+            'player_name' => $this->getPlayerName($playerId),
             'adventurer' => $adventurer,
             'adventurerName' => $adventurer->name,
             'dice' => $dice,
@@ -70,7 +70,7 @@ trait ActionTrait {
 
         self::notifyAllPlayers('chosenCompanion', clienttranslate('${player_name} chooses companion ${companionName}'), [
             'playerId' => $playerId,
-            'player_name' => self::getActivePlayerName(),
+            'player_name' => $this->getPlayerName($playerId),
             'companion' => $companion,
             'companionName' => $companion->name,
             'spot' => $spot,
@@ -113,7 +113,7 @@ trait ActionTrait {
 
             self::notifyAllPlayers('moveBlackDie', clienttranslate('${player_name} adds black die with ${companionName}'), [
                 'playerId' => $playerId,
-                'player_name' => self::getActivePlayerName(),
+                'player_name' => $this->getPlayerName($playerId),
                 'companionName' => $companion->name,
                 'die' => $die,
             ]);
@@ -214,7 +214,7 @@ trait ActionTrait {
 
         self::notifyAllPlayers('moveBlackDie', clienttranslate('${player_name} moves black die'), [
             'playerId' => $playerId,
-            'player_name' => self::getActivePlayerName(),
+            'player_name' => $this->getPlayerName($playerId),
             'die' => $die,
         ]);
 
@@ -245,7 +245,7 @@ trait ActionTrait {
 
         self::notifyAllPlayers('removeCompanion', clienttranslate('${player_name} removes companion ${companionName}'), [
             'playerId' => $playerId,
-            'player_name' => self::getActivePlayerName(),
+            'player_name' => $this->getPlayerName($playerId),
             'companion' => $companion,
             'companionName' => $companion->name,
             'spot' => $spot,
@@ -452,7 +452,7 @@ trait ActionTrait {
 
                 self::notifyAllPlayers('removeCompanion', clienttranslate('${player_name} removes companion ${companionName}'), [
                     'playerId' => $playerId,
-                    'player_name' => self::getActivePlayerName(),
+                    'player_name' => $this->getPlayerName($playerId),
                     'companion' => $companion,
                     'companionName' => $companion->name,
                 ]);

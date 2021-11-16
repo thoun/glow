@@ -410,9 +410,12 @@
 }
 #board .destination-zone {
   position: absolute;
-  border: 3px dashed red;
+  border: 3px dashed transparent;
   border-radius: 50%;
   cursor: pointer;
+  /*&.unselectable {
+    pointer-events: none;
+  }*/
 }
 #board .destination-zone.big {
   width: 85px;
@@ -421,9 +424,6 @@
 #board .destination-zone.small {
   width: 30px;
   height: 30px;
-}
-#board .destination-zone.unselectable {
-  pointer-events: none;
 }
 #board .destination-arrow {
   position: absolute;

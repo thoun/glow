@@ -112,9 +112,9 @@ trait StateTrait {
 
                 $this->sendToCemetery($playerId, $cromaugCard->id);
                 $companion = $this->getCompanionFromDb($this->companions->getCard($cromaugCard->id));
-                self::notifyAllPlayers('removeCompanion', clienttranslate('${playerName} discards Cromaug and takes a companion from the cemetery'), [
+                self::notifyAllPlayers('removeCompanion', clienttranslate('${player_name} discards Cromaug and takes a companion from the cemetery'), [
                     'playerId' => $playerId,
-                    'playerName' => $this->getPlayerName($playerId),
+                    'player_name' => $this->getPlayerName($playerId),
                     'companion' => $cromaugCard,
                 ]);
             }
@@ -241,7 +241,7 @@ trait StateTrait {
                     $points += $companion->points;
                 }
 
-                $this->incPlayerScore($playerId, $points, _('${playerName} gains ${points} bursts of light with adventurer and companions'));
+                $this->incPlayerScore($playerId, $points, _('${player_name} gains ${points} bursts of light with adventurer and companions'));
                 
                 self::setStat($points, 'cardsEndPoints', $playerId);
             }
@@ -254,9 +254,9 @@ trait StateTrait {
 
             $message = null;
             if ($side === 1) {
-                $message = _('${playerName} gains ${points} bursts of light with the village where encampment is situated');
+                $message = _('${player_name} gains ${points} bursts of light with the village where encampment is situated');
             } else if ($side === 2) {
-                $message = _('${playerName} gains ${points} bursts of light with boats placed on islands');
+                $message = _('${player_name} gains ${points} bursts of light with boats placed on islands');
             }
 
             $this->incPlayerScore($playerId, $points, $message);
@@ -278,7 +278,7 @@ trait StateTrait {
 
             // If they have as many or more fireflies than companions, they score 10 bursts of light.
             if ($points > $companionCount) {
-                $this->incPlayerScore($playerId, 10, _('${playerName} gains ${points} bursts of light with fireflies (more fireflies than companions)'));
+                $this->incPlayerScore($playerId, 10, _('${player_name} gains ${points} bursts of light with fireflies (more fireflies than companions)'));
             }
 
             if ($playerId != 0) {
@@ -292,7 +292,7 @@ trait StateTrait {
         foreach($playersIds as $playerId) {
             $points = $this->getPlayerFootprints($playerId);
 
-            $this->incPlayerScore($playerId, $points, _('${playerName} gains ${points} bursts of light with footprints'));
+            $this->incPlayerScore($playerId, $points, _('${player_name} gains ${points} bursts of light with footprints'));
 
             if ($playerId != 0) {
                 self::setStat($points, 'endFootprintsCount', $playerId);

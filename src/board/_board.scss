@@ -68,7 +68,7 @@
 
   .destination-zone {
     position: absolute;
-    border: 3px dashed red;
+    border: 3px dashed /*red*/transparent;
     border-radius: 50%;
     cursor: pointer;
 
@@ -82,9 +82,9 @@
       height: 30px;
     }
 
-    &.unselectable {
+    /*&.unselectable {
       pointer-events: none;
-    }
+    }*/
   }
 
   .destination-arrow {

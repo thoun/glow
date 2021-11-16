@@ -442,25 +442,29 @@ var Board = /** @class */ (function () {
         Array.from(document.getElementsByClassName('destination-arrow')).forEach(function (node) { return node.parentElement.removeChild(node); });
         possibleDestinations === null || possibleDestinations === void 0 ? void 0 : possibleDestinations.forEach(function (possibleDestination) {
             var position = possibleDestination.destination;
-            var showArrow = _this.game.getBoardSide() == 2;
             var mapSpot = _this.getMapSpot(position);
+            var big = mapSpot.length > 2;
             if (!document.getElementById("destination-zone-" + position)) {
-                dojo.place("<div id=\"destination-zone-" + position + "\" class=\"destination-zone " + (mapSpot[2] ? 'big' : 'small') + " " + (showArrow ? 'unselectable' : '') + "\" style=\"left: " + mapSpot[0] + "px; top: " + mapSpot[1] + "px;\"></div>", 'board');
+                dojo.place("<div id=\"destination-zone-" + position + "\" class=\"destination-zone " + (mapSpot[2] ? 'big' : 'small') + "\" style=\"left: " + mapSpot[0] + "px; top: " + mapSpot[1] + "px;\"></div>", 'board');
             }
-            if (showArrow) {
-                var from = possibleDestination.from;
-                var mapSpotFrom = _this.getMapSpot(from);
-                var deltaX = mapSpot[0] - mapSpotFrom[0];
-                var deltaY = mapSpot[1] - mapSpotFrom[1];
-                var rad = Math.atan2(deltaY, deltaX); // In radians
-                var left = (mapSpot[0] + mapSpotFrom[0]) / 2;
-                var top_2 = (mapSpot[1] + mapSpotFrom[1]) / 2;
-                if (!document.getElementById("destination-arrow-" + position + "-from-" + from)) {
-                    dojo.place("<div id=\"destination-arrow-" + position + "-from-" + from + "\" class=\"destination-arrow\" style=\"left: " + left + "px; top: " + top_2 + "px; transform: rotate(" + rad + "rad)\"></div>", 'board');
-                    document.getElementById("destination-arrow-" + position + "-from-" + from).addEventListener('click', function () { return _this.game.selectMove(possibleDestination); });
-                }
+            var from = possibleDestination.from;
+            var mapSpotFrom = _this.getMapSpot(from);
+            var deltaX = mapSpot[0] - mapSpotFrom[0];
+            var deltaY = mapSpot[1] - mapSpotFrom[1];
+            var rad = Math.atan2(deltaY, deltaX); // In radians
+            var left = (mapSpot[0] + mapSpotFrom[0]) / 2;
+            var top = (mapSpot[1] + mapSpotFrom[1]) / 2;
+            if (!big) {
+                left -= 25;
             }
-            else {
+            var distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            var scaleX = Math.min(1, distance / 180);
+            var scaleY = Math.min(1, distance / 100);
+            if (!document.getElementById("destination-arrow-" + position + "-from-" + from)) {
+                dojo.place("<div id=\"destination-arrow-" + position + "-from-" + from + "\" class=\"destination-arrow\" style=\"left: " + left + "px; top: " + top + "px; transform: rotate(" + rad + "rad) scaleX(" + scaleX + ") scaleY(" + scaleY + ")\"></div>", 'board');
+                document.getElementById("destination-arrow-" + position + "-from-" + from).addEventListener('click', function () { return _this.game.selectMove(possibleDestination); });
+            }
+            if (_this.game.getBoardSide() == 1) {
                 document.getElementById("destination-zone-" + position).addEventListener('click', function () { return _this.game.selectMove(possibleDestination); });
             }
         });

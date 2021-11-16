@@ -245,27 +245,33 @@ class Board {
 
         possibleDestinations?.forEach(possibleDestination => {
             const position = possibleDestination.destination;
-            const showArrow = this.game.getBoardSide() == 2;
             const mapSpot = this.getMapSpot(position);
+            const big = mapSpot.length > 2;
             if (!document.getElementById(`destination-zone-${position}`)) {
-                dojo.place(`<div id="destination-zone-${position}" class="destination-zone ${mapSpot[2] ? 'big' : 'small'} ${showArrow ? 'unselectable' : ''}" style="left: ${mapSpot[0]}px; top: ${mapSpot[1]}px;"></div>`, 'board');
+                dojo.place(`<div id="destination-zone-${position}" class="destination-zone ${mapSpot[2] ? 'big' : 'small'}" style="left: ${mapSpot[0]}px; top: ${mapSpot[1]}px;"></div>`, 'board');
             }
 
-            if (showArrow) {
-                const from = possibleDestination.from;
-                const mapSpotFrom = this.getMapSpot(from);
+            const from = possibleDestination.from;
+            const mapSpotFrom = this.getMapSpot(from);
 
-                const deltaX = mapSpot[0] - mapSpotFrom[0];
-                const deltaY = mapSpot[1] - mapSpotFrom[1];
-                const rad = Math.atan2(deltaY, deltaX); // In radians
-                const left = (mapSpot[0] + mapSpotFrom[0]) / 2;
-                const top = (mapSpot[1] + mapSpotFrom[1]) / 2;
+            const deltaX = mapSpot[0] - mapSpotFrom[0];
+            const deltaY = mapSpot[1] - mapSpotFrom[1];
+            const rad = Math.atan2(deltaY, deltaX); // In radians
+            let left = (mapSpot[0] + mapSpotFrom[0]) / 2;
+            let top = (mapSpot[1] + mapSpotFrom[1]) / 2;
+            if (!big) {
+                left -= 25;
+            }
 
-                if (!document.getElementById(`destination-arrow-${position}-from-${from}`)) {
-                    dojo.place(`<div id="destination-arrow-${position}-from-${from}" class="destination-arrow" style="left: ${left}px; top: ${top}px; transform: rotate(${rad}rad)"></div>`, 'board');
-                    document.getElementById(`destination-arrow-${position}-from-${from}`).addEventListener('click', () => this.game.selectMove(possibleDestination));
-                }
-            } else {
+            const distance = Math.sqrt( deltaX*deltaX + deltaY*deltaY );
+            const scaleX = Math.min(1, distance / 180);
+            const scaleY = Math.min(1, distance / 100);
+
+            if (!document.getElementById(`destination-arrow-${position}-from-${from}`)) {
+                dojo.place(`<div id="destination-arrow-${position}-from-${from}" class="destination-arrow" style="left: ${left}px; top: ${top}px; transform: rotate(${rad}rad) scaleX(${scaleX}) scaleY(${scaleY})"></div>`, 'board');
+                document.getElementById(`destination-arrow-${position}-from-${from}`).addEventListener('click', () => this.game.selectMove(possibleDestination));
+            }
+            if (this.game.getBoardSide() == 1) {
                 document.getElementById(`destination-zone-${position}`).addEventListener('click', () => this.game.selectMove(possibleDestination));
             }
         });
