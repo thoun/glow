@@ -924,6 +924,9 @@ var Glow = /** @class */ (function () {
         if (this.zoom !== 1) {
             this.setZoom(this.zoom);
         }
+        this.onScreenWidthChange = function () {
+            _this.setAutoZoom();
+        };
         log("Ending game setup");
     };
     ///////////////////////////////////////////////////
@@ -1011,6 +1014,7 @@ var Glow = /** @class */ (function () {
             if (spot >= 1 && spot <= 5) {
                 _this.meetingTrack.setCompanion(meetingTrackSpot.companion, spot);
                 _this.meetingTrack.placeSmallDice(meetingTrackSpot.dice);
+                _this.meetingTrack.setFootprintTokens(spot, meetingTrackSpot.footprints);
                 if (solo) {
                     _this.meetingTrack.setSoloTile(meetingTrackSpot, spot);
                 }
@@ -1234,6 +1238,8 @@ var Glow = /** @class */ (function () {
         }
         stocks.forEach(function (stock) { return stock.updateDisplay(); });
         document.getElementById('zoom-wrapper').style.height = div.getBoundingClientRect().height + "px";
+        var fullBoardWrapperDiv = document.getElementById('full-board-wrapper');
+        fullBoardWrapperDiv.style.display = fullBoardWrapperDiv.clientWidth < 916 * zoom ? 'block' : 'flex';
     };
     Glow.prototype.zoomIn = function () {
         if (this.zoom === ZOOM_LEVELS[ZOOM_LEVELS.length - 1]) {
@@ -1248,6 +1254,19 @@ var Glow = /** @class */ (function () {
         }
         var newIndex = ZOOM_LEVELS.indexOf(this.zoom) - 1;
         this.setZoom(ZOOM_LEVELS[newIndex]);
+    };
+    Glow.prototype.setAutoZoom = function () {
+        var _this = this;
+        var zoomWrapperWidth = document.getElementById('zoom-wrapper').clientWidth;
+        if (!zoomWrapperWidth) {
+            setTimeout(function () { return _this.setAutoZoom(); }, 200);
+            return;
+        }
+        var newZoom = this.zoom;
+        while (newZoom > ZOOM_LEVELS[0] && zoomWrapperWidth / newZoom < 916 /* board width */) {
+            newZoom = ZOOM_LEVELS[ZOOM_LEVELS.indexOf(newZoom) - 1];
+        }
+        this.setZoom(newZoom);
     };
     /*private setupPreferences() {
         // Extract the ID and value from the UI control

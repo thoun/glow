@@ -58,6 +58,7 @@ html {
 #full-board-wrapper {
   display: flex;
   justify-content: center;
+  overflow: auto;
 
   #full-board {
     width: 916px;
@@ -348,4 +349,8 @@ html {
     margin-left: 2px;
     margin-right: 2px;
   }
+}
+
+#globalaction_zoom_wrap {
+  visibility: hidden;
 }

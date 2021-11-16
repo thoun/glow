@@ -490,7 +490,7 @@
   width: 129px;
 }
 #meeting-track .footprint-token {
-  position: absolute;
+  position: relative;
   width: 32px;
   height: 32px;
   background-image: url("img/footprint-token.png");
@@ -588,13 +588,13 @@
 
 #glow-help-button {
   position: fixed;
-  bottom: 75px;
+  bottom: 12px;
   left: 5px;
   width: 50px;
   height: 50px;
-  background: white;
+  background: black;
   font-weight: bold;
-  color: black;
+  color: white;
   border-radius: 25px;
   box-shadow: 3px 5px 5px 0px black;
   cursor: pointer;
@@ -737,6 +737,7 @@ html {
 #full-board-wrapper {
   display: flex;
   justify-content: center;
+  overflow: auto;
 }
 #full-board-wrapper #full-board {
   width: 916px;
@@ -1030,4 +1031,8 @@ html {
   height: 20px;
   margin-left: 2px;
   margin-right: 2px;
+}
+
+#globalaction_zoom_wrap {
+  visibility: hidden;
 }

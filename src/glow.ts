@@ -114,6 +114,9 @@ class Glow implements GlowGame {
         if (this.zoom !== 1) {
             this.setZoom(this.zoom);
         }
+        (this as any).onScreenWidthChange = () => {
+            this.setAutoZoom();
+        }
 
         log( "Ending game setup" );
     }
@@ -212,6 +215,7 @@ class Glow implements GlowGame {
             if (spot >=1 && spot <=5) {
                 this.meetingTrack.setCompanion(meetingTrackSpot.companion, spot);
                 this.meetingTrack.placeSmallDice(meetingTrackSpot.dice);
+                this.meetingTrack.setFootprintTokens(spot, meetingTrackSpot.footprints);
                 if (solo) {
                     this.meetingTrack.setSoloTile(meetingTrackSpot, spot);
                 }
@@ -467,6 +471,9 @@ class Glow implements GlowGame {
         stocks.forEach(stock => stock.updateDisplay());
 
         document.getElementById('zoom-wrapper').style.height = `${div.getBoundingClientRect().height}px`;
+
+        const fullBoardWrapperDiv = document.getElementById('full-board-wrapper');
+        fullBoardWrapperDiv.style.display = fullBoardWrapperDiv.clientWidth < 916*zoom ? 'block' : 'flex';
     }
 
     public zoomIn() {
@@ -483,6 +490,22 @@ class Glow implements GlowGame {
         }
         const newIndex = ZOOM_LEVELS.indexOf(this.zoom) - 1;
         this.setZoom(ZOOM_LEVELS[newIndex]);
+    }
+
+    public setAutoZoom() {
+        
+        const zoomWrapperWidth = document.getElementById('zoom-wrapper').clientWidth;
+
+        if (!zoomWrapperWidth) {
+            setTimeout(() => this.setAutoZoom(), 200);
+            return;
+        }
+
+        let newZoom = this.zoom;
+        while (newZoom > ZOOM_LEVELS[0] && zoomWrapperWidth/newZoom < 916 /* board width */) {
+            newZoom = ZOOM_LEVELS[ZOOM_LEVELS.indexOf(newZoom) - 1];
+        }
+        this.setZoom(newZoom);
     }
 
     /*private setupPreferences() {
