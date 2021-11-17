@@ -1444,7 +1444,7 @@ var Glow = /** @class */ (function () {
         this.addTooltipHtml("die" + die.id, this.DICE_FACES_TOOLTIP[die.color]);
     };
     Glow.prototype.createOrMoveDie = function (die, destinationId, rollClass) {
-        if (rollClass === void 0) { rollClass = 'no-roll'; }
+        if (rollClass === void 0) { rollClass = '-'; }
         var dieDiv = this.getDieDiv(die);
         if (dieDiv) {
             this.setNewFace(die, true);
@@ -1468,7 +1468,7 @@ var Glow = /** @class */ (function () {
                 dieDiv.classList.add("die" + die.face);
                 dieDiv.dataset.dieValue = '' + die.face;
                 if (addChangeDieRoll) {
-                    this.addRollToDiv(dieDiv, 'change-die-roll');
+                    this.addRollToDiv(dieDiv, 'change');
                 }
             }
         }
@@ -1480,14 +1480,14 @@ var Glow = /** @class */ (function () {
         var _this = this;
         if (attempt === void 0) { attempt = 0; }
         dieDiv.classList.remove('rolled');
-        if (rollClass === 'odd-roll' || rollClass === 'even-roll') {
-            dieDiv.classList.add('rolled');
+        if (rollClass === 'odd' || rollClass === 'even') {
+            setTimeout(function () { return dieDiv.classList.add('rolled'); }, 50);
         }
         var dieList = dieDiv.getElementsByClassName('die-list')[0];
         if (dieList) {
+            dieList.dataset.rollType = '-';
             dieList.dataset.roll = dieDiv.dataset.dieValue;
-            dieList.classList.remove('no-roll');
-            dieList.classList.add(rollClass);
+            setTimeout(function () { return dieList.dataset.rollType = rollClass; }, 50);
         }
         else if (attempt < 5) {
             setTimeout(function () { return _this.addRollToDiv(dieDiv, rollClass, attempt + 1); }, 200);
@@ -1737,7 +1737,7 @@ var Glow = /** @class */ (function () {
         dice.forEach(function (die) {
             dojo.removeClass("die" + die.id, 'selected');
             _this.setNewFace(die);
-            _this.addRollToDiv(_this.getDieDiv(die), changed ? 'change-die-roll' : (Math.random() > 0.5 ? 'odd-roll' : 'even-roll'));
+            _this.addRollToDiv(_this.getDieDiv(die), changed ? 'change' : (Math.random() > 0.5 ? 'odd' : 'even'));
         });
         if (args) {
             this.gamedatas.gamestate.args[this.getPlayerId()] = args[this.getPlayerId()];

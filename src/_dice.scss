@@ -98,153 +98,89 @@ $size: 0.25rem;
     }
   }
 
-  [data-side="1"] .dot:nth-of-type(1) {
-    grid-area: five;
-  }
-  [data-side="2"] .dot:nth-of-type(1) {
-    grid-area: one;
-  }
-  [data-side="2"] .dot:nth-of-type(2) {
-    grid-area: nine;
-  }
-  [data-side="3"] .dot:nth-of-type(1) {
-    grid-area: one;
-  }
-  [data-side="3"] .dot:nth-of-type(2) {
-    grid-area: five;
-  }
-  [data-side="3"] .dot:nth-of-type(3) {
-    grid-area: nine;
-  }
-  [data-side="4"] .dot:nth-of-type(1) {
-    grid-area: one;
-  }
-  [data-side="4"] .dot:nth-of-type(2) {
-    grid-area: three;
-  }
-  [data-side="4"] .dot:nth-of-type(3) {
-    grid-area: seven;
-  }
-  [data-side="4"] .dot:nth-of-type(4) {
-    grid-area: nine;
-  }
-  [data-side="5"] .dot:nth-of-type(1) {
-    grid-area: one;
-  }
-  [data-side="5"] .dot:nth-of-type(2) {
-    grid-area: three;
-  }
-  [data-side="5"] .dot:nth-of-type(3) {
-    grid-area: five;
-  }
-  [data-side="5"] .dot:nth-of-type(4) {
-    grid-area: seven;
-  }
-  [data-side="5"] .dot:nth-of-type(5) {
-    grid-area: nine;
-  }
-  [data-side="6"] .dot:nth-of-type(1) {
-    grid-area: one;
-  }
-  [data-side="6"] .dot:nth-of-type(2) {
-    grid-area: three;
-  }
-  [data-side="6"] .dot:nth-of-type(3) {
-    grid-area: four;
-  }
-  [data-side="6"] .dot:nth-of-type(4) {
-    grid-area: six;
-  }
-  [data-side="6"] .dot:nth-of-type(5) {
-    grid-area: seven;
-  }
-  [data-side="6"] .dot:nth-of-type(6) {
-    grid-area: nine;
-  }
-
-  .even-roll {
+  [data-roll-type="even"] {
     transition: transform 0.9s ease-out;
   }
-  .odd-roll {
+  [data-roll-type="odd"] {
     transition: transform 1.1s ease-out;
   }
-  .no-roll {
+  [data-roll-type="-"] {
     transition: transform 0;
   }
-  .change-die-roll {
+  [data-roll-type="change"] {
     transition: transform 0.5s ease-in-out;
   }
 
-  .even-roll[data-roll="1"] {
+  [data-roll-type="even"][data-roll="1"] {
     transform: rotateX(360deg) rotateY(720deg) rotateZ(360deg);
   }
-  .even-roll[data-roll="2"] {
+  [data-roll-type="even"][data-roll="2"] {
     transform: rotateX(450deg) rotateY(720deg) rotateZ(360deg);
   }
-  .even-roll[data-roll="3"] {
+  [data-roll-type="even"][data-roll="3"] {
     transform: rotateX(360deg) rotateY(630deg) rotateZ(360deg);
   }
-  .even-roll[data-roll="4"] {
+  [data-roll-type="even"][data-roll="4"] {
     transform: rotateX(360deg) rotateY(810deg) rotateZ(360deg);
   }
-  .even-roll[data-roll="5"] {
+  [data-roll-type="even"][data-roll="5"] {
     transform: rotateX(270deg) rotateY(720deg) rotateZ(360deg);
   }
-  .even-roll[data-roll="6"] {
+  [data-roll-type="even"][data-roll="6"] {
     transform: rotateX(360deg) rotateY(900deg) rotateZ(540deg);
   }
-  .odd-roll[data-roll="1"] {
+  [data-roll-type="odd"][data-roll="1"] {
     transform: rotateX(-360deg) rotateY(-720deg) rotateZ(-360deg);
   }
-  .odd-roll[data-roll="2"] {
+  [data-roll-type="odd"][data-roll="2"] {
     transform: rotateX(-270deg) rotateY(-720deg) rotateZ(-360deg);
   }
-  .odd-roll[data-roll="3"] {
+  [data-roll-type="odd"][data-roll="3"] {
     transform: rotateX(-360deg) rotateY(-810deg) rotateZ(-360deg);
   }
-  .odd-roll[data-roll="4"] {
+  [data-roll-type="odd"][data-roll="4"] {
     transform: rotateX(-360deg) rotateY(-630deg) rotateZ(-360deg);
   }
-  .odd-roll[data-roll="5"] {
+  [data-roll-type="odd"][data-roll="5"] {
     transform: rotateX(-450deg) rotateY(-720deg) rotateZ(-360deg);
   }
-  .odd-roll[data-roll="6"] {
+  [data-roll-type="odd"][data-roll="6"] {
     transform: rotateX(-360deg) rotateY(-900deg) rotateZ(-540deg);
   }
-  .no-roll[data-roll="1"] {
+  [data-roll-type="-"][data-roll="1"] {
+    transform: rotateX(0deg) rotateY(720deg) rotateZ(0deg);
+  }
+  [data-roll-type="-"][data-roll="2"] {
+    transform: rotateX(90deg) rotateY(0deg) rotateZ(0deg);
+  }
+  [data-roll-type="-"][data-roll="3"] {
+    transform: rotateX(0deg) rotateY(270deg) rotateZ(0deg);
+  }
+  [data-roll-type="-"][data-roll="4"] {
+    transform: rotateX(0deg) rotateY(90deg) rotateZ(0deg);
+  }
+  [data-roll-type="-"][data-roll="5"] {
+    transform: rotateX(270deg) rotateY(0deg) rotateZ(0deg);
+  }
+  [data-roll-type="-"][data-roll="6"] {
+    transform: rotateX(0deg) rotateY(180deg) rotateZ(180deg);
+  }
+  [data-roll-type="change"][data-roll="1"] {
     transform: rotateX(360deg) rotateY(720deg) rotateZ(360deg);
   }
-  .no-roll[data-roll="2"] {
+  [data-roll-type="change"][data-roll="2"] {
     transform: rotateX(450deg) rotateY(720deg) rotateZ(360deg);
   }
-  .no-roll[data-roll="3"] {
+  [data-roll-type="change"][data-roll="3"] {
     transform: rotateX(360deg) rotateY(630deg) rotateZ(360deg);
   }
-  .no-roll[data-roll="4"] {
+  [data-roll-type="change"][data-roll="4"] {
     transform: rotateX(360deg) rotateY(810deg) rotateZ(360deg);
   }
-  .no-roll[data-roll="5"] {
+  [data-roll-type="change"][data-roll="5"] {
     transform: rotateX(270deg) rotateY(720deg) rotateZ(360deg);
   }
-  .no-roll[data-roll="6"] {
-    transform: rotateX(360deg) rotateY(900deg) rotateZ(540deg);
-  }
-  .change-die-roll[data-roll="1"] {
-    transform: rotateX(360deg) rotateY(720deg) rotateZ(360deg);
-  }
-  .change-die-roll[data-roll="2"] {
-    transform: rotateX(450deg) rotateY(720deg) rotateZ(360deg);
-  }
-  .change-die-roll[data-roll="3"] {
-    transform: rotateX(360deg) rotateY(630deg) rotateZ(360deg);
-  }
-  .change-die-roll[data-roll="4"] {
-    transform: rotateX(360deg) rotateY(810deg) rotateZ(360deg);
-  }
-  .change-die-roll[data-roll="5"] {
-    transform: rotateX(270deg) rotateY(720deg) rotateZ(360deg);
-  }
-  .change-die-roll[data-roll="6"] {
+  [data-roll-type="change"][data-roll="6"] {
     transform: rotateX(360deg) rotateY(900deg) rotateZ(540deg);
   }
 

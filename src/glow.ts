@@ -746,7 +746,7 @@ class Glow implements GlowGame {
         (this as any).addTooltipHtml(`die${die.id}`, this.DICE_FACES_TOOLTIP[die.color]);        
     }
 
-    public createOrMoveDie(die: Die, destinationId: string, rollClass: string = 'no-roll') {
+    public createOrMoveDie(die: Die, destinationId: string, rollClass: string = '-') {
         const dieDiv = this.getDieDiv(die);
 
         if (dieDiv) {
@@ -773,7 +773,7 @@ class Glow implements GlowGame {
                 dieDiv.dataset.dieValue = ''+die.face;
 
                 if (addChangeDieRoll) {
-                    this.addRollToDiv(dieDiv, 'change-die-roll');
+                    this.addRollToDiv(dieDiv, 'change');
                 }
             }
         }
@@ -785,15 +785,15 @@ class Glow implements GlowGame {
 
     private addRollToDiv(dieDiv: HTMLDivElement, rollClass: string, attempt: number = 0) {
         dieDiv.classList.remove('rolled');
-        if (rollClass === 'odd-roll' || rollClass ==='even-roll') {
-            dieDiv.classList.add('rolled');
+        if (rollClass === 'odd' || rollClass ==='even') {
+            setTimeout(() => dieDiv.classList.add('rolled'), 50);
         }
 
         const dieList = dieDiv.getElementsByClassName('die-list')[0] as HTMLDivElement;
         if (dieList) {
+            dieList.dataset.rollType = '-';
             dieList.dataset.roll = dieDiv.dataset.dieValue;
-            dieList.classList.remove('no-roll');
-            dieList.classList.add(rollClass);
+            setTimeout(() => dieList.dataset.rollType = rollClass, 50);
         } else if (attempt < 5) {
             setTimeout(() => this.addRollToDiv(dieDiv, rollClass, attempt + 1), 200); 
         }
@@ -1070,7 +1070,7 @@ class Glow implements GlowGame {
         dice.forEach(die => {
             dojo.removeClass(`die${die.id}`, 'selected');
             this.setNewFace(die);
-            this.addRollToDiv(this.getDieDiv(die), changed ? 'change-die-roll' : (Math.random() > 0.5 ? 'odd-roll' : 'even-roll'));
+            this.addRollToDiv(this.getDieDiv(die), changed ? 'change' : (Math.random() > 0.5 ? 'odd' : 'even'));
         });
 
         if (args) {
