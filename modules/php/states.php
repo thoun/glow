@@ -45,6 +45,7 @@ trait StateTrait {
             }
             $this->placeCompanionsOnMeetingTrack();
             $this->initMeetingTrackSmallDice();
+            $this->addFootprintsOnMeetingTrack();
         }
 
         $this->revealSpellTokens();
