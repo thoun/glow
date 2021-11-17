@@ -2156,7 +2156,7 @@ var Glow = /** @class */ (function () {
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */
     Glow.prototype.format_string_recursive = function (log, args) {
-        var _a, _b, _c;
+        var _a, _b, _c, _d;
         try {
             if (log && args && !args.processed) {
                 if (typeof args.adventurerName == 'string' && args.adventurerName[0] != '<') {
@@ -2165,8 +2165,16 @@ var Glow = /** @class */ (function () {
                 if (typeof args.companionName == 'string' && args.companionName[0] != '<') {
                     args.companionName = "<strong>" + args.companionName + "</strong>";
                 }
+                if (typeof args.effectOrigin == 'string' && args.effectOrigin[0] != '<') {
+                    if (args.adventurer) {
+                        args.effectOrigin = "<strong style=\"color: " + this.getColor((_b = args.adventurer) === null || _b === void 0 ? void 0 : _b.color) + ";\">" + args.adventurer.name + "</strong>";
+                    }
+                    if (args.companion) {
+                        args.effectOrigin = "<strong>" + args.companion.name + "</strong>";
+                    }
+                }
                 for (var property in args) {
-                    if (((_c = (_b = args[property]) === null || _b === void 0 ? void 0 : _b.indexOf) === null || _c === void 0 ? void 0 : _c.call(_b, ']')) > 0) {
+                    if (((_d = (_c = args[property]) === null || _c === void 0 ? void 0 : _c.indexOf) === null || _d === void 0 ? void 0 : _d.call(_c, ']')) > 0) {
                         args[property] = formatTextIcons(_(args[property]));
                     }
                 }

@@ -222,6 +222,7 @@ trait UtilTrait {
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'points' => $incScore,
+            'abspoints' => $incScore,
         ]);
     }
 
@@ -233,6 +234,7 @@ trait UtilTrait {
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'points' => -$decScore,
+            'abspoints' => $decScore,
         ]);
 
         return $newScore;
@@ -284,6 +286,7 @@ trait UtilTrait {
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'footprints' => $footprints,
+            'absfootprints' => $footprints,
         ]);
     }
 
@@ -295,6 +298,7 @@ trait UtilTrait {
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'footprints' => -$dec,
+            'absfootprints' => $dec,
         ]);
 
         return $newValue;
@@ -739,31 +743,62 @@ trait UtilTrait {
         self::DbQuery("UPDATE `player` SET `applied_effects` = '$jsonObj' WHERE `player_id` = $playerId");
     }
 
-    function applyEffect(int $playerId, int $effect, $cardId = null) {
+    // card type
+    // 0 adventurer
+    // 1 companion
+    // 2 spell
+    // 3 dice
+    // 4 route
+    function applyEffect(int $playerId, int $effect, int $cardType, /*object|null*/ $card) {
+        $args = [];
+        switch ($cardType) {
+            case 0: 
+                $effectOrigin = 'adventurer';
+                $args['adventurer'] = $card;
+                $args['preserve'] = ['adventurer'];
+                break;
+            case 1:
+                $effectOrigin = 'companion';
+                $args['companion'] = $card;
+                $args['preserve'] = ['companion'];
+                break;
+            case 2:
+                $effectOrigin = _('spell');
+                break;
+            case 3:
+                $effectOrigin = _('rolled die');
+                break;
+            case 4:
+                $effectOrigin = _('route');
+                break;
+        }
+        $args['effectOrigin'] = $effectOrigin;
+
+
         if ($effect > 100) {
-            $this->incPlayerScore($playerId, $effect - 100);
+            $this->incPlayerScore($playerId, $effect - 100, clienttranslate('${player_name} ${gainsloses} ${abspoints} burst of light with ${effectOrigin} effect'), $args + ['gainsloses' => _('gains')]);
         } else if ($effect < -100) {
-            $this->decPlayerScore($playerId, -($effect + 100));
+            $this->decPlayerScore($playerId, -($effect + 100), clienttranslate('${player_name} ${gainsloses} ${abspoints} burst of light with ${effectOrigin} effect'), $args + ['gainsloses' => _('loses')]);
         }
 
         else if ($effect > 20 && $effect < 30) {
-            $this->addPlayerFootprints($playerId, $effect - 20);
+            $this->addPlayerFootprints($playerId, $effect - 20, clienttranslate('${player_name} ${gainsloses} ${absfootprints} footprints with ${effectOrigin} effect'), $args + ['gainsloses' => _('gains')]);
         } else if ($effect < -20 && $effect > -30) {
-            $this->removePlayerFootprints($playerId, -($effect + 20));
+            $this->removePlayerFootprints($playerId, -($effect + 20), clienttranslate('${player_name} ${gainsloses} ${absfootprints} footprints with ${effectOrigin} effect'), $args + ['gainsloses' => _('loses')]);
         }
 
         else if ($effect > 10 && $effect < 20) {
-            $this->addPlayerFireflies($playerId, $effect - 10);
+            $this->addPlayerFireflies($playerId, $effect - 10, clienttranslate('${player_name} gains ${fireflies} fireflies with ${effectOrigin} effect'), $args);
         }
 
         else if ($effect === 30) {
-            $this->addPlayerRerolls($playerId, 1);
+            $this->addPlayerRerolls($playerId, 1, clienttranslate('${player_name} gains ${rerolls} rerolls with ${effectOrigin} effect'), $args);
         }
 
         else if ($effect === 33) { // skull
-            $this->sendToCemetery($playerId, $cardId);
+            $this->sendToCemetery($playerId, $card->id);
 
-            $companion = $this->getCompanionFromDb($this->companions->getCard($cardId));
+            $companion = $this->getCompanionFromDb($this->companions->getCard($card->id));
 
             self::notifyAllPlayers('removeCompanion', '', [
                 'playerId' => $playerId,
@@ -812,30 +847,6 @@ trait UtilTrait {
             throw new BgaUserException("Selected effect is not available");
         }
 
-        foreach($cardEffect->effects as $effect) {
-            if ($spellCard != null && $spellCard->type == COMPANION_SPELL) {
-                $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
-                if (count($companions) > 0) {
-                    $lastCompanion = $companions[count($companions) - 1];
-                    $this->sendToCemetery($playerId, $lastCompanion->id);
-
-                    self::notifyAllPlayers('removeCompanion', '', [
-                        'playerId' => $playerId,
-                        'companion' => $lastCompanion,
-                        'removedBySpell' => $spellCard,
-                    ]);
-
-                    $this->spells->moveCard($spell->id, 'discard');
-                }
-            } else {
-                $this->applyEffect($playerId, $effect, $id);
-            }
-        }
-
-        if ($cardType == 2 && $spellCard->type != COMPANION_SPELL) { // spells are discarded after usage
-            $this->discardSpell($playerId, $spellCard);
-        }
-
         switch ($cardType) {
             case 0:
                 self::notifyAllPlayers('resolveCardLog', clienttranslate('${player_name} resolves adventurer ${adventurerName} effects'), [
@@ -858,6 +869,30 @@ trait UtilTrait {
                     'player_name' => $this->getPlayerName($playerId),
                 ]);
                 break;
+        }
+
+        foreach($cardEffect->effects as $effect) {
+            if ($spellCard != null && $spellCard->type == COMPANION_SPELL) {
+                $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+                if (count($companions) > 0) {
+                    $lastCompanion = $companions[count($companions) - 1];
+                    $this->sendToCemetery($playerId, $lastCompanion->id);
+
+                    self::notifyAllPlayers('removeCompanion', '', [
+                        'playerId' => $playerId,
+                        'companion' => $lastCompanion,
+                        'removedBySpell' => $spellCard,
+                    ]);
+
+                    $this->spells->moveCard($spell->id, 'discard');
+                }
+            } else {
+                $this->applyEffect($playerId, $effect, $cardType, $card);
+            }
+        }
+
+        if ($cardType == 2 && $spellCard->type != COMPANION_SPELL) { // spells are discarded after usage
+            $this->discardSpell($playerId, $spellCard);
         }
         
 

@@ -1592,6 +1592,15 @@ class Glow implements GlowGame {
                     args.companionName = `<strong>${args.companionName}</strong>`;
                 }
 
+                if (typeof args.effectOrigin == 'string' && args.effectOrigin[0] != '<') {
+                    if (args.adventurer) {
+                        args.effectOrigin = `<strong style="color: ${this.getColor(args.adventurer?.color)};">${args.adventurer.name}</strong>`;
+                    }
+                    if (args.companion) {
+                        args.effectOrigin = `<strong>${args.companion.name}</strong>`;
+                    }
+                }
+
                 for (const property in args) {
                     if (args[property]?.indexOf?.(']') > 0) {
                         args[property] = formatTextIcons(_(args[property]));

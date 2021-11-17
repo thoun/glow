@@ -378,7 +378,7 @@ trait ActionTrait {
     private function applyMove(int $playerId, object $route) {
         // apply route & destination effects
         foreach($route->costForPlayer as $effect) {
-            $this->applyEffect($playerId, $effect);
+            $this->applyEffect($playerId, $effect, 4, null);
 
             if ($effect >= 1 && $effect <= 5) {
                 $dice = $this->getDiceByLocation('player', $playerId, false);

@@ -140,7 +140,7 @@ trait StateTrait {
 
             foreach($dice as &$idie) {
                 if ($idie->color > 5 && $idie->face == 6 && $idie->location == 'player') { // we apply yellow/purple/black die special effect
-                    $this->applyEffect($idie->location_arg, $idie->value);
+                    $this->applyEffect($idie->location_arg, $idie->value, 3, null);
                 }
             }
 
