@@ -2036,9 +2036,8 @@ var Glow = /** @class */ (function () {
         this.meetingTrack.setDeckTop(CEMETERY, (_a = notif.args.companion) === null || _a === void 0 ? void 0 : _a.type);
     };
     Glow.prototype.notif_removeCompanions = function (notif) {
-        var _a;
         this.meetingTrack.removeCompanions();
-        this.meetingTrack.setDeckTop(CEMETERY, (_a = notif.args.topCemeteryType) === null || _a === void 0 ? void 0 : _a.type);
+        this.meetingTrack.setDeckTop(CEMETERY, notif.args.topCemeteryType);
     };
     Glow.prototype.notif_takeSketalDie = function (notif) {
         var playerTable = this.getPlayerTable(notif.args.playerId);

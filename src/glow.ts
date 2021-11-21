@@ -1439,7 +1439,7 @@ class Glow implements GlowGame {
 
     notif_removeCompanions(notif: Notif<NotifRemoveCompanionsArgs>) {
         this.meetingTrack.removeCompanions();
-        this.meetingTrack.setDeckTop(CEMETERY, notif.args.topCemeteryType?.type);
+        this.meetingTrack.setDeckTop(CEMETERY, notif.args.topCemeteryType);
     }
 
     notif_takeSketalDie(notif: Notif<NotifSketalDieArgs>) {
