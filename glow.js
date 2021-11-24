@@ -376,8 +376,8 @@ var Board = /** @class */ (function () {
         }, HIDDEN_TOKENS_DELAY);
         //}
     };
-    Board.prototype.incPoints = function (playerId, points) {
-        this.points.set(playerId, this.points.get(playerId) + points);
+    Board.prototype.setPoints = function (playerId, points) {
+        this.points.set(playerId, points);
         this.movePoints();
     };
     Board.prototype.setTomCompany = function (company) {
@@ -460,13 +460,15 @@ var Board = /** @class */ (function () {
             var distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
             var scaleX = Math.min(1, distance / 180);
             var scaleY = Math.min(1, distance / 100);
+            var onlyOneDestinationToSpot = possibleDestinations.filter(function (pd) { return pd.destination === possibleDestination.destination; }).length <= 1;
             if (!document.getElementById("destination-arrow-" + position + "-from-" + from)) {
                 dojo.place("<div id=\"destination-arrow-" + position + "-from-" + from + "\" class=\"destination-arrow\" style=\"left: " + left + "px; top: " + top + "px; transform: rotate(" + rad + "rad) scaleX(" + scaleX + ") scaleY(" + scaleY + ")\"></div>", 'board');
                 document.getElementById("destination-arrow-" + position + "-from-" + from).addEventListener('click', function () { return _this.game.selectMove(possibleDestination); });
             }
-            if (_this.game.getBoardSide() == 1) {
+            if (onlyOneDestinationToSpot) {
                 document.getElementById("destination-zone-" + position).addEventListener('click', function () { return _this.game.selectMove(possibleDestination); });
             }
+            dojo.toggleClass("destination-zone-" + position, 'unselectable', !onlyOneDestinationToSpot);
         });
     };
     Board.prototype.setColor = function (playerId, newPlayerColor) {
@@ -1912,10 +1914,10 @@ var Glow = /** @class */ (function () {
         data.lock = true;
         this.ajaxcall("/glow/glow/" + action + ".html", data, this, function () { });
     };
-    Glow.prototype.incPoints = function (playerId, points) {
+    Glow.prototype.setPoints = function (playerId, points) {
         var _a;
-        (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.incValue(points);
-        this.board.incPoints(playerId, points);
+        (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.toValue(points);
+        this.board.setPoints(playerId, points);
     };
     Glow.prototype.incRerolls = function (playerId, footprints) {
         var _a;
@@ -2048,7 +2050,7 @@ var Glow = /** @class */ (function () {
         playerTable.removeDice([notif.args.die]);
     };
     Glow.prototype.notif_points = function (notif) {
-        this.incPoints(notif.args.playerId, notif.args.points);
+        this.setPoints(notif.args.playerId, notif.args.newScore);
         if (notif.args.company !== undefined) {
             this.board.setTomCompany(notif.args.company);
         }

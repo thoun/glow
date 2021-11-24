@@ -167,8 +167,8 @@ class Board {
         //}
     }
 
-    public incPoints(playerId: number, points: number) {
-        this.points.set(playerId, this.points.get(playerId) + points);
+    public setPoints(playerId: number, points: number) {
+        this.points.set(playerId, points);
         this.movePoints();
     }
 
@@ -266,14 +266,16 @@ class Board {
             const distance = Math.sqrt( deltaX*deltaX + deltaY*deltaY );
             const scaleX = Math.min(1, distance / 180);
             const scaleY = Math.min(1, distance / 100);
+            const onlyOneDestinationToSpot = possibleDestinations.filter(pd => pd.destination === possibleDestination.destination).length <= 1;
 
             if (!document.getElementById(`destination-arrow-${position}-from-${from}`)) {
                 dojo.place(`<div id="destination-arrow-${position}-from-${from}" class="destination-arrow" style="left: ${left}px; top: ${top}px; transform: rotate(${rad}rad) scaleX(${scaleX}) scaleY(${scaleY})"></div>`, 'board');
                 document.getElementById(`destination-arrow-${position}-from-${from}`).addEventListener('click', () => this.game.selectMove(possibleDestination));
             }
-            if (this.game.getBoardSide() == 1) {
+            if (onlyOneDestinationToSpot) {
                 document.getElementById(`destination-zone-${position}`).addEventListener('click', () => this.game.selectMove(possibleDestination));
             }
+            dojo.toggleClass(`destination-zone-${position}`, 'unselectable', !onlyOneDestinationToSpot);
         });
         
     }

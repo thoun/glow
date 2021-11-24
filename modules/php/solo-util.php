@@ -67,6 +67,7 @@ trait SoloUtilTrait {
             'playerId' => 0,
             'player_name' => 'Tom',
             'points' => $incScore,
+            'newScore' => $tom->score,
         ]);
     }
 

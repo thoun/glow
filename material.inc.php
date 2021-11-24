@@ -351,7 +351,7 @@ $this->MAP2 = [
   new MapSpot2(10, [30], [
     new MapRoute(11, [], 5),
   ], 0, 1),
-  new MapSpot2(11, [], [
+  new MapSpot2(11, [37], [
   ], 3, 2),
 ];
 

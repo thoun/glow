@@ -1282,9 +1282,9 @@ class Glow implements GlowGame {
         (this as any).ajaxcall(`/glow/glow/${action}.html`, data, this, () => {});
     }
     
-    private incPoints(playerId: number, points: number) {
-        (this as any).scoreCtrl[playerId]?.incValue(points);
-        this.board.incPoints(playerId, points);
+    private setPoints(playerId: number, points: number) {
+        (this as any).scoreCtrl[playerId]?.toValue(points);
+        this.board.setPoints(playerId, points);
     }
     
     private incRerolls(playerId: number, footprints: number) {
@@ -1453,7 +1453,7 @@ class Glow implements GlowGame {
     }
 
     notif_points(notif: Notif<NotifPointsArgs>) {
-        this.incPoints(notif.args.playerId, notif.args.points);
+        this.setPoints(notif.args.playerId, notif.args.newScore);
         if (notif.args.company !== undefined) {
             this.board.setTomCompany(notif.args.company);
         }

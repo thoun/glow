@@ -223,6 +223,7 @@ trait UtilTrait {
             'player_name' => $this->getPlayerName($playerId),
             'points' => $incScore,
             'abspoints' => $incScore,
+            'newScore' => $this->getPlayerScore($playerId),
         ]);
     }
 
@@ -235,6 +236,7 @@ trait UtilTrait {
             'player_name' => $this->getPlayerName($playerId),
             'points' => -$decScore,
             'abspoints' => $decScore,
+            'newScore' => $newScore,
         ]);
 
         return $newScore;

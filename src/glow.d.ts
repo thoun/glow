@@ -223,6 +223,7 @@ interface NotifRemoveCompanionsArgs {
 interface NotifPointsArgs {
     playerId: number;
     points: number;
+    newScore: number;
     incCompany?: number;
     company?: number;
 }
