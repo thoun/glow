@@ -178,7 +178,7 @@ class MeetingTrack {
     public clearFootprintTokens(spot: number, toPlayer: number) {
         const zone = document.getElementById(`meeting-track-footprints-${spot}`) as HTMLDivElement;
         Array.from(zone.children).forEach(
-            tokenDiv => (this.game as any).slideToObjectAndDestroy(tokenDiv, `footprint-counter-${toPlayer}`)
+            tokenDiv => (this.game as any).slideToObjectAndDestroy(tokenDiv, `player-table-${toPlayer}-footprint-tokens`)
         );
     }
     

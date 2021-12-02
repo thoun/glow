@@ -15,14 +15,14 @@ class PlayerTable {
 
         let html = `
         <div id="player-table-${this.playerId}" class="player-table whiteblock">
-            <div class="name-column">
+            <div class="name-and-dice">
                 <div id="player-table-${this.playerId}-name" class="player-name" style="background-color: #${player.color};">${player.name}</div>
-                <div class="player-table-tokens">
-                    <div id="player-table-${this.playerId}-reroll-tokens" class="player-table-tokens-type"></div>
-                    <div id="player-table-${this.playerId}-footprint-tokens" class="player-table-tokens-type"></div>
-                    <div id="player-table-${this.playerId}-firefly-tokens" class="player-table-tokens-type"></div>
+                <div class="player-tokens">
+                    <div id="player-table-${this.playerId}-reroll-tokens" class="player-tokens-type"></div>
+                    <div id="player-table-${this.playerId}-footprint-tokens" class="player-tokens-type"></div>
+                    <div id="player-table-${this.playerId}-firefly-tokens" class="player-tokens-type"></div>
                 </div>
-                <div id="player-table-${this.playerId}-dice" class="player-table-dice"></div>
+                <div id="player-table-${this.playerId}-dice" class="player-dice"></div>
             </div>
             <div class="adventurer-and-companions">
                 <div id="player-table-${this.playerId}-spells" class="player-table-spells normal"></div>
@@ -230,7 +230,7 @@ class PlayerTable {
     }
     
     public setColor(newPlayerColor: string) {
-        document.getElementById(`player-table-${this.playerId}-name`).style.color = `#${newPlayerColor}`;
+        document.getElementById(`player-table-${this.playerId}-name`).style.backgroundColor = `#${newPlayerColor}`;
     }
 
     public setTokens(type: 'reroll' | 'footprint' | 'firefly', number: number) {

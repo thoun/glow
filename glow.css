@@ -452,29 +452,37 @@
 #currentplayertable .whiteblock, #playerstables .whiteblock {
   padding: 0;
 }
-#currentplayertable .player-table .name-column, #playerstables .player-table .name-column {
-  position: relative;
+#currentplayertable .player-table .name-and-dice, #playerstables .player-table .name-and-dice {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  flex-wrap: wrap;
 }
-#currentplayertable .player-table .name-column .player-name, #playerstables .player-table .name-column .player-name {
+#currentplayertable .player-table .name-and-dice .player-name, #playerstables .player-table .name-and-dice .player-name {
+  transition: background-color 0.5s;
+  background-color: black;
   color: white;
   font-family: "glow";
-  font-size: 200%;
+  font-size: 230%;
   font-weight: unset;
   padding: 5px;
-  margin-bottom: 5px;
-  max-width: 180px;
+  min-width: 200px;
   text-align: center;
+  white-space: nowrap;
+  margin-right: 20px;
 }
-#currentplayertable .player-table .player-table-tokens, #playerstables .player-table .player-table-tokens {
+#currentplayertable .player-table .name-and-dice .player-tokens, #playerstables .player-table .name-and-dice .player-tokens {
   display: grid;
   grid-template-columns: repeat(3, auto);
   width: fit-content;
-  grid-column-gap: 15px;
+  grid-column-gap: 8px;
+  min-height: 32px;
+  margin-right: 20px;
 }
-#currentplayertable .player-table .player-table-tokens .player-table-tokens-type > div:not(:first-child), #playerstables .player-table .player-table-tokens .player-table-tokens-type > div:not(:first-child) {
+#currentplayertable .player-table .name-and-dice .player-tokens .player-tokens-type > div:not(:first-child), #playerstables .player-table .name-and-dice .player-tokens .player-tokens-type > div:not(:first-child) {
   margin-left: -20px;
 }
-#currentplayertable .player-table .player-table-dice, #playerstables .player-table .player-table-dice {
+#currentplayertable .player-table .name-and-dice .player-tokens .player-dice, #playerstables .player-table .name-and-dice .player-tokens .player-dice {
   height: 42px;
 }
 #currentplayertable .player-table .player-table-spells .stockitem, #playerstables .player-table .player-table-spells .stockitem {

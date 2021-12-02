@@ -625,7 +625,7 @@ var MeetingTrack = /** @class */ (function () {
     MeetingTrack.prototype.clearFootprintTokens = function (spot, toPlayer) {
         var _this = this;
         var zone = document.getElementById("meeting-track-footprints-" + spot);
-        Array.from(zone.children).forEach(function (tokenDiv) { return _this.game.slideToObjectAndDestroy(tokenDiv, "footprint-counter-" + toPlayer); });
+        Array.from(zone.children).forEach(function (tokenDiv) { return _this.game.slideToObjectAndDestroy(tokenDiv, "player-table-" + toPlayer + "-footprint-tokens"); });
     };
     MeetingTrack.prototype.placeSmallDice = function (dice) {
         var _this = this;
@@ -661,7 +661,7 @@ var PlayerTable = /** @class */ (function () {
         var _this = this;
         this.game = game;
         this.playerId = Number(player.id);
-        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock\">\n            <div class=\"name-column\">\n                <div id=\"player-table-" + this.playerId + "-name\" class=\"player-name\" style=\"background-color: #" + player.color + ";\">" + player.name + "</div>\n                <div class=\"player-table-tokens\">\n                    <div id=\"player-table-" + this.playerId + "-reroll-tokens\" class=\"player-table-tokens-type\"></div>\n                    <div id=\"player-table-" + this.playerId + "-footprint-tokens\" class=\"player-table-tokens-type\"></div>\n                    <div id=\"player-table-" + this.playerId + "-firefly-tokens\" class=\"player-table-tokens-type\"></div>\n                </div>\n                <div id=\"player-table-" + this.playerId + "-dice\" class=\"player-table-dice\"></div>\n            </div>\n            <div class=\"adventurer-and-companions\">\n                <div id=\"player-table-" + this.playerId + "-spells\" class=\"player-table-spells normal\"></div>\n                <div id=\"player-table-" + this.playerId + "-adventurer\" class=\"player-table-adventurer\"></div>\n                <div id=\"player-table-" + this.playerId + "-companions\" class=\"player-table-companions\"></div>\n            </div>\n        </div>";
+        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock\">\n            <div class=\"name-and-dice\">\n                <div id=\"player-table-" + this.playerId + "-name\" class=\"player-name\" style=\"background-color: #" + player.color + ";\">" + player.name + "</div>\n                <div class=\"player-tokens\">\n                    <div id=\"player-table-" + this.playerId + "-reroll-tokens\" class=\"player-tokens-type\"></div>\n                    <div id=\"player-table-" + this.playerId + "-footprint-tokens\" class=\"player-tokens-type\"></div>\n                    <div id=\"player-table-" + this.playerId + "-firefly-tokens\" class=\"player-tokens-type\"></div>\n                </div>\n                <div id=\"player-table-" + this.playerId + "-dice\" class=\"player-dice\"></div>\n            </div>\n            <div class=\"adventurer-and-companions\">\n                <div id=\"player-table-" + this.playerId + "-spells\" class=\"player-table-spells normal\"></div>\n                <div id=\"player-table-" + this.playerId + "-adventurer\" class=\"player-table-adventurer\"></div>\n                <div id=\"player-table-" + this.playerId + "-companions\" class=\"player-table-companions\"></div>\n            </div>\n        </div>";
         dojo.place(html, this.playerId === this.game.getPlayerId() ? 'currentplayertable' : 'playerstables');
         // adventurer        
         this.adventurerStock = new ebg.stock();
@@ -834,7 +834,7 @@ var PlayerTable = /** @class */ (function () {
         dojo.toggleClass("player-table-" + this.playerId + "-spells", 'hidden', this.spellsStock.items.length == 0);
     };
     PlayerTable.prototype.setColor = function (newPlayerColor) {
-        document.getElementById("player-table-" + this.playerId + "-name").style.color = "#" + newPlayerColor;
+        document.getElementById("player-table-" + this.playerId + "-name").style.backgroundColor = "#" + newPlayerColor;
     };
     PlayerTable.prototype.setTokens = function (type, number) {
         var zone = document.getElementById("player-table-" + this.playerId + "-" + type + "-tokens");
