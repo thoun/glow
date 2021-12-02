@@ -1289,14 +1289,17 @@ class Glow implements GlowGame {
     
     private incRerolls(playerId: number, footprints: number) {
         this.rerollCounters[playerId]?.incValue(footprints);
+        this.getPlayerTable(playerId).setTokens('reroll', this.rerollCounters[playerId]?.getValue());
     }
     
     private incFootprints(playerId: number, footprints: number) {
         this.footprintCounters[playerId]?.incValue(footprints);
+        this.getPlayerTable(playerId).setTokens('footprint', this.footprintCounters[playerId]?.getValue());
     }
     
     private incFireflies(playerId: number, fireflies: number) {
         this.fireflyCounters[playerId]?.incValue(fireflies);
+        this.getPlayerTable(playerId).setTokens('firefly', this.fireflyCounters[playerId]?.getValue());
     }
 
     private addHelp() {

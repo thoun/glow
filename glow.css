@@ -407,11 +407,7 @@
 }
 #meeting-track .footprint-token {
   position: relative;
-  width: 32px;
-  height: 32px;
-  background-image: url("img/footprint-token.png");
   box-shadow: 0 0 2px 4px white;
-  border-radius: 50%;
 }
 #meeting-track #deck {
   left: -150px;
@@ -468,6 +464,15 @@
   margin-bottom: 5px;
   max-width: 180px;
   text-align: center;
+}
+#currentplayertable .player-table .player-table-tokens, #playerstables .player-table .player-table-tokens {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  width: fit-content;
+  grid-column-gap: 15px;
+}
+#currentplayertable .player-table .player-table-tokens .player-table-tokens-type > div:not(:first-child), #playerstables .player-table .player-table-tokens .player-table-tokens-type > div:not(:first-child) {
+  margin-left: -20px;
 }
 #currentplayertable .player-table .player-table-dice, #playerstables .player-table .player-table-dice {
   height: 42px;
@@ -638,6 +643,26 @@ html {
     margin-top: 8px;
   }
 }
+.round-token {
+  display: inline-block;
+  position: relative;
+  width: 32px;
+  height: 32px;
+  background-image: url("img/tokens.png");
+  background-size: auto 100%;
+  border-radius: 50%;
+  box-shadow: 1px 1px 1px 1px black;
+}
+.round-token.reroll {
+  background-position: 0% 0%;
+}
+.round-token.footprint {
+  background-position: 50% 0%;
+}
+.round-token.firefly {
+  background-position: 100% 0%;
+}
+
 #zoom-wrapper {
   position: relative;
 }

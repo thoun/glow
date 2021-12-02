@@ -17,6 +17,11 @@ class PlayerTable {
         <div id="player-table-${this.playerId}" class="player-table whiteblock">
             <div class="name-column">
                 <div id="player-table-${this.playerId}-name" class="player-name" style="background-color: #${player.color};">${player.name}</div>
+                <div class="player-table-tokens">
+                    <div id="player-table-${this.playerId}-reroll-tokens" class="player-table-tokens-type"></div>
+                    <div id="player-table-${this.playerId}-footprint-tokens" class="player-table-tokens-type"></div>
+                    <div id="player-table-${this.playerId}-firefly-tokens" class="player-table-tokens-type"></div>
+                </div>
                 <div id="player-table-${this.playerId}-dice" class="player-table-dice"></div>
             </div>
             <div class="adventurer-and-companions">
@@ -95,6 +100,11 @@ class PlayerTable {
         player.dice.forEach(die => {
             this.game.createOrMoveDie(die, `player-table-${this.playerId}-dice`);
         });
+
+        // tokens
+        this.setTokens('reroll', player.rerolls);
+        this.setTokens('footprint', player.footprints);
+        this.setTokens('firefly', player.fireflies);
     }
 
     private getLastCompanionId() {
@@ -221,5 +231,15 @@ class PlayerTable {
     
     public setColor(newPlayerColor: string) {
         document.getElementById(`player-table-${this.playerId}-name`).style.color = `#${newPlayerColor}`;
+    }
+
+    public setTokens(type: 'reroll' | 'footprint' | 'firefly', number: number) {
+        const zone = document.getElementById(`player-table-${this.playerId}-${type}-tokens`) as HTMLDivElement;
+        while (zone.childElementCount > number) {
+            zone.removeChild(zone.lastChild);
+        }
+        for (let i = zone.childElementCount; i<number; i++) {
+            dojo.place(`<div class="round-token ${type}"></div>`, zone.id);
+        }
     }
 }

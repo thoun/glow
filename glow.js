@@ -619,7 +619,7 @@ var MeetingTrack = /** @class */ (function () {
             zone.removeChild(zone.lastChild);
         }
         for (var i = zone.childElementCount; i < number; i++) {
-            dojo.place("<div class=\"footprint-token\"></div>", zone.id);
+            dojo.place("<div class=\"round-token footprint footprint-token\"></div>", zone.id);
         }
     };
     MeetingTrack.prototype.clearFootprintTokens = function (spot, toPlayer) {
@@ -661,7 +661,7 @@ var PlayerTable = /** @class */ (function () {
         var _this = this;
         this.game = game;
         this.playerId = Number(player.id);
-        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock\">\n            <div class=\"name-column\">\n                <div id=\"player-table-" + this.playerId + "-name\" class=\"player-name\" style=\"background-color: #" + player.color + ";\">" + player.name + "</div>\n                <div id=\"player-table-" + this.playerId + "-dice\" class=\"player-table-dice\"></div>\n            </div>\n            <div class=\"adventurer-and-companions\">\n                <div id=\"player-table-" + this.playerId + "-spells\" class=\"player-table-spells normal\"></div>\n                <div id=\"player-table-" + this.playerId + "-adventurer\" class=\"player-table-adventurer\"></div>\n                <div id=\"player-table-" + this.playerId + "-companions\" class=\"player-table-companions\"></div>\n            </div>\n        </div>";
+        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock\">\n            <div class=\"name-column\">\n                <div id=\"player-table-" + this.playerId + "-name\" class=\"player-name\" style=\"background-color: #" + player.color + ";\">" + player.name + "</div>\n                <div class=\"player-table-tokens\">\n                    <div id=\"player-table-" + this.playerId + "-reroll-tokens\" class=\"player-table-tokens-type\"></div>\n                    <div id=\"player-table-" + this.playerId + "-footprint-tokens\" class=\"player-table-tokens-type\"></div>\n                    <div id=\"player-table-" + this.playerId + "-firefly-tokens\" class=\"player-table-tokens-type\"></div>\n                </div>\n                <div id=\"player-table-" + this.playerId + "-dice\" class=\"player-table-dice\"></div>\n            </div>\n            <div class=\"adventurer-and-companions\">\n                <div id=\"player-table-" + this.playerId + "-spells\" class=\"player-table-spells normal\"></div>\n                <div id=\"player-table-" + this.playerId + "-adventurer\" class=\"player-table-adventurer\"></div>\n                <div id=\"player-table-" + this.playerId + "-companions\" class=\"player-table-companions\"></div>\n            </div>\n        </div>";
         dojo.place(html, this.playerId === this.game.getPlayerId() ? 'currentplayertable' : 'playerstables');
         // adventurer        
         this.adventurerStock = new ebg.stock();
@@ -722,6 +722,10 @@ var PlayerTable = /** @class */ (function () {
         player.dice.forEach(function (die) {
             _this.game.createOrMoveDie(die, "player-table-" + _this.playerId + "-dice");
         });
+        // tokens
+        this.setTokens('reroll', player.rerolls);
+        this.setTokens('footprint', player.footprints);
+        this.setTokens('firefly', player.fireflies);
     }
     PlayerTable.prototype.getLastCompanionId = function () {
         var _a;
@@ -831,6 +835,15 @@ var PlayerTable = /** @class */ (function () {
     };
     PlayerTable.prototype.setColor = function (newPlayerColor) {
         document.getElementById("player-table-" + this.playerId + "-name").style.color = "#" + newPlayerColor;
+    };
+    PlayerTable.prototype.setTokens = function (type, number) {
+        var zone = document.getElementById("player-table-" + this.playerId + "-" + type + "-tokens");
+        while (zone.childElementCount > number) {
+            zone.removeChild(zone.lastChild);
+        }
+        for (var i = zone.childElementCount; i < number; i++) {
+            dojo.place("<div class=\"round-token " + type + "\"></div>", zone.id);
+        }
     };
     return PlayerTable;
 }());
@@ -1920,16 +1933,19 @@ var Glow = /** @class */ (function () {
         this.board.setPoints(playerId, points);
     };
     Glow.prototype.incRerolls = function (playerId, footprints) {
-        var _a;
+        var _a, _b;
         (_a = this.rerollCounters[playerId]) === null || _a === void 0 ? void 0 : _a.incValue(footprints);
+        this.getPlayerTable(playerId).setTokens('reroll', (_b = this.rerollCounters[playerId]) === null || _b === void 0 ? void 0 : _b.getValue());
     };
     Glow.prototype.incFootprints = function (playerId, footprints) {
-        var _a;
+        var _a, _b;
         (_a = this.footprintCounters[playerId]) === null || _a === void 0 ? void 0 : _a.incValue(footprints);
+        this.getPlayerTable(playerId).setTokens('footprint', (_b = this.footprintCounters[playerId]) === null || _b === void 0 ? void 0 : _b.getValue());
     };
     Glow.prototype.incFireflies = function (playerId, fireflies) {
-        var _a;
+        var _a, _b;
         (_a = this.fireflyCounters[playerId]) === null || _a === void 0 ? void 0 : _a.incValue(fireflies);
+        this.getPlayerTable(playerId).setTokens('firefly', (_b = this.fireflyCounters[playerId]) === null || _b === void 0 ? void 0 : _b.getValue());
     };
     Glow.prototype.addHelp = function () {
         var _this = this;

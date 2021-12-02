@@ -22,6 +22,19 @@
             }
         }
 
+        .player-table-tokens {
+            display: grid;
+            grid-template-columns: repeat(3, auto);
+            width: fit-content;
+            grid-column-gap: 15px;
+
+            .player-table-tokens-type {    
+                &>div:not(:first-child) {
+                margin-left: -20px;
+            }
+        }
+      }
+
         .player-table-dice {
             height: 42px;
         }

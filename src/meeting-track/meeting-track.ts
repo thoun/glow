@@ -171,7 +171,7 @@ class MeetingTrack {
             zone.removeChild(zone.lastChild);
         }
         for (let i = zone.childElementCount; i<number; i++) {
-            dojo.place(`<div class="footprint-token"></div>`, zone.id);
+            dojo.place(`<div class="round-token footprint footprint-token"></div>`, zone.id);
         }
     }
 

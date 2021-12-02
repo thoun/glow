@@ -35,6 +35,29 @@ html {
 }
 
 
+.round-token {
+  display: inline-block;
+  position: relative;
+  width: 32px;
+  height: 32px;
+  background-image: url('img/tokens.png');
+  background-size: auto 100%;
+  border-radius: 50%;
+  box-shadow: 1px 1px 1px 1px black;
+
+  &.reroll {
+    background-position: 0% 0%;
+  }
+
+  &.footprint {
+    background-position: 50% 0%;
+  }
+
+  &.firefly {
+    background-position: 100% 0%;
+  }
+}
+
 #zoom-wrapper {
   position: relative;
 
