@@ -9,10 +9,16 @@
 
         .name-column {
             position: relative;
-            padding: 5px;
 
             .player-name {                
-                text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+                color: white;
+                font-family: 'glow';
+                font-size: 200%;
+                font-weight: unset;
+                padding: 5px;
+                margin-bottom: 5px;
+                max-width: 180px;
+                text-align: center;
             }
         }
 

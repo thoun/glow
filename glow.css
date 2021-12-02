@@ -458,10 +458,16 @@
 }
 #currentplayertable .player-table .name-column, #playerstables .player-table .name-column {
   position: relative;
-  padding: 5px;
 }
 #currentplayertable .player-table .name-column .player-name, #playerstables .player-table .name-column .player-name {
-  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+  color: white;
+  font-family: "glow";
+  font-size: 200%;
+  font-weight: unset;
+  padding: 5px;
+  margin-bottom: 5px;
+  max-width: 180px;
+  text-align: center;
 }
 #currentplayertable .player-table .player-table-dice, #playerstables .player-table .player-table-dice {
   height: 42px;
@@ -619,6 +625,12 @@ html {
   background-repeat: repeat;
 }
 
+@font-face {
+  font-family: "glow";
+  src: url("img/glow.woff2") format("woff2"), url("img/glow.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
 /* make space between buttons on touch devices */
 @media (hover: none) {
   #page-title .action-button.bgabutton, #page-title .bgabutton {

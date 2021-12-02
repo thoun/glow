@@ -16,7 +16,7 @@ class PlayerTable {
         let html = `
         <div id="player-table-${this.playerId}" class="player-table whiteblock">
             <div class="name-column">
-                <div id="player-table-${this.playerId}-name" class="player-name" style="color: #${player.color};">${player.name}</div>
+                <div id="player-table-${this.playerId}-name" class="player-name" style="background-color: #${player.color};">${player.name}</div>
                 <div id="player-table-${this.playerId}-dice" class="player-table-dice"></div>
             </div>
             <div class="adventurer-and-companions">
