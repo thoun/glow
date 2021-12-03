@@ -121,7 +121,12 @@ trait ActionTrait {
     }
 
     function redirectAfterRecruit() {
-        $this->gamestate->nextState($this->getPlayerCount() == 2 ? 'removeCompanion' : 'nextPlayer');
+        if ($this->getPlayerCount() == 2 && intval(self::getActivePlayerId()) == intval(self::getGameStateValue(FIRST_PLAYER))) {
+            $this->gamestate->nextState('removeCompanion');
+        } else {
+            $this->gamestate->nextState('nextPlayer');
+        }
+        
     }
     
     public function recruitCompanion(int $spot, $ignoreCheck = false) {
