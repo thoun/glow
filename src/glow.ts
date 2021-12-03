@@ -24,6 +24,7 @@ class Glow implements GlowGame {
     private rerollCounters: Counter[] = [];
     private footprintCounters: Counter[] = [];
     private fireflyCounters: Counter[] = [];
+    private companionCounters: Counter[] = [];
     private roundCounter: Counter;
     private helpDialog: any;
     private selectedDice: Die[] = [];
@@ -667,8 +668,8 @@ class Glow implements GlowGame {
                     <span id="footprint-counter-${player.id}"></span>
                 </div>
                 <div id="firefly-counter-wrapper-${player.id}" class="firefly-counter">
-                    <div class="icon firefly"></div> 
-                    <span id="firefly-counter-${player.id}"></span>
+                    <div id="firefly-counter-icon-${player.id}" class="icon firefly"></div> 
+                    <span id="firefly-counter-${player.id}"></span>&nbsp;/&nbsp;<span id="companion-counter-${player.id}"></span>
                 </div>
             </div>
             `, `player_board_${player.id}`);
@@ -685,9 +686,17 @@ class Glow implements GlowGame {
 
             const fireflyCounter = new ebg.counter();
             fireflyCounter.create(`firefly-counter-${playerId}`);
-            fireflyCounter.setValue(player.fireflies);
+            const allFireflies = player.fireflies + player.companions.map(companion => companion.fireflies).reduce((a, b) => a + b, 0);
+            fireflyCounter.setValue(allFireflies);
             this.fireflyCounters[playerId] = fireflyCounter;
 
+            const companionCounter = new ebg.counter();
+            companionCounter.create(`companion-counter-${playerId}`);
+            companionCounter.setValue(player.companions.length);
+            this.companionCounters[playerId] = companionCounter;
+
+            this.updateFireflyCounterIcon(playerId);
+            
             if (!solo) {
                 // first player token
                 dojo.place(`<div id="player_board_${player.id}_firstPlayerWrapper"></div>`, `player_board_${player.id}`);
@@ -709,9 +718,15 @@ class Glow implements GlowGame {
             }
         });
 
-        (this as any).addTooltipHtmlToClass('reroll-counter', _("Rerolls"));
-        (this as any).addTooltipHtmlToClass('footprint-counter', _("Footprints"));
-        (this as any).addTooltipHtmlToClass('firefly-counter', _("Fireflies"));
+        (this as any).addTooltipHtmlToClass('reroll-counter', _("Rerolls tokens"));
+        (this as any).addTooltipHtmlToClass('footprint-counter', _("Footprints tokens"));
+        (this as any).addTooltipHtmlToClass('firefly-counter', _("Fireflies (tokens + companion fireflies) / number of companions"));
+    }
+    
+    private updateFireflyCounterIcon(playerId: number) {
+        const activated = this.fireflyCounters[playerId].getValue() >= this.companionCounters[playerId].getValue();
+        
+        document.getElementById(`firefly-counter-icon-${playerId}`).dataset.activated = activated.toString();
     }
 
     private createPlayerTables(gamedatas: GlowGamedatas) {
@@ -786,6 +801,9 @@ class Glow implements GlowGame {
     private addRollToDiv(dieDiv: HTMLDivElement, rollClass: string, attempt: number = 0) {
         dieDiv.classList.remove('rolled');
         if (rollClass === 'odd' || rollClass ==='even') {
+            dieDiv.addEventListener('animationend', () => {
+                dieDiv.classList.remove('rolled');
+            })
             setTimeout(() => dieDiv.classList.add('rolled'), 50);
         }
 
@@ -1299,6 +1317,7 @@ class Glow implements GlowGame {
     
     private incFireflies(playerId: number, fireflies: number) {
         this.fireflyCounters[playerId]?.incValue(fireflies);
+        this.updateFireflyCounterIcon(playerId);
         this.getPlayerTable(playerId).setTokens('firefly', this.fireflyCounters[playerId]?.getValue());
     }
 
@@ -1415,10 +1434,12 @@ class Glow implements GlowGame {
     }
 
     notif_chosenCompanion(notif: Notif<NotifChosenCompanionArgs>) {
+        const companion = notif.args.companion;
         const spot = notif.args.spot;
-        const playerTable = this.getPlayerTable(notif.args.playerId);
+        const playerId = notif.args.playerId;
+        const playerTable = this.getPlayerTable(playerId);
         const originStock = spot ? this.meetingTrack.getStock(notif.args.spot) : this.cemetaryCompanionsStock;
-        playerTable.addCompanion(notif.args.companion, originStock);
+        playerTable.addCompanion(companion, originStock);
         if (notif.args.dice?.length) {
             playerTable.addDice(notif.args.dice);
         }
@@ -1428,14 +1449,28 @@ class Glow implements GlowGame {
         if (notif.args.cemetaryTop) {
             this.meetingTrack.setDeckTop(CEMETERY, notif.args.cemetaryTop?.type);
         }
+
+        if (companion?.fireflies) {
+            this.fireflyCounters[playerId].incValue(companion.fireflies);
+        }
+        this.companionCounters[playerId].incValue(1);
+        this.updateFireflyCounterIcon(playerId);
     }
 
     notif_removeCompanion(notif: Notif<NotifChosenCompanionArgs>) {
+        const companion = notif.args.companion;
         if (notif.args.spot) {
             this.meetingTrack.removeCompanion(notif.args.spot);
         } else {
-            const playerTable = this.getPlayerTable(notif.args.playerId);
-            playerTable.removeCompanion(notif.args.companion, notif.args.removedBySpell);
+            const playerId = notif.args.playerId;
+            const playerTable = this.getPlayerTable(playerId);
+            playerTable.removeCompanion(companion, notif.args.removedBySpell);
+
+            if (companion?.fireflies) {
+                this.fireflyCounters[playerId].incValue(-companion.fireflies);
+            }
+            this.companionCounters[playerId].incValue(-1);
+            this.updateFireflyCounterIcon(playerId);
         }
         this.meetingTrack.setDeckTop(CEMETERY, notif.args.companion?.type);
     }
@@ -1495,6 +1530,7 @@ class Glow implements GlowGame {
     }
 
     notif_replaceSmallDice(notif: Notif<NotifDiceUpdateArgs>) {
+        console.log('replaceSmallDice', notif.args);
         this.meetingTrack.placeSmallDice(notif.args.dice);
     }
 

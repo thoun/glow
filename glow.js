@@ -24,7 +24,7 @@ function slideToObjectAndAttach(object, destinationId, posX, posY) {
             attachToNewParent();
         }
         else {
-            object.style.transition = "transform 0.5s ease-in";
+            object.style.transition = "transform 0.5s";
             object.style.transform = "translate(" + deltaX + "px, " + deltaY + "px)";
             var transitionend_1 = function () {
                 attachToNewParent();
@@ -876,6 +876,7 @@ var Glow = /** @class */ (function () {
         this.rerollCounters = [];
         this.footprintCounters = [];
         this.fireflyCounters = [];
+        this.companionCounters = [];
         this.selectedDice = [];
         this.selectedDieFace = null;
         this.diceSelectionActive = false;
@@ -1399,7 +1400,7 @@ var Glow = /** @class */ (function () {
         (solo ? __spreadArray(__spreadArray([], players), [gamedatas.tom]) : players).forEach(function (player) {
             var playerId = Number(player.id);
             // counters
-            dojo.place("\n            <div class=\"counters\">\n                <div id=\"reroll-counter-wrapper-" + player.id + "\" class=\"reroll-counter\">\n                    <div class=\"icon reroll\"></div> \n                    <span id=\"reroll-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"footprint-counter-wrapper-" + player.id + "\" class=\"footprint-counter\">\n                    <div class=\"icon footprint\"></div> \n                    <span id=\"footprint-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"firefly-counter-wrapper-" + player.id + "\" class=\"firefly-counter\">\n                    <div class=\"icon firefly\"></div> \n                    <span id=\"firefly-counter-" + player.id + "\"></span>\n                </div>\n            </div>\n            ", "player_board_" + player.id);
+            dojo.place("\n            <div class=\"counters\">\n                <div id=\"reroll-counter-wrapper-" + player.id + "\" class=\"reroll-counter\">\n                    <div class=\"icon reroll\"></div> \n                    <span id=\"reroll-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"footprint-counter-wrapper-" + player.id + "\" class=\"footprint-counter\">\n                    <div class=\"icon footprint\"></div> \n                    <span id=\"footprint-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"firefly-counter-wrapper-" + player.id + "\" class=\"firefly-counter\">\n                    <div id=\"firefly-counter-icon-" + player.id + "\" class=\"icon firefly\"></div> \n                    <span id=\"firefly-counter-" + player.id + "\"></span>&nbsp;/&nbsp;<span id=\"companion-counter-" + player.id + "\"></span>\n                </div>\n            </div>\n            ", "player_board_" + player.id);
             var rerollCounter = new ebg.counter();
             rerollCounter.create("reroll-counter-" + playerId);
             rerollCounter.setValue(player.rerolls);
@@ -1410,8 +1411,14 @@ var Glow = /** @class */ (function () {
             _this.footprintCounters[playerId] = footprintCounter;
             var fireflyCounter = new ebg.counter();
             fireflyCounter.create("firefly-counter-" + playerId);
-            fireflyCounter.setValue(player.fireflies);
+            var allFireflies = player.fireflies + player.companions.map(function (companion) { return companion.fireflies; }).reduce(function (a, b) { return a + b; }, 0);
+            fireflyCounter.setValue(allFireflies);
             _this.fireflyCounters[playerId] = fireflyCounter;
+            var companionCounter = new ebg.counter();
+            companionCounter.create("companion-counter-" + playerId);
+            companionCounter.setValue(player.companions.length);
+            _this.companionCounters[playerId] = companionCounter;
+            _this.updateFireflyCounterIcon(playerId);
             if (!solo) {
                 // first player token
                 dojo.place("<div id=\"player_board_" + player.id + "_firstPlayerWrapper\"></div>", "player_board_" + player.id);
@@ -1429,9 +1436,13 @@ var Glow = /** @class */ (function () {
                 dojo.place("\n            <div class=\"token meeple" + (_this.gamedatas.side == 2 ? 0 : 1) + " color-blind meeple-player-" + player.id + "\" data-player-no=\"" + player.playerNo + "\" style=\"background-color: #" + player.color + ";\"></div>\n            ", "player_board_" + player.id);
             }
         });
-        this.addTooltipHtmlToClass('reroll-counter', _("Rerolls"));
-        this.addTooltipHtmlToClass('footprint-counter', _("Footprints"));
-        this.addTooltipHtmlToClass('firefly-counter', _("Fireflies"));
+        this.addTooltipHtmlToClass('reroll-counter', _("Rerolls tokens"));
+        this.addTooltipHtmlToClass('footprint-counter', _("Footprints tokens"));
+        this.addTooltipHtmlToClass('firefly-counter', _("Fireflies (tokens + companion fireflies) / number of companions"));
+    };
+    Glow.prototype.updateFireflyCounterIcon = function (playerId) {
+        var activated = this.fireflyCounters[playerId].getValue() >= this.companionCounters[playerId].getValue();
+        document.getElementById("firefly-counter-icon-" + playerId).dataset.activated = activated.toString();
     };
     Glow.prototype.createPlayerTables = function (gamedatas) {
         var _this = this;
@@ -1496,6 +1507,9 @@ var Glow = /** @class */ (function () {
         if (attempt === void 0) { attempt = 0; }
         dieDiv.classList.remove('rolled');
         if (rollClass === 'odd' || rollClass === 'even') {
+            dieDiv.addEventListener('animationend', function () {
+                dieDiv.classList.remove('rolled');
+            });
             setTimeout(function () { return dieDiv.classList.add('rolled'); }, 50);
         }
         var dieList = dieDiv.getElementsByClassName('die-list')[0];
@@ -1945,6 +1959,7 @@ var Glow = /** @class */ (function () {
     Glow.prototype.incFireflies = function (playerId, fireflies) {
         var _a, _b;
         (_a = this.fireflyCounters[playerId]) === null || _a === void 0 ? void 0 : _a.incValue(fireflies);
+        this.updateFireflyCounterIcon(playerId);
         this.getPlayerTable(playerId).setTokens('firefly', (_b = this.fireflyCounters[playerId]) === null || _b === void 0 ? void 0 : _b.getValue());
     };
     Glow.prototype.addHelp = function () {
@@ -2028,10 +2043,12 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.notif_chosenCompanion = function (notif) {
         var _a, _b;
+        var companion = notif.args.companion;
         var spot = notif.args.spot;
-        var playerTable = this.getPlayerTable(notif.args.playerId);
+        var playerId = notif.args.playerId;
+        var playerTable = this.getPlayerTable(playerId);
         var originStock = spot ? this.meetingTrack.getStock(notif.args.spot) : this.cemetaryCompanionsStock;
-        playerTable.addCompanion(notif.args.companion, originStock);
+        playerTable.addCompanion(companion, originStock);
         if ((_a = notif.args.dice) === null || _a === void 0 ? void 0 : _a.length) {
             playerTable.addDice(notif.args.dice);
         }
@@ -2041,15 +2058,27 @@ var Glow = /** @class */ (function () {
         if (notif.args.cemetaryTop) {
             this.meetingTrack.setDeckTop(CEMETERY, (_b = notif.args.cemetaryTop) === null || _b === void 0 ? void 0 : _b.type);
         }
+        if (companion === null || companion === void 0 ? void 0 : companion.fireflies) {
+            this.fireflyCounters[playerId].incValue(companion.fireflies);
+        }
+        this.companionCounters[playerId].incValue(1);
+        this.updateFireflyCounterIcon(playerId);
     };
     Glow.prototype.notif_removeCompanion = function (notif) {
         var _a;
+        var companion = notif.args.companion;
         if (notif.args.spot) {
             this.meetingTrack.removeCompanion(notif.args.spot);
         }
         else {
-            var playerTable = this.getPlayerTable(notif.args.playerId);
-            playerTable.removeCompanion(notif.args.companion, notif.args.removedBySpell);
+            var playerId = notif.args.playerId;
+            var playerTable = this.getPlayerTable(playerId);
+            playerTable.removeCompanion(companion, notif.args.removedBySpell);
+            if (companion === null || companion === void 0 ? void 0 : companion.fireflies) {
+                this.fireflyCounters[playerId].incValue(-companion.fireflies);
+            }
+            this.companionCounters[playerId].incValue(-1);
+            this.updateFireflyCounterIcon(playerId);
         }
         this.meetingTrack.setDeckTop(CEMETERY, (_a = notif.args.companion) === null || _a === void 0 ? void 0 : _a.type);
     };
@@ -2099,6 +2128,7 @@ var Glow = /** @class */ (function () {
         div.classList.add('new-day-animation');
     };
     Glow.prototype.notif_replaceSmallDice = function (notif) {
+        console.log('replaceSmallDice', notif.args);
         this.meetingTrack.placeSmallDice(notif.args.dice);
     };
     Glow.prototype.notif_diceRolled = function (notif) {

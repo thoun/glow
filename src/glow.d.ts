@@ -14,6 +14,7 @@ interface Companion {
     subType: number;
     location: string;
     location_arg: number;
+    fireflies: number;
 }
 
 interface Spell {

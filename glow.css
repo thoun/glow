@@ -614,6 +614,9 @@ ol.help-list {
 .player-board .counters .icon {
   margin-right: 5px;
 }
+.player-board .counters .icon[data-activated=false] {
+  filter: grayscale(1);
+}
 .player-board .token {
   margin: 5px;
 }
