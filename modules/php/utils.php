@@ -752,6 +752,8 @@ trait UtilTrait {
     // 3 dice
     // 4 route
     function applyEffect(int $playerId, int $effect, int $cardType, /*object|null*/ $card) {
+        // TODO add die id for companion
+
         $args = [];
         switch ($cardType) {
             case 0: 
@@ -813,6 +815,8 @@ trait UtilTrait {
     }
 
     function applyCardEffect(int $playerId, int $cardType, int $id) {
+        // TODO add die id for companion or spell over comanion
+
         $card = null;
         $cardEffect = null;
         $spellCard = null;

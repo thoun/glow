@@ -11,12 +11,27 @@ function slideToObjectAndAttach(object, destinationId, posX, posY) {
         var deltaX = destinationCR.left - objectCR.left + (posX !== null && posX !== void 0 ? posX : 0);
         var deltaY = destinationCR.top - objectCR.top + (posY !== null && posY !== void 0 ? posY : 0);
         var attachToNewParent = function () {
-            object.style.top = posY !== undefined ? posY + "px" : 'unset';
-            object.style.left = posX !== undefined ? posX + "px" : 'unset';
+            if (posX !== undefined) {
+                object.style.left = posX + "px";
+            }
+            else {
+                object.style.removeProperty('left');
+            }
+            if (posY !== undefined) {
+                object.style.top = posY + "px";
+            }
+            else {
+                object.style.removeProperty('top');
+            }
             object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
-            object.style.zIndex = originalZIndex ? '' + originalZIndex : 'unset';
-            object.style.transform = 'unset';
-            object.style.transition = 'unset';
+            if (originalZIndex) {
+                object.style.zIndex = '' + originalZIndex;
+            }
+            else {
+                object.style.removeProperty('zIndex');
+            }
+            object.style.removeProperty('transform');
+            object.style.removeProperty('transition');
             destination.appendChild(object);
         };
         if (document.visibilityState === 'hidden') {
@@ -24,7 +39,7 @@ function slideToObjectAndAttach(object, destinationId, posX, posY) {
             attachToNewParent();
         }
         else {
-            object.style.transition = "transform 0.5s";
+            object.style.transition = "transform 0.5s ease-in";
             object.style.transform = "translate(" + deltaX + "px, " + deltaY + "px)";
             var transitionend_1 = function () {
                 attachToNewParent();

@@ -15,12 +15,24 @@ function slideToObjectAndAttach(object: HTMLElement, destinationId: string, posX
         const deltaY = destinationCR.top - objectCR.top + (posY ?? 0);
 
         const attachToNewParent = () => {
-            object.style.top = posY !== undefined ? `${posY}px` : 'unset';
-            object.style.left = posX !== undefined ? `${posX}px` : 'unset';
+            if (posX !== undefined) {
+                object.style.left = `${posX}px`;
+            } else {
+                object.style.removeProperty('left');
+            }
+            if (posY !== undefined) {
+                object.style.top = `${posY}px`;
+            } else {
+                object.style.removeProperty('top');
+            }
             object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
-            object.style.zIndex = originalZIndex ? ''+originalZIndex : 'unset';
-            object.style.transform = 'unset';
-            object.style.transition = 'unset';
+            if (originalZIndex) {
+                object.style.zIndex = ''+originalZIndex;
+            } else {
+                object.style.removeProperty('zIndex');
+            }
+            object.style.removeProperty('transform');
+            object.style.removeProperty('transition');
             destination.appendChild(object);
         }
 

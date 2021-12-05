@@ -434,6 +434,7 @@ trait ActionTrait {
     }
 
     public function move(int $destination, $from = null, $type = null, $id = null) {
+        // TODO add die id for companion
         self::checkAction('move');
 
         $playerId = intval($this->getCurrentPlayerId());
