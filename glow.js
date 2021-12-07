@@ -1415,7 +1415,7 @@ var Glow = /** @class */ (function () {
         (solo ? __spreadArray(__spreadArray([], players), [gamedatas.tom]) : players).forEach(function (player) {
             var playerId = Number(player.id);
             // counters
-            dojo.place("\n            <div class=\"counters\">\n                <div id=\"reroll-counter-wrapper-" + player.id + "\" class=\"reroll-counter\">\n                    <div class=\"icon reroll\"></div> \n                    <span id=\"reroll-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"footprint-counter-wrapper-" + player.id + "\" class=\"footprint-counter\">\n                    <div class=\"icon footprint\"></div> \n                    <span id=\"footprint-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"firefly-counter-wrapper-" + player.id + "\" class=\"firefly-counter\">\n                    <div id=\"firefly-counter-icon-" + player.id + "\" class=\"icon firefly\"></div> \n                    <span id=\"firefly-counter-" + player.id + "\"></span>&nbsp;/&nbsp;<span id=\"companion-counter-" + player.id + "\"></span>\n                </div>\n            </div>\n            ", "player_board_" + player.id);
+            dojo.place("\n            <div class=\"counters\">\n                <div id=\"reroll-counter-wrapper-" + player.id + "\" class=\"reroll-counter\">\n                    <div class=\"icon reroll\"></div> \n                    <span id=\"reroll-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"footprint-counter-wrapper-" + player.id + "\" class=\"footprint-counter\">\n                    <div class=\"icon footprint\"></div> \n                    <span id=\"footprint-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"firefly-counter-wrapper-" + player.id + "\" class=\"firefly-counter\">\n                </div>\n            </div>\n            ", "player_board_" + player.id);
             var rerollCounter = new ebg.counter();
             rerollCounter.create("reroll-counter-" + playerId);
             rerollCounter.setValue(player.rerolls);
@@ -1424,16 +1424,19 @@ var Glow = /** @class */ (function () {
             footprintCounter.create("footprint-counter-" + playerId);
             footprintCounter.setValue(player.footprints);
             _this.footprintCounters[playerId] = footprintCounter;
-            var fireflyCounter = new ebg.counter();
-            fireflyCounter.create("firefly-counter-" + playerId);
-            var allFireflies = player.fireflies + player.companions.map(function (companion) { return companion.fireflies; }).reduce(function (a, b) { return a + b; }, 0);
-            fireflyCounter.setValue(allFireflies);
-            _this.fireflyCounters[playerId] = fireflyCounter;
-            var companionCounter = new ebg.counter();
-            companionCounter.create("companion-counter-" + playerId);
-            companionCounter.setValue(player.companions.length);
-            _this.companionCounters[playerId] = companionCounter;
-            _this.updateFireflyCounterIcon(playerId);
+            if (playerId != 0) {
+                dojo.place("\n                    <div id=\"firefly-counter-icon-" + player.id + "\" class=\"icon firefly\"></div> \n                    <span id=\"firefly-counter-" + player.id + "\"></span>&nbsp;/&nbsp;<span id=\"companion-counter-" + player.id + "\"></span>\n                ", "firefly-counter-wrapper-" + player.id);
+                var fireflyCounter = new ebg.counter();
+                fireflyCounter.create("firefly-counter-" + playerId);
+                var allFireflies = player.fireflies + player.companions.map(function (companion) { return companion.fireflies; }).reduce(function (a, b) { return a + b; }, 0);
+                fireflyCounter.setValue(allFireflies);
+                _this.fireflyCounters[playerId] = fireflyCounter;
+                var companionCounter = new ebg.counter();
+                companionCounter.create("companion-counter-" + playerId);
+                companionCounter.setValue(player.companions.length);
+                _this.companionCounters[playerId] = companionCounter;
+                _this.updateFireflyCounterIcon(playerId);
+            }
             if (!solo) {
                 // first player token
                 dojo.place("<div id=\"player_board_" + player.id + "_firstPlayerWrapper\"></div>", "player_board_" + player.id);
@@ -2143,7 +2146,6 @@ var Glow = /** @class */ (function () {
         div.classList.add('new-day-animation');
     };
     Glow.prototype.notif_replaceSmallDice = function (notif) {
-        console.log('replaceSmallDice', notif.args);
         this.meetingTrack.placeSmallDice(notif.args.dice);
     };
     Glow.prototype.notif_diceRolled = function (notif) {

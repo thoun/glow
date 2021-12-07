@@ -668,8 +668,6 @@ class Glow implements GlowGame {
                     <span id="footprint-counter-${player.id}"></span>
                 </div>
                 <div id="firefly-counter-wrapper-${player.id}" class="firefly-counter">
-                    <div id="firefly-counter-icon-${player.id}" class="icon firefly"></div> 
-                    <span id="firefly-counter-${player.id}"></span>&nbsp;/&nbsp;<span id="companion-counter-${player.id}"></span>
                 </div>
             </div>
             `, `player_board_${player.id}`);
@@ -684,18 +682,25 @@ class Glow implements GlowGame {
             footprintCounter.setValue(player.footprints);
             this.footprintCounters[playerId] = footprintCounter;
 
-            const fireflyCounter = new ebg.counter();
-            fireflyCounter.create(`firefly-counter-${playerId}`);
-            const allFireflies = player.fireflies + player.companions.map(companion => companion.fireflies).reduce((a, b) => a + b, 0);
-            fireflyCounter.setValue(allFireflies);
-            this.fireflyCounters[playerId] = fireflyCounter;
+            if (playerId != 0) {
+                dojo.place(`
+                    <div id="firefly-counter-icon-${player.id}" class="icon firefly"></div> 
+                    <span id="firefly-counter-${player.id}"></span>&nbsp;/&nbsp;<span id="companion-counter-${player.id}"></span>
+                `, `firefly-counter-wrapper-${player.id}`);
 
-            const companionCounter = new ebg.counter();
-            companionCounter.create(`companion-counter-${playerId}`);
-            companionCounter.setValue(player.companions.length);
-            this.companionCounters[playerId] = companionCounter;
+                const fireflyCounter = new ebg.counter();
+                fireflyCounter.create(`firefly-counter-${playerId}`);
+                const allFireflies = player.fireflies + player.companions.map(companion => companion.fireflies).reduce((a, b) => a + b, 0);
+                fireflyCounter.setValue(allFireflies);
+                this.fireflyCounters[playerId] = fireflyCounter;
 
-            this.updateFireflyCounterIcon(playerId);
+                const companionCounter = new ebg.counter();
+                companionCounter.create(`companion-counter-${playerId}`);
+                companionCounter.setValue(player.companions.length);
+                this.companionCounters[playerId] = companionCounter;
+
+                this.updateFireflyCounterIcon(playerId);
+            }
             
             if (!solo) {
                 // first player token
@@ -704,6 +709,7 @@ class Glow implements GlowGame {
                 if (gamedatas.firstPlayer === playerId) {
                     this.placeFirstPlayerToken(gamedatas.firstPlayer);
                 }
+
             } else if (playerId == 0) {
                 dojo.place(`<div id="tomDiceWrapper"></div>`, `player_board_${player.id}`);
                 if (gamedatas.tom.dice) {
@@ -1530,7 +1536,6 @@ class Glow implements GlowGame {
     }
 
     notif_replaceSmallDice(notif: Notif<NotifDiceUpdateArgs>) {
-        console.log('replaceSmallDice', notif.args);
         this.meetingTrack.placeSmallDice(notif.args.dice);
     }
 

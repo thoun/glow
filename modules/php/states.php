@@ -269,23 +269,25 @@ trait StateTrait {
 
         // Fireflies
         foreach($playersIds as $playerId) {
-            $points = $this->getPlayerFireflies($playerId); // TOCHECK does Tom almost always win 10 as he has no companion ?
-            $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
-            $companionCount = count($companions);
-
-            foreach($companions as $companion) {
-                $points += $companion->fireflies;
-            }
-
-            // If they have as many or more fireflies than companions, they score 10 bursts of light.
-            if ($points > $companionCount) {
-                $this->incPlayerScore($playerId, 10, _('${player_name} gains ${points} bursts of light with fireflies (more fireflies than companions)'));
-            }
-
             if ($playerId != 0) {
-                self::setStat($points, 'endFirefliesTokens', $playerId);
-                self::setStat($companionCount, 'endCompanionCount', $playerId);
-                self::setStat($points > $companionCount ? 1 : 0, 'endFirefliesBonus', $playerId);
+                $points = $this->getPlayerFireflies($playerId);
+                $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+                $companionCount = count($companions);
+
+                foreach($companions as $companion) {
+                    $points += $companion->fireflies;
+                }
+
+                // If they have as many or more fireflies than companions, they score 10 bursts of light.
+                if ($points > $companionCount) {
+                    $this->incPlayerScore($playerId, 10, _('${player_name} gains ${points} bursts of light with fireflies (more fireflies than companions)'));
+                }
+
+                if ($playerId != 0) {
+                    self::setStat($points, 'endFirefliesTokens', $playerId);
+                    self::setStat($companionCount, 'endCompanionCount', $playerId);
+                    self::setStat($points > $companionCount ? 1 : 0, 'endFirefliesBonus', $playerId);
+                }
             }
         }
 
