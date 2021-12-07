@@ -1413,6 +1413,7 @@ class Glow implements GlowGame {
             ['newFirstPlayer', 1],
             ['newDay', 2500],
             ['setTomDice', 1],
+            ['setTableDice', 1],
         ];
 
         notifs.forEach((notif) => {
@@ -1598,6 +1599,12 @@ class Glow implements GlowGame {
 
     notif_updateSoloTiles(notif: Notif<NotifUpdateSoloTilesArgs>) {
         this.meetingTrack.updateSoloTiles(notif.args);
+    }
+
+    notif_setTableDice(notif: Notif<NotifDiceUpdateArgs>) {
+        notif.args.dice.forEach(die => 
+            this.createOrMoveDie(die, `table-dice`)
+        )
     }
 
     notif_lastTurn() {

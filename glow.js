@@ -405,7 +405,7 @@ var Board = /** @class */ (function () {
         var cases = points === 10 ? 11 :
             (points > 10 ? points + 2 : points);
         var top = cases < 86 ? Math.min(Math.max(cases - 34, 0), 17) * POINT_CASE_SIZE : (102 - cases) * POINT_CASE_SIZE;
-        var left = cases < 52 ? Math.min(cases, 34) * POINT_CASE_SIZE : (33 - Math.max(cases - 52, 0)) * POINT_CASE_SIZE;
+        var left = cases < 52 ? Math.min(cases, 34) * POINT_CASE_SIZE : Math.max((33 - Math.max(cases - 52, 0)) * POINT_CASE_SIZE, 0);
         return [17 + left, 15 + top];
     };
     Board.prototype.movePoints = function () {
@@ -2037,6 +2037,7 @@ var Glow = /** @class */ (function () {
             ['newFirstPlayer', 1],
             ['newDay', 2500],
             ['setTomDice', 1],
+            ['setTableDice', 1],
         ];
         notifs.forEach(function (notif) {
             dojo.subscribe(notif[0], _this, "notif_" + notif[0]);
@@ -2197,6 +2198,12 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.notif_updateSoloTiles = function (notif) {
         this.meetingTrack.updateSoloTiles(notif.args);
+    };
+    Glow.prototype.notif_setTableDice = function (notif) {
+        var _this = this;
+        notif.args.dice.forEach(function (die) {
+            return _this.createOrMoveDie(die, "table-dice");
+        });
     };
     Glow.prototype.notif_lastTurn = function () {
         if (document.getElementById('last-round')) {

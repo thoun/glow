@@ -45,6 +45,24 @@ trait ActionTrait {
         self::setStat(1, $adventurer->name, $playerId);
 
         if ($this->isSoloMode()) {
+            $movedDiceColorsToTable = [];
+
+            if ($adventurer->color != 6) {
+                $movedDiceColorsToTable[] = 6;
+            }
+            if ($adventurer->color != 7) {
+                $movedDiceColorsToTable[] = 7;
+            }
+
+            $movedDiceToTable = array_map(function($color) {
+                return $this->getBigDiceByColor($color, 1)[0];
+            }, $movedDiceColorsToTable);
+
+            $this->moveDice($movedDiceToTable, 'table');
+            self::notifyAllPlayers('setTableDice', '', [
+                'dice' => $movedDiceToTable,
+            ]);
+
             self::giveExtraTime($playerId);
             $this->gamestate->nextState('chooseTomDice');
         } else {

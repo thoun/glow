@@ -412,8 +412,7 @@ trait UtilTrait {
     }
     
     function setDiceOnTable(bool $solo) {
-        $maxBigDieOnTable = $solo ? 7 : 5;
-        for ($i=1; $i<=$maxBigDieOnTable; $i++) {
+        for ($i=1; $i<=5; $i++) {
             $bigDie = $this->getBigDiceByColor($i, 1)[0];            
             $this->moveDice([$bigDie], 'table');
         }
