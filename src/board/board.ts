@@ -262,15 +262,22 @@ class Board {
             if (!big) {
                 left -= 25;
             }
-
-            const distance = Math.sqrt( deltaX*deltaX + deltaY*deltaY );
-            const scaleX = Math.min(1, distance / 180);
-            const scaleY = Math.min(1, distance / 100);
             const onlyOneDestinationToSpot = possibleDestinations.filter(pd => pd.destination === possibleDestination.destination).length <= 1;
 
             if (!document.getElementById(`destination-arrow-${position}-from-${from}`)) {
+                const distance = Math.sqrt( deltaX*deltaX + deltaY*deltaY );
+                const scaleX = Math.min(1, distance / 180);
+                const scaleY = Math.min(1, distance / 100);
+
                 dojo.place(`<div id="destination-arrow-${position}-from-${from}" class="destination-arrow" style="left: ${left}px; top: ${top}px; transform: rotate(${rad}rad) scaleX(${scaleX}) scaleY(${scaleY})"></div>`, 'board');
                 document.getElementById(`destination-arrow-${position}-from-${from}`).addEventListener('click', () => this.game.selectMove(possibleDestination));
+
+                const footprintsCost = possibleDestination.costForPlayer.filter(cost => cost > -30 && cost < -20).map(cost => (-cost) - 20).reduce((a, b) => a + b, 0);
+
+                for (let i=0; i<footprintsCost; i++) {
+                    dojo.place(`<div class="footprint round-token" style="position: absolute; left: ${i*10}px; top: ${i*10}px; transform: scaleX(${(1/scaleX) / 1.8}) scaleY(${(1/scaleY) / 1.8})"></div>`, `destination-arrow-${position}-from-${from}`);
+                }
+                console.log('footprintsCost', footprintsCost);
             }
             if (onlyOneDestinationToSpot) {
                 document.getElementById(`destination-zone-${position}`).addEventListener('click', () => this.game.selectMove(possibleDestination));

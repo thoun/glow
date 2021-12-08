@@ -81,7 +81,7 @@ trait UtilTrait {
             }
         }
 
-        $sql .= implode($values, ',');
+        $sql .= implode(',', $values);
         self::DbQuery($sql);
     }
 

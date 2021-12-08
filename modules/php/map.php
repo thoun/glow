@@ -25,7 +25,7 @@ trait MapTrait {
             }
         }
 
-        $sql .= implode($values, ',');
+        $sql .= implode(',', $values);
         self::DbQuery($sql);
     }    
 
