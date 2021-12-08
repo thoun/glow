@@ -167,6 +167,7 @@ $this->MAP1 = [
   ]),
   new MapSpot1(12, [5], [
     new MapRoute(13),
+    new MapRoute(22),
   ]),
   new MapSpot1(13, [4], [
     new MapRoute(14),
@@ -188,6 +189,7 @@ $this->MAP1 = [
   ]),
   new MapSpot1(19, [3], [
     new MapRoute(20),
+    new MapRoute(26, [30]),
   ]),
   new MapSpot1(20, [3], [
     new MapRoute(21),
@@ -288,7 +290,7 @@ $this->MAP1 = [
   ]),
   new MapSpot1(51, [-1], []),
   new MapSpot1(52, [3], [
-    new MapRoute(54, [11]),
+    new MapRoute(54, [12]),
   ]),
   new MapSpot1(53, [1], [
     new MapRoute(54),
