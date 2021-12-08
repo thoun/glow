@@ -668,7 +668,12 @@ trait UtilTrait {
             }
             return $count;
         } else {
-            return $this->countRepetitionInDiceForEffectCondition($diceValues, $effectConditions);
+            $count = $this->countRepetitionInDiceForEffectCondition($diceValues, $effectConditions);
+            if ($this->array_some($effect->conditions, function ($condition) { return $condition >= -5 && $condition <= -1; })) {
+                return min(1, $count);
+            } else {
+                return $count;
+            }
         }
     }
 
