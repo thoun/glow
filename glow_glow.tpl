@@ -11,7 +11,7 @@
                 </div>
                 <div id="middle-band">
                     <div id="round-counter-wrapper">
-                        {DAY} <span id="round-counter">-</span>&nbsp;/&nbsp;8
+                        {DAY} <span id="round-counter">-</span><span id="round-counter-wrapper-max-days">&nbsp;/&nbsp;8</span>
                     </div>
                 </div>
                 <div id="meeting-track">

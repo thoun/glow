@@ -225,9 +225,9 @@ trait SoloUtilTrait {
 
     function updateSoloDeck(int $spot) {
         if (intval($this->soloTiles->countCardInLocation('deck')) == 0) {
-            $day = intval($this->getGameStateValue(DAY));
+            $day = intval($this->getGameStateValue(SOLO_DECK));
             if ($day == 1) { // we finish solo tiles for the first time
-                self::setGameStateValue(DAY, 2);
+                self::setGameStateValue(SOLO_DECK, 2);
 
                 $this->soloTiles->moveAllCardsInLocation('discard', 'deck');
                 $this->soloTiles->shuffle('deck');
@@ -236,7 +236,7 @@ trait SoloUtilTrait {
                 $this->companions->moveAllCardsInLocation('deck', 'discard');
                 $this->companions->moveAllCardsInLocation('deckB', 'deck');
             } else if ($day == 2) { // we finish solo tiles for the second time
-                self::setGameStateValue(DAY, 3);
+                self::setGameStateValue(SOLO_DECK, 3);
             }
         }
 

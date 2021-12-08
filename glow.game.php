@@ -55,6 +55,7 @@ class Glow extends Table {
         self::initGameStateLabels([
             DAY => 10,
             FIRST_PLAYER => 11,
+            SOLO_DECK => 12,
             
             BOARD_SIDE => 100,
         ]); 
@@ -111,6 +112,7 @@ class Glow extends Table {
 
         // Init global values with their initial values
         self::setGameStateInitialValue('DAY', 0);
+        self::setGameStateInitialValue('SOLO_DECK', 1);
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)

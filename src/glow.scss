@@ -177,9 +177,9 @@ html {
   }
 
   &.solo {
-    height: 139px;
+    padding-bottom: 139px;
 
-    #round-counter-wrapper {
+    #round-counter-wrapper-max-days {
       display: none;
     }
   }

@@ -43,6 +43,7 @@ define('END_SCORE', 100);
  */
 define('DAY', 'DAY');
 define('FIRST_PLAYER', 'FIRST_PLAYER');
+define('SOLO_DECK', 'SOLO_DECK');
 
 /*
  * Options

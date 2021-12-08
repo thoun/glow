@@ -789,9 +789,9 @@ html {
   flex: 1;
 }
 #middle-band.solo {
-  height: 139px;
+  padding-bottom: 139px;
 }
-#middle-band.solo #round-counter-wrapper {
+#middle-band.solo #round-counter-wrapper-max-days {
   display: none;
 }
 

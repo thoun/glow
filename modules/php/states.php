@@ -27,16 +27,13 @@ trait StateTrait {
         $solo = $this->isSoloMode();
 
         $day = intval($this->getGameStateValue(DAY)) + 1;
-        if (!$solo || $day == 1) {
-            self::setGameStateValue(DAY, $day);
-        }
+        self::setGameStateValue(DAY, $day);
 
         self::DbQuery("UPDATE companion SET `reroll_used` = false");
         self::DbQuery("UPDATE player SET `applied_effects` = null, visited_spots = null");
 
-        $message = $solo ? clienttranslate('A new day begins') : clienttranslate('Day ${day} begins');
-        self::notifyAllPlayers('newDay', $message, [
-            'day' => $solo ? 0 : $day,
+        self::notifyAllPlayers('newDay', clienttranslate('Day ${day} begins'), [
+            'day' => $day,
         ]);
 
         if ($day == 1) {
@@ -204,17 +201,22 @@ trait StateTrait {
 
         }
 
-        $endDay = $solo ? 3 : 8;
 
         self::incStat(1, 'days');
 
         $day = intval($this->getGameStateValue(DAY));
-        $message = $solo ? clienttranslate('Day ends') : clienttranslate('Day ${day} ends');
-        self::notifyAllPlayers('endDay', $message, [
-            'day' => $solo ? 0 : $day,
+        self::notifyAllPlayers('endDay', clienttranslate('Day ${day} ends'), [
+            'day' => $day,
         ]);
 
-        if ($day >= $endDay) {
+        $end = false;
+        if ($solo) {
+            $end = intval($this->getGameStateValue(SOLO_DECK)) > 2; 
+        } else {
+            $end = $day >= 8;
+        }
+
+        if ($end) {
             $this->gamestate->nextState('endScore');
         } else {
             $this->gamestate->nextState('newRound');
