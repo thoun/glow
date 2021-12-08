@@ -93,6 +93,7 @@ trait SoloUtilTrait {
     function rollAndPlaceTomDice(array $dice) {
         // roll dice
         foreach($dice as &$idie) {
+            $idie->roll();
             if ($idie->value > 5) { // we apply black die "-2"
                 $this->applyEffect(0, $idie->value, 3, null);
                 $this->moveDice([$idie], 'meeting', 0);

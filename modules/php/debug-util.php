@@ -51,4 +51,10 @@ trait DebugUtilTrait {
         $meepleId = intval(self::getUniqueValueFromDB("SELECT id from meeple WHERE `player_id` = $playerId LIMIT 1 OFFSET $index"));
         self::DbQuery("UPDATE meeple SET `position` = $spot where `id` = $meepleId");
     }
+
+    function debug($debugData) {
+        if ($this->getBgaEnvironment() != 'studio') { 
+            return;
+        }die('debug data : '.json_encode($debugData));
+    }
 }
