@@ -681,7 +681,7 @@ var PlayerTable = /** @class */ (function () {
         var _this = this;
         this.game = game;
         this.playerId = Number(player.id);
-        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock\">\n            <div class=\"name-and-dice\">\n                <div id=\"player-table-" + this.playerId + "-name\" class=\"player-name\" style=\"background-color: #" + player.color + ";\">" + player.name + "</div>\n                <div class=\"player-tokens\">\n                    <div id=\"player-table-" + this.playerId + "-reroll-tokens\" class=\"player-tokens-type\"></div>\n                    <div id=\"player-table-" + this.playerId + "-footprint-tokens\" class=\"player-tokens-type\"></div>\n                    <div id=\"player-table-" + this.playerId + "-firefly-tokens\" class=\"player-tokens-type\"></div>\n                </div>\n                <div id=\"player-table-" + this.playerId + "-dice\" class=\"player-dice\"></div>\n            </div>\n            <div class=\"adventurer-and-companions\">\n                <div id=\"player-table-" + this.playerId + "-spells\" class=\"player-table-spells normal\"></div>\n                <div id=\"player-table-" + this.playerId + "-adventurer\" class=\"player-table-adventurer\"></div>\n                <div id=\"player-table-" + this.playerId + "-companions\" class=\"player-table-companions\"></div>\n            </div>\n        </div>";
+        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock\">\n            <div class=\"name-and-dice\">\n                <div id=\"player-table-" + this.playerId + "-name\" class=\"player-name\" style=\"background-color: #" + player.color + ";\">" + player.name + "</div>\n                <div class=\"player-tokens\">\n                    <div id=\"player-table-" + this.playerId + "-reroll-tokens\" class=\"player-tokens-type\"></div>\n                    <div id=\"player-table-" + this.playerId + "-footprint-tokens\" class=\"player-tokens-type\"></div>\n                    <div id=\"player-table-" + this.playerId + "-firefly-tokens\" class=\"player-tokens-type\"></div>\n                </div>\n                <div id=\"player-table-" + this.playerId + "-dice\" class=\"player-dice\"></div>\n                <button id=\"player-table-" + this.playerId + "-sort-button\" class=\"bgabutton bgabutton_gray sort-button\">" + _('Sort') + "</button>\n            </div>\n            <div class=\"adventurer-and-companions\">\n                <div id=\"player-table-" + this.playerId + "-spells\" class=\"player-table-spells normal\"></div>\n                <div id=\"player-table-" + this.playerId + "-adventurer\" class=\"player-table-adventurer\"></div>\n                <div id=\"player-table-" + this.playerId + "-companions\" class=\"player-table-companions\"></div>\n            </div>\n        </div>";
         dojo.place(html, this.playerId === this.game.getPlayerId() ? 'currentplayertable' : 'playerstables');
         // adventurer        
         this.adventurerStock = new ebg.stock();
@@ -699,6 +699,7 @@ var PlayerTable = /** @class */ (function () {
         setupAdventurersCards(this.adventurerStock);
         if (player.adventurer) {
             this.adventurerStock.addToStockWithId(player.adventurer.color, '' + player.adventurer.id);
+            this.addMouseEvents(this.adventurerStock, player.adventurer);
         }
         // companions
         this.companionsStock = new ebg.stock();
@@ -714,7 +715,10 @@ var PlayerTable = /** @class */ (function () {
             _this.companionsStock.unselectAll();
         });
         setupCompanionCards(this.companionsStock);
-        player.companions.forEach(function (companion) { return _this.companionsStock.addToStockWithId(companion.subType, '' + companion.id); });
+        player.companions.forEach(function (companion) {
+            _this.companionsStock.addToStockWithId(companion.subType, '' + companion.id);
+            _this.addMouseEvents(_this.companionsStock, companion);
+        });
         // spells
         this.spellsStock = new ebg.stock();
         this.spellsStock.setSelectionAppearance('class');
@@ -742,6 +746,7 @@ var PlayerTable = /** @class */ (function () {
         player.dice.forEach(function (die) {
             _this.game.createOrMoveDie(die, "player-table-" + _this.playerId + "-dice");
         });
+        document.getElementById("player-table-" + this.playerId + "-sort-button").addEventListener('click', function () { return _this.sortDice(); });
         // tokens
         this.setTokens('reroll', player.rerolls);
         this.setTokens('footprint', player.footprints);
@@ -791,10 +796,12 @@ var PlayerTable = /** @class */ (function () {
     };
     PlayerTable.prototype.setAdventurer = function (adventurer) {
         moveToAnotherStock(this.game.adventurersStock, this.adventurerStock, adventurer.color, '' + adventurer.id);
+        this.addMouseEvents(this.adventurerStock, adventurer);
     };
     PlayerTable.prototype.addCompanion = function (companion, from) {
         moveToAnotherStock(from, this.companionsStock, companion.subType, '' + companion.id);
         this.moveCompanionSpellStock();
+        this.addMouseEvents(this.companionsStock, companion);
     };
     PlayerTable.prototype.addDice = function (dice) {
         var _this = this;
@@ -863,6 +870,47 @@ var PlayerTable = /** @class */ (function () {
         }
         for (var i = zone.childElementCount; i < number; i++) {
             dojo.place("<div class=\"round-token " + type + "\"></div>", zone.id);
+        }
+    };
+    PlayerTable.prototype.addMouseEvents = function (stock, companionOrAdventurer) {
+        var _this = this;
+        var div = document.getElementById(stock.container_div.id + "_item_" + companionOrAdventurer.id);
+        var diceDiv = document.getElementById("player-table-" + this.playerId + "-dice");
+        div.addEventListener('mouseenter', function () { var _a; return _this.highlightDice(diceDiv, (_a = companionOrAdventurer.effect) === null || _a === void 0 ? void 0 : _a.conditions); });
+        div.addEventListener('mouseleave', function () { return _this.unhighlightDice(diceDiv); });
+    };
+    PlayerTable.prototype.highlightDice = function (diceDiv, conditions) {
+        if (!conditions) {
+            return;
+        }
+        var highlightConditions = conditions.filter(function (condition) { return condition > -10 && condition < 10; });
+        if (!highlightConditions.length) {
+            return;
+        }
+        var dice = Array.from(diceDiv.querySelectorAll('.die'));
+        dice.forEach(function (die) {
+            var dieValue = Number(die.dataset.dieValue);
+            if (highlightConditions.some(function (condition) { return condition === dieValue; })) {
+                die.classList.add('highlight-green');
+            }
+            if (highlightConditions.some(function (condition) { return condition === -dieValue; })) {
+                die.classList.add('highlight-red');
+            }
+        });
+    };
+    PlayerTable.prototype.unhighlightDice = function (diceDiv) {
+        var dice = Array.from(diceDiv.querySelectorAll('.die'));
+        dice.forEach(function (die) { return die.classList.remove('highlight-green', 'highlight-red'); });
+    };
+    PlayerTable.prototype.sortDice = function () {
+        var diceDiv = document.getElementById("player-table-" + this.playerId + "-dice");
+        var dice = Array.from(diceDiv.querySelectorAll('.die'));
+        var _loop_4 = function (i) {
+            var valueDice = dice.filter(function (die) { return Number(die.dataset.dieValue) === i; });
+            valueDice.forEach(function (die) { return diceDiv.appendChild(die); });
+        };
+        for (var i = 1; i <= 8; i++) {
+            _loop_4(i);
         }
     };
     return PlayerTable;
@@ -1480,7 +1528,7 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.createAndPlaceDieHtml = function (die, destinationId) {
         var _this = this;
-        var html = "<div id=\"die" + die.id + "\" class=\"die die" + die.face + " " + (die.small ? 'small' : '') + " " + (die.used ? 'used' : '') + "\" data-die-id=\"" + die.id + "\" data-die-value=\"" + die.face + "\">\n        <ol class=\"die-list\" data-roll=\"" + die.face + "\">";
+        var html = "<div id=\"die" + die.id + "\" class=\"die " + (die.small ? 'small' : '') + " " + (die.used ? 'used' : '') + "\" data-die-id=\"" + die.id + "\" data-die-face=\"" + die.face + "\" data-die-value=\"" + die.value + "\">\n        <ol class=\"die-list\" data-roll=\"" + die.face + "\">";
         for (var dieFace = 1; dieFace <= 6; dieFace++) {
             html += "<li class=\"die-item color" + die.color + " side" + dieFace + "\" data-side=\"" + dieFace + "\"></li>";
         }
@@ -1511,11 +1559,10 @@ var Glow = /** @class */ (function () {
         if (addChangeDieRoll === void 0) { addChangeDieRoll = false; }
         var dieDiv = this.getDieDiv(die);
         if (dieDiv) {
-            var currentValue = Number(dieDiv.dataset.dieValue);
-            if (currentValue != die.face) {
-                dieDiv.classList.remove("die" + currentValue);
-                dieDiv.classList.add("die" + die.face);
-                dieDiv.dataset.dieValue = '' + die.face;
+            dieDiv.dataset.dieValue = '' + die.value;
+            var currentFace = Number(dieDiv.dataset.dieFace);
+            if (currentFace != die.face) {
+                dieDiv.dataset.dieFace = '' + die.face;
                 if (addChangeDieRoll) {
                     this.addRollToDiv(dieDiv, 'change');
                 }
@@ -1538,7 +1585,7 @@ var Glow = /** @class */ (function () {
         var dieList = dieDiv.getElementsByClassName('die-list')[0];
         if (dieList) {
             dieList.dataset.rollType = '-';
-            dieList.dataset.roll = dieDiv.dataset.dieValue;
+            dieList.dataset.roll = dieDiv.dataset.dieFace;
             setTimeout(function () { return dieList.dataset.rollType = rollClass; }, 50);
         }
         else if (attempt < 5) {
@@ -1596,7 +1643,7 @@ var Glow = /** @class */ (function () {
         ];
         [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]].forEach(function (orderArray) {
             var remainingCost = costNumber;
-            var _loop_4 = function (i) {
+            var _loop_5 = function (i) {
                 var possibleCost = [0, 0, 0];
                 orderArray.forEach(function (order, orderIndex) {
                     if (remainingCost > 0 && canUse[order] > 0) {
@@ -1613,7 +1660,7 @@ var Glow = /** @class */ (function () {
                 }
             };
             for (var i = 1; i <= costNumber; i++) {
-                _loop_4(i);
+                _loop_5(i);
             }
         });
         return possibleCosts;
@@ -1727,7 +1774,7 @@ var Glow = /** @class */ (function () {
                 cancel === null || cancel === void 0 ? void 0 : cancel.parentElement.removeChild(cancel);
                 var faces = die.color <= 5 ? 5 : 6;
                 var facesButtons = document.getElementById('change-die-faces-buttons');
-                var _loop_5 = function (i) {
+                var _loop_6 = function (i) {
                     var html = "<div class=\"die-item color" + die.color + " side" + i + "\"></div>";
                     this_3.addActionButton("changeDie" + i + "-button", html, function () {
                         if (_this.selectedDieFace !== null) {
@@ -1746,7 +1793,7 @@ var Glow = /** @class */ (function () {
                 };
                 var this_3 = this;
                 for (var i = 1; i <= faces; i++) {
-                    _loop_5(i);
+                    _loop_6(i);
                 }
                 this.addActionButton("cancelRollDice-button", _("Cancel"), function () { return _this.setActionBarRollDice(true); });
             }

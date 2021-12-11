@@ -749,7 +749,7 @@ class Glow implements GlowGame {
     }
 
     private createAndPlaceDieHtml(die: Die, destinationId: string) {
-        let html = `<div id="die${die.id}" class="die die${die.face} ${die.small ? 'small' : ''} ${die.used ? 'used' : ''}" data-die-id="${die.id}" data-die-value="${die.face}">
+        let html = `<div id="die${die.id}" class="die ${die.small ? 'small' : ''} ${die.used ? 'used' : ''}" data-die-id="${die.id}" data-die-face="${die.face}" data-die-value="${die.value}">
         <ol class="die-list" data-roll="${die.face}">`;
         for (let dieFace=1; dieFace<=6; dieFace++) {
             html += `<li class="die-item color${die.color} side${dieFace}" data-side="${dieFace}"></li>`;
@@ -787,11 +787,10 @@ class Glow implements GlowGame {
         const dieDiv = this.getDieDiv(die);
 
         if (dieDiv) {
-            const currentValue = Number(dieDiv.dataset.dieValue);
-            if (currentValue != die.face) {
-                dieDiv.classList.remove(`die${currentValue}`);
-                dieDiv.classList.add(`die${die.face}`);
-                dieDiv.dataset.dieValue = ''+die.face;
+            dieDiv.dataset.dieValue = ''+die.value;
+            const currentFace = Number(dieDiv.dataset.dieFace);
+            if (currentFace != die.face) {
+                dieDiv.dataset.dieFace = ''+die.face;
 
                 if (addChangeDieRoll) {
                     this.addRollToDiv(dieDiv, 'change');
@@ -816,7 +815,7 @@ class Glow implements GlowGame {
         const dieList = dieDiv.getElementsByClassName('die-list')[0] as HTMLDivElement;
         if (dieList) {
             dieList.dataset.rollType = '-';
-            dieList.dataset.roll = dieDiv.dataset.dieValue;
+            dieList.dataset.roll = dieDiv.dataset.dieFace;
             setTimeout(() => dieList.dataset.rollType = rollClass, 50);
         } else if (attempt < 5) {
             setTimeout(() => this.addRollToDiv(dieDiv, rollClass, attempt + 1), 200); 

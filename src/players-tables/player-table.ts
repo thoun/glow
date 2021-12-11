@@ -23,6 +23,7 @@ class PlayerTable {
                     <div id="player-table-${this.playerId}-firefly-tokens" class="player-tokens-type"></div>
                 </div>
                 <div id="player-table-${this.playerId}-dice" class="player-dice"></div>
+                <button id="player-table-${this.playerId}-sort-button" class="bgabutton bgabutton_gray sort-button">${_('Sort')}</button>
             </div>
             <div class="adventurer-and-companions">
                 <div id="player-table-${this.playerId}-spells" class="player-table-spells normal"></div>
@@ -51,6 +52,7 @@ class PlayerTable {
 
         if (player.adventurer) {
             this.adventurerStock.addToStockWithId(player.adventurer.color, ''+player.adventurer.id);
+            this.addMouseEvents(this.adventurerStock, player.adventurer);
         }
 
         // companions
@@ -69,7 +71,10 @@ class PlayerTable {
         });
         setupCompanionCards(this.companionsStock);
 
-        player.companions.forEach(companion => this.companionsStock.addToStockWithId(companion.subType, ''+companion.id));
+        player.companions.forEach(companion => {
+            this.companionsStock.addToStockWithId(companion.subType, ''+companion.id);
+            this.addMouseEvents(this.companionsStock, companion);
+        });
 
         // spells
 
@@ -100,6 +105,8 @@ class PlayerTable {
         player.dice.forEach(die => {
             this.game.createOrMoveDie(die, `player-table-${this.playerId}-dice`);
         });
+
+        document.getElementById(`player-table-${this.playerId}-sort-button`).addEventListener('click', () => this.sortDice());
 
         // tokens
         this.setTokens('reroll', player.rerolls);
@@ -161,11 +168,13 @@ class PlayerTable {
 
     public setAdventurer(adventurer: Adventurer) {
         moveToAnotherStock(this.game.adventurersStock, this.adventurerStock, adventurer.color, ''+adventurer.id);
+        this.addMouseEvents(this.adventurerStock, adventurer);
     }
     
     public addCompanion(companion: Companion, from: Stock) {
         moveToAnotherStock(from, this.companionsStock, companion.subType, ''+companion.id);
         this.moveCompanionSpellStock();
+        this.addMouseEvents(this.companionsStock, companion);
     }
     
     public addDice(dice: Die[]) {
@@ -240,6 +249,48 @@ class PlayerTable {
         }
         for (let i = zone.childElementCount; i<number; i++) {
             dojo.place(`<div class="round-token ${type}"></div>`, zone.id);
+        }
+    }
+    
+    private addMouseEvents(stock: Stock, companionOrAdventurer: Companion | Adventurer) {
+        const div = document.getElementById(`${stock.container_div.id}_item_${companionOrAdventurer.id}`);
+        const diceDiv = document.getElementById(`player-table-${this.playerId}-dice`) as HTMLDivElement;     
+
+        div.addEventListener('mouseenter', () => this.highlightDice(diceDiv, companionOrAdventurer.effect?.conditions));
+        div.addEventListener('mouseleave', () => this.unhighlightDice(diceDiv));
+    }
+
+    private highlightDice(diceDiv: HTMLDivElement, conditions: number[]) {
+        if (!conditions) {
+            return;
+        }
+        const highlightConditions = conditions.filter(condition => condition > -10 && condition < 10);
+        if (!highlightConditions.length) {
+            return;
+        }
+        const dice = Array.from(diceDiv.querySelectorAll('.die')) as HTMLDivElement[];
+        dice.forEach(die => {
+            const dieValue = Number(die.dataset.dieValue);
+            if (highlightConditions.some(condition => condition === dieValue)) {
+                die.classList.add('highlight-green');
+            }
+            if (highlightConditions.some(condition => condition === -dieValue)) {
+                die.classList.add('highlight-red');
+            }
+        });
+    }
+
+    private unhighlightDice(diceDiv: HTMLDivElement) {
+        const dice = Array.from(diceDiv.querySelectorAll('.die')) as HTMLDivElement[];
+        dice.forEach(die => die.classList.remove('highlight-green', 'highlight-red'));
+    }
+    
+    private sortDice(): void {
+        const diceDiv = document.getElementById(`player-table-${this.playerId}-dice`);
+        const dice = Array.from(diceDiv.querySelectorAll('.die')) as HTMLDivElement[];
+        for (let i = 1; i <= 8; i++) {
+            const valueDice = dice.filter(die => Number(die.dataset.dieValue) === i);
+            valueDice.forEach(die => diceDiv.appendChild(die));
         }
     }
 }

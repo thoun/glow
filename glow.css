@@ -3,8 +3,8 @@
 .die {
   display: inline-block;
   position: relative;
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   margin: 3px;
   border-radius: 20%;
   transform: translateZ(18px);
@@ -12,7 +12,7 @@
 }
 .die.small {
   margin: 0 -2px;
-  transform: scale3d(0.7, 0.7, 0.7) translateZ(18px);
+  transform: scale3d(0.76, 0.76, 0.76) translateZ(18px);
 }
 .die.rolled {
   animation: rolled-die 1s forwards;
@@ -20,13 +20,13 @@
 }
 .die.small.rolled {
   animation: rolled-die-small 1s forwards;
-  transform: scale3d(0.7, 0.7, 0.7) translateZ(18px) translateY(-40vh);
+  transform: scale3d(0.76, 0.76, 0.76) translateZ(18px) translateY(-40vh);
 }
 .die.selectable {
   cursor: pointer;
 }
 .die.selectable.selected {
-  box-shadow: 0 0 4px 4px red;
+  box-shadow: 0 0 4px 4px black;
 }
 .die.used {
   filter: grayscale(1);
@@ -48,7 +48,7 @@
 }
 @keyframes rolled-die-small {
   100% {
-    transform: scale3d(0.7, 0.7, 0.7) translateZ(18px);
+    transform: scale3d(0.76, 0.76, 0.76) translateZ(18px);
   }
 }
 .die-list {
@@ -492,8 +492,15 @@
 #currentplayertable .player-table .name-and-dice .player-tokens .player-tokens-type > div:not(:first-child), #playerstables .player-table .name-and-dice .player-tokens .player-tokens-type > div:not(:first-child) {
   margin-left: -20px;
 }
-#currentplayertable .player-table .name-and-dice .player-tokens .player-dice, #playerstables .player-table .name-and-dice .player-tokens .player-dice {
-  height: 42px;
+#currentplayertable .player-table .name-and-dice .player-dice .die.highlight-green, #playerstables .player-table .name-and-dice .player-dice .die.highlight-green {
+  box-shadow: 0 0 4px 4px green;
+}
+#currentplayertable .player-table .name-and-dice .player-dice .die.highlight-red, #playerstables .player-table .name-and-dice .player-dice .die.highlight-red {
+  box-shadow: 0 0 4px 4px red;
+}
+#currentplayertable .player-table .name-and-dice .sort-button, #playerstables .player-table .name-and-dice .sort-button {
+  width: auto;
+  margin-left: 10px;
 }
 #currentplayertable .player-table .player-table-spells .stockitem, #playerstables .player-table .player-table-spells .stockitem {
   border: 0;

@@ -3,8 +3,8 @@ $size: 0.25rem;
 .die {
     display: inline-block;
     position: relative;
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     margin: 3px;
     border-radius: 20%;
     transform: translateZ(18px);
@@ -13,7 +13,7 @@ $size: 0.25rem;
 
     &.small {
       margin: 0 -2px;
-      transform: scale3d(0.7,0.7,0.7) translateZ(18px);
+      transform: scale3d(0.76, 0.76, 0.76) translateZ(18px);
     }
 
     &.rolled {
@@ -23,7 +23,7 @@ $size: 0.25rem;
 
     &.small.rolled {
         animation: rolled-die-small 1s forwards;
-        transform: scale3d(0.7,0.7,0.7) translateZ(18px) translateY(-40vh);
+        transform: scale3d(0.76, 0.76, 0.76) translateZ(18px) translateY(-40vh);
     }
 
     &.selectable {
@@ -31,7 +31,7 @@ $size: 0.25rem;
 
       &.selected {
         // animation: selected-dice-animation 0.5s alternate infinite;
-        box-shadow: 0 0 4px 4px red;
+        box-shadow: 0 0 4px 4px black;
       }
     }
 
@@ -55,7 +55,7 @@ $size: 0.25rem;
 }
 
 @keyframes rolled-die-small {
-    100% { transform: scale3d(0.7,0.7,0.7) translateZ(18px); }
+    100% { transform: scale3d(0.76, 0.76, 0.76) translateZ(18px); }
 }
 
   .die-list {

@@ -37,14 +37,27 @@
     
                 .player-tokens-type {    
                     &>div:not(:first-child) {
-                    margin-left: -20px;
+                        margin-left: -20px;
+                    }
                 }
             }
 
             .player-dice {
-                height: 42px;
+                .die {
+                    &.highlight-green {
+                        box-shadow: 0 0 4px 4px green;
+                    }
+
+                    &.highlight-red {
+                        box-shadow: 0 0 4px 4px red;                    
+                    }
+                }
             }
-        }
+
+            .sort-button {
+                width: auto;
+                margin-left: 10px;
+            }
       }
 
         .player-table-spells {

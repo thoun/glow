@@ -1,3 +1,8 @@
+interface Effect {
+    conditions: number[];
+    effects: number[];
+}
+
 interface Adventurer {
     id: number;
     color: number;
@@ -5,7 +10,7 @@ interface Adventurer {
     location_arg: number;
     points: number;
     dice: number;
-    effect: number;
+    effect?: Effect;
 }
 
 interface Companion {
@@ -15,6 +20,7 @@ interface Companion {
     location: string;
     location_arg: number;
     fireflies: number;
+    effect?: Effect;
 }
 
 interface Spell {
@@ -69,10 +75,6 @@ interface Route {
 }
 
 
-interface Effect {
-    conditions: number[];
-    effects: number[];
-}
 
 interface GlowPlayer extends Player {
     playerNo: number;
