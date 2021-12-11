@@ -31,7 +31,4 @@ Also add one auto-FTP upload extension (for example https://marketplace.visualst
 
 ## Hint
 Make sure ftp-sync.json and node_modules are in .gitignore
-
-TODO
- - Un moyen de trier ses dés par symbole (quand on en a pleins c'est parfois dur de lire)
- - Quand on passe le curseur sur nos cartes pendant la phase de relance des dés, mettre en surbrillance les dés qui sont liés à la carte (si c'est une carte qui donne +3 éclats pour chaque paire de même symbole, mettre en surbrillance les symboles qu'on trouve par paire dans nos dés)
+ 

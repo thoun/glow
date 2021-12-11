@@ -96,19 +96,19 @@ function setupSoloTileCards(soloTilesStock) {
 }
 function getEffectExplanation(effect) {
     if (effect > 100) {
-        return dojo.string.substitute(_("Earn ${points} bursts of light."), { points: "<strong>" + (effect - 100) + "</strong>" });
+        return dojo.string.substitute(_("Earn ${points} burst(s) of light."), { points: "<strong>" + (effect - 100) + "</strong>" });
     }
     else if (effect < -100) {
-        return dojo.string.substitute(_("Lose ${points} bursts of light."), { points: "<strong>" + -(effect + 100) + "</strong>" });
+        return dojo.string.substitute(_("Lose ${points} burst(s) of light."), { points: "<strong>" + -(effect + 100) + "</strong>" });
     }
     else if (effect > 20 && effect < 30) {
-        return dojo.string.substitute(_("Earn ${footprints} footprints."), { footprints: "<strong>" + (effect - 20) + "</strong>" });
+        return dojo.string.substitute(_("Earn ${footprints} footprint(s)."), { footprints: "<strong>" + (effect - 20) + "</strong>" });
     }
     else if (effect < -20 && effect > -30) {
-        return dojo.string.substitute(_("Earn ${footprints} footprints."), { footprints: "<strong>" + -(effect + 20) + "</strong>" });
+        return dojo.string.substitute(_("Earn ${footprints} footprint(s)."), { footprints: "<strong>" + -(effect + 20) + "</strong>" });
     }
     else if (effect > 10 && effect < 20) {
-        return dojo.string.substitute(_("Earn ${fireflies} firefly."), { fireflies: "<strong>" + (effect - 10) + "</strong>" });
+        return dojo.string.substitute(_("Earn ${fireflies} firefly(ies)."), { fireflies: "<strong>" + (effect - 10) + "</strong>" });
     }
     else if (effect === 30) {
         return _("Earn 1 reroll token.");
