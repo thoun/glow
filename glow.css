@@ -3,19 +3,24 @@
 .die {
   display: inline-block;
   position: relative;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   margin: 3px;
   border-radius: 20%;
+  transform: translateZ(18px);
   box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.5);
 }
 .die.small {
-  width: 24px;
-  height: 24px;
+  margin: 0 -2px;
+  transform: scale3d(0.7, 0.7, 0.7) translateZ(18px);
 }
 .die.rolled {
   animation: rolled-die 1s forwards;
   transform: translateY(-40vh);
+}
+.die.small.rolled {
+  animation: rolled-die-small 1s forwards;
+  transform: scale3d(0.7, 0.7, 0.7) translateZ(18px) translateY(-40vh);
 }
 .die.selectable {
   cursor: pointer;
@@ -39,6 +44,11 @@
 @keyframes rolled-die {
   100% {
     transform: initial;
+  }
+}
+@keyframes rolled-die-small {
+  100% {
+    transform: scale3d(0.7, 0.7, 0.7) translateZ(18px);
   }
 }
 .die-list {

@@ -921,7 +921,7 @@ class Glow implements GlowGame {
         const possibleCosts = this.getPossibleCosts(1);
         possibleCosts.forEach((possibleCost, index) => {
             const costStr = possibleCost.map((cost, costTypeIndex) => this.getRollDiceCostStr(costTypeIndex, cost)).filter(str => str !== null).join(' ');
-            (this as any).addActionButton(`rollDice-button${index}`, _("Reroll selected dice") + `(${costStr})`, () => this.rollDice(possibleCost));
+            (this as any).addActionButton(`rollDice-button${index}`, _("Reroll selected dice") + ` (${costStr})`, () => this.rollDice(possibleCost));
             dojo.toggleClass(`rollDice-button${index}`, 'disabled', this.selectedDice.length < 1 || this.selectedDice.length > 2);
 
         });
@@ -1436,8 +1436,9 @@ class Glow implements GlowGame {
         if (colorBlindToken) {
             colorBlindToken.style.color = `#${newPlayerColor}`;
         };*/
-        this.board.setColor(notif.args.playerId, newPlayerColor)
+        this.board.setColor(notif.args.playerId, newPlayerColor);
         playerTable.setColor(newPlayerColor);
+        this.gamedatas.players[notif.args.playerId].color = newPlayerColor;
     }
 
     notif_chosenCompanion(notif: Notif<NotifChosenCompanionArgs>) {

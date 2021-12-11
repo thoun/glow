@@ -1632,7 +1632,7 @@ var Glow = /** @class */ (function () {
         var possibleCosts = this.getPossibleCosts(1);
         possibleCosts.forEach(function (possibleCost, index) {
             var costStr = possibleCost.map(function (cost, costTypeIndex) { return _this.getRollDiceCostStr(costTypeIndex, cost); }).filter(function (str) { return str !== null; }).join(' ');
-            _this.addActionButton("rollDice-button" + index, _("Reroll selected dice") + ("(" + costStr + ")"), function () { return _this.rollDice(possibleCost); });
+            _this.addActionButton("rollDice-button" + index, _("Reroll selected dice") + (" (" + costStr + ")"), function () { return _this.rollDice(possibleCost); });
             dojo.toggleClass("rollDice-button" + index, 'disabled', _this.selectedDice.length < 1 || _this.selectedDice.length > 2);
         });
         this.addActionButton("cancelRollDice-button", _("Cancel"), function () { return _this.setActionBarRollDice(true); });
@@ -2064,6 +2064,7 @@ var Glow = /** @class */ (function () {
         };*/
         this.board.setColor(notif.args.playerId, newPlayerColor);
         playerTable.setColor(newPlayerColor);
+        this.gamedatas.players[notif.args.playerId].color = newPlayerColor;
     };
     Glow.prototype.notif_chosenCompanion = function (notif) {
         var _a, _b;
