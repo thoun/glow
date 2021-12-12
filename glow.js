@@ -483,7 +483,6 @@ var Board = /** @class */ (function () {
                 for (var i = 0; i < footprintsCost; i++) {
                     dojo.place("<div class=\"footprint round-token\" style=\"position: absolute; left: " + i * 10 + "px; top: " + i * 10 + "px; transform: scaleX(" + (1 / scaleX) / 1.8 + ") scaleY(" + (1 / scaleY) / 1.8 + ")\"></div>", "destination-arrow-" + position + "-from-" + from);
                 }
-                console.log('footprintsCost', footprintsCost);
             }
             if (onlyOneDestinationToSpot) {
                 document.getElementById("destination-zone-" + position).addEventListener('click', function () { return _this.game.selectMove(possibleDestination); });

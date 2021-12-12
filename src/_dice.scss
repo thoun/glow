@@ -7,13 +7,14 @@ $size: 0.25rem;
     height: 42px;
     margin: 3px;
     border-radius: 20%;
-    transform: translateZ(18px);
+    transform: translateZ(20px);
+    transform-style: preserve-3d;
 
     box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.5);
 
     &.small {
       margin: 0 -2px;
-      transform: scale3d(0.76, 0.76, 0.76) translateZ(18px);
+      transform: scale3d(0.76, 0.76, 0.76) translateZ(16px);
     }
 
     &.rolled {
@@ -23,7 +24,7 @@ $size: 0.25rem;
 
     &.small.rolled {
         animation: rolled-die-small 1s forwards;
-        transform: scale3d(0.76, 0.76, 0.76) translateZ(18px) translateY(-40vh);
+        transform: scale3d(0.76, 0.76, 0.76) translateZ(16px) translateY(-40vh);
     }
 
     &.selectable {
@@ -55,7 +56,7 @@ $size: 0.25rem;
 }
 
 @keyframes rolled-die-small {
-    100% { transform: scale3d(0.76, 0.76, 0.76) translateZ(18px); }
+    100% { transform: scale3d(0.76, 0.76, 0.76) translateZ(16px); }
 }
 
   .die-list {
