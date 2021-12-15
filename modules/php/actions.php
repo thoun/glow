@@ -375,6 +375,11 @@ trait ActionTrait {
         self::checkAction('resolveCard');
 
         $playerId = intval($this->getCurrentPlayerId());
+        
+        $resolveCardsForPlayer = $this->argResolveCardsForPlayer($playerId);
+        if (!$this->array_some($resolveCardsForPlayer->remainingEffects, function($remainingEffect) use ($cardType, $id) { return $remainingEffect[0] == $cardType && $remainingEffect[1] == $id; })) {
+            throw new BgaUserException("You can't apply that effect");
+        }
 
         $resolveCardsForPlayer = $this->applyResolveCard($playerId, $cardType, $id);
         
