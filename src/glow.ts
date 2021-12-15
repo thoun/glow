@@ -1530,7 +1530,7 @@ class Glow implements GlowGame {
             this.roundCounter.toValue(day);
         }
 
-        dojo.place(`<div id="new-day"><span>${notif.log.replace('${day}', ''+notif.args.day)}</span></div>`, document.body);
+        dojo.place(`<div id="new-day"><span>${_(notif.log).replace('${day}', ''+notif.args.day)}</span></div>`, document.body);
         const div = document.getElementById(`new-day`);
         div.addEventListener('animationend', () => dojo.destroy(div));
         div.classList.add('new-day-animation');
