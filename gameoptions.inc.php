@@ -32,9 +32,11 @@ $game_options = [
         'values' => [
             1 => [
                 'name' => totranslate('The Province of Shadows'),
+                'tmdisplay' => totranslate('The Province of Shadows'),
             ],
             2 => [
                 'name' => totranslate('The Archipelago of Darkness'), 
+                'tmdisplay' => totranslate('The Archipelago of Darkness'), 
             ],
         ],
         'default' => 1,
