@@ -1,5 +1,15 @@
 const COMPANION_SPELL = 3;
 
+const SYMBOL_INDEX_TO_DIE_VALUE = [];
+SYMBOL_INDEX_TO_DIE_VALUE[1] = 1;
+SYMBOL_INDEX_TO_DIE_VALUE[2] = 2;
+SYMBOL_INDEX_TO_DIE_VALUE[3] = 3;
+SYMBOL_INDEX_TO_DIE_VALUE[4] = 4;
+SYMBOL_INDEX_TO_DIE_VALUE[5] = 5;
+SYMBOL_INDEX_TO_DIE_VALUE[22] = 6;
+SYMBOL_INDEX_TO_DIE_VALUE[103] = 7;
+SYMBOL_INDEX_TO_DIE_VALUE[-102] = 8;
+
 class PlayerTable {
     public playerId: number;
     public adventurerStock: Stock;
@@ -23,7 +33,10 @@ class PlayerTable {
                     <div id="player-table-${this.playerId}-firefly-tokens" class="player-tokens-type"></div>
                 </div>
                 <div id="player-table-${this.playerId}-dice" class="player-dice"></div>
-                <button id="player-table-${this.playerId}-sort-button" class="bgabutton bgabutton_gray sort-button">${_('Sort')}</button>
+                <div id="player-table-${this.playerId}-dice-grid" class="player-dice-grid">`;
+        for (let i=1; i<=8; i++) { html += `<div id="player-table-${this.playerId}-dice-grid-symbol${i}-th" class="hidden th-symbol th-symbol${i}"><div class="icon symbol${i}"></div><sub id="player-table-${this.playerId}-dice-grid-symbol${i}-counter"></sub></div>`; }
+        for (let i=1; i<=8; i++) { html += `<div id="player-table-${this.playerId}-dice-grid-symbol${i}" class="hidden"></div>`; }
+        html += `        </div>
             </div>
             <div class="adventurer-and-companions">
                 <div id="player-table-${this.playerId}-spells" class="player-table-spells normal"></div>
@@ -105,8 +118,7 @@ class PlayerTable {
         player.dice.forEach(die => {
             this.game.createOrMoveDie(die, `player-table-${this.playerId}-dice`);
         });
-
-        document.getElementById(`player-table-${this.playerId}-sort-button`).addEventListener('click', () => this.sortDice());
+        this.sortDice();
 
         // tokens
         this.setTokens('reroll', player.rerolls);
@@ -285,12 +297,22 @@ class PlayerTable {
         dice.forEach(die => die.classList.remove('highlight-green', 'highlight-red'));
     }
     
-    private sortDice(): void {
-        const diceDiv = document.getElementById(`player-table-${this.playerId}-dice`);
+    public sortDice(): void {
+        const diceDiv = document.getElementById(`player-table-${this.playerId}`);
         const dice = Array.from(diceDiv.querySelectorAll('.die')) as HTMLDivElement[];
+        console.log(dice);
+        let columns = 0;
         for (let i = 1; i <= 8; i++) {
-            const valueDice = dice.filter(die => Number(die.dataset.dieValue) === i);
-            valueDice.forEach(die => diceDiv.appendChild(die));
+            const valueDice = dice.filter(die => SYMBOL_INDEX_TO_DIE_VALUE[Number(die.dataset.dieValue)] === i);
+            document.getElementById(`player-table-${this.playerId}-dice-grid-symbol${i}-th`).classList.toggle('hidden', valueDice.length === 0);
+            const destination = document.getElementById(`player-table-${this.playerId}-dice-grid-symbol${i}`);
+            destination.classList.toggle('hidden', valueDice.length === 0);
+            if (valueDice.length) {
+                columns++;
+                valueDice.forEach(die => destination.appendChild(die));
+                document.getElementById(`player-table-${this.playerId}-dice-grid-symbol${i}-counter`).innerHTML = valueDice.length > 1 ? `(${valueDice.length})` : '';
+            }
         }
+        document.getElementById(`player-table-${this.playerId}-dice-grid`).style.gridTemplateColumns = `repeat(${columns}, auto)`;
     }
 }

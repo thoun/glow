@@ -273,6 +273,8 @@ class Glow implements GlowGame {
 
     private onEnteringStateRollDice() {
         this.setDiceSelectionActive(true);
+
+        setTimeout(() => this.playersTables.forEach(playerTable => playerTable.sortDice()), 500);
     }
 
     private onEnteringResurrect(args: EnteringResurrectArgs) {
@@ -1542,10 +1544,12 @@ class Glow implements GlowGame {
 
     notif_diceRolled(notif: Notif<NotifDiceUpdateArgs>) {
         this.diceChangedOrRolled(notif.args.dice, false, notif.args.args);
+        setTimeout(() => this.getPlayerTable(notif.args.playerId).sortDice(), ANIMATION_MS + 1000);
     }
 
     notif_diceChanged(notif: Notif<NotifDiceUpdateArgs>) {
         this.diceChangedOrRolled(notif.args.dice, true, notif.args.args);
+        setTimeout(() => this.getPlayerTable(notif.args.playerId).sortDice(), ANIMATION_MS + 1000);
     }
 
     notif_resolveCardUpdate(notif: Notif<NotifResolveCardUpdateArgs>) {

@@ -297,7 +297,7 @@ trait ActionTrait {
     public function changeDie(int $id, int $face, array $cost) {
         self::checkAction('changeDie');
 
-        $playerId = $this->getCurrentPlayerId();
+        $playerId = intval($this->getCurrentPlayerId());
 
         $this->applyRollDieCost($playerId, 3, $cost);
 

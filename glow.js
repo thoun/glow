@@ -740,12 +740,28 @@ var MeetingTrack = /** @class */ (function () {
     return MeetingTrack;
 }());
 var COMPANION_SPELL = 3;
+var SYMBOL_INDEX_TO_DIE_VALUE = [];
+SYMBOL_INDEX_TO_DIE_VALUE[1] = 1;
+SYMBOL_INDEX_TO_DIE_VALUE[2] = 2;
+SYMBOL_INDEX_TO_DIE_VALUE[3] = 3;
+SYMBOL_INDEX_TO_DIE_VALUE[4] = 4;
+SYMBOL_INDEX_TO_DIE_VALUE[5] = 5;
+SYMBOL_INDEX_TO_DIE_VALUE[22] = 6;
+SYMBOL_INDEX_TO_DIE_VALUE[103] = 7;
+SYMBOL_INDEX_TO_DIE_VALUE[-102] = 8;
 var PlayerTable = /** @class */ (function () {
     function PlayerTable(game, player) {
         var _this = this;
         this.game = game;
         this.playerId = Number(player.id);
-        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock\">\n            <div class=\"name-and-dice\">\n                <div id=\"player-table-" + this.playerId + "-name\" class=\"player-name\" style=\"background-color: #" + player.color + ";\">" + player.name + "</div>\n                <div class=\"player-tokens\">\n                    <div id=\"player-table-" + this.playerId + "-reroll-tokens\" class=\"player-tokens-type\"></div>\n                    <div id=\"player-table-" + this.playerId + "-footprint-tokens\" class=\"player-tokens-type\"></div>\n                    <div id=\"player-table-" + this.playerId + "-firefly-tokens\" class=\"player-tokens-type\"></div>\n                </div>\n                <div id=\"player-table-" + this.playerId + "-dice\" class=\"player-dice\"></div>\n                <button id=\"player-table-" + this.playerId + "-sort-button\" class=\"bgabutton bgabutton_gray sort-button\">" + _('Sort') + "</button>\n            </div>\n            <div class=\"adventurer-and-companions\">\n                <div id=\"player-table-" + this.playerId + "-spells\" class=\"player-table-spells normal\"></div>\n                <div id=\"player-table-" + this.playerId + "-adventurer\" class=\"player-table-adventurer\"></div>\n                <div id=\"player-table-" + this.playerId + "-companions\" class=\"player-table-companions\"></div>\n            </div>\n        </div>";
+        var html = "\n        <div id=\"player-table-" + this.playerId + "\" class=\"player-table whiteblock\">\n            <div class=\"name-and-dice\">\n                <div id=\"player-table-" + this.playerId + "-name\" class=\"player-name\" style=\"background-color: #" + player.color + ";\">" + player.name + "</div>\n                <div class=\"player-tokens\">\n                    <div id=\"player-table-" + this.playerId + "-reroll-tokens\" class=\"player-tokens-type\"></div>\n                    <div id=\"player-table-" + this.playerId + "-footprint-tokens\" class=\"player-tokens-type\"></div>\n                    <div id=\"player-table-" + this.playerId + "-firefly-tokens\" class=\"player-tokens-type\"></div>\n                </div>\n                <div id=\"player-table-" + this.playerId + "-dice\" class=\"player-dice\"></div>\n                <div id=\"player-table-" + this.playerId + "-dice-grid\" class=\"player-dice-grid\">";
+        for (var i = 1; i <= 8; i++) {
+            html += "<div id=\"player-table-" + this.playerId + "-dice-grid-symbol" + i + "-th\" class=\"hidden th-symbol th-symbol" + i + "\"><div class=\"icon symbol" + i + "\"></div><sub id=\"player-table-" + this.playerId + "-dice-grid-symbol" + i + "-counter\"></sub></div>";
+        }
+        for (var i = 1; i <= 8; i++) {
+            html += "<div id=\"player-table-" + this.playerId + "-dice-grid-symbol" + i + "\" class=\"hidden\"></div>";
+        }
+        html += "        </div>\n            </div>\n            <div class=\"adventurer-and-companions\">\n                <div id=\"player-table-" + this.playerId + "-spells\" class=\"player-table-spells normal\"></div>\n                <div id=\"player-table-" + this.playerId + "-adventurer\" class=\"player-table-adventurer\"></div>\n                <div id=\"player-table-" + this.playerId + "-companions\" class=\"player-table-companions\"></div>\n            </div>\n        </div>";
         dojo.place(html, this.playerId === this.game.getPlayerId() ? 'currentplayertable' : 'playerstables');
         // adventurer        
         this.adventurerStock = new ebg.stock();
@@ -810,7 +826,7 @@ var PlayerTable = /** @class */ (function () {
         player.dice.forEach(function (die) {
             _this.game.createOrMoveDie(die, "player-table-" + _this.playerId + "-dice");
         });
-        document.getElementById("player-table-" + this.playerId + "-sort-button").addEventListener('click', function () { return _this.sortDice(); });
+        this.sortDice();
         // tokens
         this.setTokens('reroll', player.rerolls);
         this.setTokens('footprint', player.footprints);
@@ -967,15 +983,26 @@ var PlayerTable = /** @class */ (function () {
         dice.forEach(function (die) { return die.classList.remove('highlight-green', 'highlight-red'); });
     };
     PlayerTable.prototype.sortDice = function () {
-        var diceDiv = document.getElementById("player-table-" + this.playerId + "-dice");
+        var diceDiv = document.getElementById("player-table-" + this.playerId);
         var dice = Array.from(diceDiv.querySelectorAll('.die'));
+        console.log(dice);
+        var columns = 0;
         var _loop_4 = function (i) {
-            var valueDice = dice.filter(function (die) { return Number(die.dataset.dieValue) === i; });
-            valueDice.forEach(function (die) { return diceDiv.appendChild(die); });
+            var valueDice = dice.filter(function (die) { return SYMBOL_INDEX_TO_DIE_VALUE[Number(die.dataset.dieValue)] === i; });
+            document.getElementById("player-table-" + this_3.playerId + "-dice-grid-symbol" + i + "-th").classList.toggle('hidden', valueDice.length === 0);
+            var destination = document.getElementById("player-table-" + this_3.playerId + "-dice-grid-symbol" + i);
+            destination.classList.toggle('hidden', valueDice.length === 0);
+            if (valueDice.length) {
+                columns++;
+                valueDice.forEach(function (die) { return destination.appendChild(die); });
+                document.getElementById("player-table-" + this_3.playerId + "-dice-grid-symbol" + i + "-counter").innerHTML = valueDice.length > 1 ? "(" + valueDice.length + ")" : '';
+            }
         };
+        var this_3 = this;
         for (var i = 1; i <= 8; i++) {
             _loop_4(i);
         }
+        document.getElementById("player-table-" + this.playerId + "-dice-grid").style.gridTemplateColumns = "repeat(" + columns + ", auto)";
     };
     return PlayerTable;
 }());
@@ -1209,7 +1236,9 @@ var Glow = /** @class */ (function () {
         }
     };
     Glow.prototype.onEnteringStateRollDice = function () {
+        var _this = this;
         this.setDiceSelectionActive(true);
+        setTimeout(function () { return _this.playersTables.forEach(function (playerTable) { return playerTable.sortDice(); }); }, 500);
     };
     Glow.prototype.onEnteringResurrect = function (args) {
         var _this = this;
@@ -1835,7 +1864,7 @@ var Glow = /** @class */ (function () {
                 var facesButtons = document.getElementById('change-die-faces-buttons');
                 var _loop_6 = function (i) {
                     var html = "<div class=\"die-item color" + die.color + " side" + i + "\"></div>";
-                    this_3.addActionButton("changeDie" + i + "-button", html, function () {
+                    this_4.addActionButton("changeDie" + i + "-button", html, function () {
                         if (_this.selectedDieFace !== null) {
                             dojo.removeClass("changeDie" + _this.selectedDieFace + "-button", 'bgabutton_blue');
                             dojo.addClass("changeDie" + _this.selectedDieFace + "-button", 'bgabutton_gray');
@@ -1850,7 +1879,7 @@ var Glow = /** @class */ (function () {
                     }, null, null, 'gray');
                     facesButtons.appendChild(document.getElementById("changeDie" + i + "-button"));
                 };
-                var this_3 = this;
+                var this_4 = this;
                 for (var i = 1; i <= faces; i++) {
                     _loop_6(i);
                 }
@@ -2262,10 +2291,14 @@ var Glow = /** @class */ (function () {
         this.meetingTrack.placeSmallDice(notif.args.dice);
     };
     Glow.prototype.notif_diceRolled = function (notif) {
+        var _this = this;
         this.diceChangedOrRolled(notif.args.dice, false, notif.args.args);
+        setTimeout(function () { return _this.getPlayerTable(notif.args.playerId).sortDice(); }, ANIMATION_MS + 1000);
     };
     Glow.prototype.notif_diceChanged = function (notif) {
+        var _this = this;
         this.diceChangedOrRolled(notif.args.dice, true, notif.args.args);
+        setTimeout(function () { return _this.getPlayerTable(notif.args.playerId).sortDice(); }, ANIMATION_MS + 1000);
     };
     Glow.prototype.notif_resolveCardUpdate = function (notif) {
         this.onEnteringStateResolveCards(notif.args.resolveCardsForPlayer);

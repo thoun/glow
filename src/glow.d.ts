@@ -247,6 +247,7 @@ interface NotifFirefliesArgs {
 }
 
 interface NotifDiceUpdateArgs {
+    playerId: number;
     dice: Die[];
     args?: EnteringRollDiceArgs;
 }

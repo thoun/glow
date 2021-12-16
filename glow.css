@@ -493,15 +493,50 @@
 #currentplayertable .player-table .name-and-dice .player-tokens .player-tokens-type > div:not(:first-child), #playerstables .player-table .name-and-dice .player-tokens .player-tokens-type > div:not(:first-child) {
   margin-left: -20px;
 }
-#currentplayertable .player-table .name-and-dice .player-dice .die.highlight-green, #playerstables .player-table .name-and-dice .player-dice .die.highlight-green {
+#currentplayertable .player-table .name-and-dice .player-dice .die.highlight-green, #currentplayertable .player-table .name-and-dice .player-dice-grid .die.highlight-green, #playerstables .player-table .name-and-dice .player-dice .die.highlight-green, #playerstables .player-table .name-and-dice .player-dice-grid .die.highlight-green {
   box-shadow: 0 0 4px 4px green;
 }
-#currentplayertable .player-table .name-and-dice .player-dice .die.highlight-red, #playerstables .player-table .name-and-dice .player-dice .die.highlight-red {
+#currentplayertable .player-table .name-and-dice .player-dice .die.highlight-red, #currentplayertable .player-table .name-and-dice .player-dice-grid .die.highlight-red, #playerstables .player-table .name-and-dice .player-dice .die.highlight-red, #playerstables .player-table .name-and-dice .player-dice-grid .die.highlight-red {
   box-shadow: 0 0 4px 4px red;
 }
-#currentplayertable .player-table .name-and-dice .sort-button, #playerstables .player-table .name-and-dice .sort-button {
-  width: auto;
-  margin-left: 10px;
+#currentplayertable .player-table .name-and-dice .player-dice-grid, #playerstables .player-table .name-and-dice .player-dice-grid {
+  display: grid;
+  grid-template-columns: repeat(8, auto);
+  column-gap: 8px;
+}
+#currentplayertable .player-table .name-and-dice .player-dice-grid .th-symbol, #playerstables .player-table .name-and-dice .player-dice-grid .th-symbol {
+  text-align: center;
+  border-bottom: 2px solid transparent;
+}
+#currentplayertable .player-table .name-and-dice .player-dice-grid .th-symbol sub, #playerstables .player-table .name-and-dice .player-dice-grid .th-symbol sub {
+  vertical-align: bottom;
+}
+#currentplayertable .player-table .name-and-dice .player-dice-grid .th-symbol1, #playerstables .player-table .name-and-dice .player-dice-grid .th-symbol1 {
+  border-color: #00995c;
+}
+#currentplayertable .player-table .name-and-dice .player-dice-grid .th-symbol2, #playerstables .player-table .name-and-dice .player-dice-grid .th-symbol2 {
+  border-color: #0077ba;
+}
+#currentplayertable .player-table .name-and-dice .player-dice-grid .th-symbol3, #playerstables .player-table .name-and-dice .player-dice-grid .th-symbol3 {
+  border-color: #57cbf5;
+}
+#currentplayertable .player-table .name-and-dice .player-dice-grid .th-symbol4, #playerstables .player-table .name-and-dice .player-dice-grid .th-symbol4 {
+  border-color: #bf1e2e;
+}
+#currentplayertable .player-table .name-and-dice .player-dice-grid .th-symbol5, #playerstables .player-table .name-and-dice .player-dice-grid .th-symbol5 {
+  border-color: #ea7d28;
+}
+#currentplayertable .player-table .name-and-dice .player-dice-grid .th-symbol6, #playerstables .player-table .name-and-dice .player-dice-grid .th-symbol6 {
+  border-color: #8a298a;
+}
+#currentplayertable .player-table .name-and-dice .player-dice-grid .th-symbol7, #playerstables .player-table .name-and-dice .player-dice-grid .th-symbol7 {
+  border-color: #ffd503;
+}
+#currentplayertable .player-table .name-and-dice .player-dice-grid .th-symbol8, #playerstables .player-table .name-and-dice .player-dice-grid .th-symbol8 {
+  border-color: #000000;
+}
+#currentplayertable .player-table .name-and-dice .player-dice-grid .hidden, #playerstables .player-table .name-and-dice .player-dice-grid .hidden {
+  display: none;
 }
 #currentplayertable .player-table .player-table-spells .stockitem, #playerstables .player-table .player-table-spells .stockitem {
   border: 0;
@@ -755,30 +790,39 @@ html {
   background-position: 0% 0%;
 }
 .icon.footprint {
-  background-position: 11.1111111111% 0%;
+  background-position: 8.3333333333% 0%;
 }
 .icon.firefly {
-  background-position: 22.2222222222% 0%;
+  background-position: 16.6666666667% 0%;
 }
 .icon.point {
-  background-position: 33.3333333333% 0%;
+  background-position: 25% 0%;
 }
 .icon.symbol0 {
-  background-position: 44.4444444444% 100%;
+  background-position: 33.3333333333% 100%;
 }
 .icon.symbol1 {
-  background-position: 55.5555555556% 100%;
+  background-position: 41.6666666667% 100%;
 }
 .icon.symbol2 {
-  background-position: 66.6666666667% 100%;
+  background-position: 50% 100%;
 }
 .icon.symbol3 {
-  background-position: 77.7777777778% 100%;
+  background-position: 58.3333333333% 100%;
 }
 .icon.symbol4 {
-  background-position: 88.8888888889% 100%;
+  background-position: 66.6666666667% 100%;
 }
 .icon.symbol5 {
+  background-position: 75% 100%;
+}
+.icon.symbol6 {
+  background-position: 83.3333333333% 100%;
+}
+.icon.symbol7 {
+  background-position: 91.6666666667% 100%;
+}
+.icon.symbol8 {
   background-position: 100% 100%;
 }
 
