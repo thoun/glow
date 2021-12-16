@@ -180,8 +180,9 @@ class Board {
     }
 
     private getPointsCoordinates(points: number) {
-        const cases = points === 10 ? 11 :
-            (points > 10 ? points + 2 : points);
+        const pointsModulo = points % 100;
+        const cases = pointsModulo === 10 ? 11 :
+            (pointsModulo > 10 ? pointsModulo + 2 : pointsModulo);
 
         const top = cases < 86 ? Math.min(Math.max(cases - 34, 0), 17) * POINT_CASE_SIZE : (102 - cases) * POINT_CASE_SIZE;
         const left = cases < 52 ? Math.min(cases, 34) * POINT_CASE_SIZE : Math.max((33 - Math.max(cases - 52, 0))*POINT_CASE_SIZE, 0);

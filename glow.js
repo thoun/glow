@@ -402,8 +402,9 @@ var Board = /** @class */ (function () {
         document.getElementById("meeple0").style.transform = "translateX(" + left + "px) translateY(" + top + "px)";
     };
     Board.prototype.getPointsCoordinates = function (points) {
-        var cases = points === 10 ? 11 :
-            (points > 10 ? points + 2 : points);
+        var pointsModulo = points % 100;
+        var cases = pointsModulo === 10 ? 11 :
+            (pointsModulo > 10 ? pointsModulo + 2 : pointsModulo);
         var top = cases < 86 ? Math.min(Math.max(cases - 34, 0), 17) * POINT_CASE_SIZE : (102 - cases) * POINT_CASE_SIZE;
         var left = cases < 52 ? Math.min(cases, 34) * POINT_CASE_SIZE : Math.max((33 - Math.max(cases - 52, 0)) * POINT_CASE_SIZE, 0);
         return [17 + left, 15 + top];
