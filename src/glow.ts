@@ -108,7 +108,7 @@ class Glow implements GlowGame {
         this.addHelp();
         this.setupNotifications();
 
-        //this.setupPreferences();
+        this.setupPreferences();
 
         document.getElementById('zoom-out').addEventListener('click', () => this.zoomOut());
         document.getElementById('zoom-in').addEventListener('click', () => this.zoomIn());
@@ -509,7 +509,7 @@ class Glow implements GlowGame {
         this.setZoom(newZoom);
     }
 
-    /*private setupPreferences() {
+    private setupPreferences() {
         // Extract the ID and value from the UI control
         const onchange = (e) => {
           var match = e.target.id.match(/^preference_control_(\d+)$/);
@@ -535,11 +535,11 @@ class Glow implements GlowGame {
     private onPreferenceChange(prefId: number, prefValue: number) {
         switch (prefId) {
             // KEEP
-            case 201: 
-                document.getElementById('full-table').appendChild(document.getElementById(prefValue == 2 ? 'table-wrapper' : 'playerstables'));
+            case 202: 
+                document.getElementById('full-table').classList.toggle('points-high-contrast', prefValue == 1);
                 break;
         }
-    }*/
+    }
 
     public isSolo(): boolean {
         return Object.keys(this.gamedatas.players).length == 1;

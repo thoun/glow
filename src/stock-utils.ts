@@ -17,6 +17,42 @@ const DECK = 'deck';
 const DECKB = 'deckB';
 const SOLO_TILES = 'solo-tiles';
 
+const ADVENTURERS_POINTS = [];
+ADVENTURERS_POINTS[1] = 1;
+ADVENTURERS_POINTS[3] = 4;
+ADVENTURERS_POINTS[4] = 4;
+ADVENTURERS_POINTS[5] = 3;
+const COMPANION_POINTS = [];
+//COMPANION_POINTS[10] = -1;
+COMPANION_POINTS[11] = 6;
+COMPANION_POINTS[12] = 5;
+COMPANION_POINTS[13] = 1;
+COMPANION_POINTS[14] = 1;
+COMPANION_POINTS[16] = 1;
+COMPANION_POINTS[17] = 1;
+COMPANION_POINTS[20] = 4;
+//COMPANION_POINTS[21] = -2;
+//COMPANION_POINTS[22] = -5;
+//COMPANION_POINTS[23] = -2;
+COMPANION_POINTS[24] = 4;
+COMPANION_POINTS[27] = 2;
+COMPANION_POINTS[28] = 2;
+COMPANION_POINTS[29] = 2;
+COMPANION_POINTS[30] = 5;
+COMPANION_POINTS[32] = 1;
+COMPANION_POINTS[34] = 4;
+COMPANION_POINTS[35] = 3;
+COMPANION_POINTS[36] = 3;
+COMPANION_POINTS[38] = 3;
+COMPANION_POINTS[39] = 2;
+COMPANION_POINTS[40] = 2;
+//COMPANION_POINTS[41] = -1;
+COMPANION_POINTS[42] = 5;
+COMPANION_POINTS[43] = 5;
+COMPANION_POINTS[44] = 2;
+COMPANION_POINTS[45] = 1;
+COMPANION_POINTS[46] = 4;
+
 function setupAdventurersCards(adventurerStock: Stock) {
     const cardsurl = `${g_gamethemeurl}img/adventurers.png`;
 
@@ -143,6 +179,11 @@ function setupAdventurerCard(game: Game, cardDiv: HTMLDivElement, type: number) 
     if (tooltip) {
         (game as any).addTooltipHtml(cardDiv.id, tooltip);
     }
+
+    const adventurerPoints = ADVENTURERS_POINTS[type];
+    if (adventurerPoints) {
+        dojo.place(`<div class="score-contrast">${adventurerPoints}</div>`, cardDiv);
+    }
 }
 
 function getCompanionTooltip(type: number) {
@@ -183,6 +224,12 @@ function setupCompanionCard(game: Game, cardDiv: HTMLDivElement, type: number) {
     cardDiv.classList.add('card-inner');
     dojo.place(`<div class="card-front" style="${cardDiv.attributes.getNamedItem('style').nodeValue.replace(/"/g, '\'')}"></div>`, cardDiv);
     dojo.place(`<div class="card-back back${type > 23 ? 'B' : 'A'}"></div>`, cardDiv);
+
+    const companionPoints = COMPANION_POINTS[type];
+    if (companionPoints) {
+        dojo.place(`<div class="score-contrast">${companionPoints}</div>`, cardDiv);
+        dojo.place(`<div class="score-contrast">${companionPoints}</div>`, cardDiv.getElementsByClassName('card-front')[0] as HTMLElement);
+    }
 }
 
 function setupSpellCard(game: Game, cardDiv: HTMLDivElement, type: number) {

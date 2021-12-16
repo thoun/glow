@@ -53,4 +53,14 @@ $game_preferences = [
         ],
         'default' => 2
     ],
+
+    202 => [
+        'name' => totranslate('Bursts of light : higher contrast'),
+        'needReload' => false,
+        'values' => [
+            1 => [ 'name' => totranslate('Enabled')],
+            2 => [ 'name' => totranslate('Disabled')],
+        ],
+        'default' => 2
+    ],
 ];

@@ -394,3 +394,23 @@ html {
 #globalaction_zoom_wrap {
   visibility: hidden;
 }
+
+.score-contrast {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 90%;
+  display: none;
+  user-select: none;
+}
+
+.points-high-contrast .score-contrast {
+  display: inline-block;
+}
+
+.stockitem .score-contrast {
+    right: 8px;
+    top: 11px;
+}

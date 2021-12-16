@@ -65,6 +65,41 @@ var CEMETERY = 'cemetery';
 var DECK = 'deck';
 var DECKB = 'deckB';
 var SOLO_TILES = 'solo-tiles';
+var ADVENTURERS_POINTS = [];
+ADVENTURERS_POINTS[1] = 1;
+ADVENTURERS_POINTS[3] = 4;
+ADVENTURERS_POINTS[4] = 4;
+ADVENTURERS_POINTS[5] = 3;
+var COMPANION_POINTS = [];
+//COMPANION_POINTS[10] = -1;
+COMPANION_POINTS[11] = 6;
+COMPANION_POINTS[12] = 5;
+COMPANION_POINTS[13] = 1;
+COMPANION_POINTS[14] = 1;
+COMPANION_POINTS[16] = 1;
+COMPANION_POINTS[17] = 1;
+COMPANION_POINTS[20] = 4;
+//COMPANION_POINTS[21] = -2;
+//COMPANION_POINTS[22] = -5;
+//COMPANION_POINTS[23] = -2;
+COMPANION_POINTS[24] = 4;
+COMPANION_POINTS[27] = 2;
+COMPANION_POINTS[28] = 2;
+COMPANION_POINTS[29] = 2;
+COMPANION_POINTS[30] = 5;
+COMPANION_POINTS[32] = 1;
+COMPANION_POINTS[34] = 4;
+COMPANION_POINTS[35] = 3;
+COMPANION_POINTS[36] = 3;
+COMPANION_POINTS[38] = 3;
+COMPANION_POINTS[39] = 2;
+COMPANION_POINTS[40] = 2;
+//COMPANION_POINTS[41] = -1;
+COMPANION_POINTS[42] = 5;
+COMPANION_POINTS[43] = 5;
+COMPANION_POINTS[44] = 2;
+COMPANION_POINTS[45] = 1;
+COMPANION_POINTS[46] = 4;
 function setupAdventurersCards(adventurerStock) {
     var cardsurl = g_gamethemeurl + "img/adventurers.png";
     for (var i = 0; i <= 7; i++) {
@@ -150,6 +185,10 @@ function setupAdventurerCard(game, cardDiv, type) {
     if (tooltip) {
         game.addTooltipHtml(cardDiv.id, tooltip);
     }
+    var adventurerPoints = ADVENTURERS_POINTS[type];
+    if (adventurerPoints) {
+        dojo.place("<div class=\"score-contrast\">" + adventurerPoints + "</div>", cardDiv);
+    }
 }
 function getCompanionTooltip(type) {
     switch (type) {
@@ -180,6 +219,11 @@ function setupCompanionCard(game, cardDiv, type) {
     cardDiv.classList.add('card-inner');
     dojo.place("<div class=\"card-front\" style=\"" + cardDiv.attributes.getNamedItem('style').nodeValue.replace(/"/g, '\'') + "\"></div>", cardDiv);
     dojo.place("<div class=\"card-back back" + (type > 23 ? 'B' : 'A') + "\"></div>", cardDiv);
+    var companionPoints = COMPANION_POINTS[type];
+    if (companionPoints) {
+        dojo.place("<div class=\"score-contrast\">" + companionPoints + "</div>", cardDiv);
+        dojo.place("<div class=\"score-contrast\">" + companionPoints + "</div>", cardDiv.getElementsByClassName('card-front')[0]);
+    }
 }
 function setupSpellCard(game, cardDiv, type) {
     var tooltip = getEffectTooltip(game.gamedatas.SPELLS_EFFECTS[type]);
@@ -320,6 +364,24 @@ var MAP2 = [
     [504, 55, 1], // 11
 ];
 var MAPS = [null, MAP1, MAP2];
+var MAP1_POINT = [
+    [418, 406, 5],
+    [819, 98, 20],
+    [605, 269, 12],
+    [469, 312, 8],
+    [257, 134, 10],
+    [455, 79, 15],
+    [69, 254, 3], // 59
+];
+var MAP2_POINT = [
+    [795, 373, 5],
+    [428, 402, 4],
+    [285, 318, 2],
+    [84, 369, 2],
+    [104, 85, 8],
+    [539, 72, 3], // 11
+];
+var MAPS_POINT = [null, MAP1_POINT, MAP2_POINT];
 var Board = /** @class */ (function () {
     function Board(game, players, tableDice) {
         var _this = this;
@@ -328,6 +390,8 @@ var Board = /** @class */ (function () {
         this.points = new Map();
         this.meeples = [];
         var html = '';
+        // score contrast
+        MAPS_POINT[game.getBoardSide()].forEach(function (point) { return dojo.place("<div class=\"score-contrast\" style=\"left: " + point[0] + "px; top: " + point[1] + "px;\">" + point[2] + "</div>", 'board'); });
         // points
         players.forEach(function (player) {
             return html += "<div id=\"player-" + player.id + "-point-marker\" class=\"point-marker " + (_this.game.isColorBlindMode() ? 'color-blind' : '') + "\" data-player-no=\"" + player.playerNo + "\" style=\"background: #" + player.color + ";\"></div>";
@@ -1002,7 +1066,7 @@ var Glow = /** @class */ (function () {
         }
         this.addHelp();
         this.setupNotifications();
-        //this.setupPreferences();
+        this.setupPreferences();
         document.getElementById('zoom-out').addEventListener('click', function () { return _this.zoomOut(); });
         document.getElementById('zoom-in').addEventListener('click', function () { return _this.zoomIn(); });
         if (this.zoom !== 1) {
@@ -1352,37 +1416,32 @@ var Glow = /** @class */ (function () {
         }
         this.setZoom(newZoom);
     };
-    /*private setupPreferences() {
+    Glow.prototype.setupPreferences = function () {
+        var _this = this;
         // Extract the ID and value from the UI control
-        const onchange = (e) => {
-          var match = e.target.id.match(/^preference_control_(\d+)$/);
-          if (!match) {
-            return;
-          }
-          var prefId = +match[1];
-          var prefValue = +e.target.value;
-          (this as any).prefs[prefId].value = prefValue;
-          this.onPreferenceChange(prefId, prefValue);
-        }
-        
+        var onchange = function (e) {
+            var match = e.target.id.match(/^preference_control_(\d+)$/);
+            if (!match) {
+                return;
+            }
+            var prefId = +match[1];
+            var prefValue = +e.target.value;
+            _this.prefs[prefId].value = prefValue;
+            _this.onPreferenceChange(prefId, prefValue);
+        };
         // Call onPreferenceChange() when any value changes
         dojo.query(".preference_control").connect("onchange", onchange);
-        
         // Call onPreferenceChange() now
-        dojo.forEach(
-          dojo.query("#ingame_menu_content .preference_control"),
-          el => onchange({ target: el })
-        );
-    }
-      
-    private onPreferenceChange(prefId: number, prefValue: number) {
+        dojo.forEach(dojo.query("#ingame_menu_content .preference_control"), function (el) { return onchange({ target: el }); });
+    };
+    Glow.prototype.onPreferenceChange = function (prefId, prefValue) {
         switch (prefId) {
             // KEEP
-            case 201:
-                document.getElementById('full-table').appendChild(document.getElementById(prefValue == 2 ? 'table-wrapper' : 'playerstables'));
+            case 202:
+                document.getElementById('full-table').classList.toggle('points-high-contrast', prefValue == 1);
                 break;
         }
-    }*/
+    };
     Glow.prototype.isSolo = function () {
         return Object.keys(this.gamedatas.players).length == 1;
     };

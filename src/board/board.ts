@@ -82,10 +82,29 @@ const MAP2: number[][] = [
 ];
 const MAPS: number[][][] = [null, MAP1, MAP2];
 
+const MAP1_POINT = [
+    [418, 406, 5], // 5
+    [819, 98, 20], // 14
+    [605, 269, 12], // 17
+    [469, 312, 8], // 33
+    [257, 134, 10], // 38
+    [455, 79, 15], // 43    
+    [69, 254, 3], // 59
+];
+const MAP2_POINT = [
+    [795, 373, 5], // 4
+    [428, 402, 4], // 5
+    [285, 318, 2], // 6
+    [84, 369, 2], // 7
+    [104, 85, 8], // 9
+    [539, 72, 3], // 11
+];
+const MAPS_POINT: number[][][] = [null, MAP1_POINT, MAP2_POINT];
+
 class Board {
     private points = new Map<number, number>();
     private meeples: Meeple[] = [];
-    private tomCompany: number;
+    tomCompany: number;
     private tokensOpacityTimeout: any;
 
     constructor(
@@ -94,6 +113,9 @@ class Board {
         tableDice: Die[],
     ) {
         let html = '';
+
+        // score contrast
+        MAPS_POINT[game.getBoardSide()].forEach(point => dojo.place(`<div class="score-contrast" style="left: ${point[0]}px; top: ${point[1]}px;">${point[2]}</div>`, 'board'));
 
         // points
         players.forEach(player =>
