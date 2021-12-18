@@ -71,7 +71,7 @@ ADVENTURERS_POINTS[3] = 4;
 ADVENTURERS_POINTS[4] = 4;
 ADVENTURERS_POINTS[5] = 3;
 var COMPANION_POINTS = [];
-//COMPANION_POINTS[10] = -1;
+COMPANION_POINTS[10] = -1;
 COMPANION_POINTS[11] = 6;
 COMPANION_POINTS[12] = 5;
 COMPANION_POINTS[13] = 1;
@@ -79,9 +79,9 @@ COMPANION_POINTS[14] = 1;
 COMPANION_POINTS[16] = 1;
 COMPANION_POINTS[17] = 1;
 COMPANION_POINTS[20] = 4;
-//COMPANION_POINTS[21] = -2;
-//COMPANION_POINTS[22] = -5;
-//COMPANION_POINTS[23] = -2;
+COMPANION_POINTS[21] = -2;
+COMPANION_POINTS[22] = -5;
+COMPANION_POINTS[23] = -2;
 COMPANION_POINTS[24] = 4;
 COMPANION_POINTS[27] = 2;
 COMPANION_POINTS[28] = 2;
@@ -94,7 +94,7 @@ COMPANION_POINTS[36] = 3;
 COMPANION_POINTS[38] = 3;
 COMPANION_POINTS[39] = 2;
 COMPANION_POINTS[40] = 2;
-//COMPANION_POINTS[41] = -1;
+COMPANION_POINTS[41] = -1;
 COMPANION_POINTS[42] = 5;
 COMPANION_POINTS[43] = 5;
 COMPANION_POINTS[44] = 2;
@@ -221,8 +221,8 @@ function setupCompanionCard(game, cardDiv, type) {
     dojo.place("<div class=\"card-back back" + (type > 23 ? 'B' : 'A') + "\"></div>", cardDiv);
     var companionPoints = COMPANION_POINTS[type];
     if (companionPoints) {
-        dojo.place("<div class=\"score-contrast\">" + companionPoints + "</div>", cardDiv);
-        dojo.place("<div class=\"score-contrast\">" + companionPoints + "</div>", cardDiv.getElementsByClassName('card-front')[0]);
+        dojo.place("<div class=\"score-contrast " + (companionPoints < 0 ? 'score-contrast-glow' : '') + "\">" + Math.abs(companionPoints) + "</div>", cardDiv);
+        dojo.place("<div class=\"score-contrast " + (companionPoints < 0 ? 'score-contrast-glow' : '') + "\">" + Math.abs(companionPoints) + "</div>", cardDiv.getElementsByClassName('card-front')[0]);
     }
 }
 function setupSpellCard(game, cardDiv, type) {
@@ -391,7 +391,7 @@ var Board = /** @class */ (function () {
         this.meeples = [];
         var html = '';
         // score contrast
-        MAPS_POINT[game.getBoardSide()].forEach(function (point) { return dojo.place("<div class=\"score-contrast\" style=\"left: " + point[0] + "px; top: " + point[1] + "px;\">" + point[2] + "</div>", 'board'); });
+        MAPS_POINT[game.getBoardSide()].forEach(function (point) { return dojo.place("<div class=\"score-contrast score-contrast-map\" style=\"left: " + point[0] + "px; top: " + point[1] + "px;\">" + point[2] + "</div>", 'board'); });
         // points
         players.forEach(function (player) {
             return html += "<div id=\"player-" + player.id + "-point-marker\" class=\"point-marker " + (_this.game.isColorBlindMode() ? 'color-blind' : '') + "\" data-player-no=\"" + player.playerNo + "\" style=\"background: #" + player.color + ";\"></div>";
@@ -1467,7 +1467,7 @@ var Glow = /** @class */ (function () {
         switch (prefId) {
             // KEEP
             case 202:
-                document.getElementById('full-table').classList.toggle('points-high-contrast', prefValue == 1);
+                document.getElementById('full-table').dataset.highContrastPoints = '' + prefValue;
                 break;
         }
     };

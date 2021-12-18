@@ -115,7 +115,7 @@ class Board {
         let html = '';
 
         // score contrast
-        MAPS_POINT[game.getBoardSide()].forEach(point => dojo.place(`<div class="score-contrast" style="left: ${point[0]}px; top: ${point[1]}px;">${point[2]}</div>`, 'board'));
+        MAPS_POINT[game.getBoardSide()].forEach(point => dojo.place(`<div class="score-contrast score-contrast-map" style="left: ${point[0]}px; top: ${point[1]}px;">${point[2]}</div>`, 'board'));
 
         // points
         players.forEach(player =>

@@ -23,7 +23,7 @@ ADVENTURERS_POINTS[3] = 4;
 ADVENTURERS_POINTS[4] = 4;
 ADVENTURERS_POINTS[5] = 3;
 const COMPANION_POINTS = [];
-//COMPANION_POINTS[10] = -1;
+COMPANION_POINTS[10] = -1;
 COMPANION_POINTS[11] = 6;
 COMPANION_POINTS[12] = 5;
 COMPANION_POINTS[13] = 1;
@@ -31,9 +31,9 @@ COMPANION_POINTS[14] = 1;
 COMPANION_POINTS[16] = 1;
 COMPANION_POINTS[17] = 1;
 COMPANION_POINTS[20] = 4;
-//COMPANION_POINTS[21] = -2;
-//COMPANION_POINTS[22] = -5;
-//COMPANION_POINTS[23] = -2;
+COMPANION_POINTS[21] = -2;
+COMPANION_POINTS[22] = -5;
+COMPANION_POINTS[23] = -2;
 COMPANION_POINTS[24] = 4;
 COMPANION_POINTS[27] = 2;
 COMPANION_POINTS[28] = 2;
@@ -46,7 +46,7 @@ COMPANION_POINTS[36] = 3;
 COMPANION_POINTS[38] = 3;
 COMPANION_POINTS[39] = 2;
 COMPANION_POINTS[40] = 2;
-//COMPANION_POINTS[41] = -1;
+COMPANION_POINTS[41] = -1;
 COMPANION_POINTS[42] = 5;
 COMPANION_POINTS[43] = 5;
 COMPANION_POINTS[44] = 2;
@@ -227,8 +227,8 @@ function setupCompanionCard(game: Game, cardDiv: HTMLDivElement, type: number) {
 
     const companionPoints = COMPANION_POINTS[type];
     if (companionPoints) {
-        dojo.place(`<div class="score-contrast">${companionPoints}</div>`, cardDiv);
-        dojo.place(`<div class="score-contrast">${companionPoints}</div>`, cardDiv.getElementsByClassName('card-front')[0] as HTMLElement);
+        dojo.place(`<div class="score-contrast ${companionPoints < 0 ? 'score-contrast-glow' : ''}">${Math.abs(companionPoints)}</div>`, cardDiv);
+        dojo.place(`<div class="score-contrast ${companionPoints < 0 ? 'score-contrast-glow' : ''}">${Math.abs(companionPoints)}</div>`, cardDiv.getElementsByClassName('card-front')[0] as HTMLElement);
     }
 }
 

@@ -404,6 +404,22 @@ html {
   font-size: 90%;
   display: none;
   user-select: none;
+
+  &.score-contrast-glow {
+    text-shadow: 0 0 4px #ffffff, 0 0 3px #ffffff, 0 0 2px #ffffff, 0 0 1px #ffffff;
+  }
+}
+
+#full-table[data-high-contrast-points="2"] {
+  .score-contrast:not(.score-contrast-map) {
+    display: inline-block;
+  }
+}
+
+#full-table[data-high-contrast-points="3"] {
+  .score-contrast {
+    display: inline-block;
+  }
 }
 
 .points-high-contrast .score-contrast {

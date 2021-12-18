@@ -538,7 +538,7 @@ class Glow implements GlowGame {
         switch (prefId) {
             // KEEP
             case 202: 
-                document.getElementById('full-table').classList.toggle('points-high-contrast', prefValue == 1);
+                document.getElementById('full-table').dataset.highContrastPoints = '' + prefValue;
                 break;
         }
     }
