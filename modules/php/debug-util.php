@@ -14,11 +14,12 @@ trait DebugUtilTrait {
         //self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (44, 13, 14, 15, 16, 17)");
         //self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (20)");
         //self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (10, 20, 41, 44)");
-        self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (37)");
+        //self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (37)");
         //self::DbQuery("UPDATE companion SET `card_location` = 'cemetery' where `card_type_arg` in (44, 13, 14, 15, 16, 17)");
         //self::DbQuery("UPDATE companion SET `card_location` = 'cemetery' where `card_type_arg` in (17)");
         //$this->debugSetCompanionForPlayer(2343492, 41);
         //$this->debugSetPoints(19);
+        $this->debugSetFootprints(10);
         //$this->debugSkipAdventurers();
 
         //$this->debugMoveMeeple(2343492, 15, 0);
@@ -50,6 +51,10 @@ trait DebugUtilTrait {
     private function debugMoveMeeple($playerId, $spot, $index) {
         $meepleId = intval(self::getUniqueValueFromDB("SELECT id from meeple WHERE `player_id` = $playerId LIMIT 1 OFFSET $index"));
         self::DbQuery("UPDATE meeple SET `position` = $spot where `id` = $meepleId");
+    }
+
+    function debugSetFootprints($number) {
+        self::DbQuery("UPDATE player SET `player_footprints` = $number");
     }
 
     function debug($debugData) {

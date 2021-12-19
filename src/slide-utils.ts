@@ -1,4 +1,4 @@
-function slideToObjectAndAttach(object: HTMLElement, destinationId: string, posX?: number, posY?: number): Promise<boolean> {
+function slideToObjectAndAttach(game: Game, object: HTMLElement, destinationId: string, posX?: number, posY?: number): Promise<boolean> {
     const destination = document.getElementById(destinationId);
     if (destination.contains(object)) {
         return Promise.resolve(true);
@@ -36,7 +36,7 @@ function slideToObjectAndAttach(object: HTMLElement, destinationId: string, posX
             destination.appendChild(object);
         }
 
-        if (document.visibilityState === 'hidden') {
+        if (document.visibilityState === 'hidden' || (game as any).instantaneousMode) {
             // if tab is not visible, we skip animation (else they could be delayed or cancelled by browser)
             attachToNewParent();
         } else {

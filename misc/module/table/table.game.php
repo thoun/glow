@@ -378,7 +378,22 @@ class GUser {
 class game_view {
 }
 
+define('AT_bool', 0);
+define('AT_posint', 0);
+define('AT_numberlist', 0);
+define('AT_base64', 0);
 class APP_GameAction {
+    function setAjaxMode() {}
+
+    function getArg($name, $type, $mandatory) {
+        return 'val';
+    }
+
+    function ajaxResponse() {}
+
+    function isArg($arg) {}
+    
+    function trace($log) {}
 }
 
 function totranslate($text) {

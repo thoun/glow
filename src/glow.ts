@@ -578,7 +578,7 @@ class Glow implements GlowGame {
     placeFirstPlayerToken(playerId: number) {
         const firstPlayerToken = document.getElementById('firstPlayerToken');
         if (firstPlayerToken) {
-            slideToObjectAndAttach(firstPlayerToken, `player_board_${playerId}_firstPlayerWrapper`);
+            slideToObjectAndAttach(this, firstPlayerToken, `player_board_${playerId}_firstPlayerWrapper`);
         } else {
             dojo.place('<div id="firstPlayerToken"></div>', `player_board_${playerId}_firstPlayerWrapper`);
 
@@ -776,7 +776,7 @@ class Glow implements GlowGame {
             this.setNewFace(die, true);
             dojo.toggleClass(`die${die.id}`, 'used', die.used);
 
-            slideToObjectAndAttach(dieDiv, destinationId);
+            slideToObjectAndAttach(this, dieDiv, destinationId);
         } else {
             this.createAndPlaceDieHtml(die, destinationId);
             if (rollClass) {
@@ -956,7 +956,7 @@ class Glow implements GlowGame {
             if (elem) {
                 elem.parentElement.removeChild(elem);
             }
-        })
+        });
     }
     
     private setMoveGamestateDescription(property?: string) {
@@ -1090,7 +1090,7 @@ class Glow implements GlowGame {
         (Array.from(document.getElementsByClassName('die')) as HTMLElement[]).forEach(node => dojo.toggleClass(node, 'selectable', active));
     }
 
-    private diceChangedOrRolled(dice: Die[], changed: boolean, args: EnteringRollDiceArgs) {
+    private diceChangedOrRolled(dice: Die[], changed: boolean, args: EnteringRollDiceArgs, playerId: number) {
         this.unselectDice();
         dice.forEach(die => {
             dojo.removeClass(`die${die.id}`, 'selected');
@@ -1100,7 +1100,7 @@ class Glow implements GlowGame {
 
         if (args) {
             this.gamedatas.gamestate.args[this.getPlayerId()] = args[this.getPlayerId()];
-            if((this as any).isCurrentPlayerActive()) {
+            if((this as any).isCurrentPlayerActive() && this.getPlayerId() == playerId) {
                 this.setActionBarRollDice(true);
             }
         }
@@ -1140,7 +1140,7 @@ class Glow implements GlowGame {
             return;
         }
 
-        this.takeAction('rollDice', { 
+        this.takeNoLockAction('rollDice', { 
             ids: this.selectedDice.map(die => die.id).join(','),
             cost: cost.join(','),
         });
@@ -1151,7 +1151,7 @@ class Glow implements GlowGame {
             return;
         }
 
-        this.takeAction('changeDie', { 
+        this.takeNoLockAction('changeDie', { 
             id: this.selectedDice[0].id,
             value : this.selectedDieFace,
             cost: cost.join(','),
@@ -1232,7 +1232,7 @@ class Glow implements GlowGame {
             return;
         }
 
-        this.takeAction('keepDice');
+        this.takeNoLockAction('keepDice');
     }
 
     public resurrect(id: number) {
@@ -1258,7 +1258,7 @@ class Glow implements GlowGame {
             return;
         }
 
-        this.takeAction('resolveCard', {
+        this.takeNoLockAction('resolveCard', {
             type,
             id,
         });
@@ -1269,7 +1269,7 @@ class Glow implements GlowGame {
             return;
         }
 
-        this.takeAction('resolveAll');
+        this.takeNoLockAction('resolveAll');
     }
 
     public move(destination: number, from?: number, type?: number, id?: number) {
@@ -1277,7 +1277,7 @@ class Glow implements GlowGame {
             return;
         }
 
-        this.takeAction('move', {
+        this.takeNoLockAction('move', {
             destination,
             from,
             type,
@@ -1290,7 +1290,7 @@ class Glow implements GlowGame {
             return;
         }
 
-        this.takeAction('placeEncampment');
+        this.takeNoLockAction('placeEncampment');
     }
 
     public endTurn() {
@@ -1298,12 +1298,17 @@ class Glow implements GlowGame {
             return;
         }
 
-        this.takeAction('endTurn');
+        this.takeNoLockAction('endTurn');
     } 
 
     public takeAction(action: string, data?: any) {
         data = data || {};
         data.lock = true;
+        (this as any).ajaxcall(`/glow/glow/${action}.html`, data, this, () => {});
+    }
+
+    public takeNoLockAction(action: string, data?: any) {
+        data = data || {};
         (this as any).ajaxcall(`/glow/glow/${action}.html`, data, this, () => {});
     }
     
@@ -1395,7 +1400,7 @@ class Glow implements GlowGame {
             ['replaceSmallDice', ANIMATION_MS],
             ['diceRolled', ANIMATION_MS],
             ['diceChanged', ANIMATION_MS],
-            ['meepleMoved', ANIMATION_MS],
+            ['meepleMoved', 1],
             ['takeSketalDie', ANIMATION_MS],
             ['removeSketalDie', ANIMATION_MS],
             ['moveBlackDie', ANIMATION_MS],
@@ -1440,6 +1445,8 @@ class Glow implements GlowGame {
         this.board.setColor(notif.args.playerId, newPlayerColor);
         playerTable.setColor(newPlayerColor);
         this.gamedatas.players[notif.args.playerId].color = newPlayerColor;
+        
+        setTimeout(() => playerTable.sortDice(), ANIMATION_MS);
     }
 
     notif_chosenCompanion(notif: Notif<NotifChosenCompanionArgs>) {
@@ -1543,12 +1550,12 @@ class Glow implements GlowGame {
     }
 
     notif_diceRolled(notif: Notif<NotifDiceUpdateArgs>) {
-        this.diceChangedOrRolled(notif.args.dice, false, notif.args.args);
+        this.diceChangedOrRolled(notif.args.dice, false, notif.args.args, notif.args.playerId);
         setTimeout(() => this.getPlayerTable(notif.args.playerId).sortDice(), ANIMATION_MS + 1000);
     }
 
     notif_diceChanged(notif: Notif<NotifDiceUpdateArgs>) {
-        this.diceChangedOrRolled(notif.args.dice, true, notif.args.args);
+        this.diceChangedOrRolled(notif.args.dice, true, notif.args.args, notif.args.playerId);
         setTimeout(() => this.getPlayerTable(notif.args.playerId).sortDice(), ANIMATION_MS + 1000);
     }
 

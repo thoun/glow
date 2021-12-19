@@ -1,4 +1,4 @@
-function slideToObjectAndAttach(object, destinationId, posX, posY) {
+function slideToObjectAndAttach(game, object, destinationId, posX, posY) {
     var destination = document.getElementById(destinationId);
     if (destination.contains(object)) {
         return Promise.resolve(true);
@@ -34,7 +34,7 @@ function slideToObjectAndAttach(object, destinationId, posX, posY) {
             object.style.removeProperty('transition');
             destination.appendChild(object);
         };
-        if (document.visibilityState === 'hidden') {
+        if (document.visibilityState === 'hidden' || game.instantaneousMode) {
             // if tab is not visible, we skip animation (else they could be delayed or cancelled by browser)
             attachToNewParent();
         }
@@ -886,6 +886,7 @@ var PlayerTable = /** @class */ (function () {
     PlayerTable.prototype.addDice = function (dice) {
         var _this = this;
         dice.forEach(function (die) { return _this.game.createOrMoveDie(die, "player-table-" + _this.playerId + "-dice"); });
+        setTimeout(function () { return _this.sortDice(); }, 1000);
     };
     PlayerTable.prototype.removeDice = function (dice) {
         var _this = this;
@@ -985,7 +986,6 @@ var PlayerTable = /** @class */ (function () {
     PlayerTable.prototype.sortDice = function () {
         var diceDiv = document.getElementById("player-table-" + this.playerId);
         var dice = Array.from(diceDiv.querySelectorAll('.die'));
-        console.log(dice);
         var columns = 0;
         var _loop_4 = function (i) {
             var valueDice = dice.filter(function (die) { return SYMBOL_INDEX_TO_DIE_VALUE[Number(die.dataset.dieValue)] === i; });
@@ -994,7 +994,10 @@ var PlayerTable = /** @class */ (function () {
             destination.classList.toggle('hidden', valueDice.length === 0);
             if (valueDice.length) {
                 columns++;
-                valueDice.forEach(function (die) { return destination.appendChild(die); });
+                valueDice.forEach(function (die) {
+                    die.classList.remove('rolled');
+                    destination.appendChild(die);
+                });
                 document.getElementById("player-table-" + this_3.playerId + "-dice-grid-symbol" + i + "-counter").innerHTML = valueDice.length > 1 ? "(" + valueDice.length + ")" : '';
             }
         };
@@ -1504,7 +1507,7 @@ var Glow = /** @class */ (function () {
     Glow.prototype.placeFirstPlayerToken = function (playerId) {
         var firstPlayerToken = document.getElementById('firstPlayerToken');
         if (firstPlayerToken) {
-            slideToObjectAndAttach(firstPlayerToken, "player_board_" + playerId + "_firstPlayerWrapper");
+            slideToObjectAndAttach(this, firstPlayerToken, "player_board_" + playerId + "_firstPlayerWrapper");
         }
         else {
             dojo.place('<div id="firstPlayerToken"></div>', "player_board_" + playerId + "_firstPlayerWrapper");
@@ -1634,7 +1637,7 @@ var Glow = /** @class */ (function () {
         if (dieDiv) {
             this.setNewFace(die, true);
             dojo.toggleClass("die" + die.id, 'used', die.used);
-            slideToObjectAndAttach(dieDiv, destinationId);
+            slideToObjectAndAttach(this, dieDiv, destinationId);
         }
         else {
             this.createAndPlaceDieHtml(die, destinationId);
@@ -1918,7 +1921,7 @@ var Glow = /** @class */ (function () {
         this.diceSelectionActive = active;
         Array.from(document.getElementsByClassName('die')).forEach(function (node) { return dojo.toggleClass(node, 'selectable', active); });
     };
-    Glow.prototype.diceChangedOrRolled = function (dice, changed, args) {
+    Glow.prototype.diceChangedOrRolled = function (dice, changed, args, playerId) {
         var _this = this;
         this.unselectDice();
         dice.forEach(function (die) {
@@ -1928,7 +1931,7 @@ var Glow = /** @class */ (function () {
         });
         if (args) {
             this.gamedatas.gamestate.args[this.getPlayerId()] = args[this.getPlayerId()];
-            if (this.isCurrentPlayerActive()) {
+            if (this.isCurrentPlayerActive() && this.getPlayerId() == playerId) {
                 this.setActionBarRollDice(true);
             }
         }
@@ -1965,7 +1968,7 @@ var Glow = /** @class */ (function () {
         if (!this.checkAction('rollDice')) {
             return;
         }
-        this.takeAction('rollDice', {
+        this.takeNoLockAction('rollDice', {
             ids: this.selectedDice.map(function (die) { return die.id; }).join(','),
             cost: cost.join(','),
         });
@@ -1974,7 +1977,7 @@ var Glow = /** @class */ (function () {
         if (!this.checkAction('changeDie')) {
             return;
         }
-        this.takeAction('changeDie', {
+        this.takeNoLockAction('changeDie', {
             id: this.selectedDice[0].id,
             value: this.selectedDieFace,
             cost: cost.join(','),
@@ -2040,7 +2043,7 @@ var Glow = /** @class */ (function () {
         if (!this.checkAction('keepDice')) {
             return;
         }
-        this.takeAction('keepDice');
+        this.takeNoLockAction('keepDice');
     };
     Glow.prototype.resurrect = function (id) {
         if (!this.checkAction('resurrect')) {
@@ -2060,7 +2063,7 @@ var Glow = /** @class */ (function () {
         if (!this.checkAction('resolveCard')) {
             return;
         }
-        this.takeAction('resolveCard', {
+        this.takeNoLockAction('resolveCard', {
             type: type,
             id: id,
         });
@@ -2069,13 +2072,13 @@ var Glow = /** @class */ (function () {
         if (!this.checkAction('resolveAll')) {
             return;
         }
-        this.takeAction('resolveAll');
+        this.takeNoLockAction('resolveAll');
     };
     Glow.prototype.move = function (destination, from, type, id) {
         if (!this.checkAction('move')) {
             return;
         }
-        this.takeAction('move', {
+        this.takeNoLockAction('move', {
             destination: destination,
             from: from,
             type: type,
@@ -2086,17 +2089,21 @@ var Glow = /** @class */ (function () {
         if (!this.checkAction('placeEncampment')) {
             return;
         }
-        this.takeAction('placeEncampment');
+        this.takeNoLockAction('placeEncampment');
     };
     Glow.prototype.endTurn = function () {
         if (!this.checkAction('endTurn')) {
             return;
         }
-        this.takeAction('endTurn');
+        this.takeNoLockAction('endTurn');
     };
     Glow.prototype.takeAction = function (action, data) {
         data = data || {};
         data.lock = true;
+        this.ajaxcall("/glow/glow/" + action + ".html", data, this, function () { });
+    };
+    Glow.prototype.takeNoLockAction = function (action, data) {
+        data = data || {};
         this.ajaxcall("/glow/glow/" + action + ".html", data, this, function () { });
     };
     Glow.prototype.setPoints = function (playerId, points) {
@@ -2158,7 +2165,7 @@ var Glow = /** @class */ (function () {
             ['replaceSmallDice', ANIMATION_MS],
             ['diceRolled', ANIMATION_MS],
             ['diceChanged', ANIMATION_MS],
-            ['meepleMoved', ANIMATION_MS],
+            ['meepleMoved', 1],
             ['takeSketalDie', ANIMATION_MS],
             ['removeSketalDie', ANIMATION_MS],
             ['moveBlackDie', ANIMATION_MS],
@@ -2200,6 +2207,7 @@ var Glow = /** @class */ (function () {
         this.board.setColor(notif.args.playerId, newPlayerColor);
         playerTable.setColor(newPlayerColor);
         this.gamedatas.players[notif.args.playerId].color = newPlayerColor;
+        setTimeout(function () { return playerTable.sortDice(); }, ANIMATION_MS);
     };
     Glow.prototype.notif_chosenCompanion = function (notif) {
         var _a, _b;
@@ -2292,12 +2300,12 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.notif_diceRolled = function (notif) {
         var _this = this;
-        this.diceChangedOrRolled(notif.args.dice, false, notif.args.args);
+        this.diceChangedOrRolled(notif.args.dice, false, notif.args.args, notif.args.playerId);
         setTimeout(function () { return _this.getPlayerTable(notif.args.playerId).sortDice(); }, ANIMATION_MS + 1000);
     };
     Glow.prototype.notif_diceChanged = function (notif) {
         var _this = this;
-        this.diceChangedOrRolled(notif.args.dice, true, notif.args.args);
+        this.diceChangedOrRolled(notif.args.dice, true, notif.args.args, notif.args.playerId);
         setTimeout(function () { return _this.getPlayerTable(notif.args.playerId).sortDice(); }, ANIMATION_MS + 1000);
     };
     Glow.prototype.notif_resolveCardUpdate = function (notif) {

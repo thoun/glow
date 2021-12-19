@@ -191,6 +191,8 @@ class PlayerTable {
     
     public addDice(dice: Die[]) {
         dice.forEach(die => this.game.createOrMoveDie(die, `player-table-${this.playerId}-dice`));
+            
+        setTimeout(() => this.sortDice(), 1000);
     }
 
     public removeDice(dice: Die[]) {
@@ -300,7 +302,6 @@ class PlayerTable {
     public sortDice(): void {
         const diceDiv = document.getElementById(`player-table-${this.playerId}`);
         const dice = Array.from(diceDiv.querySelectorAll('.die')) as HTMLDivElement[];
-        console.log(dice);
         let columns = 0;
         for (let i = 1; i <= 8; i++) {
             const valueDice = dice.filter(die => SYMBOL_INDEX_TO_DIE_VALUE[Number(die.dataset.dieValue)] === i);
@@ -309,7 +310,10 @@ class PlayerTable {
             destination.classList.toggle('hidden', valueDice.length === 0);
             if (valueDice.length) {
                 columns++;
-                valueDice.forEach(die => destination.appendChild(die));
+                valueDice.forEach(die => {
+                    die.classList.remove('rolled');
+                    destination.appendChild(die);
+                });
                 document.getElementById(`player-table-${this.playerId}-dice-grid-symbol${i}-counter`).innerHTML = valueDice.length > 1 ? `(${valueDice.length})` : '';
             }
         }
