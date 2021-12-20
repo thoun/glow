@@ -346,10 +346,11 @@ trait UtilTrait {
             }
         }
         $this->companions->createCards($companions, 'deck');
+        $this->companions->shuffle('deck');
         if (count($companionsB) > 0) {
             $this->companions->createCards($companionsB, 'deckB');
+            $this->companions->shuffle('deckB');
         } 
-        $this->companions->shuffle('deck');
 
         if (!$solo) {
             // remove 3 of each face

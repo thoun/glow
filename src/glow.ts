@@ -751,7 +751,7 @@ class Glow implements GlowGame {
     }
 
     private createAndPlaceDieHtml(die: Die, destinationId: string) {
-        let html = `<div id="die${die.id}" class="die ${die.small ? 'small' : ''} ${die.used ? 'used' : ''}" data-die-id="${die.id}" data-die-face="${die.face}" data-die-value="${die.value}">
+        let html = `<div id="die${die.id}" class="die ${die.small ? 'small' : ''} ${die.used ? 'used' : ''}" data-die-id="${die.id}" data-die-color="${die.color}" data-die-face="${die.face}" data-die-value="${die.value}">
         <ol class="die-list" data-roll="${die.face}">`;
         for (let dieFace=1; dieFace<=6; dieFace++) {
             html += `<li class="die-item color${die.color} side${dieFace}" data-side="${dieFace}"></li>`;
@@ -775,8 +775,11 @@ class Glow implements GlowGame {
         if (dieDiv) {
             this.setNewFace(die, true);
             dojo.toggleClass(`die${die.id}`, 'used', die.used);
+            dieDiv.classList.remove('forbidden');
 
-            slideToObjectAndAttach(this, dieDiv, destinationId);
+            slideToObjectAndAttach(this, dieDiv, destinationId).then(
+                () => this.playersTables.forEach(playerTable => playerTable.setForbidden())
+            );
         } else {
             this.createAndPlaceDieHtml(die, destinationId);
             if (rollClass) {

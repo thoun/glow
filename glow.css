@@ -32,6 +32,19 @@
 .die.used {
   filter: grayscale(1);
 }
+.die:not(.rolled).forbidden::after {
+  content: "";
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  bottom: -6px;
+  right: -6px;
+  background-image: url("img/icons.png");
+  background-size: auto 100%;
+  background-position: 30.7692307692% 100%;
+  z-index: 1;
+  transform: translateZ(20px);
+}
 
 @keyframes selected-dice-animation {
   100% {
@@ -790,37 +803,37 @@ html {
   background-position: 0% 0%;
 }
 .icon.footprint {
-  background-position: 8.3333333333% 0%;
+  background-position: 7.6923076923% 0%;
 }
 .icon.firefly {
-  background-position: 16.6666666667% 0%;
+  background-position: 15.3846153846% 0%;
 }
 .icon.point {
-  background-position: 25% 0%;
+  background-position: 23.0769230769% 0%;
 }
 .icon.symbol0 {
-  background-position: 33.3333333333% 100%;
+  background-position: 38.4615384615% 100%;
 }
 .icon.symbol1 {
-  background-position: 41.6666666667% 100%;
+  background-position: 46.1538461538% 100%;
 }
 .icon.symbol2 {
-  background-position: 50% 100%;
+  background-position: 53.8461538462% 100%;
 }
 .icon.symbol3 {
-  background-position: 58.3333333333% 100%;
+  background-position: 61.5384615385% 100%;
 }
 .icon.symbol4 {
-  background-position: 66.6666666667% 100%;
+  background-position: 69.2307692308% 100%;
 }
 .icon.symbol5 {
-  background-position: 75% 100%;
+  background-position: 76.9230769231% 100%;
 }
 .icon.symbol6 {
-  background-position: 83.3333333333% 100%;
+  background-position: 84.6153846154% 100%;
 }
 .icon.symbol7 {
-  background-position: 91.6666666667% 100%;
+  background-position: 92.3076923077% 100%;
 }
 .icon.symbol8 {
   background-position: 100% 100%;

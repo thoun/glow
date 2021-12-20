@@ -130,20 +130,20 @@ html {
   }
 
   &.footprint {
-    background-position: (1 * 100% / 12) 0%;
+    background-position: (1 * 100% / 13) 0%;
   }
 
   &.firefly {
-    background-position: (2 * 100% / 12) 0%;
+    background-position: (2 * 100% / 13) 0%;
   }
 
   &.point {
-    background-position: (3 * 100% / 12) 0%;
+    background-position: (3 * 100% / 13) 0%;
   }
 
   @for $i from 0 through 8 {
     &.symbol#{$i} {
-        background-position: (($i + 4) * 100% / 12) 100%;
+        background-position: (($i + 5) * 100% / 13) 100%;
     }
   }
 }

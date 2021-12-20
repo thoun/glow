@@ -318,5 +318,21 @@ class PlayerTable {
             }
         }
         document.getElementById(`player-table-${this.playerId}-dice-grid`).style.gridTemplateColumns = `repeat(${columns}, auto)`;
+
+        this.setForbidden();
+    }
+    
+    public setForbidden(): void {
+        const diceDiv = document.getElementById(`player-table-${this.playerId}`);
+        const dice = Array.from(diceDiv.querySelectorAll('.die')) as HTMLDivElement[];
+        for (let i = 1; i <= 5; i++) {
+            const valueDice = dice.filter(die => SYMBOL_INDEX_TO_DIE_VALUE[Number(die.dataset.dieValue)] === i);
+            if (valueDice.length) {
+                const forbidden = valueDice.some(die => die.dataset.dieColor == '8');
+                valueDice.forEach(die => {
+                    die.classList.toggle('forbidden', forbidden && die.dataset.dieColor != '8');
+                });
+            }
+        }
     }
 }
