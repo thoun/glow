@@ -1656,7 +1656,7 @@ var Glow = /** @class */ (function () {
             this.setNewFace(die, true);
             dojo.toggleClass("die" + die.id, 'used', die.used);
             dieDiv.classList.remove('forbidden');
-            slideToObjectAndAttach(this, dieDiv, destinationId).then(function () { return _this.playersTables.forEach(function (playerTable) { return playerTable.setForbidden(); }); });
+            slideToObjectAndAttach(this, dieDiv, destinationId).then(function () { return _this.playersTables.forEach(function (playerTable) { return playerTable.sortDice(); }); });
         }
         else {
             this.createAndPlaceDieHtml(die, destinationId);
@@ -1803,7 +1803,7 @@ var Glow = /** @class */ (function () {
         var possibleCosts = this.getPossibleCosts(3);
         possibleCosts.forEach(function (possibleCost, index) {
             var costStr = possibleCost.map(function (cost, costTypeIndex) { return _this.getRollDiceCostStr(costTypeIndex, cost); }).filter(function (str) { return str !== null; }).join(' ');
-            _this.addActionButton("changeDie-button" + index, _("Change selected die") + ("(" + costStr + ")"), function () { return _this.changeDie(possibleCost); });
+            _this.addActionButton("changeDie-button" + index, _("Change selected die") + (" (" + costStr + ")"), function () { return _this.changeDie(possibleCost); });
             dojo.addClass("changeDie-button" + index, 'disabled');
         });
         this.addActionButton("cancelRollDice-button", _("Cancel"), function () { return _this.setActionBarRollDice(true); });

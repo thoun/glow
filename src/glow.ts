@@ -778,7 +778,7 @@ class Glow implements GlowGame {
             dieDiv.classList.remove('forbidden');
 
             slideToObjectAndAttach(this, dieDiv, destinationId).then(
-                () => this.playersTables.forEach(playerTable => playerTable.setForbidden())
+                () => this.playersTables.forEach(playerTable => playerTable.sortDice())
             );
         } else {
             this.createAndPlaceDieHtml(die, destinationId);
@@ -942,7 +942,7 @@ class Glow implements GlowGame {
         const possibleCosts = this.getPossibleCosts(3);
         possibleCosts.forEach((possibleCost, index) => {
             const costStr = possibleCost.map((cost, costTypeIndex) => this.getRollDiceCostStr(costTypeIndex, cost)).filter(str => str !== null).join(' ');
-            (this as any).addActionButton(`changeDie-button${index}`, _("Change selected die") + `(${costStr})`, () => this.changeDie(possibleCost));
+            (this as any).addActionButton(`changeDie-button${index}`, _("Change selected die") + ` (${costStr})`, () => this.changeDie(possibleCost));
             dojo.addClass(`changeDie-button${index}`, 'disabled');
         });
         (this as any).addActionButton(`cancelRollDice-button`, _("Cancel"), () => this.setActionBarRollDice(true));
