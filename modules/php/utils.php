@@ -520,6 +520,7 @@ trait UtilTrait {
         $companion = $this->getCompanionFromDb($this->companions->getCard($companionId));
         if ($companion->die) {
             $dieId = intval(self::getUniqueValueFromDB("SELECT `die_id` FROM companion WHERE `card_id` = $companion->id"));
+            //$this->debug([$companion->die, $companion->id, $dieId, $this->getDieById($dieId)]);
             if ($dieId) {
                 $this->removeSketalDie($playerId, $this->getDieById($dieId));
             }
@@ -574,7 +575,7 @@ trait UtilTrait {
     }
 
     function getPlayerCompanionRerolls(int $playerId) {
-        $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+        $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId, null, 'location_arg'));
 
         $rerolls = 0;
         foreach($companions as $companion) {
@@ -599,7 +600,7 @@ trait UtilTrait {
                 throw new BgaUserException('Not enough reroll available (companion)');
             }
 
-            $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+            $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId, null, 'location_arg'));
             $companionsFlagged = 0;
             foreach($companions as $companion) {
                 if ($companionsFlagged < $cost[0] && $companion->reroll && !$this->getRerollUsed($companion)) {
@@ -700,7 +701,7 @@ trait UtilTrait {
             }
         }
 
-        $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+        $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId, null, 'location_arg'));
         foreach($companions as $companion) {
             if ($companion->effect != null) {
                 $count = $this->isTriggeredEffectsForCard($dice, $companion->effect);
@@ -834,7 +835,7 @@ trait UtilTrait {
                 }
                 break;
             case 1:
-                $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+                $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId, null, 'location_arg'));
                 foreach($companions as $companion) {
                     if ($companion->id == $id) {
                         $card = $companion;
@@ -884,7 +885,7 @@ trait UtilTrait {
 
         foreach($cardEffect->effects as $effect) {
             if ($spellCard != null && $spellCard->type == COMPANION_SPELL) {
-                $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+                $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId, null, 'location_arg'));
                 if (count($companions) > 0) {
                     $lastCompanion = $companions[count($companions) - 1];
                     $this->sendToCemetery($playerId, $lastCompanion->id);
@@ -913,8 +914,10 @@ trait UtilTrait {
     public function takeSketalDie(int $playerId, object $die) {
         $this->moveDice([$die], 'player', $playerId);
 
-        $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+        $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId, null, 'location_arg'));
+        //$this->debug($companions);
         $companion = $companions[count($companions) - 1];
+        //$this->debug($companion);
         self::DbQuery("UPDATE `companion` SET `die_id` = $die->id WHERE `card_id` = $companion->id");
 
         self::notifyAllPlayers('takeSketalDie', clienttranslate('${player_name} takes ${companionName} die'), [

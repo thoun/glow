@@ -71,7 +71,8 @@ trait ActionTrait {
     }
 
     public function applyRecruitCompanion(int $playerId, object $companion, $spot = null) {
-        $this->companions->moveCard($companion->id, 'player', $playerId);
+        $fromCemetery = $companion->location == 'cemetery' ? 5 : 0;
+        $this->companions->moveCard($companion->id, 'player'.$playerId, intval(self::getGameStateValue(DAY)) * 10 + $fromCemetery);
         self::DbQuery("UPDATE player SET `player_recruit_day` = (".$this->getDaySql().") where `player_id` = $playerId");  
 
         $dice = null;
@@ -166,7 +167,7 @@ trait ActionTrait {
 
         $spotDice = $this->getDiceByLocation('meeting', $spot);
         if ($this->array_some($spotDice, function($die) { return $die->color == 8; })) {
-            $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+            $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId, null, 'location_arg'));
             if ($this->array_some($companions, function($companion) { return $companion->subType == KAAR; })) {
                 $this->gamestate->nextState('moveBlackDie');
                 return;
@@ -473,7 +474,7 @@ trait ActionTrait {
             if ($type == 1) {
                 $companion = $this->getCompanionFromDb($this->companions->getCard($id));
 
-                if ($companion->location != 'player' || $companion->location_arg != $playerId) {
+                if ($companion->location != 'player'.$playerId) {
                     throw new BgaUserException("Player doesn't have selected companion");
                 }
 

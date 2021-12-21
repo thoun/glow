@@ -84,6 +84,10 @@ class PlayerTable {
         });
         setupCompanionCards(this.companionsStock);
 
+        const newWeights = {};
+        player.companions.forEach(card => newWeights[card.subType] = card.location_arg);
+        this.companionsStock.changeItemsWeight(newWeights);
+
         player.companions.forEach(companion => {
             this.companionsStock.addToStockWithId(companion.subType, ''+companion.id);
             this.addMouseEvents(this.companionsStock, companion);
@@ -184,6 +188,10 @@ class PlayerTable {
     }
     
     public addCompanion(companion: Companion, from: Stock) {
+        const newWeights = {};
+        newWeights[companion.subType] = companion.location_arg;
+        this.companionsStock.changeItemsWeight(newWeights);
+
         moveToAnotherStock(from, this.companionsStock, companion.subType, ''+companion.id);
         this.moveCompanionSpellStock();
         this.addMouseEvents(this.companionsStock, companion);

@@ -223,7 +223,7 @@ class Glow extends Table {
             $player['meeples'] = $this->getPlayerMeeples($playerId);
             $adventurers = $this->getAdventurersFromDb($this->adventurers->getCardsInLocation('player', $playerId));
             $player['adventurer'] = count($adventurers) > 0 ? $adventurers[0] : null;
-            $player['companions'] = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+            $player['companions'] = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId), null, 'location_arg');
             $player['spells'] = $this->getSpellsFromDb($this->spells->getCardsInLocation('player', $playerId));
             $player['dice'] = $this->getDiceByLocation('player', $playerId);
             $player['rerolls'] = intval($player['rerolls']);
@@ -343,6 +343,10 @@ class Glow extends Table {
 //
 //
 
-
+        // TEMP
+        if ($from_version <= 2112221034) {
+            $sql = "UPDATE `DBPREFIX_companion` SET `card_location` = CONCAT(`card_location`, `card_location_arg`), `card_location_arg` = 0 WHERE `card_location` = 'player'";
+            self::applyDbUpgradeToAllDB($sql);
+        }
     }    
 }

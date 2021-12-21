@@ -92,7 +92,7 @@ trait StateTrait {
 
         foreach($playersIds as $playerId) {
             $dice = $this->getEffectiveDice($playerId);
-            $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+            $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId, null, 'location_arg'));
     
             $cromaugCard = null;
     
@@ -237,7 +237,7 @@ trait StateTrait {
                 if (count($adventurers) > 0) {
                     $points += $adventurers[0]->points;
                 }
-                $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+                $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId, null, 'location_arg'));
                 foreach($companions as $companion) {
                     $points += $companion->points;
                 }
@@ -271,7 +271,7 @@ trait StateTrait {
         foreach($playersIds as $playerId) {
             if ($playerId != 0) {
                 $points = $this->getPlayerFireflies($playerId);
-                $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player', $playerId));
+                $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId, null, 'location_arg'));
                 $companionCount = count($companions);
 
                 foreach($companions as $companion) {

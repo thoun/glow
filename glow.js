@@ -795,6 +795,9 @@ var PlayerTable = /** @class */ (function () {
             _this.companionsStock.unselectAll();
         });
         setupCompanionCards(this.companionsStock);
+        var newWeights = {};
+        player.companions.forEach(function (card) { return newWeights[card.subType] = card.location_arg; });
+        this.companionsStock.changeItemsWeight(newWeights);
         player.companions.forEach(function (companion) {
             _this.companionsStock.addToStockWithId(companion.subType, '' + companion.id);
             _this.addMouseEvents(_this.companionsStock, companion);
@@ -879,6 +882,9 @@ var PlayerTable = /** @class */ (function () {
         this.addMouseEvents(this.adventurerStock, adventurer);
     };
     PlayerTable.prototype.addCompanion = function (companion, from) {
+        var newWeights = {};
+        newWeights[companion.subType] = companion.location_arg;
+        this.companionsStock.changeItemsWeight(newWeights);
         moveToAnotherStock(from, this.companionsStock, companion.subType, '' + companion.id);
         this.moveCompanionSpellStock();
         this.addMouseEvents(this.companionsStock, companion);

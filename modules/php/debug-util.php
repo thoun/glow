@@ -40,7 +40,7 @@ trait DebugUtilTrait {
 
     private function debugSetCompanionForPlayer($playerId, $subType) {
         $card = $this->getCompanionsFromDb($this->companions->getCardsOfType($subType <= 23 ? 1 : 2, $subType))[0];
-        $this->companions->moveCard($card->id, 'player', $playerId);
+        $this->companions->moveCard($card->id, 'player'.$playerId, 0);
     }
 
     private function debugAddSpell($playerId, $type) {
