@@ -131,7 +131,6 @@ trait StateTrait {
         $playerWithEffects = [];
 
         $playersIds = $this->getPlayersIds();
-        $args = [];
 
         foreach($playersIds as $playerId) {
             $dice = $this->getDiceByLocation('player', $playerId);
@@ -159,7 +158,6 @@ trait StateTrait {
         $playerWithRoutes = [];
 
         $playersIds = $this->getPlayersIds();
-        $args = [];
 
         foreach($playersIds as $playerId) {
             if (count($this->getPossibleRoutes($playerId)) > 0) {
@@ -308,6 +306,17 @@ trait StateTrait {
             $playerId = $playersIds[0];
             $playerScore = $this->getPlayerScore($playerId);
             $tom = $this->getTom();
+
+            self::notifyAllPlayers('soloEndScore', clienttranslate('${player_name} ends with ${points} bursts of light'), [
+                'playerId' => $playerId,
+                'player_name' => $this->getPlayerName($playerId),
+                'points' => $playerScore,
+            ]);
+            self::notifyAllPlayers('soloEndScore', clienttranslate('${player_name} ends with ${points} bursts of light'), [
+                'playerId' => 0,
+                'player_name' => $this->getPlayerName(0),
+                'points' => $tom->score,
+            ]);
 
             $score = (($playerScore > $tom->score) || ($playerScore == $tom->score && $this->getPlayerFootprints($playerId) > $tom->footprints)) ? 1 : 0;
             self::DbQuery("UPDATE player SET `player_score` = $score, `player_score_aux` = 0");
