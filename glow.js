@@ -956,7 +956,7 @@ var PlayerTable = /** @class */ (function () {
     PlayerTable.prototype.addMouseEvents = function (stock, companionOrAdventurer) {
         var _this = this;
         var div = document.getElementById(stock.container_div.id + "_item_" + companionOrAdventurer.id);
-        var diceDiv = document.getElementById("player-table-" + this.playerId + "-dice");
+        var diceDiv = document.getElementById("player-table-" + this.playerId);
         div.addEventListener('mouseenter', function () { var _a; return _this.highlightDice(diceDiv, (_a = companionOrAdventurer.effect) === null || _a === void 0 ? void 0 : _a.conditions); });
         div.addEventListener('mouseleave', function () { return _this.unhighlightDice(diceDiv); });
     };

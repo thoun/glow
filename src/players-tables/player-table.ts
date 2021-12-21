@@ -268,7 +268,7 @@ class PlayerTable {
     
     private addMouseEvents(stock: Stock, companionOrAdventurer: Companion | Adventurer) {
         const div = document.getElementById(`${stock.container_div.id}_item_${companionOrAdventurer.id}`);
-        const diceDiv = document.getElementById(`player-table-${this.playerId}-dice`) as HTMLDivElement;     
+        const diceDiv = document.getElementById(`player-table-${this.playerId}`) as HTMLDivElement;     
 
         div.addEventListener('mouseenter', () => this.highlightDice(diceDiv, companionOrAdventurer.effect?.conditions));
         div.addEventListener('mouseleave', () => this.unhighlightDice(diceDiv));
