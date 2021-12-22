@@ -761,7 +761,11 @@ var PlayerTable = /** @class */ (function () {
         for (var i = 1; i <= 8; i++) {
             html += "<div id=\"player-table-" + this.playerId + "-dice-grid-symbol" + i + "\" class=\"hidden\"></div>";
         }
-        html += "        </div>\n            </div>\n            <div class=\"adventurer-and-companions\">\n                <div id=\"player-table-" + this.playerId + "-spells\" class=\"player-table-spells normal\"></div>\n                <div id=\"player-table-" + this.playerId + "-adventurer\" class=\"player-table-adventurer\"></div>\n                <div id=\"player-table-" + this.playerId + "-companions\" class=\"player-table-companions\"></div>\n            </div>\n        </div>";
+        html += "        </div>";
+        if (game.getBoardSide() === 2) {
+            html += "<div id=\"player-table-" + this.playerId + "-symbol-count\" class=\"player-symbol-count\"></div>";
+        }
+        html += "    </div>\n            <div class=\"adventurer-and-companions\">\n                <div id=\"player-table-" + this.playerId + "-spells\" class=\"player-table-spells normal\"></div>\n                <div id=\"player-table-" + this.playerId + "-adventurer\" class=\"player-table-adventurer\"></div>\n                <div id=\"player-table-" + this.playerId + "-companions\" class=\"player-table-companions\"></div>\n            </div>\n        </div>";
         dojo.place(html, this.playerId === this.game.getPlayerId() ? 'currentplayertable' : 'playerstables');
         // adventurer        
         this.adventurerStock = new ebg.stock();
@@ -993,6 +997,7 @@ var PlayerTable = /** @class */ (function () {
         var diceDiv = document.getElementById("player-table-" + this.playerId);
         var dice = Array.from(diceDiv.querySelectorAll('.die'));
         var columns = 0;
+        var symbolCount = 0;
         var _loop_4 = function (i) {
             var valueDice = dice.filter(function (die) { return SYMBOL_INDEX_TO_DIE_VALUE[Number(die.dataset.dieValue)] === i; });
             document.getElementById("player-table-" + this_3.playerId + "-dice-grid-symbol" + i + "-th").classList.toggle('hidden', valueDice.length === 0);
@@ -1000,6 +1005,9 @@ var PlayerTable = /** @class */ (function () {
             destination.classList.toggle('hidden', valueDice.length === 0);
             if (valueDice.length) {
                 columns++;
+                if (i <= 5) {
+                    symbolCount++;
+                }
                 valueDice.forEach(function (die) {
                     die.classList.remove('rolled');
                     destination.appendChild(die);
@@ -1012,6 +1020,9 @@ var PlayerTable = /** @class */ (function () {
             _loop_4(i);
         }
         document.getElementById("player-table-" + this.playerId + "-dice-grid").style.gridTemplateColumns = "repeat(" + columns + ", auto)";
+        if (this.game.getBoardSide() === 2) {
+            document.getElementById("player-table-" + this.playerId + "-symbol-count").innerHTML = '' + symbolCount;
+        }
         this.setForbidden();
     };
     PlayerTable.prototype.setForbidden = function () {

@@ -36,8 +36,13 @@ class PlayerTable {
                 <div id="player-table-${this.playerId}-dice-grid" class="player-dice-grid">`;
         for (let i=1; i<=8; i++) { html += `<div id="player-table-${this.playerId}-dice-grid-symbol${i}-th" class="hidden th-symbol th-symbol${i}"><div class="icon symbol${i}"></div><sub id="player-table-${this.playerId}-dice-grid-symbol${i}-counter"></sub></div>`; }
         for (let i=1; i<=8; i++) { html += `<div id="player-table-${this.playerId}-dice-grid-symbol${i}" class="hidden"></div>`; }
-        html += `        </div>
-            </div>
+        html += `        </div>`;
+        
+        if (game.getBoardSide() === 2) {
+            html += `<div id="player-table-${this.playerId}-symbol-count" class="player-symbol-count"></div>`;
+        }
+
+        html += `    </div>
             <div class="adventurer-and-companions">
                 <div id="player-table-${this.playerId}-spells" class="player-table-spells normal"></div>
                 <div id="player-table-${this.playerId}-adventurer" class="player-table-adventurer"></div>
@@ -311,6 +316,7 @@ class PlayerTable {
         const diceDiv = document.getElementById(`player-table-${this.playerId}`);
         const dice = Array.from(diceDiv.querySelectorAll('.die')) as HTMLDivElement[];
         let columns = 0;
+        let symbolCount = 0;
         for (let i = 1; i <= 8; i++) {
             const valueDice = dice.filter(die => SYMBOL_INDEX_TO_DIE_VALUE[Number(die.dataset.dieValue)] === i);
             document.getElementById(`player-table-${this.playerId}-dice-grid-symbol${i}-th`).classList.toggle('hidden', valueDice.length === 0);
@@ -318,6 +324,11 @@ class PlayerTable {
             destination.classList.toggle('hidden', valueDice.length === 0);
             if (valueDice.length) {
                 columns++;
+
+                if (i <= 5) {
+                    symbolCount++;
+                }
+
                 valueDice.forEach(die => {
                     die.classList.remove('rolled');
                     destination.appendChild(die);
@@ -326,6 +337,10 @@ class PlayerTable {
             }
         }
         document.getElementById(`player-table-${this.playerId}-dice-grid`).style.gridTemplateColumns = `repeat(${columns}, auto)`;
+
+        if (this.game.getBoardSide() === 2) {
+            document.getElementById(`player-table-${this.playerId}-symbol-count`).innerHTML = ''+symbolCount;
+        }
 
         this.setForbidden();
     }

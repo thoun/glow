@@ -79,6 +79,18 @@
                     display: none;
                 }
             }
+
+            .player-symbol-count {
+                background: url('img/symbol-count.png') no-repeat center;
+                width: 80px;
+                height: 80px;  
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-weight: bold;
+                font-size: 160%; 
+                margin-left: 10px;     
+            }
         }
 
         .player-table-spells {
