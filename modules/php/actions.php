@@ -515,8 +515,13 @@ trait ActionTrait {
         self::checkAction('placeEncampment');
 
         $playerId = intval($this->getCurrentPlayerId());
+        $position = $this->getPlayerCompany($playerId)->position;
 
-        $this->movePlayerEncampment($playerId, $this->getPlayerCompany($playerId)->position);
+        if (!$this->getMapSpot(1, $position)->canSettle) {
+            throw new BgaUserException("You can only place encampment in a village");
+        }
+
+        $this->movePlayerEncampment($playerId, $position);
         $this->applyEndTurn($playerId);
     }
 
