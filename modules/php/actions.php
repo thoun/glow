@@ -187,7 +187,7 @@ trait ActionTrait {
             $this->soloEndRecruit();
         }
 
-        if ($companion->die && $companion->dieColor === 0) {
+        if ($companion->die && $companion->dieColor === 0 && $this->canChooseSketalDie()) {
             $this->gamestate->nextState('selectSketalDie');
         } else {
             $this->redirectAfterRecruit();
@@ -342,7 +342,7 @@ trait ActionTrait {
 
         $this->applyRecruitCompanion($playerId, $companion);
 
-        if ($companion->die && $companion->dieColor === 0) {
+        if ($companion->die && $companion->dieColor === 0 && $this->canChooseSketalDie()) {
             $this->gamestate->nextState('selectSketalDie'); // we don't disable player so he stays active for selectSketalDieMulti
         } else {
             $this->gamestate->setPlayerNonMultiactive($playerId, 'resolveCards');

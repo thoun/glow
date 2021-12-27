@@ -133,6 +133,10 @@ class PlayerTable {
         this.setTokens('reroll', player.rerolls);
         this.setTokens('footprint', player.footprints);
         this.setTokens('firefly', player.fireflies);
+
+        if (game.getBoardSide() === 2) {
+            (game as any).addTooltipHtml(`player-table-${this.playerId}-symbol-count`, _('Number of different element symbols on dice. The special symbols do not count.'));
+        }        
     }
 
     private getLastCompanionId() {

@@ -502,9 +502,18 @@ var Board = /** @class */ (function () {
         var mapSpot = this.getMapSpot(meeple.position);
         var x = mapSpot[0];
         var y = mapSpot[1];
-        var shift = this.meeples.filter(function (m) { return m.type === meeple.type && (m.playerId < meeple.playerId || (m.playerId === meeple.playerId && m.id < meeple.id)); }).length;
+        var shift = 0;
+        var transform = '';
+        if (meeple.type > 0) {
+            shift = this.meeples.filter(function (m) { return m.type === meeple.type && (m.playerId < meeple.playerId || (m.playerId === meeple.playerId && m.id < meeple.id)); }).length;
+            transform = "translate(" + (x + shift * 5 + (meeple.type === 2 ? 50 : 0)) + "px, " + (y + shift * 5) + "px)";
+        }
+        else {
+            shift = this.meeples.filter(function (m) { return m.type === meeple.type && m.playerId === meeple.playerId && m.id < meeple.id; }).length;
+            var playerIndex = this.players.findIndex(function (player) { return Number(player.id) == meeple.playerId; });
+            transform = "translate(" + (x + shift * 5 + (playerIndex * 30 - 8 * (this.players.length - 1))) + "px, " + (y + shift * 5 + 10) + "px)";
+        }
         var div = document.getElementById("meeple" + meeple.id);
-        var transform = "translate(" + (x + shift * 5 + (meeple.type === 2 ? 50 : 0)) + "px, " + (y + shift * 5) + "px)";
         if (div) {
             div.style.transform = transform;
         }
@@ -838,6 +847,9 @@ var PlayerTable = /** @class */ (function () {
         this.setTokens('reroll', player.rerolls);
         this.setTokens('footprint', player.footprints);
         this.setTokens('firefly', player.fireflies);
+        if (game.getBoardSide() === 2) {
+            game.addTooltipHtml("player-table-" + this.playerId + "-symbol-count", _('Number of different element symbols on dice. The special symbols do not count.'));
+        }
     }
     PlayerTable.prototype.getLastCompanionId = function () {
         var _a;

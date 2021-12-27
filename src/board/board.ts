@@ -245,10 +245,19 @@ class Board {
         const mapSpot = this.getMapSpot(meeple.position);
         const x = mapSpot[0];
         const y = mapSpot[1];
-        const shift = this.meeples.filter(m => m.type === meeple.type && (m.playerId < meeple.playerId || (m.playerId === meeple.playerId  && m.id < meeple.id))).length;
+
+        let shift = 0;
+        let transform = '';
+        if (meeple.type > 0) {
+            shift = this.meeples.filter(m => m.type === meeple.type && (m.playerId < meeple.playerId || (m.playerId === meeple.playerId  && m.id < meeple.id))).length;
+            transform = `translate(${x + shift*5 + (meeple.type === 2 ? 50 : 0)}px, ${y + shift*5}px)`;
+        } else {
+            shift = this.meeples.filter(m => m.type === meeple.type && m.playerId === meeple.playerId  && m.id < meeple.id).length;
+            const playerIndex = this.players.findIndex(player => Number(player.id) == meeple.playerId);
+            transform = `translate(${x + shift*5 + (playerIndex * 30 - 8*(this.players.length-1))}px, ${y + shift*5 + 10}px)`;
+        }
 
         const div = document.getElementById(`meeple${meeple.id}`);
-        const transform = `translate(${x + shift*5 + (meeple.type === 2 ? 50 : 0)}px, ${y + shift*5}px)`;
         if (div) {
             div.style.transform = transform;
         } else {

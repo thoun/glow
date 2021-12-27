@@ -986,4 +986,10 @@ trait UtilTrait {
             'spell' => $spell,
         ]);
     }
+
+    public function canChooseSketalDie() {
+        $dice = $this->getAvailableBigDice();
+
+        return count($dice) > 0;
+    }
 }
