@@ -34,7 +34,6 @@ class Glow implements GlowGame {
     private originalTextMove: string;
     private isChangeDie: boolean = false;
     private selectedRoute: Route;
-    private moveArgs: EnteringMoveForPlayer;
 
     public adventurersStock: Stock;
     public cemetaryCompanionsStock: Stock;
@@ -335,13 +334,14 @@ class Glow implements GlowGame {
     }
 
     private onEnteringStateMove() {
-        this.board.createDestinationZones(this.moveArgs.possibleRoutes?.map(route => route));
+        const moveArgs = this.getMoveArgs();
+        this.board.createDestinationZones(moveArgs.possibleRoutes?.map(route => route));
         
         if (this.gamedatas.side === 1) {
             if (!document.getElementById(`placeEncampment-button`)) {
                 (this as any).addActionButton(`placeEncampment-button`, _("Place encampment"), () => this.placeEncampment());
             }
-            dojo.toggleClass(`placeEncampment-button`, 'disabled', !this.moveArgs.canSettle);
+            dojo.toggleClass(`placeEncampment-button`, 'disabled', !moveArgs.canSettle);
         }
 
         if (!document.getElementById(`endTurn-button`)) {
@@ -431,7 +431,6 @@ class Glow implements GlowGame {
                     (this as any).addActionButton(`resolveAll-button`, _("Resolve all"), () => this.resolveAll(), null, null, 'red');
                     break;
                 case 'move':
-                    this.moveArgs = (args as EnteringMoveArgs)[this.getPlayerId()];
                     this.setActionBarMove(false);
                     break;
 
@@ -854,6 +853,10 @@ class Glow implements GlowGame {
         document.getElementById('pagemaintitletext').innerHTML = property ? 
             originalState['description' + property] : 
             this.originalTextRollDice;
+    }
+
+    private getMoveArgs() {
+        return this.gamedatas.gamestate.args[this.getPlayerId()];
     }
     
     private setActionBarRollDice(fromCancel: boolean) {
@@ -1572,7 +1575,7 @@ class Glow implements GlowGame {
     }
 
     notif_moveUpdate(notif: Notif<NotifMoveUpdateArgs>) {
-        this.moveArgs = notif.args.args;
+        this.gamedatas.gamestate.args[this.getPlayerId()] = notif.args.args;
         this.setActionBarMove(true);
     }
 

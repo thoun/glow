@@ -1341,12 +1341,13 @@ var Glow = /** @class */ (function () {
     Glow.prototype.onEnteringStateMove = function () {
         var _this = this;
         var _a;
-        this.board.createDestinationZones((_a = this.moveArgs.possibleRoutes) === null || _a === void 0 ? void 0 : _a.map(function (route) { return route; }));
+        var moveArgs = this.getMoveArgs();
+        this.board.createDestinationZones((_a = moveArgs.possibleRoutes) === null || _a === void 0 ? void 0 : _a.map(function (route) { return route; }));
         if (this.gamedatas.side === 1) {
             if (!document.getElementById("placeEncampment-button")) {
                 this.addActionButton("placeEncampment-button", _("Place encampment"), function () { return _this.placeEncampment(); });
             }
-            dojo.toggleClass("placeEncampment-button", 'disabled', !this.moveArgs.canSettle);
+            dojo.toggleClass("placeEncampment-button", 'disabled', !moveArgs.canSettle);
         }
         if (!document.getElementById("endTurn-button")) {
             this.addActionButton("endTurn-button", _("End turn"), function () { return _this.endTurn(); }, null, null, 'red');
@@ -1428,7 +1429,6 @@ var Glow = /** @class */ (function () {
                     this.addActionButton("resolveAll-button", _("Resolve all"), function () { return _this.resolveAll(); }, null, null, 'red');
                     break;
                 case 'move':
-                    this.moveArgs = args[this.getPlayerId()];
                     this.setActionBarMove(false);
                     break;
             }
@@ -1755,6 +1755,9 @@ var Glow = /** @class */ (function () {
         document.getElementById('pagemaintitletext').innerHTML = property ?
             originalState['description' + property] :
             this.originalTextRollDice;
+    };
+    Glow.prototype.getMoveArgs = function () {
+        return this.gamedatas.gamestate.args[this.getPlayerId()];
     };
     Glow.prototype.setActionBarRollDice = function (fromCancel) {
         var _this = this;
@@ -2364,7 +2367,7 @@ var Glow = /** @class */ (function () {
         playerTable.setUsedDie(notif.args.dieId);
     };
     Glow.prototype.notif_moveUpdate = function (notif) {
-        this.moveArgs = notif.args.args;
+        this.gamedatas.gamestate.args[this.getPlayerId()] = notif.args.args;
         this.setActionBarMove(true);
     };
     Glow.prototype.notif_meepleMoved = function (notif) {
