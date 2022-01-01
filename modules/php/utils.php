@@ -784,17 +784,16 @@ trait UtilTrait {
         }
         $args['effectOrigin'] = $effectOrigin;
 
-
         if ($effect > 100) {
-            $this->incPlayerScore($playerId, $effect - 100, clienttranslate('${player_name} ${gainsloses} ${abspoints} burst of light with ${effectOrigin} effect'), $args + ['gainsloses' => _('gains'), 'i18n' => ['gainsloses']]);
+            $this->incPlayerScore($playerId, $effect - 100, clienttranslate('${player_name} ${gainsloses} ${abspoints} burst of light with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('gains'), 'i18n' => ['gainsloses']]);
         } else if ($effect < -100) {
-            $this->decPlayerScore($playerId, -($effect + 100), clienttranslate('${player_name} ${gainsloses} ${abspoints} burst of light with ${effectOrigin} effect'), $args + ['gainsloses' => _('loses'), 'i18n' => ['gainsloses']]);
+            $this->decPlayerScore($playerId, -($effect + 100), clienttranslate('${player_name} ${gainsloses} ${abspoints} burst of light with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
         }
 
         else if ($effect > 20 && $effect < 30) {
-            $this->addPlayerFootprints($playerId, $effect - 20, clienttranslate('${player_name} ${gainsloses} ${absfootprints} footprints with ${effectOrigin} effect'), $args + ['gainsloses' => _('gains'), 'i18n' => ['gainsloses']]);
+            $this->addPlayerFootprints($playerId, $effect - 20, clienttranslate('${player_name} ${gainsloses} ${absfootprints} footprints with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('gains'), 'i18n' => ['gainsloses']]);
         } else if ($effect < -20 && $effect > -30) {
-            $this->removePlayerFootprints($playerId, -($effect + 20), clienttranslate('${player_name} ${gainsloses} ${absfootprints} footprints with ${effectOrigin} effect'), $args + ['gainsloses' => _('loses'), 'i18n' => ['gainsloses']]);
+            $this->removePlayerFootprints($playerId, -($effect + 20), clienttranslate('${player_name} ${gainsloses} ${absfootprints} footprints with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
         }
 
         else if ($effect > 10 && $effect < 20) {

@@ -869,7 +869,7 @@ html {
 }
 #middle-band #round-counter-wrapper {
   text-align: center;
-  font-size: 16px;
+  font-size: 150%;
   font-weight: 700;
   padding: 8px;
   flex: 1;
