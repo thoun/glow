@@ -1,4 +1,17 @@
 {OVERALL_GAME_HEADER}
+
+<div id="score">
+    <div id="tabble-wrapper">
+        <table>
+            <thead>
+                <tr id="scoretr"></tr>
+            </thead>
+            <tbody id="score-table-body">
+            </tbody>
+        </table>
+    </div>
+</div>
+
 <div id="zoom-wrapper">
     <div id="full-table">
 

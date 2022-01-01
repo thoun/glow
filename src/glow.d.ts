@@ -304,3 +304,8 @@ interface NotifUpdateSoloTilesArgs {
     spot: number;
     soloTile: SoloTile;
 }
+
+interface NotifScorePointArgs {
+    playerId: number;
+    points: number;
+}

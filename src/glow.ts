@@ -8,6 +8,7 @@ declare const g_gamethemeurl;
 declare const board: HTMLDivElement;
 
 const ANIMATION_MS = 500;
+const SCORE_MS = 1500;
 
 const ROLL_DICE_ACTION_BUTTONS_IDS = [`setRollDice-button`, `setChangeDie-button`, `keepDice-button`, `cancelRollDice-button`, `change-die-faces-buttons`];
 const MOVE_ACTION_BUTTONS_IDS = [`placeEncampment-button`, `endTurn-button`, `cancelMoveDiscardCampanionOrSpell-button`];
@@ -105,6 +106,10 @@ class Glow implements GlowGame {
             this.notif_lastTurn();
         }
 
+        if (Number(gamedatas.gamestate.id) >= 80) { // score or end
+            this.onEnteringShowScore(true);
+        }
+
         this.addHelp();
         this.setupNotifications();
 
@@ -156,6 +161,10 @@ class Glow implements GlowGame {
             case 'endRound':
                 const playerTable = this.getPlayerTable(this.getPlayerId());
                 playerTable?.clearUsedDice();
+                break;
+
+            case 'endScore':
+                this.onEnteringShowScore();
                 break;
             case 'gameEnd':
                 const lastTurnBar = document.getElementById('last-round');
@@ -348,6 +357,59 @@ class Glow implements GlowGame {
         if (!document.getElementById(`endTurn-button`)) {
             (this as any).addActionButton(`endTurn-button`, _("End turn"), () => this.endTurn(), null, null, 'red');
         }
+    }
+
+    onEnteringShowScore(fromReload: boolean = false) {
+        const lastTurnBar = document.getElementById('last-round');
+        if (lastTurnBar) {
+            lastTurnBar.style.display = 'none';
+        }
+
+        document.getElementById('score').style.display = 'flex';
+
+        const headers = document.getElementById('scoretr');
+        if (!headers.childElementCount) {
+            dojo.place(`
+                <th></th>
+                <th id="th-before-end-score" class="before-end-score">${_("Score at last day")}</th>
+                <th id="th-cards-score" class="cards-score">${_("Adventurer and companions")}</th>
+                <th id="th-board-score" class="board-score">${_("Journey board")}</th>
+                <th id="th-fireflies-score" class="fireflies-score">${_("Fireflies")}</th>
+                <th id="th-footprints-score" class="footprints-score">${_("Footprint tokens")}</th>
+                <th id="th-after-end-score" class="after-end-score">${_("Final score")}</th>
+            `, headers);
+        }
+
+        const players = Object.values(this.gamedatas.players);
+        if (players.length == 1) {
+            players.push(this.gamedatas.tom);
+        }
+
+        players.forEach(player => {
+            //if we are a reload of end state, we display values, else we wait for notifications
+            const playerScore = fromReload ? (player as any) : null;
+
+            const firefliesScore = fromReload ? (this.fireflyCounters[player.id].getValue() >= this.companionCounters[player.id].getValue() ? 10 : 0) : undefined;
+            const footprintsScore = fromReload ? this.footprintCounters[player.id].getValue() : undefined;
+
+            dojo.place(`<tr id="score${player.id}">
+                <td class="player-name" style="color: #${player.color}">${Number(player.id) == 0 ? 'Tom' : player.name}</td>
+                <td id="before-end-score${player.id}" class="score-number before-end-score">${playerScore?.scoreBeforeEnd !== undefined ? playerScore.scoreBeforeEnd : ''}</td>
+                <td id="cards-score${player.id}" class="score-number cards-score">${playerScore?.scoreCards !== undefined ? playerScore.scoreCards : ''}</td>
+                <td id="board-score${player.id}" class="score-number board-score">${playerScore?.scoreBoard !== undefined ? playerScore.scoreBoard : ''}</td>
+                <td id="fireflies-score${player.id}" class="score-number fireflies-score">${firefliesScore !== undefined ? firefliesScore : ''}</td>
+                <td id="footprints-score${player.id}" class="score-number footprints-score">${footprintsScore !== undefined ? footprintsScore : ''}</td>
+                <td id="after-end-score${player.id}" class="score-number after-end-score total">${playerScore?.scoreAfterEnd !== undefined ? playerScore.scoreAfterEnd : ''}</td>
+            </tr>`, 'score-table-body');
+        });
+
+        (this as any).addTooltipHtmlToClass('before-end-score', _("Score before the final count."));
+        (this as any).addTooltipHtmlToClass('cards-score', _("Total number of bursts of light on adventurer and companions."));
+        (this as any).addTooltipHtmlToClass('board-score', this.gamedatas.side == 1 ?
+            _("Number of bursts of light indicated on the village where encampment is situated.") :
+            _("Number of bursts of light indicated on the islands on which players have placed their boats."));
+        (this as any).addTooltipHtmlToClass('fireflies-score', _("Total number of fireflies in player possession, represented on companions and tokens. If there is many or more fireflies than companions, player score an additional 10 bursts of light."));
+        (this as any).addTooltipHtmlToClass('footprints-score', _("1 burst of light per footprint in player possession."));
     }
 
     // onLeavingState: this method is called each time we are leaving a game state.
@@ -1434,6 +1496,12 @@ class Glow implements GlowGame {
             ['newDay', 2500],
             ['setTomDice', 1],
             ['setTableDice', 1],
+            ['scoreBeforeEnd', SCORE_MS],
+            ['scoreCards', SCORE_MS],
+            ['scoreBoard', SCORE_MS],
+            ['scoreFireflies', SCORE_MS],
+            ['scoreFootprints', SCORE_MS],
+            ['scoreAfterEnd', SCORE_MS],
         ];
 
         notifs.forEach((notif) => {
@@ -1640,6 +1708,41 @@ class Glow implements GlowGame {
         dojo.place(`<div id="last-round">
             ${_("This is the last round of the game!")}
         </div>`, 'page-title');
+    }
+
+    private setScore(playerId: number | string, column: number, score: number) { // column 1 for before score ... 6 for final score
+        const cell = (document.getElementById(`score${playerId}`).getElementsByTagName('td')[column] as HTMLTableDataCellElement);
+        cell.innerHTML = `${score}`;
+    }
+
+    notif_scoreBeforeEnd(notif: Notif<NotifScorePointArgs>) {
+        log('notif_scoreBeforeEnd', notif.args);
+        this.setScore(notif.args.playerId, 1, notif.args.points);
+    }
+
+    notif_scoreCards(notif: Notif<NotifScorePointArgs>) {
+        log('notif_scoreCards', notif.args);
+        this.setScore(notif.args.playerId, 2, notif.args.points);
+    }
+
+    notif_scoreBoard(notif: Notif<NotifScorePointArgs>) {
+        log('notif_scoreBoard', notif.args);
+        this.setScore(notif.args.playerId, 3, notif.args.points);
+    }
+
+    notif_scoreFireflies(notif: Notif<NotifScorePointArgs>) {
+        log('notif_scoreFireflies', notif.args);
+        this.setScore(notif.args.playerId, 4, notif.args.points);
+    }
+
+    notif_scoreFootprints(notif: Notif<NotifScorePointArgs>) {
+        log('notif_scoreFootprints', notif.args);
+        this.setScore(notif.args.playerId, 5, notif.args.points);
+    }
+
+    notif_scoreAfterEnd(notif: Notif<NotifScorePointArgs>) {
+        log('notif_scoreAfterEnd', notif.args);
+        this.setScore(notif.args.playerId, 6, notif.args.points);
     }
 
     private getColor(color: number) {

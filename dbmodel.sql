@@ -87,6 +87,10 @@ ALTER TABLE `player` ADD `player_footprints` TINYINT UNSIGNED NOT NULL DEFAULT '
 ALTER TABLE `player` ADD `player_fireflies` TINYINT UNSIGNED NOT NULL DEFAULT '0';
 ALTER TABLE `player` ADD `applied_effects` json;
 ALTER TABLE `player` ADD `visited_spots` json;
+ALTER TABLE `player` ADD `player_score_before_end` TINYINT UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `player` ADD `player_score_cards` TINYINT UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `player` ADD `player_score_board` TINYINT UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `player` ADD `player_score_after_end` TINYINT UNSIGNED NOT NULL DEFAULT '0';
 
 CREATE TABLE IF NOT EXISTS `global_variables` (
   `name` varchar(50) NOT NULL,

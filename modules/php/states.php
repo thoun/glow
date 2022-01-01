@@ -227,6 +227,39 @@ trait StateTrait {
 
         if ($solo) {
             $playersIds[] = 0;
+
+            if ($this->getSide() == 1) {
+                /* TODO
+                For the Province of Shadows (and only at this moment),
+if Tom has earned any footprints during the game, he uses
+them to try and move his camp to the village with a higher
+number of shards of light. To do so, he must spend the
+number of footprints indicated on the village.
+
+Example: Tom ends the game on the village with 12
+shards of light. He has earned three footprints during the
+game. He spends them to move to the next village, the
+one with 15 shards, which requires two footprints.
+*/
+            }
+        }
+
+        foreach($playersIds as $playerId) {
+            $score = 0;
+            if ($playerId == 0) {
+                $tom = $this->getTom();
+                $tom->scoreBeforeEnd = $tom->score;
+                $score = $tom->scoreBeforeEnd;
+                $this->setTom($tom);
+            } else {
+                self::DbQuery("UPDATE player SET player_score_before_end = player_score WHERE player_id = $playerId");
+                $score = intval(self::getUniqueValueFromDB("SELECT player_score_before_end FROM player where player_id = $playerId"));
+            }
+
+            self::notifyAllPlayers('scoreBeforeEnd', '', [
+                'playerId' => $playerId,
+                'points' => $score,
+            ]);
         }
         
         // Adventurer and companions        
@@ -241,6 +274,15 @@ trait StateTrait {
                 foreach($companions as $companion) {
                     $points += $companion->points;
                 }
+
+                if ($playerId > 0) {
+                    self::DbQuery("UPDATE player SET player_score_cards = $points WHERE player_id = $playerId");
+                }
+
+                self::notifyAllPlayers('scoreCards', '', [
+                    'playerId' => $playerId,
+                    'points' => $points,
+                ]);
 
                 $this->incPlayerScore($playerId, $points, _('${player_name} gains ${points} bursts of light with adventurer and companions'));
                 
@@ -259,6 +301,19 @@ trait StateTrait {
             } else if ($side === 2) {
                 $message = _('${player_name} gains ${points} bursts of light with boats placed on islands');
             }
+
+            if ($playerId == 0) {
+                $tom = $this->getTom();
+                $tom->scoreBoard = $points;        
+                $this->setTom($tom);
+            } else {
+                self::DbQuery("UPDATE player SET player_score_board = $points WHERE player_id = $playerId");
+            }
+
+            self::notifyAllPlayers('scoreBoard', '', [
+                'playerId' => $playerId,
+                'points' => $points,
+            ]);
 
             $this->incPlayerScore($playerId, $points, $message);
 
@@ -283,6 +338,11 @@ trait StateTrait {
                     $this->incPlayerScore($playerId, 10, _('${player_name} gains ${points} bursts of light with fireflies (more fireflies than companions)'));
                 }
 
+                self::notifyAllPlayers('scoreFireflies', '', [
+                    'playerId' => $playerId,
+                    'points' => $points >= $companionCount ? 10 : 0,
+                ]);
+
                 if ($playerId != 0) {
                     self::setStat($points, 'endFirefliesTokens', $playerId);
                     self::setStat($companionCount, 'endCompanionCount', $playerId);
@@ -295,11 +355,34 @@ trait StateTrait {
         foreach($playersIds as $playerId) {
             $points = $this->getPlayerFootprints($playerId);
 
+            self::notifyAllPlayers('scoreFootprints', '', [
+                'playerId' => $playerId,
+                'points' => $points,
+            ]);
+
             $this->incPlayerScore($playerId, $points, _('${player_name} gains ${points} bursts of light with footprints'));
 
             if ($playerId != 0) {
                 self::setStat($points, 'endFootprintsCount', $playerId);
             }
+        }
+
+        foreach($playersIds as $playerId) {
+            $score = 0;
+            if ($playerId == 0) {
+                $tom = $this->getTom();
+                $tom->scoreAfterEnd = $tom->score;
+                $score = $tom->scoreAfterEnd;
+                $this->setTom($tom);
+            } else {
+                self::DbQuery("UPDATE player SET player_score_after_end = player_score WHERE player_id = $playerId");
+                $score = intval(self::getUniqueValueFromDB("SELECT player_score_after_end FROM player where player_id = $playerId"));
+            }
+
+            self::notifyAllPlayers('scoreAfterEnd', '', [
+                'playerId' => $playerId,
+                'points' => $score,
+            ]);
         }
         
         if ($solo) { // solo mode
@@ -307,7 +390,7 @@ trait StateTrait {
             $playerScore = $this->getPlayerScore($playerId);
             $tom = $this->getTom();
 
-            self::notifyAllPlayers('soloEndScore', clienttranslate('${player_name} ends with ${points} bursts of light'), [
+            /*self::notifyAllPlayers('soloEndScore', clienttranslate('${player_name} ends with ${points} bursts of light'), [
                 'playerId' => $playerId,
                 'player_name' => $this->getPlayerName($playerId),
                 'points' => $playerScore,
@@ -316,7 +399,7 @@ trait StateTrait {
                 'playerId' => 0,
                 'player_name' => $this->getPlayerName(0),
                 'points' => $tom->score,
-            ]);
+            ]);*/
 
             $score = (($playerScore > $tom->score) || ($playerScore == $tom->score && $this->getPlayerFootprints($playerId) > $tom->footprints)) ? 1 : 0;
             self::DbQuery("UPDATE player SET `player_score` = $score, `player_score_aux` = 0");
@@ -327,14 +410,4 @@ trait StateTrait {
 
         $this->gamestate->nextState('endGame');
     }
-
-    /*function stGameEnd() {
-        $playersIds = $this->getPlayersIds();
-        $solo = count($playersIds) == 1;
-        if ($solo && boolval(self::getGameStateValue('game_result_neutralized'))) {
-            self::DbQuery("UPDATE player SET `player_score` = 0, `player_score_aux` = 0");
-        }
-
-        parent::stGameEnd();
-    }*/
 }

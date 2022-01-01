@@ -1072,6 +1072,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from) {
     return to;
 };
 var ANIMATION_MS = 500;
+var SCORE_MS = 1500;
 var ROLL_DICE_ACTION_BUTTONS_IDS = ["setRollDice-button", "setChangeDie-button", "keepDice-button", "cancelRollDice-button", "change-die-faces-buttons"];
 var MOVE_ACTION_BUTTONS_IDS = ["placeEncampment-button", "endTurn-button", "cancelMoveDiscardCampanionOrSpell-button"];
 var ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1];
@@ -1141,6 +1142,9 @@ var Glow = /** @class */ (function () {
         if (gamedatas.endTurn) {
             this.notif_lastTurn();
         }
+        if (Number(gamedatas.gamestate.id) >= 80) { // score or end
+            this.onEnteringShowScore(true);
+        }
         this.addHelp();
         this.setupNotifications();
         this.setupPreferences();
@@ -1186,6 +1190,9 @@ var Glow = /** @class */ (function () {
             case 'endRound':
                 var playerTable = this.getPlayerTable(this.getPlayerId());
                 playerTable === null || playerTable === void 0 ? void 0 : playerTable.clearUsedDice();
+                break;
+            case 'endScore':
+                this.onEnteringShowScore();
                 break;
             case 'gameEnd':
                 var lastTurnBar = document.getElementById('last-round');
@@ -1353,6 +1360,37 @@ var Glow = /** @class */ (function () {
         if (!document.getElementById("endTurn-button")) {
             this.addActionButton("endTurn-button", _("End turn"), function () { return _this.endTurn(); }, null, null, 'red');
         }
+    };
+    Glow.prototype.onEnteringShowScore = function (fromReload) {
+        var _this = this;
+        if (fromReload === void 0) { fromReload = false; }
+        var lastTurnBar = document.getElementById('last-round');
+        if (lastTurnBar) {
+            lastTurnBar.style.display = 'none';
+        }
+        document.getElementById('score').style.display = 'flex';
+        var headers = document.getElementById('scoretr');
+        if (!headers.childElementCount) {
+            dojo.place("\n                <th></th>\n                <th id=\"th-before-end-score\" class=\"before-end-score\">" + _("Score at last day") + "</th>\n                <th id=\"th-cards-score\" class=\"cards-score\">" + _("Adventurer and companions") + "</th>\n                <th id=\"th-board-score\" class=\"board-score\">" + _("Journey board") + "</th>\n                <th id=\"th-fireflies-score\" class=\"fireflies-score\">" + _("Fireflies") + "</th>\n                <th id=\"th-footprints-score\" class=\"footprints-score\">" + _("Footprint tokens") + "</th>\n                <th id=\"th-after-end-score\" class=\"after-end-score\">" + _("Final score") + "</th>\n            ", headers);
+        }
+        var players = Object.values(this.gamedatas.players);
+        if (players.length == 1) {
+            players.push(this.gamedatas.tom);
+        }
+        players.forEach(function (player) {
+            //if we are a reload of end state, we display values, else we wait for notifications
+            var playerScore = fromReload ? player : null;
+            var firefliesScore = fromReload ? (_this.fireflyCounters[player.id].getValue() >= _this.companionCounters[player.id].getValue() ? 10 : 0) : undefined;
+            var footprintsScore = fromReload ? _this.footprintCounters[player.id].getValue() : undefined;
+            dojo.place("<tr id=\"score" + player.id + "\">\n                <td class=\"player-name\" style=\"color: #" + player.color + "\">" + (Number(player.id) == 0 ? 'Tom' : player.name) + "</td>\n                <td id=\"before-end-score" + player.id + "\" class=\"score-number before-end-score\">" + ((playerScore === null || playerScore === void 0 ? void 0 : playerScore.scoreBeforeEnd) !== undefined ? playerScore.scoreBeforeEnd : '') + "</td>\n                <td id=\"cards-score" + player.id + "\" class=\"score-number cards-score\">" + ((playerScore === null || playerScore === void 0 ? void 0 : playerScore.scoreCards) !== undefined ? playerScore.scoreCards : '') + "</td>\n                <td id=\"board-score" + player.id + "\" class=\"score-number board-score\">" + ((playerScore === null || playerScore === void 0 ? void 0 : playerScore.scoreBoard) !== undefined ? playerScore.scoreBoard : '') + "</td>\n                <td id=\"fireflies-score" + player.id + "\" class=\"score-number fireflies-score\">" + (firefliesScore !== undefined ? firefliesScore : '') + "</td>\n                <td id=\"footprints-score" + player.id + "\" class=\"score-number footprints-score\">" + (footprintsScore !== undefined ? footprintsScore : '') + "</td>\n                <td id=\"after-end-score" + player.id + "\" class=\"score-number after-end-score total\">" + ((playerScore === null || playerScore === void 0 ? void 0 : playerScore.scoreAfterEnd) !== undefined ? playerScore.scoreAfterEnd : '') + "</td>\n            </tr>", 'score-table-body');
+        });
+        this.addTooltipHtmlToClass('before-end-score', _("Score before the final count."));
+        this.addTooltipHtmlToClass('cards-score', _("Total number of bursts of light on adventurer and companions."));
+        this.addTooltipHtmlToClass('board-score', this.gamedatas.side == 1 ?
+            _("Number of bursts of light indicated on the village where encampment is situated.") :
+            _("Number of bursts of light indicated on the islands on which players have placed their boats."));
+        this.addTooltipHtmlToClass('fireflies-score', _("Total number of fireflies in player possession, represented on companions and tokens. If there is many or more fireflies than companions, player score an additional 10 bursts of light."));
+        this.addTooltipHtmlToClass('footprints-score', _("1 burst of light per footprint in player possession."));
     };
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
@@ -2244,6 +2282,12 @@ var Glow = /** @class */ (function () {
             ['newDay', 2500],
             ['setTomDice', 1],
             ['setTableDice', 1],
+            ['scoreBeforeEnd', SCORE_MS],
+            ['scoreCards', SCORE_MS],
+            ['scoreBoard', SCORE_MS],
+            ['scoreFireflies', SCORE_MS],
+            ['scoreFootprints', SCORE_MS],
+            ['scoreAfterEnd', SCORE_MS],
         ];
         notifs.forEach(function (notif) {
             dojo.subscribe(notif[0], _this, "notif_" + notif[0]);
@@ -2422,6 +2466,34 @@ var Glow = /** @class */ (function () {
             return;
         }
         dojo.place("<div id=\"last-round\">\n            " + _("This is the last round of the game!") + "\n        </div>", 'page-title');
+    };
+    Glow.prototype.setScore = function (playerId, column, score) {
+        var cell = document.getElementById("score" + playerId).getElementsByTagName('td')[column];
+        cell.innerHTML = "" + score;
+    };
+    Glow.prototype.notif_scoreBeforeEnd = function (notif) {
+        log('notif_scoreBeforeEnd', notif.args);
+        this.setScore(notif.args.playerId, 1, notif.args.points);
+    };
+    Glow.prototype.notif_scoreCards = function (notif) {
+        log('notif_scoreCards', notif.args);
+        this.setScore(notif.args.playerId, 2, notif.args.points);
+    };
+    Glow.prototype.notif_scoreBoard = function (notif) {
+        log('notif_scoreBoard', notif.args);
+        this.setScore(notif.args.playerId, 3, notif.args.points);
+    };
+    Glow.prototype.notif_scoreFireflies = function (notif) {
+        log('notif_scoreFireflies', notif.args);
+        this.setScore(notif.args.playerId, 4, notif.args.points);
+    };
+    Glow.prototype.notif_scoreFootprints = function (notif) {
+        log('notif_scoreFootprints', notif.args);
+        this.setScore(notif.args.playerId, 5, notif.args.points);
+    };
+    Glow.prototype.notif_scoreAfterEnd = function (notif) {
+        log('notif_scoreAfterEnd', notif.args);
+        this.setScore(notif.args.playerId, 6, notif.args.points);
     };
     Glow.prototype.getColor = function (color) {
         switch (color) {

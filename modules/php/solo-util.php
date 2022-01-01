@@ -19,6 +19,9 @@ trait SoloUtilTrait {
         $tom->rerolls = 0;
         $tom->footprints = 0;
         $tom->fireflies = 0;
+        $tom->scoreBeforeEnd = 0;
+        $tom->scoreBoard = 0;
+        $tom->scoreAfterEnd = 0;
 
         return $this->setTom($tom);
     }

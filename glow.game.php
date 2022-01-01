@@ -184,7 +184,7 @@ class Glow extends Table {
     
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = "SELECT player_id id, player_score score, player_no playerNo, player_rerolls rerolls, player_footprints footprints, player_fireflies fireflies FROM player ";
+        $sql = "SELECT player_id id, player_score score, player_no playerNo, player_rerolls rerolls, player_footprints footprints, player_fireflies fireflies, player_score_before_end scoreBeforeEnd, player_score_cards scoreCards, player_score_board scoreBoard, player_score_after_end scoreAfterEnd FROM player ";
         $result['players'] = self::getCollectionFromDb($sql);
 
         $solo = count($result['players']) == 1;
@@ -347,6 +347,13 @@ class Glow extends Table {
         if ($from_version <= 2112221034) {
             $sql = "UPDATE `DBPREFIX_companion` SET `card_location` = CONCAT(`card_location`, `card_location_arg`), `card_location_arg` = 0 WHERE `card_location` = 'player'";
             self::applyDbUpgradeToAllDB($sql);
+        }
+
+        if ($from_version <= 2112291719) {
+            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_before_end` TINYINT UNSIGNED NOT NULL DEFAULT '0'");
+            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_cards` TINYINT UNSIGNED NOT NULL DEFAULT '0'");
+            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_board` TINYINT UNSIGNED NOT NULL DEFAULT '0'");
+            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_after_end` TINYINT UNSIGNED NOT NULL DEFAULT '0'");
         }
     }    
 }
