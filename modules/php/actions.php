@@ -72,7 +72,9 @@ trait ActionTrait {
 
     public function applyRecruitCompanion(int $playerId, object $companion, $spot = null) {
         $fromCemetery = $companion->location == 'cemetery' ? 5 : 0;
-        $this->companions->moveCard($companion->id, 'player'.$playerId, intval(self::getGameStateValue(DAY)) * 10 + $fromCemetery);
+        $companion->location = 'player'.$playerId;
+        $companion->location_arg = intval(self::getGameStateValue(DAY)) * 10 + $fromCemetery;
+        $this->companions->moveCard($companion->id, $companion->location, $companion->location_arg);
         self::DbQuery("UPDATE player SET `player_recruit_day` = (".$this->getDaySql().") where `player_id` = $playerId");  
 
         $dice = null;
