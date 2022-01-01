@@ -15,6 +15,13 @@ class MapRoute {
         $this->min = $min;
         $this->max = $max == null ? $min : $max;
     } 
+
+    // keep route immutable
+    public function withCostForPlayer(array $costForPlayer) {
+        $newRoute = new MapRoute($this->destination, $this->effects, $this->min, $this->max);
+        $newRoute->costForPlayer = $costForPlayer;
+        return $newRoute;
+    }
 }
 
 class MapSpot {

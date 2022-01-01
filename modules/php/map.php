@@ -211,14 +211,14 @@ trait MapTrait {
                 }
 
                 if ($canGoToDestination) {
-                    $route->costForPlayer = array_merge($effects, $route->effects);
+                    $routeWithCost = $route->withCostForPlayer(array_merge($effects, $route->effects));
                     if ($usedFootprints > 0) {
-                        $route->costForPlayer = array_merge($route->costForPlayer, [-20 - $usedFootprints]);
+                        $routeWithCost = $routeWithCost->withCostForPlayer(array_merge($routeWithCost->costForPlayer, [-20 - $usedFootprints]));
                     } 
 
-                    $canPayFootprints = $this->canPayFootprints($playerId, $route->costForPlayer);
+                    $canPayFootprints = $this->canPayFootprints($playerId, $routeWithCost->costForPlayer);
                     if ($canPayFootprints) {
-                        $possibleRoutes[] = $route;
+                        $possibleRoutes[] = $routeWithCost;
                     }
                 }
     
