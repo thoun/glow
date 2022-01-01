@@ -1099,16 +1099,21 @@ class Glow implements GlowGame {
     }
 
     private diceChangedOrRolled(dice: Die[], changed: boolean, args: EnteringRollDiceArgs, playerId: number) {
-        this.unselectDice();
+        const isCurrentPlayer = playerId == this.getPlayerId();
+        if (isCurrentPlayer) {
+            this.unselectDice();
+        }
         dice.forEach(die => {
-            dojo.removeClass(`die${die.id}`, 'selected');
+            if (isCurrentPlayer) {
+                dojo.removeClass(`die${die.id}`, 'selected');
+            }
             this.setNewFace(die);
             this.addRollToDiv(this.getDieDiv(die), changed ? 'change' : (Math.random() > 0.5 ? 'odd' : 'even'));
         });
 
         if (args) {
             this.gamedatas.gamestate.args[this.getPlayerId()] = args[this.getPlayerId()];
-            if((this as any).isCurrentPlayerActive() && this.getPlayerId() == playerId) {
+            if (isCurrentPlayer && (this as any).isCurrentPlayerActive()) {
                 this.setActionBarRollDice(true);
             }
         }

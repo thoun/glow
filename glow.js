@@ -1976,15 +1976,20 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.diceChangedOrRolled = function (dice, changed, args, playerId) {
         var _this = this;
-        this.unselectDice();
+        var isCurrentPlayer = playerId == this.getPlayerId();
+        if (isCurrentPlayer) {
+            this.unselectDice();
+        }
         dice.forEach(function (die) {
-            dojo.removeClass("die" + die.id, 'selected');
+            if (isCurrentPlayer) {
+                dojo.removeClass("die" + die.id, 'selected');
+            }
             _this.setNewFace(die);
             _this.addRollToDiv(_this.getDieDiv(die), changed ? 'change' : (Math.random() > 0.5 ? 'odd' : 'even'));
         });
         if (args) {
             this.gamedatas.gamestate.args[this.getPlayerId()] = args[this.getPlayerId()];
-            if (this.isCurrentPlayerActive() && this.getPlayerId() == playerId) {
+            if (isCurrentPlayer && this.isCurrentPlayerActive()) {
                 this.setActionBarRollDice(true);
             }
         }
