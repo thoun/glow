@@ -229,18 +229,7 @@ trait StateTrait {
             $playersIds[] = 0;
 
             if ($this->getSide() == 1) {
-                /* TODO
-                For the Province of Shadows (and only at this moment),
-if Tom has earned any footprints during the game, he uses
-them to try and move his camp to the village with a higher
-number of shards of light. To do so, he must spend the
-number of footprints indicated on the village.
-
-Example: Tom ends the game on the village with 12
-shards of light. He has earned three footprints during the
-game. He spends them to move to the next village, the
-one with 15 shards, which requires two footprints.
-*/
+                $this->provinceOfShadowLastMove();
             }
         }
 

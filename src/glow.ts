@@ -389,7 +389,7 @@ class Glow implements GlowGame {
             //if we are a reload of end state, we display values, else we wait for notifications
             const playerScore = fromReload ? (player as any) : null;
 
-            const firefliesScore = fromReload ? (this.fireflyCounters[player.id].getValue() >= this.companionCounters[player.id].getValue() ? 10 : 0) : undefined;
+            const firefliesScore = fromReload && Number(player.id) > 0 ? (this.fireflyCounters[player.id].getValue() >= this.companionCounters[player.id].getValue() ? 10 : 0) : undefined;
             const footprintsScore = fromReload ? this.footprintCounters[player.id].getValue() : undefined;
 
             dojo.place(`<tr id="score${player.id}">
@@ -1394,19 +1394,19 @@ class Glow implements GlowGame {
     
     private incRerolls(playerId: number, footprints: number) {
         this.rerollCounters[playerId]?.incValue(footprints);
-        this.getPlayerTable(playerId).setTokens('reroll', this.rerollCounters[playerId]?.getValue());
+        this.getPlayerTable(playerId)?.setTokens('reroll', this.rerollCounters[playerId]?.getValue());
     }
     
     private incFootprints(playerId: number, footprints: number) {
         this.footprintCounters[playerId]?.incValue(footprints);
-        this.getPlayerTable(playerId).setTokens('footprint', this.footprintCounters[playerId]?.getValue());
+        this.getPlayerTable(playerId)?.setTokens('footprint', this.footprintCounters[playerId]?.getValue());
     }
     
     private incFireflies(playerId: number, fireflies: number) {
         this.fireflyCounters[playerId]?.incValue(fireflies);
         this.fireflyTokenCounters[playerId] += fireflies;
         this.updateFireflyCounterIcon(playerId);
-        this.getPlayerTable(playerId).setTokens('firefly', this.fireflyTokenCounters[playerId]);
+        this.getPlayerTable(playerId)?.setTokens('firefly', this.fireflyTokenCounters[playerId]);
     }
 
     private addHelp() {

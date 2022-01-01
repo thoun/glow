@@ -92,6 +92,23 @@ trait SoloUtilTrait {
         return $tom->rerolls;
     }
 
+    function addTomFootprints(int $footprints) {
+        $tom = $this->getTom();
+
+        $tom->footprints += $footprints;
+
+        $this->setTom($tom);
+    }
+
+    function removeTomFootprints(int $footprints) {
+        $tom = $this->getTom();
+
+        $tom->footprints = max(0, $tom->footprints - $footprints);
+
+        $this->setTom($tom);
+
+        return $tom->footprints;
+    }
     
     function rollAndPlaceTomDice(array $dice) {
         // roll dice
@@ -282,6 +299,38 @@ trait SoloUtilTrait {
         }
 
         $this->moveSmallDiceToMeetingTrack($smallDice);
+    }
+
+    function provinceOfShadowLastMove() {
+        $villages = array_filter($this->MAP1, function ($spot) { return $spot->canSettle; });
+        uasort($villages, function($spot1, $spot2) { return $spot1->points - $spot2->points; });
+
+        $tomEncampment = $this->getPlayerEncampment(0);
+
+        $getNextVillage = $tomEncampment->position == 0;
+        $nextVillage = null;
+        foreach ($villages as $position => $village) {
+            if ($getNextVillage) {
+                $nextVillage = $village;
+                break;
+            }
+            if ($tomEncampment->position == $position) {
+                $getNextVillage = true;
+            }
+        }
+
+        if ($nextVillage !== null && $this->canPayFootprints(0, $nextVillage->effects)) {
+            $this->movePlayerEncampment(0, $position);
+
+            $footprintsCost = 0;
+            foreach($nextVillage->effects as $cost) {
+                if ($cost < -20 && $cost > -30) {
+                    $footprintsCost += (-$cost) - 20;
+                }
+            }
+
+            $this->removePlayerFootprints(0, $footprintsCost);
+        }
     }
 
 }

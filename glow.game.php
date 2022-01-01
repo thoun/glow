@@ -350,10 +350,10 @@ class Glow extends Table {
         }
 
         if ($from_version <= 2112291719) {
-            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_before_end` TINYINT UNSIGNED NOT NULL DEFAULT '0'");
-            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_cards` TINYINT UNSIGNED NOT NULL DEFAULT '0'");
-            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_board` TINYINT UNSIGNED NOT NULL DEFAULT '0'");
-            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_after_end` TINYINT UNSIGNED NOT NULL DEFAULT '0'");
+            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_before_end` TINYINT NOT NULL DEFAULT '0'");
+            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_cards` TINYINT NOT NULL DEFAULT '0'");
+            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_board` TINYINT NOT NULL DEFAULT '0'");
+            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_after_end` TINYINT NOT NULL DEFAULT '0'");
         }
     }    
 }

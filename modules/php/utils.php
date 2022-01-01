@@ -282,7 +282,11 @@ trait UtilTrait {
     }
 
     function addPlayerFootprints(int $playerId, int $footprints, $message = '', $params = []) {
-        self::DbQuery("UPDATE player SET `player_footprints` = `player_footprints` + $footprints WHERE `player_id` = $playerId");
+        if ($playerId == 0) {
+            $this->addTomFootprints($footprints);
+        } else {
+            self::DbQuery("UPDATE player SET `player_footprints` = `player_footprints` + $footprints WHERE `player_id` = $playerId");
+        }
 
         self::notifyAllPlayers('footprints', $message, $params + [
             'playerId' => $playerId,
@@ -293,8 +297,12 @@ trait UtilTrait {
     }
 
     function removePlayerFootprints(int $playerId, int $dec, $message = '', $params = []) {
-        $newValue = max(0, $this->getPlayerFootprints($playerId) - $dec);
-        self::DbQuery("UPDATE player SET `player_footprints` = $newValue WHERE player_id = $playerId");
+        if ($playerId == 0) {
+            $newValue = $this->removeTomFootprints($dec);
+        } else {
+            $newValue = max(0, $this->getPlayerFootprints($playerId) - $dec);
+            self::DbQuery("UPDATE player SET `player_footprints` = $newValue WHERE player_id = $playerId");
+        }
 
         self::notifyAllPlayers('footprints', $message, $params + [
             'playerId' => $playerId,

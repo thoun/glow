@@ -1380,7 +1380,7 @@ var Glow = /** @class */ (function () {
         players.forEach(function (player) {
             //if we are a reload of end state, we display values, else we wait for notifications
             var playerScore = fromReload ? player : null;
-            var firefliesScore = fromReload ? (_this.fireflyCounters[player.id].getValue() >= _this.companionCounters[player.id].getValue() ? 10 : 0) : undefined;
+            var firefliesScore = fromReload && Number(player.id) > 0 ? (_this.fireflyCounters[player.id].getValue() >= _this.companionCounters[player.id].getValue() ? 10 : 0) : undefined;
             var footprintsScore = fromReload ? _this.footprintCounters[player.id].getValue() : undefined;
             dojo.place("<tr id=\"score" + player.id + "\">\n                <td class=\"player-name\" style=\"color: #" + player.color + "\">" + (Number(player.id) == 0 ? 'Tom' : player.name) + "</td>\n                <td id=\"before-end-score" + player.id + "\" class=\"score-number before-end-score\">" + ((playerScore === null || playerScore === void 0 ? void 0 : playerScore.scoreBeforeEnd) !== undefined ? playerScore.scoreBeforeEnd : '') + "</td>\n                <td id=\"cards-score" + player.id + "\" class=\"score-number cards-score\">" + ((playerScore === null || playerScore === void 0 ? void 0 : playerScore.scoreCards) !== undefined ? playerScore.scoreCards : '') + "</td>\n                <td id=\"board-score" + player.id + "\" class=\"score-number board-score\">" + ((playerScore === null || playerScore === void 0 ? void 0 : playerScore.scoreBoard) !== undefined ? playerScore.scoreBoard : '') + "</td>\n                <td id=\"fireflies-score" + player.id + "\" class=\"score-number fireflies-score\">" + (firefliesScore !== undefined ? firefliesScore : '') + "</td>\n                <td id=\"footprints-score" + player.id + "\" class=\"score-number footprints-score\">" + (footprintsScore !== undefined ? footprintsScore : '') + "</td>\n                <td id=\"after-end-score" + player.id + "\" class=\"score-number after-end-score total\">" + ((playerScore === null || playerScore === void 0 ? void 0 : playerScore.scoreAfterEnd) !== undefined ? playerScore.scoreAfterEnd : '') + "</td>\n            </tr>", 'score-table-body');
         });
@@ -2208,21 +2208,21 @@ var Glow = /** @class */ (function () {
         this.board.setPoints(playerId, points);
     };
     Glow.prototype.incRerolls = function (playerId, footprints) {
-        var _a, _b;
+        var _a, _b, _c;
         (_a = this.rerollCounters[playerId]) === null || _a === void 0 ? void 0 : _a.incValue(footprints);
-        this.getPlayerTable(playerId).setTokens('reroll', (_b = this.rerollCounters[playerId]) === null || _b === void 0 ? void 0 : _b.getValue());
+        (_b = this.getPlayerTable(playerId)) === null || _b === void 0 ? void 0 : _b.setTokens('reroll', (_c = this.rerollCounters[playerId]) === null || _c === void 0 ? void 0 : _c.getValue());
     };
     Glow.prototype.incFootprints = function (playerId, footprints) {
-        var _a, _b;
+        var _a, _b, _c;
         (_a = this.footprintCounters[playerId]) === null || _a === void 0 ? void 0 : _a.incValue(footprints);
-        this.getPlayerTable(playerId).setTokens('footprint', (_b = this.footprintCounters[playerId]) === null || _b === void 0 ? void 0 : _b.getValue());
+        (_b = this.getPlayerTable(playerId)) === null || _b === void 0 ? void 0 : _b.setTokens('footprint', (_c = this.footprintCounters[playerId]) === null || _c === void 0 ? void 0 : _c.getValue());
     };
     Glow.prototype.incFireflies = function (playerId, fireflies) {
-        var _a;
+        var _a, _b;
         (_a = this.fireflyCounters[playerId]) === null || _a === void 0 ? void 0 : _a.incValue(fireflies);
         this.fireflyTokenCounters[playerId] += fireflies;
         this.updateFireflyCounterIcon(playerId);
-        this.getPlayerTable(playerId).setTokens('firefly', this.fireflyTokenCounters[playerId]);
+        (_b = this.getPlayerTable(playerId)) === null || _b === void 0 ? void 0 : _b.setTokens('firefly', this.fireflyTokenCounters[playerId]);
     };
     Glow.prototype.addHelp = function () {
         var _this = this;
