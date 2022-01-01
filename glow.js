@@ -1017,7 +1017,7 @@ var PlayerTable = /** @class */ (function () {
             destination.classList.toggle('hidden', valueDice.length === 0);
             if (valueDice.length) {
                 columns++;
-                if (i <= 5) {
+                if (i <= 5 && !valueDice.some(function (die) { return die.dataset.dieColor == '8'; })) {
                     symbolCount++;
                 }
                 valueDice.forEach(function (die) {

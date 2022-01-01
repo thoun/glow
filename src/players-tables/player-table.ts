@@ -329,7 +329,7 @@ class PlayerTable {
             if (valueDice.length) {
                 columns++;
 
-                if (i <= 5) {
+                if (i <= 5 && !valueDice.some(die => die.dataset.dieColor == '8')) {
                     symbolCount++;
                 }
 
