@@ -24,6 +24,7 @@ class Glow implements GlowGame {
     private rerollCounters: Counter[] = [];
     private footprintCounters: Counter[] = [];
     private fireflyCounters: Counter[] = [];
+    private fireflyTokenCounters: number[] = [];
     private companionCounters: Counter[] = [];
     private roundCounter: Counter;
     private helpDialog: any;
@@ -694,6 +695,7 @@ class Glow implements GlowGame {
                 const allFireflies = player.fireflies + player.companions.map(companion => companion.fireflies).reduce((a, b) => a + b, 0);
                 fireflyCounter.setValue(allFireflies);
                 this.fireflyCounters[playerId] = fireflyCounter;
+                this.fireflyTokenCounters[playerId] = player.fireflies;
 
                 const companionCounter = new ebg.counter();
                 companionCounter.create(`companion-counter-${playerId}`);
@@ -1335,8 +1337,9 @@ class Glow implements GlowGame {
     
     private incFireflies(playerId: number, fireflies: number) {
         this.fireflyCounters[playerId]?.incValue(fireflies);
+        this.fireflyTokenCounters[playerId] += fireflies;
         this.updateFireflyCounterIcon(playerId);
-        this.getPlayerTable(playerId).setTokens('firefly', this.fireflyCounters[playerId]?.getValue());
+        this.getPlayerTable(playerId).setTokens('firefly', this.fireflyTokenCounters[playerId]);
     }
 
     private addHelp() {

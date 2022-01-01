@@ -19,7 +19,7 @@ trait DebugUtilTrait {
         //self::DbQuery("UPDATE companion SET `card_location` = 'cemetery' where `card_type_arg` in (17)");
         //$this->debugSetCompanionForPlayer(2343492, 41);
         //$this->debugSetPoints(19);
-        $this->debugSetFootprints(10);
+        $this->debugSetFootprints(30);
         //$this->debugSkipAdventurers();
 
         //$this->debugMoveMeeple(2343492, 15, 0);

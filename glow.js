@@ -1084,6 +1084,7 @@ var Glow = /** @class */ (function () {
         this.rerollCounters = [];
         this.footprintCounters = [];
         this.fireflyCounters = [];
+        this.fireflyTokenCounters = [];
         this.companionCounters = [];
         this.selectedDice = [];
         this.selectedDieFace = null;
@@ -1621,6 +1622,7 @@ var Glow = /** @class */ (function () {
                 var allFireflies = player.fireflies + player.companions.map(function (companion) { return companion.fireflies; }).reduce(function (a, b) { return a + b; }, 0);
                 fireflyCounter.setValue(allFireflies);
                 _this.fireflyCounters[playerId] = fireflyCounter;
+                _this.fireflyTokenCounters[playerId] = player.fireflies;
                 var companionCounter = new ebg.counter();
                 companionCounter.create("companion-counter-" + playerId);
                 companionCounter.setValue(player.companions.length);
@@ -2173,10 +2175,11 @@ var Glow = /** @class */ (function () {
         this.getPlayerTable(playerId).setTokens('footprint', (_b = this.footprintCounters[playerId]) === null || _b === void 0 ? void 0 : _b.getValue());
     };
     Glow.prototype.incFireflies = function (playerId, fireflies) {
-        var _a, _b;
+        var _a;
         (_a = this.fireflyCounters[playerId]) === null || _a === void 0 ? void 0 : _a.incValue(fireflies);
+        this.fireflyTokenCounters[playerId] += fireflies;
         this.updateFireflyCounterIcon(playerId);
-        this.getPlayerTable(playerId).setTokens('firefly', (_b = this.fireflyCounters[playerId]) === null || _b === void 0 ? void 0 : _b.getValue());
+        this.getPlayerTable(playerId).setTokens('firefly', this.fireflyTokenCounters[playerId]);
     };
     Glow.prototype.addHelp = function () {
         var _this = this;
