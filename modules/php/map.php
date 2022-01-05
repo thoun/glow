@@ -238,7 +238,7 @@ trait MapTrait {
                     $canGoByPaying = $route->min - $colors;
                 }
                 if ($canGoForFree || $canGoByPaying > 0) {
-                    $effects = $canGoByPaying > 0 ? array_merge($route->effects, [20 + $canGoByPaying]) : $route->effects;
+                    $effects = $canGoByPaying > 0 ? array_merge($route->effects, [-20 - $canGoByPaying]) : $route->effects;
 
                     $destinationEffects = $this->getMapSpot($side, $route->destination)->effects;
                     $route->costForPlayer = array_merge($effects, $destinationEffects);
