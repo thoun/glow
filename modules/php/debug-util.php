@@ -62,4 +62,40 @@ trait DebugUtilTrait {
             return;
         }die('debug data : '.json_encode($debugData));
     }
+    
+
+    public function debugReplacePlayersIds() {
+        if ($this->getBgaEnvironment() != 'studio') { 
+            return;
+        } 
+
+		// These are the id's from the BGAtable I need to debug.
+		$ids = [
+			20260903,
+            89065765,
+            89988159,
+		];
+
+		// Id of the first player in BGA Studio
+		$sid = 2343492;
+		
+		foreach ($ids as $id) {
+			// basic tables
+			self::DbQuery("UPDATE player SET player_id=$sid WHERE player_id = $id" );
+			self::DbQuery("UPDATE global SET global_value=$sid WHERE global_value = $id" );
+			self::DbQuery("UPDATE stats SET stats_player_id=$sid WHERE stats_player_id = $id" );
+
+			// 'other' game specific tables. example:
+			// tables specific to your schema that use player_ids
+			self::DbQuery("UPDATE dice SET location_arg=$sid WHERE location_arg = $id" );
+			self::DbQuery("UPDATE meeple SET player_id=$sid WHERE player_id = $id" );
+			self::DbQuery("UPDATE adventurer SET card_location_arg=$sid WHERE card_location_arg = $id" );
+			self::DbQuery("UPDATE adventurer SET card_location_arg=$sid WHERE card_location_arg = $id" );
+			self::DbQuery("UPDATE companion SET card_location='player$sid' WHERE card_location='playersid'" );
+			self::DbQuery("UPDATE spells SET card_location_arg=$sid WHERE card_location_arg = $id" );
+			
+			++$sid;
+		}
+	}
+
 }

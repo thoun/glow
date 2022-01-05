@@ -350,10 +350,17 @@ class Glow extends Table {
         }
 
         if ($from_version <= 2112291719) {
-            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_before_end` TINYINT NOT NULL DEFAULT '0'");
-            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_cards` TINYINT NOT NULL DEFAULT '0'");
-            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_board` TINYINT NOT NULL DEFAULT '0'");
-            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_after_end` TINYINT NOT NULL DEFAULT '0'");
+            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_before_end` int(10) unsigned NOT NULL DEFAULT '0'");
+            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_cards` int(10) unsigned NOT NULL DEFAULT '0'");
+            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_board` int(10) unsigned NOT NULL DEFAULT '0'");
+            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_after_end` int(10) unsigned NOT NULL DEFAULT '0'");
+        }
+
+        if ($from_version <= 2201020009) {
+            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_before_end` int(10) unsigned");
+            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_cards` int(10) unsigned");
+            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_board` int(10) unsigned");
+            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_after_end` int(10) unsigned");
         }
     }    
 }
