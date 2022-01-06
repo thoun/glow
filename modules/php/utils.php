@@ -44,6 +44,14 @@ trait UtilTrait {
         return false;
     }
 
+    function isTurnBased() {
+        return intval($this->gamestate->table_globals[200]) >= 10;
+    }
+
+    function autoSkipImpossibleActions() {
+        return $this->isTurnBased();
+    }
+
     function getFirstPlayerId() {
         return intval(self::getGameStateValue(FIRST_PLAYER));
     }

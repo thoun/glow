@@ -357,6 +357,10 @@ class Glow implements GlowGame {
         if (!document.getElementById(`endTurn-button`)) {
             (this as any).addActionButton(`endTurn-button`, _("End turn"), () => this.endTurn(), null, null, 'red');
         }
+
+        if (moveArgs.possibleRoutes && !moveArgs.possibleRoutes.length && !moveArgs.canSettle) {
+            this.startActionTimer('endTurn-button', 10);
+        }
     }
 
     onEnteringShowScore(fromReload: boolean = false) {
@@ -919,7 +923,7 @@ class Glow implements GlowGame {
             this.originalTextRollDice;
     }
 
-    private getMoveArgs() {
+    private getMoveArgs(): EnteringMoveForPlayer {
         return this.gamedatas.gamestate.args[this.getPlayerId()];
     }
     
@@ -1451,6 +1455,31 @@ class Glow implements GlowGame {
         }
 
         this.helpDialog.show();
+    }
+
+    private startActionTimer(buttonId: string, time: number) {
+        if ((this as any).prefs[203]?.value === 2) {
+            return;
+        }
+
+        const button = document.getElementById(buttonId);
+ 
+        let actionTimerId = null;
+        const _actionTimerLabel = button.innerHTML;
+        let _actionTimerSeconds = time;
+        const actionTimerFunction = () => {
+          const button = document.getElementById(buttonId);
+          if (button == null) {
+            window.clearInterval(actionTimerId);
+          } else if (_actionTimerSeconds-- > 1) {
+            button.innerHTML = _actionTimerLabel + ' (' + _actionTimerSeconds + ')';
+          } else {
+            window.clearInterval(actionTimerId);
+            button.click();
+          }
+        };
+        actionTimerFunction();
+        actionTimerId = window.setInterval(() => actionTimerFunction(), 1000);
     }
 
     ///////////////////////////////////////////////////

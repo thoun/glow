@@ -1360,6 +1360,9 @@ var Glow = /** @class */ (function () {
         if (!document.getElementById("endTurn-button")) {
             this.addActionButton("endTurn-button", _("End turn"), function () { return _this.endTurn(); }, null, null, 'red');
         }
+        if (moveArgs.possibleRoutes && !moveArgs.possibleRoutes.length && !moveArgs.canSettle) {
+            this.startActionTimer('endTurn-button', 10);
+        }
     };
     Glow.prototype.onEnteringShowScore = function (fromReload) {
         var _this = this;
@@ -2239,6 +2242,31 @@ var Glow = /** @class */ (function () {
             this.helpDialog.setContent(html);
         }
         this.helpDialog.show();
+    };
+    Glow.prototype.startActionTimer = function (buttonId, time) {
+        var _a;
+        if (((_a = this.prefs[203]) === null || _a === void 0 ? void 0 : _a.value) === 2) {
+            return;
+        }
+        var button = document.getElementById(buttonId);
+        var actionTimerId = null;
+        var _actionTimerLabel = button.innerHTML;
+        var _actionTimerSeconds = time;
+        var actionTimerFunction = function () {
+            var button = document.getElementById(buttonId);
+            if (button == null) {
+                window.clearInterval(actionTimerId);
+            }
+            else if (_actionTimerSeconds-- > 1) {
+                button.innerHTML = _actionTimerLabel + ' (' + _actionTimerSeconds + ')';
+            }
+            else {
+                window.clearInterval(actionTimerId);
+                button.click();
+            }
+        };
+        actionTimerFunction();
+        actionTimerId = window.setInterval(function () { return actionTimerFunction(); }, 1000);
     };
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications

@@ -158,9 +158,10 @@ trait StateTrait {
         $playerWithRoutes = [];
 
         $playersIds = $this->getPlayersIds();
+        $autoSkipImpossibleActions = $this->autoSkipImpossibleActions();
 
         foreach($playersIds as $playerId) {
-            if (count($this->getPossibleRoutes($playerId)) > 0) {
+            if (!$autoSkipImpossibleActions || count($this->getPossibleRoutes($playerId)) > 0) {
                 $playerWithRoutes[] = $playerId;
             } else {
                 // player finishes its turn, replace die
