@@ -301,12 +301,19 @@
   position: relative;
   width: 916px;
   height: 477px;
+  background-size: 100% 100%, 100% 100%;
 }
 #board.side1 {
   background-image: url("img/side1.png");
 }
+#board.side1.hd {
+  background-image: url("img/side1-hd.png"), url("img/side1.png");
+}
 #board.side2 {
   background-image: url("img/side2.png");
+}
+#board.side2.hd {
+  background-image: url("img/side2-hd.png"), url("img/side2.png");
 }
 #board .point-marker {
   position: absolute;

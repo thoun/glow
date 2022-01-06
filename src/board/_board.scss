@@ -2,13 +2,22 @@
   position: relative;
   width: 916px;
   height: 477px;
+  background-size: 100% 100%, 100% 100%;
 
   &.side1 {
     background-image: url('img/side1.png');
+
+    &.hd {
+      background-image: url('img/side1-hd.png'), url('img/side1.png');
+    }
   }
 
   &.side2 {
     background-image: url('img/side2.png');
+
+    &.hd {
+      background-image: url('img/side2-hd.png'), url('img/side2.png');
+    }
   }
 
   .point-marker {

@@ -72,6 +72,8 @@ class Glow implements GlowGame {
     public setup(gamedatas: GlowGamedatas) {
         (this as any).dontPreloadImage('publisher.png');
         (this as any).dontPreloadImage(`side${gamedatas.side == 2 ? 1 : 2}.png`);
+        (this as any).dontPreloadImage('side1-hd.png');
+        (this as any).dontPreloadImage('side2-hd.png');
 
         log( "Starting game setup" );
 
@@ -532,6 +534,7 @@ class Glow implements GlowGame {
             div.style.transform = `scale(${zoom})`;
             div.style.margin = `0 ${ZOOM_LEVELS_MARGIN[newIndex]}% ${(1-zoom)*-100}% 0`;
         }
+        document.getElementById('board').classList.toggle('hd', this.zoom > 1);
 
         const stocks = this.playersTables.map(pt => pt.companionsStock);
         if (this.adventurersStock) {

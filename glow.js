@@ -1115,6 +1115,8 @@ var Glow = /** @class */ (function () {
         var _this = this;
         this.dontPreloadImage('publisher.png');
         this.dontPreloadImage("side" + (gamedatas.side == 2 ? 1 : 2) + ".png");
+        this.dontPreloadImage('side1-hd.png');
+        this.dontPreloadImage('side2-hd.png');
         log("Starting game setup");
         for (var color = 1; color <= 8; color++) {
             var facesStr = '';
@@ -1500,6 +1502,7 @@ var Glow = /** @class */ (function () {
             div.style.transform = "scale(" + zoom + ")";
             div.style.margin = "0 " + ZOOM_LEVELS_MARGIN[newIndex] + "% " + (1 - zoom) * -100 + "% 0";
         }
+        document.getElementById('board').classList.toggle('hd', this.zoom > 1);
         var stocks = this.playersTables.map(function (pt) { return pt.companionsStock; });
         if (this.adventurersStock) {
             stocks.push(this.adventurersStock);
