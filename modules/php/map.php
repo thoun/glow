@@ -241,11 +241,11 @@ trait MapTrait {
                     $effects = $canGoByPaying > 0 ? array_merge($route->effects, [-20 - $canGoByPaying]) : $route->effects;
 
                     $destinationEffects = $this->getMapSpot($side, $route->destination)->effects;
-                    $route->costForPlayer = array_merge($effects, $destinationEffects);
+                    $routeWithCost = $route->withCostForPlayer(array_merge($effects, $destinationEffects));
 
-                    $canPayFootprints = $this->canPayFootprints($playerId, $route->costForPlayer);
+                    $canPayFootprints = $this->canPayFootprints($playerId, $routeWithCost);
                     if ($canPayFootprints) {
-                        $possibleRoutes[] = $route;
+                        $possibleRoutes[] = $routeWithCost;
                     }
                 }
             }
