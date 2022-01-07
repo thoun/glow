@@ -265,9 +265,7 @@ trait StateTrait {
                     $points += $companion->points;
                 }
 
-                if ($playerId > 0) {
-                    self::DbQuery("UPDATE player SET player_score_cards = $points WHERE player_id = $playerId");
-                }
+                self::DbQuery("UPDATE player SET player_score_cards = $points WHERE player_id = $playerId");
 
                 self::notifyAllPlayers('scoreCards', '', [
                     'playerId' => $playerId,

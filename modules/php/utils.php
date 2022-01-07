@@ -224,7 +224,13 @@ trait UtilTrait {
     }
 
     function incPlayerScore(int $playerId, int $incScore, $message = '', $params = []) {
+        if ($playerId == 0) {
+            $this->incTomScore($incScore, $message, $params);
+            return;
+        }
+        
         self::DbQuery("UPDATE player SET player_score = player_score + $incScore WHERE player_id = $playerId");
+        
 
         self::notifyAllPlayers('points', $message, $params + [
             'playerId' => $playerId,
