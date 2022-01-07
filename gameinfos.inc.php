@@ -136,6 +136,10 @@ $gameinfos = [
     totranslate("Adventurers are born and trained for this: to master the power of the elements, choose their companions and find their way to the villages with light.")
 ],
 
+'custom_buy_button' => array(
+    'url' => 'https://www.philibertnet.com/en/bombyx/93241-lueur-3760267990526.html',
+ ),
+
 // Games categories
 //  You can attribute a maximum of FIVE "tags" for your game.
 //  Each tag has a specific ID (ex: 22 for the category "Prototype", 101 for the tag "Science-fiction theme game")
