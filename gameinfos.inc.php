@@ -138,6 +138,7 @@ $gameinfos = [
 
 'custom_buy_button' => array(
     'url' => 'https://www.philibertnet.com/en/bombyx/93241-lueur-3760267990526.html',
+    'label' => 'Philibert',
  ),
 
 // Games categories
