@@ -362,5 +362,12 @@ class Glow extends Table {
             self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_board` int(10) unsigned");
             self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_after_end` int(10) unsigned");
         }
+
+        if ($from_version <= 2201111938) {
+            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_before_end` int(10)");
+            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_cards` int(10)");
+            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_board` int(10)");
+            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_after_end` int(10)");
+        }
     }    
 }
