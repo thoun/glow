@@ -951,7 +951,7 @@ trait UtilTrait {
     
 
     public function removeSketalDie(int $playerId, object $die) {
-        $this->moveDice([$die], 'deck');
+        $this->moveDice([$die], 'table');
 
         $companionId = intval(self::getUniqueValueFromDB("SELECT `card_id` FROM `companion` WHERE `die_id` = $die->id"));
         $companion = $this->getCompanionFromDb($this->companions->getCard($companionId));

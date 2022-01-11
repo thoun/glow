@@ -1616,8 +1616,7 @@ class Glow implements GlowGame {
     }
 
     notif_removeSketalDie(notif: Notif<NotifSketalDieArgs>) {
-        const playerTable = this.getPlayerTable(notif.args.playerId);
-        playerTable.removeDice([notif.args.die]);
+        this.createOrMoveDie(notif.args.die, 'table-dice');
     }
 
     notif_points(notif: Notif<NotifPointsArgs>) {
