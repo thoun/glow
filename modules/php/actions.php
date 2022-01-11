@@ -326,7 +326,11 @@ trait ActionTrait {
 
     public function keepDice() {
         self::checkAction('keepDice');
-        $this->gamestate->setPlayerNonMultiactive($this->getCurrentPlayerId(), 'keepDice');
+
+        $playerId = $this->getCurrentPlayerId();
+
+        self::giveExtraTime($playerId);
+        $this->gamestate->setPlayerNonMultiactive($playerId, 'keepDice');
     }
 
     
@@ -388,6 +392,7 @@ trait ActionTrait {
         
         if (count($resolveCardsForPlayer->remainingEffects) === 0) {
             $this->gamestate->setPlayerNonMultiactive($playerId, 'move');
+            self::giveExtraTime($playerId);
         }
     }
 
@@ -404,6 +409,7 @@ trait ActionTrait {
         }
         
         $this->gamestate->setPlayerNonMultiactive($playerId, 'move');
+        self::giveExtraTime($playerId);
     }
 
     private function applyMove(int $playerId, object $route) {
@@ -511,6 +517,7 @@ trait ActionTrait {
         $this->replaceSmallDiceOnMeetingTrack($playerId);
 
         $this->gamestate->setPlayerNonMultiactive($playerId, 'endRound');
+        self::giveExtraTime($playerId);
     }
   	
     public function placeEncampment() {
