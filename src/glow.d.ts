@@ -21,6 +21,7 @@ interface Companion {
     location_arg: number;
     fireflies: number;
     effect?: Effect;
+    noDieWarning?: boolean;
 }
 
 interface Spell {
@@ -147,11 +148,11 @@ interface GlowGame extends Game {
     isSolo(): boolean;
 }
 
-interface ChooseAdventurerArgs {
+interface EnteringChooseAdventurerArgs {
     adventurers: Adventurer[];
 }
 
-interface RecruitCompanionArgs {
+interface EnteringRecruitCompanionArgs {
     companions: MeetingTrackSpot[];
     topDeckType: number;
 }

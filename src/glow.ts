@@ -191,7 +191,7 @@ class Glow implements GlowGame {
         }
     }
 
-    private onEnteringStateChooseAdventurer(args: ChooseAdventurerArgs) {
+    private onEnteringStateChooseAdventurer(args: EnteringChooseAdventurerArgs) {
         const adventurers = args.adventurers;
         if (!document.getElementById('adventurers-stock')) {
             dojo.place(`<div id="adventurers-stock"></div>`, 'currentplayertable', 'before');
@@ -218,7 +218,7 @@ class Glow implements GlowGame {
         }
     }
 
-    private onEnteringStateRecruitCompanion(args: RecruitCompanionArgs) {
+    private onEnteringStateRecruitCompanion(args: EnteringRecruitCompanionArgs) {
         this.meetingTrackClickAction = 'recruit';
 
         const solo = this.isSolo();
@@ -262,7 +262,7 @@ class Glow implements GlowGame {
         });
     }
 
-    private onEnteringStateRemoveCompanion(args: RecruitCompanionArgs) {
+    private onEnteringStateRemoveCompanion(args: EnteringRecruitCompanionArgs) {
         this.meetingTrackClickAction = 'remove';
 
         args.companions.forEach((meetingTrackSpot, spot) =>  {
@@ -1269,9 +1269,20 @@ class Glow implements GlowGame {
         });
     }
 
-    public recruitCompanion(spot: number) {
+    public recruitCompanion(spot: number, warningPrompted: boolean = false) {
         if(!(this as any).checkAction('recruitCompanion')) {
             return;
+        }
+
+        if (!warningPrompted) {
+            const args = this.gamedatas.gamestate.args as EnteringRecruitCompanionArgs;
+            if (args.companions[spot].companion.noDieWarning) {
+                (this as any).confirmationDialog(
+                    _("Are you sure you want to take that card? There is no available big die for it."), 
+                    () => this.recruitCompanion(spot, true)
+                );
+                return;
+            }
         }
 
         this.takeAction('recruitCompanion', {
@@ -1317,9 +1328,20 @@ class Glow implements GlowGame {
         this.takeNoLockAction('keepDice');
     }
 
-    public resurrect(id: number) {
+    public resurrect(id: number, warningPrompted: boolean = false) {
         if(!(this as any).checkAction('resurrect')) {
             return;
+        }
+
+        if (!warningPrompted) {
+            const args = this.gamedatas.gamestate.args as EnteringResurrectArgs;
+            if (args.cemeteryCards.find(card => card.id == id).noDieWarning) {
+                (this as any).confirmationDialog(
+                    _("Are you sure you want to take that card? There is no available big die for it."), 
+                    () => this.resurrect(id, true)
+                );
+                return;
+            }
         }
 
         this.takeAction('resurrect', {

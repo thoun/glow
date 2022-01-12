@@ -34,6 +34,10 @@ trait ArgsTrait {
             $companionsFromDb = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting', $i));
             $companion = count($companionsFromDb) > 0 ? $companionsFromDb[0] : null;
 
+            if ($companion && $companion->die) {
+                $companion->noDieWarning = !$this->isBigDieAvailable($companion->dieColor);
+            }
+
             $spotDice = array_values(array_filter($dice, function($idie) use ($i) { return $idie->location_arg === $i; }));
 
             $footprints = $this->getMeetingTrackFootprints($i);
@@ -101,8 +105,16 @@ trait ArgsTrait {
     }
 
     function argResurrect() {
+        $cards = $this->getCompanionsFromDb($this->companions->getCardsInLocation('cemetery'));
+
+        foreach($cards as &$companion) {
+            if ($companion && $companion->die) {
+                $companion->noDieWarning = !$this->isBigDieAvailable($companion->dieColor);
+            }
+        }
+
         return [
-            'cemeteryCards' => $this->getCompanionsFromDb($this->companions->getCardsInLocation('cemetery')),
+            'cemeteryCards' => $cards,
         ];
     }
 

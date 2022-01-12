@@ -2109,9 +2109,18 @@ var Glow = /** @class */ (function () {
             dice: this.selectedDice.map(function (die) { return die.id; }).join(',')
         });
     };
-    Glow.prototype.recruitCompanion = function (spot) {
+    Glow.prototype.recruitCompanion = function (spot, warningPrompted) {
+        var _this = this;
+        if (warningPrompted === void 0) { warningPrompted = false; }
         if (!this.checkAction('recruitCompanion')) {
             return;
+        }
+        if (!warningPrompted) {
+            var args = this.gamedatas.gamestate.args;
+            if (args.companions[spot].companion.noDieWarning) {
+                this.confirmationDialog(_("Are you sure you want to take that card? There is no available big die for it."), function () { return _this.recruitCompanion(spot, true); });
+                return;
+            }
         }
         this.takeAction('recruitCompanion', {
             spot: spot
@@ -2147,9 +2156,18 @@ var Glow = /** @class */ (function () {
         }
         this.takeNoLockAction('keepDice');
     };
-    Glow.prototype.resurrect = function (id) {
+    Glow.prototype.resurrect = function (id, warningPrompted) {
+        var _this = this;
+        if (warningPrompted === void 0) { warningPrompted = false; }
         if (!this.checkAction('resurrect')) {
             return;
+        }
+        if (!warningPrompted) {
+            var args = this.gamedatas.gamestate.args;
+            if (args.cemeteryCards.find(function (card) { return card.id == id; }).noDieWarning) {
+                this.confirmationDialog(_("Are you sure you want to take that card? There is no available big die for it."), function () { return _this.resurrect(id, true); });
+                return;
+            }
         }
         this.takeAction('resurrect', {
             id: id

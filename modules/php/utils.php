@@ -1013,4 +1013,13 @@ trait UtilTrait {
 
         return count($dice) > 0;
     }
+
+    private function isBigDieAvailable(int $dieColor) {
+        $dice = $this->getAvailableBigDice();
+        if ($dieColor == 0) {
+            return count($dice) > 0;
+        } else {
+            return count(array_filter($dice, function($die) use ($dieColor) { return $die->color == $dieColor; })) > 0;
+        }
+    }
 }
