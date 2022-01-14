@@ -285,6 +285,13 @@ trait ActionTrait {
 
         $playerId = $this->getCurrentPlayerId();
 
+        foreach($ids as $id) {
+            $die = $this->getDieById($id);
+            if ($die->location_arg != $playerId) {
+                throw new BgaUserException("You can't roll this die");
+            }
+        }
+
         $this->applyRollDieCost($playerId, 1, $cost);
 
         $params = [
@@ -302,9 +309,12 @@ trait ActionTrait {
 
         $playerId = intval($this->getCurrentPlayerId());
 
-        $this->applyRollDieCost($playerId, 3, $cost);
-
         $die = $this->getDieById($id);
+        if ($die->location_arg != $playerId) {
+            throw new BgaUserException("You can't roll this die");
+        }
+
+        $this->applyRollDieCost($playerId, 3, $cost);
         $originalDiceStr = $this->getDieFaceLogName($die);
         $die->setFace($face);
         $rolledDiceStr = $this->getDieFaceLogName($die);
