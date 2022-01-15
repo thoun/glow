@@ -31,8 +31,14 @@
     width: 48px;
     height: 48px;
   }
+
+  // spectator mode box
+  .roundedbox_topleft, .roundedbox_topmain, .roundedbox_topright, .roundedbox_main, .roundedbox_bottomleft, .roundedbox_bottommain, .roundedbox_bottomright {
+    background-color: white;
+  }
 }
 
 #avatar_active_0 {
   background: url('img/gear.png');
 }
+

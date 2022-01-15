@@ -754,6 +754,9 @@ ol.help-list {
   width: 48px;
   height: 48px;
 }
+.player-board .roundedbox_topleft, .player-board .roundedbox_topmain, .player-board .roundedbox_topright, .player-board .roundedbox_main, .player-board .roundedbox_bottomleft, .player-board .roundedbox_bottommain, .player-board .roundedbox_bottomright {
+  background-color: white;
+}
 
 #avatar_active_0 {
   background: url("img/gear.png");
