@@ -159,7 +159,7 @@ trait MapTrait {
         self::DbQuery("UPDATE `player` SET `visited_spots` = '$jsonObj' WHERE `player_id` = $playerId");
     }
 
-    private function canPayFootprints($playerId, $costForPlayer) {
+    private function canPayFootprints(int $playerId, array $costForPlayer) {
         $footprintsCost = 0;
         foreach($costForPlayer as $cost) {
             if ($cost < -20 && $cost > -30) {
@@ -243,7 +243,7 @@ trait MapTrait {
                     $destinationEffects = $this->getMapSpot($side, $route->destination)->effects;
                     $routeWithCost = $route->withCostForPlayer(array_merge($effects, $destinationEffects));
 
-                    $canPayFootprints = $this->canPayFootprints($playerId, $routeWithCost);
+                    $canPayFootprints = $this->canPayFootprints($playerId, $routeWithCost->costForPlayer);
                     if ($canPayFootprints) {
                         $possibleRoutes[] = $routeWithCost;
                     }

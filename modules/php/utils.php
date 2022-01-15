@@ -542,7 +542,7 @@ trait UtilTrait {
         $companion = $this->getCompanionFromDb($this->companions->getCard($companionId));
         if ($companion->die) {
             $dieId = intval(self::getUniqueValueFromDB("SELECT `die_id` FROM companion WHERE `card_id` = $companion->id"));
-            //$this->debug([$companion->die, $companion->id, $dieId, $this->getDieById($dieId)]);
+            
             if ($dieId) {
                 $this->removeSketalDie($playerId, $this->getDieById($dieId));
             }
@@ -936,9 +936,9 @@ trait UtilTrait {
         $this->moveDice([$die], 'player', $playerId);
 
         $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId, null, 'location_arg'));
-        //$this->debug($companions);
+        
         $companion = $companions[count($companions) - 1];
-        //$this->debug($companion);
+        
         self::DbQuery("UPDATE `companion` SET `die_id` = $die->id WHERE `card_id` = $companion->id");
 
         self::notifyAllPlayers('takeSketalDie', clienttranslate('${player_name} takes ${companionName} die'), [
