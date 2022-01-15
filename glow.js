@@ -140,7 +140,7 @@ function getEffectExplanation(effect) {
         return dojo.string.substitute(_("Earn ${footprints} footprint(s)."), { footprints: "<strong>" + (effect - 20) + "</strong>" });
     }
     else if (effect < -20 && effect > -30) {
-        return dojo.string.substitute(_("Earn ${footprints} footprint(s)."), { footprints: "<strong>" + -(effect + 20) + "</strong>" });
+        return dojo.string.substitute(_("Lose ${footprints} footprint(s)."), { footprints: "<strong>" + -(effect + 20) + "</strong>" });
     }
     else if (effect > 10 && effect < 20) {
         return dojo.string.substitute(_("Earn ${fireflies} firefly(ies)."), { fireflies: "<strong>" + (effect - 10) + "</strong>" });
