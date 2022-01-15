@@ -181,19 +181,21 @@ trait MapTrait {
             $routes = array_values(array_filter($routes, function ($route) use ($visitedSpots) { return !in_array($route->destination, $visitedSpots); }));
         }
 
-        $footprints = $this->getPlayerFootprints($playerId);        
+        $footprints = $this->getPlayerFootprints($playerId);
         $dice = $this->getEffectiveDice($playerId, false);
 
         foreach($routes as $route) {
 
             if ($side === 1) {
                 $effects = $this->getMapSpot($side, $route->destination)->effects;
+
+                $allDice = $this->getEffectiveDice($playerId, null);
                 
                 $canGoToDestination = true;
                 $usedFootprints = 0;
 
                 foreach($effects as $effect) {
-                    if ($effect >= -5 && $effect <= -1 && $this->array_some($dice, function ($die) use ($effect) { return $die->value == -$effect; })) {
+                    if ($effect >= -5 && $effect <= -1 && $this->array_some($allDice, function ($die) use ($effect) { return $die->value == -$effect; })) {
                         if ($usedFootprints < $footprints) {
                             $usedFootprints++;
                         } else {
