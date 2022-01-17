@@ -937,7 +937,7 @@ var PlayerTable = /** @class */ (function () {
     };
     PlayerTable.prototype.addHiddenSpell = function (id, fromPlayerId) {
         if (fromPlayerId === void 0) { fromPlayerId = undefined; }
-        dojo.addClass("player-table-" + this.playerId + "-spells", 'hidden');
+        dojo.removeClass("player-table-" + this.playerId + "-spells", 'hidden');
         this.spellsStock.addToStockWithId(0, 'hidden' + id, fromPlayerId ? "overall_player_board_" + fromPlayerId : undefined);
     };
     PlayerTable.prototype.revealSpell = function (spell, tableCreation) {

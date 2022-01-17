@@ -241,7 +241,7 @@ class PlayerTable {
     }
 
     public addHiddenSpell(id: number, fromPlayerId: number = undefined) {
-        dojo.addClass(`player-table-${this.playerId}-spells`, 'hidden');
+        dojo.removeClass(`player-table-${this.playerId}-spells`, 'hidden');
         this.spellsStock.addToStockWithId(0, 'hidden'+id, fromPlayerId ? `overall_player_board_${fromPlayerId}` : undefined);
     }
 
