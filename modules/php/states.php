@@ -272,7 +272,7 @@ trait StateTrait {
                     'points' => $points,
                 ]);
 
-                $this->incPlayerScore($playerId, $points, _('${player_name} gains ${points} bursts of light with adventurer and companions'));
+                $this->incPlayerScore($playerId, $points, clienttranslate('${player_name} gains ${points} bursts of light with adventurer and companions'));
                 
                 self::setStat($points, 'cardsEndPoints', $playerId);
             }
@@ -285,9 +285,9 @@ trait StateTrait {
 
             $message = null;
             if ($side === 1) {
-                $message = _('${player_name} gains ${points} bursts of light with the village where encampment is situated');
+                $message = clienttranslate('${player_name} gains ${points} bursts of light with the village where encampment is situated');
             } else if ($side === 2) {
-                $message = _('${player_name} gains ${points} bursts of light with boats placed on islands');
+                $message = clienttranslate('${player_name} gains ${points} bursts of light with boats placed on islands');
             }
 
             if ($playerId == 0) {
@@ -323,7 +323,7 @@ trait StateTrait {
 
                 // If they have as many or more fireflies than companions, they score 10 bursts of light.
                 if ($points >= $companionCount) {
-                    $this->incPlayerScore($playerId, 10, _('${player_name} gains ${points} bursts of light with fireflies (more fireflies than companions)'));
+                    $this->incPlayerScore($playerId, 10, clienttranslate('${player_name} gains ${points} bursts of light with fireflies (more fireflies than companions)'));
                 }
 
                 self::notifyAllPlayers('scoreFireflies', '', [
@@ -348,7 +348,7 @@ trait StateTrait {
                 'points' => $points,
             ]);
 
-            $this->incPlayerScore($playerId, $points, _('${player_name} gains ${points} bursts of light with footprints'));
+            $this->incPlayerScore($playerId, $points, clienttranslate('${player_name} gains ${points} bursts of light with footprints'));
 
             if ($playerId != 0) {
                 self::setStat($points, 'endFootprintsCount', $playerId);
