@@ -236,9 +236,10 @@ trait MapTrait {
 
                 $canGoForFree = $route->min === null || ($colors >= $route->min && $colors <= $route->max);
                 $canGoByPaying = 0;
-                if (!$canGoForFree && $colors < $route->min && ($route->min - $colors) < $footprints) {
+                if (!$canGoForFree && $colors < $route->min && ($route->min - $colors) <= $footprints) {
                     $canGoByPaying = $route->min - $colors;
                 }
+                
                 if ($canGoForFree || $canGoByPaying > 0) {
                     $effects = $canGoByPaying > 0 ? array_merge($route->effects, [-20 - $canGoByPaying]) : $route->effects;
 
