@@ -844,8 +844,7 @@ class Glow implements GlowGame {
 
         if (dieDiv) {
             this.setNewFace(die, true);
-            dojo.toggleClass(`die${die.id}`, 'used', die.used);
-            dieDiv.classList.remove('forbidden');
+            dieDiv.classList.remove('used', 'forbidden');
 
             slideToObjectAndAttach(this, dieDiv, destinationId).then(
                 () => this.playersTables.forEach(playerTable => playerTable.sortDice())
@@ -1138,13 +1137,13 @@ class Glow implements GlowGame {
         }
     }
 
-    private onDiceClick(die: Die, force: boolean = null) {
-        if (!this.diceSelectionActive && !force) {
+    private onDiceClick(die: Die, forceValue: boolean = null) {
+        if (forceValue === null && (!this.diceSelectionActive || !this.dieIsOnPlayerTable(die))) {
             return;
         }
 
         const index = this.selectedDice.findIndex(d => d.id === die.id);
-        const selected = force !== null ? !force : index !== -1;
+        const selected = forceValue !== null ? !forceValue : index !== -1;
 
         if (selected) {
             this.selectedDice.splice(index, 1);
@@ -1155,6 +1154,15 @@ class Glow implements GlowGame {
         dojo.toggleClass(`die${die.id}`, 'selected', !selected);
 
         this.onSelectedDiceChange();
+    }
+    
+    private dieIsOnPlayerTable(die: Die) {
+        const playerTableDiv = document.getElementById(`player-table-${this.getPlayerId()}`);
+        if (!playerTableDiv) {
+            return false;
+        } else {
+            return this.getDieDiv(die).closest(`#player-table-${this.getPlayerId()}`) != null;
+        }
     }
 
     private unselectDice() {

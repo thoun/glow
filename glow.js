@@ -1729,8 +1729,7 @@ var Glow = /** @class */ (function () {
         var dieDiv = this.getDieDiv(die);
         if (dieDiv) {
             this.setNewFace(die, true);
-            dojo.toggleClass("die" + die.id, 'used', die.used);
-            dieDiv.classList.remove('forbidden');
+            dieDiv.classList.remove('used', 'forbidden');
             slideToObjectAndAttach(this, dieDiv, destinationId).then(function () { return _this.playersTables.forEach(function (playerTable) { return playerTable.sortDice(); }); });
         }
         else {
@@ -1993,13 +1992,13 @@ var Glow = /** @class */ (function () {
             }
         }
     };
-    Glow.prototype.onDiceClick = function (die, force) {
-        if (force === void 0) { force = null; }
-        if (!this.diceSelectionActive && !force) {
+    Glow.prototype.onDiceClick = function (die, forceValue) {
+        if (forceValue === void 0) { forceValue = null; }
+        if (forceValue === null && (!this.diceSelectionActive || !this.dieIsOnPlayerTable(die))) {
             return;
         }
         var index = this.selectedDice.findIndex(function (d) { return d.id === die.id; });
-        var selected = force !== null ? !force : index !== -1;
+        var selected = forceValue !== null ? !forceValue : index !== -1;
         if (selected) {
             this.selectedDice.splice(index, 1);
         }
@@ -2008,6 +2007,15 @@ var Glow = /** @class */ (function () {
         }
         dojo.toggleClass("die" + die.id, 'selected', !selected);
         this.onSelectedDiceChange();
+    };
+    Glow.prototype.dieIsOnPlayerTable = function (die) {
+        var playerTableDiv = document.getElementById("player-table-" + this.getPlayerId());
+        if (!playerTableDiv) {
+            return false;
+        }
+        else {
+            return this.getDieDiv(die).closest("#player-table-" + this.getPlayerId()) != null;
+        }
     };
     Glow.prototype.unselectDice = function () {
         var _this = this;
