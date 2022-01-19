@@ -1703,7 +1703,8 @@ class Glow implements GlowGame {
     }
 
     notif_resolveCardUpdate(notif: Notif<NotifResolveCardUpdateArgs>) {
-        this.onEnteringStateResolveCards(notif.args.resolveCardsForPlayer);
+            this.gamedatas.gamestate.args[this.getPlayerId()] = notif.args.resolveCardsForPlayer;
+            this.onEnteringStateResolveCards(notif.args.resolveCardsForPlayer);
     }
 
     notif_usedDice(notif: Notif<NotifUsedDiceArgs>) {

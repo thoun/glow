@@ -2468,6 +2468,7 @@ var Glow = /** @class */ (function () {
         setTimeout(function () { return _this.getPlayerTable(notif.args.playerId).sortDice(); }, ANIMATION_MS + 1000);
     };
     Glow.prototype.notif_resolveCardUpdate = function (notif) {
+        this.gamedatas.gamestate.args[this.getPlayerId()] = notif.args.resolveCardsForPlayer;
         this.onEnteringStateResolveCards(notif.args.resolveCardsForPlayer);
     };
     Glow.prototype.notif_usedDice = function (notif) {
