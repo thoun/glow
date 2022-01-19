@@ -334,7 +334,7 @@ trait StateTrait {
                 if ($playerId != 0) {
                     self::setStat($points, 'endFirefliesTokens', $playerId);
                     self::setStat($companionCount, 'endCompanionCount', $playerId);
-                    self::setStat($points > $companionCount ? 1 : 0, 'endFirefliesBonus', $playerId);
+                    self::setStat($points >= $companionCount ? 1 : 0, 'endFirefliesBonus', $playerId);
                 }
             }
         }

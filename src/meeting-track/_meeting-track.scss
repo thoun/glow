@@ -22,6 +22,10 @@
         cursor: pointer;
         box-shadow: 0 0 4px 4px red;
       }
+
+      .die[data-die-color="8"] {
+        box-shadow: 0 0 2px 4px white;
+      }
     }
 
     &.footprints {      

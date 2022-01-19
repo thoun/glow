@@ -121,23 +121,31 @@ trait ActionTrait {
                     break;
                 }
             }
-        } else if ($companion->subType == KAAR && $spot !== null) {
-            // black die enters the game
-            $sql = "select `card_location_arg` from `companion` where `card_location` = 'meeting'";
-            $availableSpots = array_values(array_map(function($dbLine) { return intval($dbLine['card_location_arg']); }, self::getCollectionFromDb($sql)));
-
-            $dieSpot = $availableSpots[bga_rand(0, count($availableSpots) - 1)];
+        } else if ($companion->subType == KAAR) {
             $die = $this->getBlackDie();
-            $die->setFace($dieSpot);
-            $this->persistDice([$die]);
-            $this->moveDice([$die], 'meeting', $dieSpot);
 
-            self::notifyAllPlayers('moveBlackDie', clienttranslate('${player_name} adds black die with ${companionName}'), [
-                'playerId' => $playerId,
-                'player_name' => $this->getPlayerName($playerId),
-                'companionName' => $companion->name,
-                'die' => $die,
-            ]);
+            // black die enters the game
+            if ($die->location == 'table') {
+                $availableSpots = [1,2,3,4,5];
+                if ($spot !== null) {
+                    $availableSpots = array_values(array_map(function($dbLine) { 
+                        return intval($dbLine['card_location_arg']); 
+                    }, self::getCollectionFromDb("select `card_location_arg` from `companion` where `card_location` = 'meeting'")));
+                }
+
+                $dieSpot = $availableSpots[bga_rand(0, count($availableSpots) - 1)];
+                
+                $die->setFace($dieSpot);
+                $this->persistDice([$die]);
+                $this->moveDice([$die], 'meeting', $dieSpot);
+
+                self::notifyAllPlayers('moveBlackDie', clienttranslate('${player_name} adds black die with ${companionName}'), [
+                    'playerId' => $playerId,
+                    'player_name' => $this->getPlayerName($playerId),
+                    'companionName' => $companion->name,
+                    'die' => $die,
+                ]);
+            }
         }
     }
 

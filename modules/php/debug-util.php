@@ -13,7 +13,9 @@ trait DebugUtilTrait {
 
         //self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (44, 13, 14, 15, 16, 17)");
         //self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (44)");
-        self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (10)"); // Xar'gok
+        //self::DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (10)"); // Xar'gok
+        self::DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (41)"); // Cromaug
+        self::DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (20)"); // Kaar
         //self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (10, 20, 41, 44)");
         //self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (37)");
         //self::DbQuery("UPDATE companion SET `card_location` = 'cemetery' where `card_type_arg` in (44, 13, 14, 15, 16, 17)");
