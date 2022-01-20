@@ -121,7 +121,7 @@ $this->SOLO_TILES = [
   8 => new SoloTileCard(1, 5, 2),
 ];
 
-$this->SCORE_TRACK_REROLLS = [0, 1, 2, 3, 4, 5, 7, 9, 11, 13, 16, 19, 22, 26, 31, 36, 44, 52];
+$this->SCORE_TRACK_REROLLS = [0, 1, 2, 3, 4, 5, 7, 9, 11, 13, 16, 19, 22, 26, 31, 37, 44, 52];
 
 $this->MAP1 = [
   new MapSpot1(0, [], [
