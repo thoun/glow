@@ -154,8 +154,9 @@
 
         $type = self::getArg('type', AT_posint, true);
         $id = self::getArg('id', AT_posint, true);
+        $dieId = self::getArg('dieId', AT_posint, false);
 
-        $this->game->resolveCard($type, $id);
+        $this->game->resolveCard($type, $id, $dieId);
 
         self::ajaxResponse();
     }

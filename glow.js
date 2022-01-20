@@ -1074,6 +1074,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from) {
 var ANIMATION_MS = 500;
 var SCORE_MS = 1500;
 var ROLL_DICE_ACTION_BUTTONS_IDS = ["setRollDice-button", "setChangeDie-button", "keepDice-button", "cancelRollDice-button", "change-die-faces-buttons"];
+var RESOLVE_ACTION_BUTTONS_IDS = ["resolveAll-button", "cancelResolveDiscardDie-button"];
 var MOVE_ACTION_BUTTONS_IDS = ["placeEncampment-button", "endTurn-button", "cancelMoveDiscardCampanionOrSpell-button"];
 var ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1, 1.25, 1.5];
 var ZOOM_LEVELS_MARGIN = [-300, -166, -100, -60, -33, -14, 0, 20, 33.34];
@@ -1321,11 +1322,13 @@ var Glow = /** @class */ (function () {
             this.addActionButton("skipResurrect-button", _("Skip"), function () { return _this.skipResurrect(); }, null, null, 'red');
         }
     };
-    Glow.prototype.onEnteringStateResolveCards = function (resolveCardsForPlayer) {
+    Glow.prototype.onEnteringStateResolveCards = function () {
+        var _this = this;
+        var resolveArgs = this.getResolveArgs();
         this.onLeavingResolveCards();
         var playerId = this.getPlayerId();
         var playerTable = this.getPlayerTable(playerId);
-        resolveCardsForPlayer.remainingEffects.forEach(function (possibleEffect) {
+        resolveArgs.remainingEffects.forEach(function (possibleEffect) {
             var cardType = possibleEffect[0];
             var cardId = possibleEffect[1];
             if (cardType === 0) { // adventurer
@@ -1347,6 +1350,10 @@ var Glow = /** @class */ (function () {
                 }
             }
         });
+        if (!document.getElementById("resolveAll-button")) {
+            this.addActionButton("resolveAll-button", _("Resolve all"), function () { return _this.resolveAll(); }, null, null, 'red');
+        }
+        document.getElementById("resolveAll-button").classList.toggle('disabled', resolveArgs.remainingEffects.some(function (remainingEffect) { return remainingEffect[2]; }));
     };
     Glow.prototype.onEnteringStateMove = function () {
         var _this = this;
@@ -1453,7 +1460,6 @@ var Glow = /** @class */ (function () {
     //                        action status bar (ie: the HTML links in the status bar).
     //
     Glow.prototype.onUpdateActionButtons = function (stateName, args) {
-        var _this = this;
         if (this.isCurrentPlayerActive()) {
             switch (stateName) {
                 case 'chooseTomDice':
@@ -1468,9 +1474,7 @@ var Glow = /** @class */ (function () {
                     this.setActionBarRollDice(false);
                     break;
                 case 'resolveCards':
-                    var resolveCardsArgs = args[this.getPlayerId()];
-                    this.onEnteringStateResolveCards(resolveCardsArgs);
-                    this.addActionButton("resolveAll-button", _("Resolve all"), function () { return _this.resolveAll(); }, null, null, 'red');
+                    this.setActionBarResolve(false);
                     break;
                 case 'move':
                     this.setActionBarMove(false);
@@ -1801,6 +1805,9 @@ var Glow = /** @class */ (function () {
             originalState['description' + property] :
             this.originalTextRollDice;
     };
+    Glow.prototype.getResolveArgs = function () {
+        return this.gamedatas.gamestate.args[this.getPlayerId()];
+    };
     Glow.prototype.getMoveArgs = function () {
         return this.gamedatas.gamestate.args[this.getPlayerId()];
     };
@@ -1887,6 +1894,47 @@ var Glow = /** @class */ (function () {
         if (this.selectedDice.length === 1) {
             this.onSelectedDiceChange();
         }
+    };
+    Glow.prototype.removeResolveActionButtons = function () {
+        var ids = RESOLVE_ACTION_BUTTONS_IDS;
+        ids.forEach(function (id) {
+            var elem = document.getElementById(id);
+            if (elem) {
+                elem.parentElement.removeChild(elem);
+            }
+        });
+        document.querySelectorAll(".action-button[id^=\"selectDiscardDie\"]").forEach(function (elem) { return elem.parentElement.removeChild(elem); });
+    };
+    Glow.prototype.setResolveGamestateDescription = function (property) {
+        if (!this.originalTextResolve) {
+            this.originalTextResolve = document.getElementById('pagemaintitletext').innerHTML;
+        }
+        var originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
+        document.getElementById('pagemaintitletext').innerHTML = property ?
+            originalState['description' + property] :
+            this.originalTextResolve;
+    };
+    Glow.prototype.setActionBarResolve = function (fromCancel) {
+        this.removeResolveActionButtons();
+        if (fromCancel) {
+            this.setResolveGamestateDescription();
+        }
+        // make cards unselectable
+        this.onLeavingResolveCards();
+        this.onEnteringStateResolveCards();
+    };
+    Glow.prototype.setActionBarResolveDiscardDie = function (type, id, dice) {
+        var _this = this;
+        this.removeResolveActionButtons();
+        this.setResolveGamestateDescription("discardDie");
+        dice.forEach(function (die) {
+            var html = "<div class=\"die-item color" + die.color + " side" + die.face + "\"></div>";
+            _this.addActionButton("selectDiscardDie" + die.id + "-button", html, function () {
+                _this.resolveCard(type, id, die.id);
+                _this.setActionBarResolve(true);
+            }, null, null, 'gray');
+        });
+        this.addActionButton("cancelResolveDiscardDie-button", _("Cancel"), function () { return _this.setActionBarResolve(true); });
     };
     Glow.prototype.removeMoveActionButtons = function () {
         var ids = MOVE_ACTION_BUTTONS_IDS;
@@ -2065,7 +2113,14 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.cardClick = function (type, id) {
         if (this.gamedatas.gamestate.name === 'resolveCards') {
-            this.resolveCard(type, id);
+            var args = this.getResolveArgs();
+            var remainingEffect = args.remainingEffects.find(function (re) { return re[0] == type && re[1] == id; });
+            if (remainingEffect[2]) {
+                this.setActionBarResolveDiscardDie(type, id, remainingEffect[2]);
+            }
+            else {
+                this.resolveCard(type, id);
+            }
         }
         else if (this.gamedatas.gamestate.name === 'move') {
             this.move(this.selectedRoute.destination, this.selectedRoute.from, type, id);
@@ -2187,13 +2242,14 @@ var Glow = /** @class */ (function () {
         }
         this.takeAction('skipResurrect');
     };
-    Glow.prototype.resolveCard = function (type, id) {
+    Glow.prototype.resolveCard = function (type, id, dieId) {
         if (!this.checkAction('resolveCard')) {
             return;
         }
         this.takeNoLockAction('resolveCard', {
             type: type,
             id: id,
+            dieId: dieId,
         });
     };
     Glow.prototype.resolveAll = function () {
@@ -2469,7 +2525,7 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.notif_resolveCardUpdate = function (notif) {
         this.gamedatas.gamestate.args[this.getPlayerId()] = notif.args.resolveCardsForPlayer;
-        this.onEnteringStateResolveCards(notif.args.resolveCardsForPlayer);
+        this.onEnteringStateResolveCards();
     };
     Glow.prototype.notif_usedDice = function (notif) {
         var playerTable = this.getPlayerTable(notif.args.playerId);

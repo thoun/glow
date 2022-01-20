@@ -252,6 +252,7 @@ $playerActionsGameStates = [
         "name" => "resolveCards",
         "description" => clienttranslate('Players must resolve their cards'),
         "descriptionmyturn" => clienttranslate('${you} must resolve your cards (select the card to resolve first)'),
+        "descriptiondiscardDie" => clienttranslate('Choose a die to discard'),
         "type" => "multipleactiveplayer",
         "action" => "stResolveCards",
         "args" => "argResolveCards",

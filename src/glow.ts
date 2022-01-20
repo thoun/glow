@@ -11,6 +11,7 @@ const ANIMATION_MS = 500;
 const SCORE_MS = 1500;
 
 const ROLL_DICE_ACTION_BUTTONS_IDS = [`setRollDice-button`, `setChangeDie-button`, `keepDice-button`, `cancelRollDice-button`, `change-die-faces-buttons`];
+const RESOLVE_ACTION_BUTTONS_IDS = [`resolveAll-button`, `cancelResolveDiscardDie-button`];
 const MOVE_ACTION_BUTTONS_IDS = [`placeEncampment-button`, `endTurn-button`, `cancelMoveDiscardCampanionOrSpell-button`];
 
 const ZOOM_LEVELS = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1, 1.25, 1.5];
@@ -33,6 +34,7 @@ class Glow implements GlowGame {
     private selectedDieFace: number = null;
     private diceSelectionActive: boolean = false;
     private originalTextRollDice: string;
+    private originalTextResolve: string;
     private originalTextMove: string;
     private isChangeDie: boolean = false;
     private selectedRoute: Route;
@@ -318,13 +320,15 @@ class Glow implements GlowGame {
         
     }
 
-    private onEnteringStateResolveCards(resolveCardsForPlayer: ResolveCardsForPlayer) {
+    private onEnteringStateResolveCards() {
+        const resolveArgs = this.getResolveArgs();
+
         this.onLeavingResolveCards();
 
         const playerId = this.getPlayerId();
         const playerTable = this.getPlayerTable(playerId);
         
-        resolveCardsForPlayer.remainingEffects.forEach(possibleEffect => {
+        resolveArgs.remainingEffects.forEach(possibleEffect => {
             const cardType = possibleEffect[0];
             const cardId = possibleEffect[1];
             if (cardType === 0) { // adventurer
@@ -343,6 +347,11 @@ class Glow implements GlowGame {
                 }
             }
         });
+        
+        if (!document.getElementById(`resolveAll-button`)) {
+            (this as any).addActionButton(`resolveAll-button`, _("Resolve all"), () => this.resolveAll(), null, null, 'red');
+        }
+        document.getElementById(`resolveAll-button`).classList.toggle('disabled', resolveArgs.remainingEffects.some(remainingEffect => remainingEffect[2]));
     }
 
     private onEnteringStateMove() {
@@ -495,9 +504,7 @@ class Glow implements GlowGame {
                     this.setActionBarRollDice(false);
                     break;
                 case 'resolveCards':
-                    const resolveCardsArgs = (args as EnteringResolveCardsArgs)[this.getPlayerId()];
-                    this.onEnteringStateResolveCards(resolveCardsArgs);
-                    (this as any).addActionButton(`resolveAll-button`, _("Resolve all"), () => this.resolveAll(), null, null, 'red');
+                    this.setActionBarResolve(false);
                     break;
                 case 'move':
                     this.setActionBarMove(false);
@@ -925,6 +932,10 @@ class Glow implements GlowGame {
             this.originalTextRollDice;
     }
 
+    private getResolveArgs(): ResolveCardsForPlayer {
+        return this.gamedatas.gamestate.args[this.getPlayerId()];
+    }
+
     private getMoveArgs(): EnteringMoveForPlayer {
         return this.gamedatas.gamestate.args[this.getPlayerId()];
     }
@@ -1023,6 +1034,56 @@ class Glow implements GlowGame {
         if (this.selectedDice.length === 1) {
             this.onSelectedDiceChange();
         }
+    }
+
+    private removeResolveActionButtons() {
+        const ids = RESOLVE_ACTION_BUTTONS_IDS;
+        ids.forEach(id => {
+            const elem = document.getElementById(id);
+            if (elem) {
+                elem.parentElement.removeChild(elem);
+            }
+        });
+
+        document.querySelectorAll(`.action-button[id^="selectDiscardDie"]`).forEach(elem => elem.parentElement.removeChild(elem));
+    }
+    
+    private setResolveGamestateDescription(property?: string) {
+        if (!this.originalTextResolve) {
+            this.originalTextResolve = document.getElementById('pagemaintitletext').innerHTML;
+        }
+
+        const originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
+        document.getElementById('pagemaintitletext').innerHTML = property ? 
+            originalState['description' + property] : 
+            this.originalTextResolve;
+    }
+    
+    private setActionBarResolve(fromCancel: boolean) {
+        this.removeResolveActionButtons();
+        if (fromCancel) {
+            this.setResolveGamestateDescription();
+        }            
+        // make cards unselectable
+        this.onLeavingResolveCards();
+        
+        this.onEnteringStateResolveCards();
+    }
+
+    private setActionBarResolveDiscardDie(type: number, id: number, dice: Die[]) {
+        this.removeResolveActionButtons();
+        this.setResolveGamestateDescription(`discardDie`);
+
+        dice.forEach(die => {
+            const html = `<div class="die-item color${die.color} side${die.face}"></div>`;
+
+            (this as any).addActionButton(`selectDiscardDie${die.id}-button`, html, () => {
+                this.resolveCard(type, id, die.id);
+                this.setActionBarResolve(true);
+            }, null, null, 'gray');
+        });
+
+        (this as any).addActionButton(`cancelResolveDiscardDie-button`, _("Cancel"), () => this.setActionBarResolve(true));
     }
 
     private removeMoveActionButtons() {
@@ -1217,7 +1278,13 @@ class Glow implements GlowGame {
 
     public cardClick(type: number, id: number) {
         if (this.gamedatas.gamestate.name === 'resolveCards') {
-            this.resolveCard(type, id);
+            const args = this.getResolveArgs();
+            const remainingEffect = args.remainingEffects.find(re => re[0] == type && re[1] == id);
+            if (remainingEffect[2]) {
+                this.setActionBarResolveDiscardDie(type, id, remainingEffect[2] as any as Die[]);
+            } else {
+                this.resolveCard(type, id);
+            }
         } else if (this.gamedatas.gamestate.name === 'move') {
             this.move(this.selectedRoute.destination, this.selectedRoute.from, type, id);
         } else {
@@ -1365,7 +1432,7 @@ class Glow implements GlowGame {
         this.takeAction('skipResurrect');
     }
 
-    public resolveCard(type: number, id: number) {
+    public resolveCard(type: number, id: number, dieId?: number) {
         if(!(this as any).checkAction('resolveCard')) {
             return;
         }
@@ -1373,6 +1440,7 @@ class Glow implements GlowGame {
         this.takeNoLockAction('resolveCard', {
             type,
             id,
+            dieId,
         });
     }
 
@@ -1703,8 +1771,8 @@ class Glow implements GlowGame {
     }
 
     notif_resolveCardUpdate(notif: Notif<NotifResolveCardUpdateArgs>) {
-            this.gamedatas.gamestate.args[this.getPlayerId()] = notif.args.resolveCardsForPlayer;
-            this.onEnteringStateResolveCards(notif.args.resolveCardsForPlayer);
+        this.gamedatas.gamestate.args[this.getPlayerId()] = notif.args.resolveCardsForPlayer;
+        this.onEnteringStateResolveCards();
     }
 
     notif_usedDice(notif: Notif<NotifUsedDiceArgs>) {

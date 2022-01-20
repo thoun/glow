@@ -381,8 +381,8 @@ trait ActionTrait {
         $this->gamestate->setPlayerNonMultiactive($playerId, 'resolveCards');
     }
 
-    public function applyResolveCard(int $playerId, int $cardType, int $id) {
-        $this->applyCardEffect($playerId, $cardType, $id);
+    public function applyResolveCard(int $playerId, int $cardType, int $id, $dieId = 0) {
+        $this->applyCardEffect($playerId, $cardType, $id, $dieId);
 
         $resolveCardsForPlayer = $this->argResolveCardsForPlayer($playerId);
      
@@ -396,7 +396,7 @@ trait ActionTrait {
         return $resolveCardsForPlayer;
     }
 
-    public function resolveCard(int $cardType, int $id) {
+    public function resolveCard(int $cardType, int $id, $dieId = 0) {
         self::checkAction('resolveCard');
 
         $playerId = intval($this->getCurrentPlayerId());
@@ -406,7 +406,7 @@ trait ActionTrait {
             throw new BgaUserException("You can't apply that effect");
         }
 
-        $resolveCardsForPlayer = $this->applyResolveCard($playerId, $cardType, $id);
+        $resolveCardsForPlayer = $this->applyResolveCard($playerId, $cardType, $id, $dieId);
         
         if (count($resolveCardsForPlayer->remainingEffects) === 0) {
             $this->gamestate->setPlayerNonMultiactive($playerId, 'move');
@@ -423,7 +423,7 @@ trait ActionTrait {
         
         while (count($resolveCardsForPlayer->remainingEffects) > 0) {
             $firstRemainingEffect = $resolveCardsForPlayer->remainingEffects[0];
-            $resolveCardsForPlayer = $this->applyResolveCard($playerId, $firstRemainingEffect[0], $firstRemainingEffect[1]);
+            $resolveCardsForPlayer = $this->applyResolveCard($playerId, $firstRemainingEffect[0], $firstRemainingEffect[1], 0);
         }
         
         $this->gamestate->setPlayerNonMultiactive($playerId, 'move');

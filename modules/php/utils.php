@@ -197,6 +197,12 @@ trait UtilTrait {
         $dbDices = self::getCollectionFromDB($sql);
         return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices))[0];
     }
+    
+    function getPlayerBigDiceByColor(int $playerId, int $dieColor) {
+        $sql = "SELECT * FROM dice WHERE `location` = 'player' AND `location_arg` = $playerId AND `color` = $dieColor AND `small` = false";
+        $dbDices = self::getCollectionFromDB($sql);
+        return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices));
+    }
 
     function moveDice(array $dice, string $location, int $locationArg = 0) {
         $ids = array_map(function ($idie) { return $idie->id; }, $dice);
@@ -535,15 +541,15 @@ trait UtilTrait {
         ] + $params);
     }
 
-    function sendToCemetery(int $playerId, int $companionId) {
+    function sendToCemetery(int $playerId, int $companionId, /*int*/ $dieId = 0) {
         $this->companions->moveCard($companionId, 'cemetery', intval($this->companions->countCardInLocation('cemetery')));
 
         $companion = $this->getCompanionFromDb($this->companions->getCard($companionId));
         if ($companion->die) {
-            $dieId = intval(self::getUniqueValueFromDB("SELECT `die_id` FROM companion WHERE `card_id` = $companion->id"));
+            $removedDieId = $dieId > 0 ? $dieId : intval(self::getUniqueValueFromDB("SELECT `die_id` FROM companion WHERE `card_id` = $companion->id"));
             
-            if ($dieId) {
-                $this->removeSketalDie($playerId, $this->getDieById($dieId));
+            if ($removedDieId) {
+                $this->removeSketalDie($playerId, $companion, $this->getDieById($removedDieId));
             }
         }
 
@@ -710,6 +716,20 @@ trait UtilTrait {
         }
     }
 
+    private function mustSelectDiscardDie(int $playerId, object $companion) {
+        if ($companion->die) {
+            $dieId = intval(self::getUniqueValueFromDB("SELECT `die_id` FROM companion WHERE `card_id` = $companion->id"));
+            
+            if ($dieId) {
+                $die = $this->getDieById($dieId);
+                $dieColor = $die->color;
+                $bigDice = $this->getPlayerBigDiceByColor($playerId, $dieColor);
+                return count($bigDice) > 1 ? $bigDice : null;
+            }
+        }
+        return null;
+    }
+
     public function getTriggeredEffectsForPlayer(int $playerId) {
         $effectsCodes = [];
         $dice = $this->getEffectiveDice($playerId, false);
@@ -718,7 +738,7 @@ trait UtilTrait {
         if ($adventurer->effect != null) {
             $count = $this->isTriggeredEffectsForCard($dice, $adventurer->effect);
             for ($i=0; $i<$count; $i++) {
-                $effectsCodes[] = [0, $adventurer->id];
+                $effectsCodes[] = [0, $adventurer->id, null];
             }
         }
 
@@ -726,8 +746,9 @@ trait UtilTrait {
         foreach($companions as $companion) {
             if ($companion->effect != null) {
                 $count = $this->isTriggeredEffectsForCard($dice, $companion->effect);
+                $discardDieSelection = $this->mustSelectDiscardDie($playerId, $companion);
                 for ($i=0; $i<$count; $i++) {
-                    $effectsCodes[] = [1, $companion->id];
+                    $effectsCodes[] = [1, $companion->id, $discardDieSelection];
                 }
             }
         }
@@ -735,7 +756,7 @@ trait UtilTrait {
         $spells = $this->getSpellsFromDb($this->spells->getCardsInLocation('player', $playerId));
         foreach($spells as $spell) {
             if ($spell->visible && $this->isTriggeredEffectsForCard($dice, $spell->effect)) {
-                $effectsCodes[] = [2, $spell->id];
+                $effectsCodes[] = [2, $spell->id, null];
             }
         }
 
@@ -778,8 +799,7 @@ trait UtilTrait {
     // 2 spell
     // 3 dice
     // 4 route
-    function applyEffect(int $playerId, int $effect, int $cardType, /*object|null*/ $card) {
-        // TODO add die id for companion
+    function applyEffect(int $playerId, int $effect, int $cardType, /*object|null*/ $card, /*int*/ $dieId = 0) {
 
         $args = [];
         switch ($cardType) {
@@ -826,7 +846,7 @@ trait UtilTrait {
         }
 
         else if ($effect === 33) { // skull
-            $this->sendToCemetery($playerId, $card->id);
+            $this->sendToCemetery($playerId, $card->id, $dieId);
 
             $companion = $this->getCompanionFromDb($this->companions->getCard($card->id));
 
@@ -840,8 +860,7 @@ trait UtilTrait {
         }
     }
 
-    function applyCardEffect(int $playerId, int $cardType, int $id) {
-        // TODO add die id for companion or spell over comanion
+    function applyCardEffect(int $playerId, int $cardType, int $id, $dieId = 0) {
 
         $card = null;
         $cardEffect = null;
@@ -919,7 +938,7 @@ trait UtilTrait {
                     $this->spells->moveCard($spell->id, 'discard');
                 }
             } else {
-                $this->applyEffect($playerId, $effect, $cardType, $card);
+                $this->applyEffect($playerId, $effect, $cardType, $card, $dieId);
             }
         }
 
@@ -949,11 +968,8 @@ trait UtilTrait {
     }
     
 
-    public function removeSketalDie(int $playerId, object $die) {
+    public function removeSketalDie(int $playerId, object $companion, object $die) {
         $this->moveDice([$die], 'table');
-
-        $companionId = intval(self::getUniqueValueFromDB("SELECT `card_id` FROM `companion` WHERE `die_id` = $die->id"));
-        $companion = $this->getCompanionFromDb($this->companions->getCard($companionId));
 
         self::DbQuery("UPDATE `companion` SET `die_id` = null WHERE `die_id` = $die->id");
 
