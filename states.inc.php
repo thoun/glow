@@ -135,6 +135,7 @@ $playerActionsGameStates = [
         "descriptionmyturn" => clienttranslate('${you} must recruit a companion'),
         "type" => "activeplayer",
         "args" => "argRecuitCompanion",
+        "updateGameProgression" => true,
         "possibleactions" => [ 
             "recruitCompanion",
         ],
