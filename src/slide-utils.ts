@@ -42,6 +42,8 @@ function slideToObjectAndAttach(game: Game, object: HTMLElement, destinationId: 
         } else {
             object.style.transition = `transform 0.5s ease-in`;
             object.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+            
+            let securityTimeoutId = null;
 
             const transitionend = () => {
                 attachToNewParent();
@@ -49,9 +51,22 @@ function slideToObjectAndAttach(game: Game, object: HTMLElement, destinationId: 
                 object.removeEventListener('transitionend', transitionend);
 
                 resolve(true);
+
+                if (securityTimeoutId) {
+                    clearTimeout(securityTimeoutId);
+                }
             };
 
             object.addEventListener('transitionend', transitionend);
+
+            // security check : if transition fails, we force tile to destination
+            securityTimeoutId = setTimeout(() => {
+                if (!destination.contains(object)) {
+                    attachToNewParent();
+                    object.removeEventListener('transitionend', transitionend);
+                    resolve(true);
+                }
+            }, 700);
         }
     });
 }
