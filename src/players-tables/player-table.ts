@@ -261,8 +261,10 @@ class PlayerTable {
     }
 
     public removeSpell(spell: Spell) {
+        this.spellsStock.removeFromStockById('hidden'+spell.id);
         this.spellsStock.removeFromStockById(''+spell.id);
         if (spell.type === 3) {
+            this.companionSpellStock?.removeFromStockById('hidden'+spell.id);
             this.companionSpellStock?.removeFromStockById(''+spell.id);
             this.removeCompanionSpellStock();
         }

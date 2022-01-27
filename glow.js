@@ -967,10 +967,12 @@ var PlayerTable = /** @class */ (function () {
         dojo.toggleClass("player-table-" + this.playerId + "-spells", 'hidden', this.spellsStock.items.length == 0);
     };
     PlayerTable.prototype.removeSpell = function (spell) {
-        var _a;
+        var _a, _b;
+        this.spellsStock.removeFromStockById('hidden' + spell.id);
         this.spellsStock.removeFromStockById('' + spell.id);
         if (spell.type === 3) {
-            (_a = this.companionSpellStock) === null || _a === void 0 ? void 0 : _a.removeFromStockById('' + spell.id);
+            (_a = this.companionSpellStock) === null || _a === void 0 ? void 0 : _a.removeFromStockById('hidden' + spell.id);
+            (_b = this.companionSpellStock) === null || _b === void 0 ? void 0 : _b.removeFromStockById('' + spell.id);
             this.removeCompanionSpellStock();
         }
         dojo.toggleClass("player-table-" + this.playerId + "-spells", 'hidden', this.spellsStock.items.length == 0);

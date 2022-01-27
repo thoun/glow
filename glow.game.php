@@ -52,7 +52,7 @@ class Glow extends Table {
         // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
         parent::__construct();
         
-        self::initGameStateLabels([
+        $this->initGameStateLabels([
             DAY => 10,
             FIRST_PLAYER => 11,
             SOLO_DECK => 12,
@@ -60,16 +60,16 @@ class Glow extends Table {
             BOARD_SIDE => 100,
         ]); 
 		
-        $this->adventurers = self::getNew("module.common.deck");
+        $this->adventurers = $this->getNew("module.common.deck");
         $this->adventurers->init("adventurer");
 		
-        $this->companions = self::getNew("module.common.deck");
+        $this->companions = $this->getNew("module.common.deck");
         $this->companions->init("companion");
 		
-        $this->spells = self::getNew("module.common.deck");
+        $this->spells = $this->getNew("module.common.deck");
         $this->spells->init("spells");
 		
-        $this->soloTiles = self::getNew("module.common.deck");
+        $this->soloTiles = $this->getNew("module.common.deck");
         $this->soloTiles->init("solotiles");
 	}
 	
@@ -99,43 +99,43 @@ class Glow extends Table {
             $values[] = "('".$playerId."','000000','".$player['player_canal']."','".addslashes( $player['player_name'] )."', 10, '".addslashes( $player['player_avatar'] )."', ".($lastPlayer ? 2 : 0).")";
 
             if ($i == 0) {
-                self::setGameStateValue(FIRST_PLAYER, $playerId);
+                $this->setGameStateValue(FIRST_PLAYER, $playerId);
             }
 
             $i++;
         }
         $sql .= implode(',', $values);
-        self::DbQuery( $sql );
-        self::reloadPlayersBasicInfos();
+        $this->DbQuery( $sql );
+        $this->reloadPlayersBasicInfos();
         
         /************ Start the game initialization *****/
 
         // Init global values with their initial values
-        self::setGameStateInitialValue('DAY', 0);
-        self::setGameStateInitialValue('SOLO_DECK', 1);
+        $this->setGameStateInitialValue('DAY', 0);
+        $this->setGameStateInitialValue('SOLO_DECK', 1);
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
-        self::initStat('table', 'days', 0);
-        self::initStat('table', 'collectedSmallDice', 0);
-        self::initStat('player', 'collectedSmallDice', 0);
-        self::initStat('table', 'rerolledDice', 0);
-        self::initStat('player', 'rerolledDice', 0);
-        self::initStat('table', 'changedDice', 0);
-        self::initStat('player', 'changedDice', 0);
-        self::initStat('table', 'scoreBack', 0);
-        self::initStat('player', 'scoreBack', 0);
-        self::initStat('table', 'resolvedCards', 0);
-        self::initStat('player', 'resolvedCards', 0);
-        self::initStat('table', 'discardedCompanions', 0);
-        self::initStat('player', 'discardedCompanions', 0);
-        self::initStat('table', 'moves', 0);
-        self::initStat('player', 'moves', 0);
-        self::initStat('table', 'footprintsAsJokers', 0);
-        self::initStat('player', 'footprintsAsJokers', 0);
+        $this->initStat('table', 'days', 0);
+        $this->initStat('table', 'collectedSmallDice', 0);
+        $this->initStat('player', 'collectedSmallDice', 0);
+        $this->initStat('table', 'rerolledDice', 0);
+        $this->initStat('player', 'rerolledDice', 0);
+        $this->initStat('table', 'changedDice', 0);
+        $this->initStat('player', 'changedDice', 0);
+        $this->initStat('table', 'scoreBack', 0);
+        $this->initStat('player', 'scoreBack', 0);
+        $this->initStat('table', 'resolvedCards', 0);
+        $this->initStat('player', 'resolvedCards', 0);
+        $this->initStat('table', 'discardedCompanions', 0);
+        $this->initStat('player', 'discardedCompanions', 0);
+        $this->initStat('table', 'moves', 0);
+        $this->initStat('player', 'moves', 0);
+        $this->initStat('table', 'footprintsAsJokers', 0);
+        $this->initStat('player', 'footprintsAsJokers', 0);
         foreach($this->ADVENTURERS as $adventurer) {            
-            self::initStat('table', $adventurer->name, 0);
-            self::initStat('player', $adventurer->name, 0);
+            $this->initStat('table', $adventurer->name, 0);
+            $this->initStat('player', $adventurer->name, 0);
         }
 
         $solo = count($players) == 1;
@@ -180,18 +180,16 @@ class Glow extends Table {
     protected function getAllDatas() {
         $result = [];
     
-        $current_player_id = self::getCurrentPlayerId();    // !! We must only return informations visible by this player !!
-    
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
         $sql = "SELECT player_id id, player_score score, player_no playerNo, player_rerolls rerolls, player_footprints footprints, player_fireflies fireflies, player_score_before_end scoreBeforeEnd, player_score_cards scoreCards, player_score_board scoreBoard, player_score_after_end scoreAfterEnd FROM player ";
-        $result['players'] = self::getCollectionFromDb($sql);
+        $result['players'] = $this->getCollectionFromDb($sql);
 
         $solo = count($result['players']) == 1;
   
-        $result['firstPlayer'] = intval(self::getGameStateValue(FIRST_PLAYER));
+        $result['firstPlayer'] = intval($this->getGameStateValue(FIRST_PLAYER));
         $result['side'] = $this->getSide();
-        $result['day'] = intval(self::getGameStateValue(DAY));
+        $result['day'] = intval($this->getGameStateValue(DAY));
         
         $result['tableDice'] = $this->getDiceByLocation('table');
         $result['topDeckType'] = $this->getTopDeckType();
@@ -202,14 +200,14 @@ class Glow extends Table {
 
         $dice = $this->getDiceByLocation('meeting');
         $meetingTrack = [];
-        $tomDiceSetAside = array_values(array_filter($dice, function($idie) { return $idie->location_arg === 0; }));
+        $tomDiceSetAside = array_values(array_filter($dice, fn($idie) => $idie->location_arg === 0));
         $meetingTrack[0] = new MeetingTrackSpot(null, $tomDiceSetAside);
 
         for ($i=1;$i<=5;$i++) {
             $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting', $i));
             $companion = count($companions) > 0 ? $companions[0] : null;
 
-            $spotDice = array_values(array_filter($dice, function($idie) use ($i) { return $idie->location_arg === $i; }));
+            $spotDice = array_values(array_filter($dice, fn($idie) => $idie->location_arg === $i));
 
             $footprints = $this->getMeetingTrackFootprints($i);
 
@@ -237,9 +235,9 @@ class Glow extends Table {
             $result['tom']->color = '000000';
         }
 
-        $result['ADVENTURERS_EFFECTS'] = array_map(function ($card) { return $card->effect; }, $this->ADVENTURERS);
-        $result['COMPANIONS_EFFECTS'] = array_map(function ($card) { return $card->effect; }, $this->COMPANIONS);
-        $result['SPELLS_EFFECTS'] = array_map(function ($card) { return $card->effect; }, $this->SPELLS);
+        $result['ADVENTURERS_EFFECTS'] = array_map(fn($card) => $card->effect, $this->ADVENTURERS);
+        $result['COMPANIONS_EFFECTS'] = array_map(fn($card) => $card->effect, $this->COMPANIONS);
+        $result['SPELLS_EFFECTS'] = array_map(fn ($card) => $card->effect, $this->SPELLS);
         $result['SOLO_TILES'] = $this->SOLO_TILES;
   
         return $result;
@@ -261,7 +259,7 @@ class Glow extends Table {
             return 100;
         }
 
-        return (intval(self::getGameStateValue(DAY)) - 1) * 12.5;
+        return (intval($this->getGameStateValue(DAY)) - 1) * 12.5;
     }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -330,14 +328,14 @@ class Glow extends Table {
 //            // ! important ! Use DBPREFIX_<table_name> for all tables
 //
 //            $sql = "ALTER TABLE DBPREFIX_xxxxxxx ....";
-//            self::applyDbUpgradeToAllDB( $sql );
+//            $this->applyDbUpgradeToAllDB( $sql );
 //        }
 //        if( $from_version <= 1405061421 )
 //        {
 //            // ! important ! Use DBPREFIX_<table_name> for all tables
 //
 //            $sql = "CREATE TABLE DBPREFIX_xxxxxxx ....";
-//            self::applyDbUpgradeToAllDB( $sql );
+//            $this->applyDbUpgradeToAllDB( $sql );
 //        }
 //        // Please add your future database scheme changes here
 //
@@ -346,28 +344,28 @@ class Glow extends Table {
         // TEMP
         if ($from_version <= 2112221034) {
             $sql = "UPDATE `DBPREFIX_companion` SET `card_location` = CONCAT(`card_location`, `card_location_arg`), `card_location_arg` = 0 WHERE `card_location` = 'player'";
-            self::applyDbUpgradeToAllDB($sql);
+            $this->applyDbUpgradeToAllDB($sql);
         }
 
         if ($from_version <= 2112291719) {
-            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_before_end` int(10) unsigned NOT NULL DEFAULT '0'");
-            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_cards` int(10) unsigned NOT NULL DEFAULT '0'");
-            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_board` int(10) unsigned NOT NULL DEFAULT '0'");
-            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_after_end` int(10) unsigned NOT NULL DEFAULT '0'");
+            $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_before_end` int(10) unsigned NOT NULL DEFAULT '0'");
+            $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_cards` int(10) unsigned NOT NULL DEFAULT '0'");
+            $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_board` int(10) unsigned NOT NULL DEFAULT '0'");
+            $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_after_end` int(10) unsigned NOT NULL DEFAULT '0'");
         }
 
         if ($from_version <= 2201020009) {
-            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_before_end` int(10) unsigned");
-            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_cards` int(10) unsigned");
-            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_board` int(10) unsigned");
-            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_after_end` int(10) unsigned");
+            $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_before_end` int(10) unsigned");
+            $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_cards` int(10) unsigned");
+            $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_board` int(10) unsigned");
+            $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_after_end` int(10) unsigned");
         }
 
         if ($from_version <= 2201111938) {
-            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_before_end` int(10)");
-            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_cards` int(10)");
-            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_board` int(10)");
-            self::applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_after_end` int(10)");
+            $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_before_end` int(10)");
+            $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_cards` int(10)");
+            $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_board` int(10)");
+            $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_after_end` int(10)");
         }
     }    
 }

@@ -149,7 +149,7 @@ trait SoloUtilTrait {
             }
 
             // remove routes leading to other boat
-            if ($this->array_some($allBoats, function ($aBoat) use ($iRoute) { return $aBoat->position == $iRoute->destination; })) {
+            if ($this->array_some($allBoats, fn($aBoat) => $aBoat->position == $iRoute->destination)) {
                 continue;
             }
 
@@ -302,8 +302,8 @@ trait SoloUtilTrait {
     }
 
     function provinceOfShadowLastMove() {
-        $villages = array_filter($this->MAP1, function ($spot) { return $spot->canSettle; });
-        uasort($villages, function($spot1, $spot2) { return $spot1->points - $spot2->points; });
+        $villages = array_filter($this->MAP1, fn($spot) => $spot->canSettle);
+        uasort($villages, fn($spot1, $spot2) => $spot1->points - $spot2->points);
 
         $tomEncampment = $this->getPlayerEncampment(0);
 

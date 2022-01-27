@@ -38,7 +38,7 @@ trait ArgsTrait {
                 $companion->noDieWarning = !$this->isBigDieAvailable($companion->dieColor);
             }
 
-            $spotDice = array_values(array_filter($dice, function($idie) use ($i) { return $idie->location_arg === $i; }));
+            $spotDice = array_values(array_filter($dice, fn($idie) => $idie->location_arg === $i));
 
             $footprints = $this->getMeetingTrackFootprints($i);
 
@@ -147,8 +147,8 @@ trait ArgsTrait {
                     $possibleRoute->from = $meeple->position;
 
                     if (
-                        !$this->array_some($possibleRoutes, function($p) use ($possibleRoute) { return $possibleRoute->from == $p->from && $possibleRoute->destination == $p->destination; })
-                        && !$this->array_some($meeples, function($m) use ($possibleRoute) { return $possibleRoute->destination == $m->position; })
+                        !$this->array_some($possibleRoutes, fn($p) => $possibleRoute->from == $p->from && $possibleRoute->destination == $p->destination)
+                        && !$this->array_some($meeples, fn($m) => $possibleRoute->destination == $m->position)
                     ) {
                         $possibleRoutes[] = $possibleRoute;
                     }
@@ -182,12 +182,12 @@ trait ArgsTrait {
 
     function argMoveBlackDie() {
         $sql = "select `card_location_arg` from `companion` where `card_location` = 'meeting'";
-        $availableSpots = array_values(array_map(function($dbLine) { return intval($dbLine['card_location_arg']); }, self::getCollectionFromDb($sql)));
+        $availableSpots = array_values(array_map(fn($dbLine) => intval($dbLine['card_location_arg']), self::getCollectionFromDb($sql)));
 
         $die = $this->getBlackDie();
         $dieSpot = $die->location_arg;
 
-        $possibleSpots = array_values(array_filter($availableSpots, function ($spot) use ($dieSpot) { return $spot != $dieSpot; }));
+        $possibleSpots = array_values(array_filter($availableSpots, fn($spot) => $spot != $dieSpot));
 
         return [
             'possibleSpots' => $possibleSpots,

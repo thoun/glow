@@ -54,9 +54,7 @@ trait ActionTrait {
                 $movedDiceColorsToTable[] = 7;
             }
 
-            $movedDiceToTable = array_map(function($color) {
-                return $this->getBigDiceByColor($color, 1)[0];
-            }, $movedDiceColorsToTable);
+            $movedDiceToTable = array_map(fn($color) => $this->getBigDiceByColor($color, 1)[0], $movedDiceColorsToTable);
 
             $this->moveDice($movedDiceToTable, 'table');
             self::notifyAllPlayers('setTableDice', '', [
@@ -128,9 +126,9 @@ trait ActionTrait {
             if ($die->location == 'table') {
                 $availableSpots = [1,2,3,4,5];
                 if ($spot !== null) {
-                    $availableSpots = array_values(array_map(function($dbLine) { 
-                        return intval($dbLine['card_location_arg']); 
-                    }, self::getCollectionFromDb("select `card_location_arg` from `companion` where `card_location` = 'meeting'")));
+                    $availableSpots = array_values(array_map(fn($dbLine) => 
+                        intval($dbLine['card_location_arg'])
+                    , self::getCollectionFromDb("select `card_location_arg` from `companion` where `card_location` = 'meeting'")));
                 }
 
                 $dieSpot = $availableSpots[bga_rand(0, count($availableSpots) - 1)];
@@ -176,9 +174,9 @@ trait ActionTrait {
         }
 
         $spotDice = $this->getDiceByLocation('meeting', $spot);
-        if ($this->array_some($spotDice, function($die) { return $die->color == 8; })) {
+        if ($this->array_some($spotDice, fn($die) => $die->color == 8)) {
             $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId, null, 'location_arg'));
-            if ($this->array_some($companions, function($companion) { return $companion->subType == KAAR; })) {
+            if ($this->array_some($companions, fn($companion) => $companion->subType == KAAR)) {
                 $this->gamestate->nextState('moveBlackDie');
                 return;
             }
@@ -402,7 +400,7 @@ trait ActionTrait {
         $playerId = intval($this->getCurrentPlayerId());
         
         $resolveCardsForPlayer = $this->argResolveCardsForPlayer($playerId);
-        if (!$this->array_some($resolveCardsForPlayer->remainingEffects, function($remainingEffect) use ($cardType, $id) { return $remainingEffect[0] == $cardType && $remainingEffect[1] == $id; })) {
+        if (!$this->array_some($resolveCardsForPlayer->remainingEffects, fn($remainingEffect) => $remainingEffect[0] == $cardType && $remainingEffect[1] == $id)) {
             throw new BgaUserException("You can't apply that effect");
         }
 
@@ -437,7 +435,7 @@ trait ActionTrait {
 
             if ($effect >= 1 && $effect <= 5) {
                 $dice = $this->getDiceByLocation('player', $playerId, false);
-                $die = $this->array_find($dice, function($die) use ($effect) { return $die->value == $effect; });
+                $die = $this->array_find($dice, fn($die) => $die->value == $effect);
                 if ($die != null) {
                     self::DbQuery("UPDATE dice SET `used` = true WHERE die_id = $die->id");
 
@@ -451,10 +449,10 @@ trait ActionTrait {
 
         $side = $this->getSide();
 
-        $footprintEffect = $this->array_find($route->costForPlayer, function($effect) { return $effect < -20 && $effect > -30; });
+        $footprintEffect = $this->array_find($route->costForPlayer, fn($effect) => $effect < -20 && $effect > -30);
         if ($footprintEffect != null) {
             $destination = $this->getMapSpot($side, $route->destination);
-            if (!$this->array_some($destination->effects, function($effect) { return $effect < -20 && $effect > -30; })) {
+            if (!$this->array_some($destination->effects, fn($effect) => $effect < -20 && $effect > -30)) {
                 // we count footprints as joker only if we are not in a spot that require footprint cost
                 $footprintCost = -($footprintEffect + 20);
                 self::incStat($footprintCost, 'footprintsAsJokers');
@@ -490,7 +488,7 @@ trait ActionTrait {
         $playerId = intval($this->getCurrentPlayerId());
 
         $possibleRoutes = $this->getPossibleRoutes($playerId);
-        $route = $this->array_find($possibleRoutes, function ($possibleRoute) use ($destination, $from) { return $possibleRoute->destination == $destination && ($from == null || $possibleRoute->from == $from); });
+        $route = $this->array_find($possibleRoutes, fn($possibleRoute) => $possibleRoute->destination == $destination && ($from == null || $possibleRoute->from == $from));
         if ($route == null) {
             throw new BgaUserException("Impossible to move here");
         }

@@ -54,7 +54,7 @@
 
         $dice = self::getArg("dice", AT_numberlist, true);
 
-        $this->game->chooseTomDice(array_map(function($idStr) { return intval($idStr); }, explode(',', $dice)));
+        $this->game->chooseTomDice(array_map(fn($idStr) => intval($idStr), explode(',', $dice)));
 
         self::ajaxResponse();
     }
@@ -103,7 +103,7 @@
         self::setAjaxMode();     
 
         $idsStr = explode(',', self::getArg("ids", AT_numberlist, true));
-        $ids = array_map(function($idStr) { return intval($idStr); }, $idsStr);
+        $ids = array_map(fn($idStr) => intval($idStr), $idsStr);
         $cost = explode(',', self::getArg("cost", AT_numberlist, true)); // cost : [companion, tokens, score]
         $this->game->rollDice($ids, $cost);
 

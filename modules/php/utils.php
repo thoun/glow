@@ -107,7 +107,7 @@ trait UtilTrait {
     }
 
     function getAdventurersFromDb(array $dbObjects) {
-        return array_map(function($dbObject) { return $this->getAdventurerFromDb($dbObject); }, array_values($dbObjects));
+        return array_map(fn($dbObject) => $this->getAdventurerFromDb($dbObject), array_values($dbObjects));
     }
 
     function getCompanionFromDb($dbObject) {
@@ -118,7 +118,7 @@ trait UtilTrait {
     }
 
     function getCompanionsFromDb(array $dbObjects) {
-        return array_map(function($dbObject) { return $this->getCompanionFromDb($dbObject); }, array_values($dbObjects));
+        return array_map(fn($dbObject) => $this->getCompanionFromDb($dbObject), array_values($dbObjects));
     }
 
     function getSpellFromDb($dbObject) {
@@ -129,7 +129,7 @@ trait UtilTrait {
     }
 
     function getSpellsFromDb(array $dbObjects) {
-        return array_map(function($dbObject) { return $this->getSpellFromDb($dbObject); }, array_values($dbObjects));
+        return array_map(fn($dbObject) => $this->getSpellFromDb($dbObject), array_values($dbObjects));
     }
 
     function getSoloTileFromDb($dbObject) {
@@ -140,7 +140,7 @@ trait UtilTrait {
     }
 
     function getSoloTilesFromDb(array $dbObjects) {
-        return array_map(function($dbObject) { return $this->getSoloTileFromDb($dbObject); }, array_values($dbObjects));
+        return array_map(fn($dbObject) => $this->getSoloTileFromDb($dbObject), array_values($dbObjects));
     }
     
     function getSmallDice(bool $ignoreBlack) {
@@ -149,13 +149,13 @@ trait UtilTrait {
             $sql .= " AND `color` <> 8";
         } 
         $dbDices = self::getCollectionFromDB($sql);
-        return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices));
+        return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices));
     }
     
     function getBigDiceByColor(int $color, int $limit) {
         $sql = "SELECT * FROM dice WHERE `location` = 'deck' AND `color` = $color AND `small` = false LIMIT $limit";
         $dbDices = self::getCollectionFromDB($sql);
-        return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices));
+        return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices));
     }
     
     function getDiceByLocation(string $location, $locationArg = null, $used = null) {
@@ -167,7 +167,7 @@ trait UtilTrait {
             $sql .= " AND `used` = ".json_encode($used);
         }
         $dbDices = self::getCollectionFromDB($sql);
-        return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices));
+        return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices));
     }
 
     function getDiceByIds(array $ids) {
@@ -177,35 +177,35 @@ trait UtilTrait {
 
         $sql = "SELECT * FROM dice WHERE `die_id` IN (".implode(',', $ids).")";
         $dbDices = self::getCollectionFromDB($sql);
-        return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices));
+        return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices));
     }
 
     function getDieById(int $id) {
         $sql = "SELECT * FROM dice WHERE `die_id` = $id";
         $dbDices = self::getCollectionFromDB($sql);
-        return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices))[0];
+        return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices))[0];
     }
     
     function getAvailableBigDice() {
         $sql = "SELECT * FROM dice WHERE `location` = 'table' AND `small` = false";
         $dbDices = self::getCollectionFromDB($sql);
-        return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices));
+        return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices));
     }
 
     function getBlackDie() {
         $sql = "SELECT * FROM dice WHERE `color` = 8";
         $dbDices = self::getCollectionFromDB($sql);
-        return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices))[0];
+        return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices))[0];
     }
     
     function getPlayerBigDiceByColor(int $playerId, int $dieColor) {
         $sql = "SELECT * FROM dice WHERE `location` = 'player' AND `location_arg` = $playerId AND `color` = $dieColor AND `small` = false";
         $dbDices = self::getCollectionFromDB($sql);
-        return array_map(function($dbDice) { return new Dice($dbDice); }, array_values($dbDices));
+        return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices));
     }
 
     function moveDice(array $dice, string $location, int $locationArg = 0) {
-        $ids = array_map(function ($idie) { return $idie->id; }, $dice);
+        $ids = array_map(fn($idie) => $idie->id, $dice);
         self::DbQuery("UPDATE dice SET `location` = '$location', `location_arg` = $locationArg WHERE `die_id` IN (".implode(',', $ids).")");
         foreach($dice as &$die) {
             $die->location = $location;
@@ -384,7 +384,7 @@ trait UtilTrait {
             // remove 3 of each face
             for ($face=1; $face<=2; $face++) {
                 $removed = array_slice($this->getCompanionsFromDb($this->companions->getCardsOfTypeInLocation($face, null, 'deck')), 0, 3);
-                $this->companions->moveCards(array_map(function ($companion) { return $companion->id; }, $removed), 'discard');
+                $this->companions->moveCards(array_map(fn($companion) => $companion->id, $removed), 'discard');
 
             }
             // set face 1 (A) before face 2 (B)
@@ -472,7 +472,7 @@ trait UtilTrait {
     
     function replaceSmallDiceOnMeetingTrack(int $playerId) {
         $playerDice = $this->getDiceByLocation('player', $playerId);
-        $smallDice = array_values(array_filter($playerDice, function($die) { return $die->small; }));
+        $smallDice = array_values(array_filter($playerDice, fn($die) => $die->small));
 
         // If a die indicates a -2 burst of light or a footprint symbol, it must be rerolled until it indicates a color
         foreach($smallDice as &$idie) {
@@ -490,7 +490,7 @@ trait UtilTrait {
 
     private function moveSmallDiceToMeetingTrack(array $smallDice) {
         for ($i=1; $i<=5; $i++) {
-            $colorDice = array_values(array_filter($smallDice, function ($idie) use ($i) { return $idie->value === $i; }));
+            $colorDice = array_values(array_filter($smallDice, fn($idie) => $idie->value === $i));
             if (count($colorDice) > 0) {
                 $this->moveDice($colorDice, 'meeting', $i);
             }
@@ -585,7 +585,7 @@ trait UtilTrait {
 
     function getRerollScoreCost(int $score) {
         // list of points with reroll, under current score, top first
-        $scoreTrackRerolls = array_values(array_reverse(array_filter($this->SCORE_TRACK_REROLLS, function($p) use ($score) { return $p < $score; })));
+        $scoreTrackRerolls = array_values(array_reverse(array_filter($this->SCORE_TRACK_REROLLS, fn($p) => $p < $score)));
 
         $result = [];
         $i = 1;
@@ -615,7 +615,7 @@ trait UtilTrait {
     }
 
     public function applyRollDieCost(int $playerId, int $costNumber, array $cost) {
-        $costNumberSum = array_reduce($cost, function ($carry, $item) { return $carry + $item; }, 0);
+        $costNumberSum = array_reduce($cost, fn($carry, $item) => $carry + $item, 0);
         if ($costNumberSum != $costNumber) {
             throw new BgaUserException('Invalid roll die cost');
         }
@@ -675,30 +675,28 @@ trait UtilTrait {
     public function isTriggeredEffectsForCard(array $dice, object $effect) {
         // we check if we have a forbidden die, preventing the effect
         foreach($effect->conditions as $condition) {
-            if ($condition >= -5 && $condition <= -1 && $this->array_some($dice, function ($die) use ($condition) { return $die->value == -$condition; })) {
+            if ($condition >= -5 && $condition <= -1 && $this->array_some($dice, fn($die) => $die->value == -$condition)) {
                 return 0;
             }
         }
 
-        $effects = [];
-
-        $diceValues = array_map(function($die) { return $die->value; }, $dice);
+        $diceValues = array_map(fn($die) => $die->value, $dice);
         // we remove forbidden signs, as they have been checked before
-        $effectConditions = array_values(array_filter($effect->conditions, function ($condition) { return $condition >= 0; }));
+        $effectConditions = array_values(array_filter($effect->conditions, fn ($condition) => $condition >= 0));
         if (count($effectConditions) === 0) {
             return 1;
         }
 
-        if ($this->array_some($effect->conditions, function ($condition) { return $condition == 0; })) { // serie of same color
+        if ($this->array_some($effect->conditions, fn($condition) => $condition == 0)) { // serie of same color
             $count = 0;
             foreach ([1, 2, 3, 4, 5, 22, 103] as $i) {
-                $conditions = array_map(function($condition) use ($i) { return $condition == 0 ? $i : $condition; }, $effectConditions);
+                $conditions = array_map(fn($condition) => $condition == 0 ? $i : $condition, $effectConditions);
                 $count += $this->countRepetitionInDiceForEffectCondition($diceValues, $conditions);
             }
             return $count;
         } else {
             $count = $this->countRepetitionInDiceForEffectCondition($diceValues, $effectConditions);
-            if ($this->array_some($effect->conditions, function ($condition) { return $condition >= -5 && $condition <= -1; })) {
+            if ($this->array_some($effect->conditions, fn($condition) => $condition >= -5 && $condition <= -1)) {
                 return min(1, $count);
             } else {
                 return $count;
@@ -708,9 +706,9 @@ trait UtilTrait {
 
     function getEffectiveDice(int $playerId, $used = null) {
         $dice = $this->getDiceByLocation('player', $playerId, $used);
-        $blackDie = $this->array_find($dice, function($die) { return $die->color == 8; });
+        $blackDie = $this->array_find($dice, fn($die) => $die->color == 8);
         if ($blackDie != null) { // got black Die
-            return array_values(array_filter($dice, function($die) use ($blackDie) { return $die->value != $blackDie->value; }));
+            return array_values(array_filter($dice, fn($die) => $die->value != $blackDie->value));
         } else {
             return $dice;
         }
@@ -773,7 +771,7 @@ trait UtilTrait {
 
         $remainingEffects = $allEffects;
         foreach($appliedEffects as $effect) {
-            $index = $this->array_findIndex($remainingEffects, function ($remainingEffect) use ($effect) { return $remainingEffect[0] == $effect[0] && $remainingEffect[1] == $effect[1]; });
+            $index = $this->array_findIndex($remainingEffects, fn($remainingEffect) => $remainingEffect[0] == $effect[0] && $remainingEffect[1] == $effect[1]);
             unset($remainingEffects[$index]); 
             $remainingEffects = array_values($remainingEffects);
         }
@@ -856,7 +854,7 @@ trait UtilTrait {
             ]);
         } else if ($effect === 36) { // spell
             $playersIds = $this->getPlayersIds();
-            $this->giveSpellToPlayers(array_values(array_filter($playersIds, function($pId) use ($playerId) { return $pId != $playerId; })));
+            $this->giveSpellToPlayers($playerId, array_values(array_filter($playersIds, fn($pId) => $pId != $playerId)));
         }
     }
 
@@ -981,16 +979,17 @@ trait UtilTrait {
         ]);
     }
 
-    private function giveSpellToPlayers(array $playersIds) {
+    private function giveSpellToPlayers(int $originPlayerId, array $playersIds) {
         $spellsIds = [];
 
         foreach($playersIds as $playerId) {
             $spellsIds[$playerId] = $this->getSpellFromDb($this->spells->pickCardForLocation('deck', 'player', $playerId))->id;
         }
 
-        self::notifyAllPlayers('giveHiddenSpells', clienttranslate('${player_name} gives spell token to other players with ${companionName}'), [
+        self::notifyAllPlayers('giveHiddenSpells', clienttranslate('${player_name} gives spell token to ${player_name2} with ${companionName}'), [
             'playerId' => $playerId,
-            'player_name' => $this->getPlayerName($playerId),
+            'player_name' => $this->getPlayerName($originPlayerId),
+            'player_name2' => $this->getPlayerName($playerId),
             'companionName' => $this->COMPANIONS[XARGOK]->name,
             'spellsIds' => $spellsIds,
         ]);
@@ -1034,7 +1033,7 @@ trait UtilTrait {
         if ($dieColor == 0) {
             return count($dice) > 0;
         } else {
-            return count(array_filter($dice, function($die) use ($dieColor) { return $die->color == $dieColor; })) > 0;
+            return count(array_filter($dice, fn($die) => $die->color == $dieColor)) > 0;
         }
     }
 }

@@ -35,7 +35,7 @@ trait MapTrait {
             $sql .= " AND `type` = $type";
         }
         $dbMeeples = self::getCollectionFromDB($sql);
-        return array_map(function($dbMeeples) { return new Meeple($dbMeeples); }, array_values($dbMeeples));
+        return array_map(fn($dbMeeples) => new Meeple($dbMeeples), array_values($dbMeeples));
     }
 
     function getPlayerCompany(int $playerId) {
@@ -66,7 +66,7 @@ trait MapTrait {
 
     function movePlayerBoat(int $playerId, int $position, int $from) {
         $boats = $this->getPlayerMeeples($playerId, 0);
-        $boat = $this->array_find($boats, function ($b) use ($from) { return $b->position == $from; });
+        $boat = $this->array_find($boats, fn($b) => $b->position == $from);
 
         $boat->position = $position;
         $sql = "UPDATE meeple SET `position` = $position WHERE `id` = $boat->id";
@@ -133,7 +133,7 @@ trait MapTrait {
             if ($spot->position === $position) {
                 $routes = array_merge($routes, $spot->routes);
             } else {
-                $routeToSpot = $this->array_find($spot->routes, function ($route) use ($position) { return $route->destination == $position; });
+                $routeToSpot = $this->array_find($spot->routes, fn($route) => $route->destination == $position);
                 if ($routeToSpot !== null) {
                     $routes[] = new MapRoute($spot->position, $routeToSpot->effects, $routeToSpot->min, $routeToSpot->max);
                 }
@@ -178,7 +178,7 @@ trait MapTrait {
 
         if ($side === 1) {
             $visitedSpots = $this->getVisitedMapSpots($playerId);
-            $routes = array_values(array_filter($routes, function ($route) use ($visitedSpots) { return !in_array($route->destination, $visitedSpots); }));
+            $routes = array_values(array_filter($routes, fn($route) => !in_array($route->destination, $visitedSpots)));
         }
 
         $footprints = $this->getPlayerFootprints($playerId);
@@ -195,7 +195,7 @@ trait MapTrait {
                 $usedFootprints = 0;
 
                 foreach($effects as $effect) {
-                    if ($effect >= -5 && $effect <= -1 && $this->array_some($allDice, function ($die) use ($effect) { return $die->value == -$effect; })) {
+                    if ($effect >= -5 && $effect <= -1 && $this->array_some($allDice, fn($die) => $die->value == -$effect)) {
                         if ($usedFootprints < $footprints) {
                             $usedFootprints++;
                         } else {
@@ -203,7 +203,7 @@ trait MapTrait {
                         }
                     } else if ($effect < -20 && $effect > -30 && $footprints < -($effect + 20)) {
                         $canGoToDestination = false;
-                    } else if ($effect >= 1 && $effect <= 5 && !$this->array_some($dice, function ($die) use ($effect) { return $die->value == $effect; })) {
+                    } else if ($effect >= 1 && $effect <= 5 && !$this->array_some($dice, fn($die) => $die->value == $effect)) {
                         if ($usedFootprints < $footprints) {
                             $usedFootprints++;
                         } else {
