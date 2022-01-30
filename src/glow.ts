@@ -1496,19 +1496,28 @@ class Glow implements GlowGame {
         (this as any).scoreCtrl[playerId]?.toValue(points);
         this.board.setPoints(playerId, points);
     }
+
+    private limitCounterToZero(counter?: Counter) {
+        if (counter && counter.getValue() < 0) {
+            counter.toValue(0);
+        }
+    }
     
-    private incRerolls(playerId: number, footprints: number) {
-        this.rerollCounters[playerId]?.incValue(footprints);
+    private incRerolls(playerId: number, rerolls: number) {
+        this.rerollCounters[playerId]?.incValue(rerolls);
+        this.limitCounterToZero(this.rerollCounters[playerId]);
         this.getPlayerTable(playerId)?.setTokens('reroll', this.rerollCounters[playerId]?.getValue());
     }
     
     private incFootprints(playerId: number, footprints: number) {
         this.footprintCounters[playerId]?.incValue(footprints);
+        this.limitCounterToZero(this.footprintCounters[playerId]);
         this.getPlayerTable(playerId)?.setTokens('footprint', this.footprintCounters[playerId]?.getValue());
     }
     
     private incFireflies(playerId: number, fireflies: number) {
         this.fireflyCounters[playerId]?.incValue(fireflies);
+        this.limitCounterToZero(this.fireflyCounters[playerId]);
         this.fireflyTokenCounters[playerId] += fireflies;
         this.updateFireflyCounterIcon(playerId);
         this.getPlayerTable(playerId)?.setTokens('firefly', this.fireflyTokenCounters[playerId]);

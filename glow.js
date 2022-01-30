@@ -2309,19 +2309,27 @@ var Glow = /** @class */ (function () {
         (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.toValue(points);
         this.board.setPoints(playerId, points);
     };
-    Glow.prototype.incRerolls = function (playerId, footprints) {
+    Glow.prototype.limitCounterToZero = function (counter) {
+        if (counter && counter.getValue() < 0) {
+            counter.toValue(0);
+        }
+    };
+    Glow.prototype.incRerolls = function (playerId, rerolls) {
         var _a, _b, _c;
-        (_a = this.rerollCounters[playerId]) === null || _a === void 0 ? void 0 : _a.incValue(footprints);
+        (_a = this.rerollCounters[playerId]) === null || _a === void 0 ? void 0 : _a.incValue(rerolls);
+        this.limitCounterToZero(this.rerollCounters[playerId]);
         (_b = this.getPlayerTable(playerId)) === null || _b === void 0 ? void 0 : _b.setTokens('reroll', (_c = this.rerollCounters[playerId]) === null || _c === void 0 ? void 0 : _c.getValue());
     };
     Glow.prototype.incFootprints = function (playerId, footprints) {
         var _a, _b, _c;
         (_a = this.footprintCounters[playerId]) === null || _a === void 0 ? void 0 : _a.incValue(footprints);
+        this.limitCounterToZero(this.footprintCounters[playerId]);
         (_b = this.getPlayerTable(playerId)) === null || _b === void 0 ? void 0 : _b.setTokens('footprint', (_c = this.footprintCounters[playerId]) === null || _c === void 0 ? void 0 : _c.getValue());
     };
     Glow.prototype.incFireflies = function (playerId, fireflies) {
         var _a, _b;
         (_a = this.fireflyCounters[playerId]) === null || _a === void 0 ? void 0 : _a.incValue(fireflies);
+        this.limitCounterToZero(this.fireflyCounters[playerId]);
         this.fireflyTokenCounters[playerId] += fireflies;
         this.updateFireflyCounterIcon(playerId);
         (_b = this.getPlayerTable(playerId)) === null || _b === void 0 ? void 0 : _b.setTokens('firefly', this.fireflyTokenCounters[playerId]);
