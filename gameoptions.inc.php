@@ -41,6 +41,20 @@ $game_options = [
         ],
         'default' => 1,
     ],
+
+    101 => [
+        'name' => totranslate('Random adventurers'),
+        'values' => [
+            1 => [
+                'name' => totranslate('Disabled'),
+            ],
+            2 => [
+                'name' => totranslate('Enabled'), 
+                'tmdisplay' => totranslate('Random adventurers'), 
+            ],
+        ],
+        'default' => 1,
+    ],
 ];
 
 $game_preferences = [

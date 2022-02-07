@@ -14,10 +14,10 @@ trait StateTrait {
     function stNextPlayerChooseAdventurer() { 
         $this->activeNextPlayer();
     
-        $playerId = self::getActivePlayerId();
-        self::giveExtraTime($playerId);
+        $playerId = $this->getActivePlayerId();
+        $this->giveExtraTime($playerId);
 
-        $startRound = $playerId == intval(self::getGameStateValue(FIRST_PLAYER));
+        $startRound = $playerId == intval($this->getGameStateValue(FIRST_PLAYER));
         $this->gamestate->nextState($startRound ? 'end' : 'nextPlayer');
     }
 
@@ -25,12 +25,12 @@ trait StateTrait {
         $solo = $this->isSoloMode();
 
         $day = intval($this->getGameStateValue(DAY)) + 1;
-        self::setGameStateValue(DAY, $day);
+        $this->setGameStateValue(DAY, $day);
 
-        self::DbQuery("UPDATE companion SET `reroll_used` = false");
-        self::DbQuery("UPDATE player SET `applied_effects` = null, visited_spots = null");
+        $this->DbQuery("UPDATE companion SET `reroll_used` = false");
+        $this->DbQuery("UPDATE player SET `applied_effects` = null, visited_spots = null");
 
-        self::notifyAllPlayers('newDay', clienttranslate('Day ${day} begins'), [
+        $this->notifyAllPlayers('newDay', clienttranslate('Day ${day} begins'), [
             'day' => $day,
         ]);
 
@@ -49,14 +49,14 @@ trait StateTrait {
     }
 
     function stNextPlayerRecruitCompanion() {     
-        $playerId = self::getActivePlayerId();
+        $playerId = $this->getActivePlayerId();
 
         $this->activeNextPlayer();
     
-        $playerId = self::getActivePlayerId();
-        self::giveExtraTime($playerId);
+        $playerId = $this->getActivePlayerId();
+        $this->giveExtraTime($playerId);
 
-        $endRecruit = $playerId == intval(self::getGameStateValue(FIRST_PLAYER));
+        $endRecruit = $playerId == intval($this->getGameStateValue(FIRST_PLAYER));
         $this->gamestate->nextState($endRecruit ? 'end' : 'nextPlayer');
     }
     
@@ -67,7 +67,7 @@ trait StateTrait {
             $this->sendToCemetery(0, $companion->id);
         }
 
-        self::notifyAllPlayers('removeCompanions', '', [
+        $this->notifyAllPlayers('removeCompanions', '', [
             'topCemeteryType' => $this->getTopCemeteryType(),
         ]);
 
@@ -108,7 +108,7 @@ trait StateTrait {
 
                 $this->sendToCemetery($playerId, $cromaugCard->id);
                 $companion = $this->getCompanionFromDb($this->companions->getCard($cromaugCard->id));
-                self::notifyAllPlayers('removeCompanion', clienttranslate('${player_name} discards Cromaug and takes a companion from the cemetery'), [
+                $this->notifyAllPlayers('removeCompanion', clienttranslate('${player_name} discards Cromaug and takes a companion from the cemetery'), [
                     'playerId' => $playerId,
                     'player_name' => $this->getPlayerName($playerId),
                     'companion' => $cromaugCard,
@@ -176,7 +176,7 @@ trait StateTrait {
 
     function stEndRound() {
         // reset dice use        
-        self::DbQuery("UPDATE dice SET `used` = false");
+        $this->DbQuery("UPDATE dice SET `used` = false");
 
         $this->placeCompanionsOnMeetingTrack();
         $this->addFootprintsOnMeetingTrack();
@@ -184,14 +184,14 @@ trait StateTrait {
         $solo = $this->isSoloMode();
 
         if (!$solo) {
-            $nextPlayerTable = self::createNextPlayerTable(array_keys(self::loadPlayersBasicInfos()));
+            $nextPlayerTable = $this->createNextPlayerTable(array_keys($this->loadPlayersBasicInfos()));
             $newFirstPlayer = intval($nextPlayerTable[intval($this->getGameStateValue(FIRST_PLAYER))]);
 
             $this->gamestate->changeActivePlayer($newFirstPlayer);
 
             $this->setGameStateValue(FIRST_PLAYER, $newFirstPlayer);
 
-            self::notifyAllPlayers('newFirstPlayer', clienttranslate('${player_name} is the new First player'), [
+            $this->notifyAllPlayers('newFirstPlayer', clienttranslate('${player_name} is the new First player'), [
                 'playerId' => $newFirstPlayer,
                 'player_name' => $this->getPlayerName($newFirstPlayer),
             ]);
@@ -199,10 +199,10 @@ trait StateTrait {
         }
 
 
-        self::incStat(1, 'days');
+        $this->incStat(1, 'days');
 
         $day = intval($this->getGameStateValue(DAY));
-        self::notifyAllPlayers('endDay', clienttranslate('Day ${day} ends'), [
+        $this->notifyAllPlayers('endDay', clienttranslate('Day ${day} ends'), [
             'day' => $day,
         ]);
 
@@ -240,11 +240,11 @@ trait StateTrait {
                 $score = $tom->scoreBeforeEnd;
                 $this->setTom($tom);
             } else {
-                self::DbQuery("UPDATE player SET player_score_before_end = player_score WHERE player_id = $playerId");
-                $score = intval(self::getUniqueValueFromDB("SELECT player_score_before_end FROM player where player_id = $playerId"));
+                $this->DbQuery("UPDATE player SET player_score_before_end = player_score WHERE player_id = $playerId");
+                $score = intval($this->getUniqueValueFromDB("SELECT player_score_before_end FROM player where player_id = $playerId"));
             }
 
-            self::notifyAllPlayers('scoreBeforeEnd', '', [
+            $this->notifyAllPlayers('scoreBeforeEnd', '', [
                 'playerId' => $playerId,
                 'points' => $score,
             ]);
@@ -263,16 +263,16 @@ trait StateTrait {
                     $points += $companion->points;
                 }
 
-                self::DbQuery("UPDATE player SET player_score_cards = $points WHERE player_id = $playerId");
+                $this->DbQuery("UPDATE player SET player_score_cards = $points WHERE player_id = $playerId");
 
-                self::notifyAllPlayers('scoreCards', '', [
+                $this->notifyAllPlayers('scoreCards', '', [
                     'playerId' => $playerId,
                     'points' => $points,
                 ]);
 
                 $this->incPlayerScore($playerId, $points, clienttranslate('${player_name} gains ${points} bursts of light with adventurer and companions'));
                 
-                self::setStat($points, 'cardsEndPoints', $playerId);
+                $this->setStat($points, 'cardsEndPoints', $playerId);
             }
         }
 
@@ -293,10 +293,10 @@ trait StateTrait {
                 $tom->scoreBoard = $points;        
                 $this->setTom($tom);
             } else {
-                self::DbQuery("UPDATE player SET player_score_board = $points WHERE player_id = $playerId");
+                $this->DbQuery("UPDATE player SET player_score_board = $points WHERE player_id = $playerId");
             }
 
-            self::notifyAllPlayers('scoreBoard', '', [
+            $this->notifyAllPlayers('scoreBoard', '', [
                 'playerId' => $playerId,
                 'points' => $points,
             ]);
@@ -304,7 +304,7 @@ trait StateTrait {
             $this->incPlayerScore($playerId, $points, $message);
 
             if ($playerId != 0) {
-                self::setStat($points, 'meepleEndPoints', $playerId);
+                $this->setStat($points, 'meepleEndPoints', $playerId);
             }
         }
 
@@ -324,15 +324,15 @@ trait StateTrait {
                     $this->incPlayerScore($playerId, 10, clienttranslate('${player_name} gains ${points} bursts of light with fireflies (more fireflies than companions)'));
                 }
 
-                self::notifyAllPlayers('scoreFireflies', '', [
+                $this->notifyAllPlayers('scoreFireflies', '', [
                     'playerId' => $playerId,
                     'points' => $points >= $companionCount ? 10 : 0,
                 ]);
 
                 if ($playerId != 0) {
-                    self::setStat($points, 'endFirefliesTokens', $playerId);
-                    self::setStat($companionCount, 'endCompanionCount', $playerId);
-                    self::setStat($points >= $companionCount ? 1 : 0, 'endFirefliesBonus', $playerId);
+                    $this->setStat($points, 'endFirefliesTokens', $playerId);
+                    $this->setStat($companionCount, 'endCompanionCount', $playerId);
+                    $this->setStat($points >= $companionCount ? 1 : 0, 'endFirefliesBonus', $playerId);
                 }
             }
         }
@@ -341,7 +341,7 @@ trait StateTrait {
         foreach($playersIds as $playerId) {
             $points = $this->getPlayerFootprints($playerId);
 
-            self::notifyAllPlayers('scoreFootprints', '', [
+            $this->notifyAllPlayers('scoreFootprints', '', [
                 'playerId' => $playerId,
                 'points' => $points,
             ]);
@@ -349,7 +349,7 @@ trait StateTrait {
             $this->incPlayerScore($playerId, $points, clienttranslate('${player_name} gains ${points} bursts of light with footprints'));
 
             if ($playerId != 0) {
-                self::setStat($points, 'endFootprintsCount', $playerId);
+                $this->setStat($points, 'endFootprintsCount', $playerId);
             }
         }
 
@@ -361,11 +361,11 @@ trait StateTrait {
                 $score = $tom->scoreAfterEnd;
                 $this->setTom($tom);
             } else {
-                self::DbQuery("UPDATE player SET player_score_after_end = player_score WHERE player_id = $playerId");
-                $score = intval(self::getUniqueValueFromDB("SELECT player_score_after_end FROM player where player_id = $playerId"));
+                $this->DbQuery("UPDATE player SET player_score_after_end = player_score WHERE player_id = $playerId");
+                $score = intval($this->getUniqueValueFromDB("SELECT player_score_after_end FROM player where player_id = $playerId"));
             }
 
-            self::notifyAllPlayers('scoreAfterEnd', '', [
+            $this->notifyAllPlayers('scoreAfterEnd', '', [
                 'playerId' => $playerId,
                 'points' => $score,
             ]);
@@ -376,24 +376,32 @@ trait StateTrait {
             $playerScore = $this->getPlayerScore($playerId);
             $tom = $this->getTom();
 
-            /*self::notifyAllPlayers('soloEndScore', clienttranslate('${player_name} ends with ${points} bursts of light'), [
+            /*$this->notifyAllPlayers('soloEndScore', clienttranslate('${player_name} ends with ${points} bursts of light'), [
                 'playerId' => $playerId,
                 'player_name' => $this->getPlayerName($playerId),
                 'points' => $playerScore,
             ]);
-            self::notifyAllPlayers('soloEndScore', clienttranslate('${player_name} ends with ${points} bursts of light'), [
+            $this->notifyAllPlayers('soloEndScore', clienttranslate('${player_name} ends with ${points} bursts of light'), [
                 'playerId' => 0,
                 'player_name' => $this->getPlayerName(0),
                 'points' => $tom->score,
             ]);*/
 
             $score = (($playerScore > $tom->score) || ($playerScore == $tom->score && $this->getPlayerFootprints($playerId) > $tom->footprints)) ? 1 : 0;
-            self::DbQuery("UPDATE player SET `player_score` = $score, `player_score_aux` = 0");
+            $this->DbQuery("UPDATE player SET `player_score` = $score, `player_score_aux` = 0");
         } else {  
             // Tie          
-            self::DbQuery("UPDATE player SET `player_score_aux` = `player_rerolls`");
+            $this->DbQuery("UPDATE player SET `player_score_aux` = `player_rerolls`");
         }
 
         $this->gamestate->nextState('endGame');
+    }
+
+    function stPrepareAdventurerChoice() {
+        if (intval($this->getGameStateValue(RANDOM_ADVENTURERS)) === 2) {
+            $this->setRandomAdventurers($this->getPlayersIds());
+        } else {
+            $this->gamestate->nextState('chooseAdventurer');
+        }
     }
 }

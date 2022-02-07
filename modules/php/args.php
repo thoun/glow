@@ -182,7 +182,7 @@ trait ArgsTrait {
 
     function argMoveBlackDie() {
         $sql = "select `card_location_arg` from `companion` where `card_location` = 'meeting'";
-        $availableSpots = array_values(array_map(fn($dbLine) => intval($dbLine['card_location_arg']), self::getCollectionFromDb($sql)));
+        $availableSpots = array_values(array_map(fn($dbLine) => intval($dbLine['card_location_arg']), $this->getCollectionFromDb($sql)));
 
         $die = $this->getBlackDie();
         $dieSpot = $die->location_arg;

@@ -22,7 +22,7 @@ trait SoloActionTrait {
 
         $this->persistDice($dice);
 
-        self::notifyAllPlayers('setTomDice', '', [
+        $this->notifyAllPlayers('setTomDice', '', [
             'dice' => $dice,
         ]);
 

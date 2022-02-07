@@ -39,7 +39,7 @@
 
         /*********** Place your code below:  ************/
 
-        $this->tpl['DAY'] = self::_("Day");
+        $this->tpl['DAY'] = $this->_("Day");
 
         /*********** Do not change anything below this line  ************/
   	}

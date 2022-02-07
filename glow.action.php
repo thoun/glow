@@ -27,176 +27,176 @@
     // Constructor: please do not modify
    	public function __default()
   	{
-  	    if( self::isArg( 'notifwindow') )
+  	    if( $this->isArg( 'notifwindow') )
   	    {
             $this->view = "common_notifwindow";
-  	        $this->viewArgs['table'] = self::getArg( "table", AT_posint, true );
+  	        $this->viewArgs['table'] = $this->getArg( "table", AT_posint, true );
   	    }
   	    else
   	    {
             $this->view = "glow_glow";
-            self::trace( "Complete reinitialization of board game" );
+            $this->trace( "Complete reinitialization of board game" );
       }
   	}
   	
     public function chooseAdventurer() {
-        self::setAjaxMode();     
+        $this->setAjaxMode();     
 
-        $id = self::getArg('id', AT_posint, true);
+        $id = $this->getArg('id', AT_posint, true);
 
         $this->game->chooseAdventurer($id);
 
-        self::ajaxResponse();
+        $this->ajaxResponse();
     }
 
     public function chooseTomDice() {
-        self::setAjaxMode();     
+        $this->setAjaxMode();     
 
-        $dice = self::getArg("dice", AT_numberlist, true);
+        $dice = $this->getArg("dice", AT_numberlist, true);
 
         $this->game->chooseTomDice(array_map(fn($idStr) => intval($idStr), explode(',', $dice)));
 
-        self::ajaxResponse();
+        $this->ajaxResponse();
     }
   	
     public function recruitCompanion() {
-        self::setAjaxMode();     
+        $this->setAjaxMode();     
 
-        $spot = self::getArg('spot', AT_posint, true);
+        $spot = $this->getArg('spot', AT_posint, true);
 
         $this->game->recruitCompanion($spot);
 
-        self::ajaxResponse();
+        $this->ajaxResponse();
     }
   	
     public function selectSketalDie() {
-        self::setAjaxMode();     
+        $this->setAjaxMode();     
 
-        $id = self::getArg('id', AT_posint, true);
+        $id = $this->getArg('id', AT_posint, true);
 
         $this->game->selectSketalDie($id);
 
-        self::ajaxResponse();
+        $this->ajaxResponse();
     }
   	
     public function moveBlackDie() {
-        self::setAjaxMode();     
+        $this->setAjaxMode();     
 
-        $spot = self::getArg('spot', AT_posint, true);
+        $spot = $this->getArg('spot', AT_posint, true);
 
         $this->game->moveBlackDie($spot);
 
-        self::ajaxResponse();
+        $this->ajaxResponse();
     }
   	
     public function removeCompanion() {
-        self::setAjaxMode();     
+        $this->setAjaxMode();     
 
-        $spot = self::getArg('spot', AT_posint, true);
+        $spot = $this->getArg('spot', AT_posint, true);
 
         $this->game->removeCompanion($spot);
 
-        self::ajaxResponse();
+        $this->ajaxResponse();
     }
 
     public function rollDice() {
-        self::setAjaxMode();     
+        $this->setAjaxMode();     
 
-        $idsStr = explode(',', self::getArg("ids", AT_numberlist, true));
+        $idsStr = explode(',', $this->getArg("ids", AT_numberlist, true));
         $ids = array_map(fn($idStr) => intval($idStr), $idsStr);
-        $cost = explode(',', self::getArg("cost", AT_numberlist, true)); // cost : [companion, tokens, score]
+        $cost = explode(',', $this->getArg("cost", AT_numberlist, true)); // cost : [companion, tokens, score]
         $this->game->rollDice($ids, $cost);
 
-        self::ajaxResponse();
+        $this->ajaxResponse();
 
     }
 
     public function changeDie() {
-        self::setAjaxMode();     
+        $this->setAjaxMode();     
 
-        $id = self::getArg('id', AT_posint, true);
-        $value = self::getArg('value', AT_posint, true);
-        $cost = explode(',', self::getArg("cost", AT_numberlist, true)); // cost : [companion, tokens, score]
+        $id = $this->getArg('id', AT_posint, true);
+        $value = $this->getArg('value', AT_posint, true);
+        $cost = explode(',', $this->getArg("cost", AT_numberlist, true)); // cost : [companion, tokens, score]
         $this->game->changeDie($id, $value, $cost);
 
-        self::ajaxResponse();
+        $this->ajaxResponse();
 
     }
   	
     public function keepDice() {
-        self::setAjaxMode();
+        $this->setAjaxMode();
 
         $this->game->keepDice();
 
-        self::ajaxResponse();
+        $this->ajaxResponse();
     }
     
     public function resurrect() {
-        self::setAjaxMode();
+        $this->setAjaxMode();
 
-        $id = self::getArg('id', AT_posint, true);
+        $id = $this->getArg('id', AT_posint, true);
 
         $this->game->resurrect($id);
 
-        self::ajaxResponse();
+        $this->ajaxResponse();
     } 
 
     public function skipResurrect() {
-        self::setAjaxMode();
+        $this->setAjaxMode();
 
         $this->game->skipResurrect();
 
-        self::ajaxResponse();
+        $this->ajaxResponse();
     } 
 
     public function resolveCard() {
-        self::setAjaxMode();
+        $this->setAjaxMode();
 
-        $type = self::getArg('type', AT_posint, true);
-        $id = self::getArg('id', AT_posint, true);
-        $dieId = self::getArg('dieId', AT_posint, false);
+        $type = $this->getArg('type', AT_posint, true);
+        $id = $this->getArg('id', AT_posint, true);
+        $dieId = $this->getArg('dieId', AT_posint, false);
 
         $this->game->resolveCard($type, $id, $dieId);
 
-        self::ajaxResponse();
+        $this->ajaxResponse();
     }
 
     public function resolveAll() {
-        self::setAjaxMode();
+        $this->setAjaxMode();
 
         $this->game->resolveAll();
 
-        self::ajaxResponse();
+        $this->ajaxResponse();
     }
 
     public function move() {
-        self::setAjaxMode();
+        $this->setAjaxMode();
 
-        $destination = self::getArg('destination', AT_posint, true);
-        $from = self::getArg('from', AT_posint, false);
-        $type = self::getArg('type', AT_posint, false);
-        $id = self::getArg('id', AT_posint, false);
+        $destination = $this->getArg('destination', AT_posint, true);
+        $from = $this->getArg('from', AT_posint, false);
+        $type = $this->getArg('type', AT_posint, false);
+        $id = $this->getArg('id', AT_posint, false);
 
         $this->game->move($destination, $from, $type, $id);
 
-        self::ajaxResponse();
+        $this->ajaxResponse();
     }
   	
     public function placeEncampment() {
-        self::setAjaxMode();
+        $this->setAjaxMode();
 
         $this->game->placeEncampment();
 
-        self::ajaxResponse();
+        $this->ajaxResponse();
     }
 
   	
     public function endTurn() {
-        self::setAjaxMode();
+        $this->setAjaxMode();
 
         $this->game->endTurn();
 
-        self::ajaxResponse();
+        $this->ajaxResponse();
     }
 
   }

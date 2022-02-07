@@ -11,14 +11,14 @@ trait DebugUtilTrait {
             return;
         }
 
-        //self::DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (44, 13, 14, 15, 16, 17)"); // Sketals
-        self::DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (10)"); // Xar'gok
-        //self::DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (41)"); // Cromaug
-        //self::DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (20)"); // Kaar
-        //self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (10, 20, 41, 44)");
-        //self::DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (37)");
-        //self::DbQuery("UPDATE companion SET `card_location` = 'cemetery' where `card_type_arg` in (44, 13, 14, 15, 16, 17)");
-        //self::DbQuery("UPDATE companion SET `card_location` = 'cemetery' where `card_type_arg` in (17)");
+        //$this->DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (44, 13, 14, 15, 16, 17)"); // Sketals
+        $this->DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (10)"); // Xar'gok
+        //$this->DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (41)"); // Cromaug
+        //$this->DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (20)"); // Kaar
+        //$this->DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (10, 20, 41, 44)");
+        //$this->DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (37)");
+        //$this->DbQuery("UPDATE companion SET `card_location` = 'cemetery' where `card_type_arg` in (44, 13, 14, 15, 16, 17)");
+        //$this->DbQuery("UPDATE companion SET `card_location` = 'cemetery' where `card_type_arg` in (17)");
         //$this->debugSetCompanionForPlayer(2343492, 41);
         //$this->debugSetPoints(19);
         $this->debugSetFootprints(30);
@@ -34,7 +34,7 @@ trait DebugUtilTrait {
     }
 
     private function debugSkipAdventurers() {
-        foreach(array_keys(self::loadPlayersBasicInfos()) as $playerId) {
+        foreach(array_keys($this->loadPlayersBasicInfos()) as $playerId) {
             $this->adventurers->pickCardForLocation('deck', 'player', $playerId);
         }
         //$this->gamestate->jumpToState(ST_START_ROUND);
@@ -51,12 +51,12 @@ trait DebugUtilTrait {
     }
 
     private function debugMoveMeeple($playerId, $spot, $index) {
-        $meepleId = intval(self::getUniqueValueFromDB("SELECT id from meeple WHERE `player_id` = $playerId LIMIT 1 OFFSET $index"));
-        self::DbQuery("UPDATE meeple SET `position` = $spot where `id` = $meepleId");
+        $meepleId = intval($this->getUniqueValueFromDB("SELECT id from meeple WHERE `player_id` = $playerId LIMIT 1 OFFSET $index"));
+        $this->DbQuery("UPDATE meeple SET `position` = $spot where `id` = $meepleId");
     }
 
     function debugSetFootprints($number) {
-        self::DbQuery("UPDATE player SET `player_footprints` = $number");
+        $this->DbQuery("UPDATE player SET `player_footprints` = $number");
     }
 
     function debug($debugData) {
@@ -83,18 +83,18 @@ trait DebugUtilTrait {
 		
 		foreach ($ids as $id) {
 			// basic tables
-			self::DbQuery("UPDATE player SET player_id=$sid WHERE player_id = $id" );
-			self::DbQuery("UPDATE global SET global_value=$sid WHERE global_value = $id" );
-			self::DbQuery("UPDATE stats SET stats_player_id=$sid WHERE stats_player_id = $id" );
+			$this->DbQuery("UPDATE player SET player_id=$sid WHERE player_id = $id" );
+			$this->DbQuery("UPDATE global SET global_value=$sid WHERE global_value = $id" );
+			$this->DbQuery("UPDATE stats SET stats_player_id=$sid WHERE stats_player_id = $id" );
 
 			// 'other' game specific tables. example:
 			// tables specific to your schema that use player_ids
-			self::DbQuery("UPDATE dice SET location_arg=$sid WHERE location_arg = $id" );
-			self::DbQuery("UPDATE meeple SET player_id=$sid WHERE player_id = $id" );
-			self::DbQuery("UPDATE adventurer SET card_location_arg=$sid WHERE card_location_arg = $id" );
-			self::DbQuery("UPDATE adventurer SET card_location_arg=$sid WHERE card_location_arg = $id" );
-			self::DbQuery("UPDATE companion SET card_location='player$sid' WHERE card_location='playersid'" );
-			self::DbQuery("UPDATE spells SET card_location_arg=$sid WHERE card_location_arg = $id" );
+			$this->DbQuery("UPDATE dice SET location_arg=$sid WHERE location_arg = $id" );
+			$this->DbQuery("UPDATE meeple SET player_id=$sid WHERE player_id = $id" );
+			$this->DbQuery("UPDATE adventurer SET card_location_arg=$sid WHERE card_location_arg = $id" );
+			$this->DbQuery("UPDATE adventurer SET card_location_arg=$sid WHERE card_location_arg = $id" );
+			$this->DbQuery("UPDATE companion SET card_location='player$sid' WHERE card_location='playersid'" );
+			$this->DbQuery("UPDATE spells SET card_location_arg=$sid WHERE card_location_arg = $id" );
 			
 			++$sid;
 		}

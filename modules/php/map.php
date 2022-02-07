@@ -26,7 +26,7 @@ trait MapTrait {
         }
 
         $sql .= implode(',', $values);
-        self::DbQuery($sql);
+        $this->DbQuery($sql);
     }    
 
     function getPlayerMeeples(int $playerId, $type = null) {
@@ -34,7 +34,7 @@ trait MapTrait {
         if ($type !== null) {
             $sql .= " AND `type` = $type";
         }
-        $dbMeeples = self::getCollectionFromDB($sql);
+        $dbMeeples = $this->getCollectionFromDB($sql);
         return array_map(fn($dbMeeples) => new Meeple($dbMeeples), array_values($dbMeeples));
     }
 
@@ -47,19 +47,19 @@ trait MapTrait {
     }
 
     function movePlayerCompany(int $playerId, int $position, int $from) {
-        self::DbQuery("UPDATE meeple SET `position` = $position WHERE `player_id` = $playerId AND `type` = 1");
+        $this->DbQuery("UPDATE meeple SET `position` = $position WHERE `player_id` = $playerId AND `type` = 1");
         
         $this->addVisitedMapSpot($playerId, $from);
         
-        self::notifyAllPlayers('meepleMoved', '', [
+        $this->notifyAllPlayers('meepleMoved', '', [
             'meeple' => $this->getPlayerCompany($playerId),
         ]);
     }
 
     function movePlayerEncampment(int $playerId, int $position) {
-        self::DbQuery("UPDATE meeple SET `position` = $position WHERE `player_id` = $playerId AND `type` = 2");
+        $this->DbQuery("UPDATE meeple SET `position` = $position WHERE `player_id` = $playerId AND `type` = 2");
         
-        self::notifyAllPlayers('meepleMoved', '', [
+        $this->notifyAllPlayers('meepleMoved', '', [
             'meeple' => $this->getPlayerEncampment($playerId),
         ]);
     }
@@ -73,9 +73,9 @@ trait MapTrait {
         if ($from != null) {
             $sql .= " AND `position` = $from";
         }
-        self::DbQuery($sql);
+        $this->DbQuery($sql);
         
-        self::notifyAllPlayers('meepleMoved', '', [
+        $this->notifyAllPlayers('meepleMoved', '', [
             'meeple' => $boat,
         ]);
     }
@@ -144,7 +144,7 @@ trait MapTrait {
     }
 
     function getVisitedMapSpots(int $playerId) {
-        $json_obj = self::getUniqueValueFromDB("SELECT `visited_spots` FROM `player` WHERE `player_id` = $playerId");
+        $json_obj = $this->getUniqueValueFromDB("SELECT `visited_spots` FROM `player` WHERE `player_id` = $playerId");
         if ($json_obj) {
             return json_decode($json_obj, true);
         } else {
@@ -156,7 +156,7 @@ trait MapTrait {
         $visitedSpots = $this->getVisitedMapSpots($playerId);
         $visitedSpots[] = $position;
         $jsonObj = json_encode($visitedSpots);
-        self::DbQuery("UPDATE `player` SET `visited_spots` = '$jsonObj' WHERE `player_id` = $playerId");
+        $this->DbQuery("UPDATE `player` SET `visited_spots` = '$jsonObj' WHERE `player_id` = $playerId");
     }
 
     private function canPayFootprints(int $playerId, array $costForPlayer) {

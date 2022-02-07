@@ -5,6 +5,8 @@
  */
 define('ST_BGA_GAME_SETUP', 1);
 
+define('ST_PREPARE_ADVENTURER_CHOICE', 5);
+
 define('ST_PLAYER_CHOOSE_ADVENTURER', 10);
 define('ST_NEXT_PLAYER_CHOOSE_ADVENTURER', 11);
 define('ST_PLAYER_CHOOSE_TOM_DICE', 12);
@@ -49,6 +51,7 @@ define('SOLO_DECK', 'SOLO_DECK');
  * Options
  */
 define('BOARD_SIDE', 'BOARD_SIDE');
+define('RANDOM_ADVENTURERS', 'RANDOM_ADVENTURERS');
 
 /*
  * Cards

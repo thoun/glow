@@ -58,6 +58,7 @@ class Glow extends Table {
             SOLO_DECK => 12,
             
             BOARD_SIDE => 100,
+            RANDOM_ADVENTURERS => 101,
         ]); 
 		
         $this->adventurers = $this->getNew("module.common.deck");

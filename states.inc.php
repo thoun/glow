@@ -37,7 +37,7 @@
    _ action: name of the method to call when this game state become the current game state. Usually, the
              action method is prefixed by "st" (ex: "stMyGameStateName").
    _ possibleactions: array that specify possible player actions on this step. It allows you to use "checkAction"
-                      method on both client side (Javacript: this.checkAction) and server side (PHP: self::checkAction).
+                      method on both client side (Javacript: this.checkAction) and server side (PHP: $this->checkAction).
    _ transitions: the transitions are the possible paths to go from a game state to another. You must name
                   transitions in order to use transition names in "nextState" PHP method, and use IDs to
                   specify the next game state for each transition.
@@ -59,7 +59,21 @@ $basicGameStates = [
         "description" => clienttranslate("Game setup"),
         "type" => "manager",
         "action" => "stGameSetup",
-        "transitions" => [ "" => ST_PLAYER_CHOOSE_ADVENTURER ]
+        "transitions" => [ 
+            "" => ST_PREPARE_ADVENTURER_CHOICE,
+        ]
+    ],
+
+    ST_PREPARE_ADVENTURER_CHOICE => [
+        "name" => "prepareAdventurerChoice",
+        "description" => "",
+        "type" => "game",
+        "action" => "stPrepareAdventurerChoice",
+        "transitions" => [
+            "chooseAdventurer" => ST_PLAYER_CHOOSE_ADVENTURER,
+            "recruit" => ST_START_ROUND,
+            "chooseTomDice" => ST_PLAYER_CHOOSE_TOM_DICE,
+        ],
     ],
 
     ST_NEXT_PLAYER_CHOOSE_ADVENTURER => [

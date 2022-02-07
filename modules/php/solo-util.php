@@ -28,11 +28,11 @@ trait SoloUtilTrait {
 
     function setTom(object $tom) {
         $jsonObj = json_encode($tom);
-        self::DbQuery("INSERT INTO `global_variables`(`name`, `value`)  VALUES ('TOM', '$jsonObj') ON DUPLICATE KEY UPDATE `value` = '$jsonObj'");
+        $this->DbQuery("INSERT INTO `global_variables`(`name`, `value`)  VALUES ('TOM', '$jsonObj') ON DUPLICATE KEY UPDATE `value` = '$jsonObj'");
     }
 
     function getTom() {
-        $json_obj = self::getUniqueValueFromDB("SELECT `value` FROM `global_variables` where `name` = 'TOM'");
+        $json_obj = $this->getUniqueValueFromDB("SELECT `value` FROM `global_variables` where `name` = 'TOM'");
         if ($json_obj) {
             $tom = json_decode($json_obj);
             return $tom;
@@ -66,7 +66,7 @@ trait SoloUtilTrait {
 
         $this->setTom($tom);
 
-        self::notifyAllPlayers('points', $message, $params + [
+        $this->notifyAllPlayers('points', $message, $params + [
             'playerId' => 0,
             'player_name' => 'Tom',
             'points' => $incScore,
@@ -121,7 +121,7 @@ trait SoloUtilTrait {
                 $this->moveDice([$idie], 'meeting', $idie->value);
             }
 
-            self::notifyAllPlayers('moveBlackDie', '', [
+            $this->notifyAllPlayers('moveBlackDie', '', [
                 'die' => $idie,
             ]);
         }
@@ -248,7 +248,7 @@ trait SoloUtilTrait {
         if (intval($this->soloTiles->countCardInLocation('deck')) == 0) {
             $day = intval($this->getGameStateValue(SOLO_DECK));
             if ($day == 1) { // we finish solo tiles for the first time
-                self::setGameStateValue(SOLO_DECK, 2);
+                $this->setGameStateValue(SOLO_DECK, 2);
 
                 $this->soloTiles->moveAllCardsInLocation('discard', 'deck');
                 $this->soloTiles->shuffle('deck');
@@ -257,14 +257,14 @@ trait SoloUtilTrait {
                 $this->companions->moveAllCardsInLocation('deck', 'discard');
                 $this->companions->moveAllCardsInLocation('deckB', 'deck');
             } else if ($day == 2) { // we finish solo tiles for the second time
-                self::setGameStateValue(SOLO_DECK, 3);
+                $this->setGameStateValue(SOLO_DECK, 3);
             }
         }
 
         $newSoloTileDb = $this->soloTiles->pickCardForLocation('deck', 'meeting', $spot);
         $newSoloTile = $newSoloTileDb != null ? $this->getSoloTileFromDb($newSoloTileDb) : null;
 
-        self::notifyAllPlayers('updateSoloTiles', '', [
+        $this->notifyAllPlayers('updateSoloTiles', '', [
             'topDeckType' => $this->getTopDeckType(),
             'topDeckBType' => intval($this->companions->countCardInLocation('deckB')) > 0 ? 2 : 0,
             'discardedSoloTiles' => intval($this->soloTiles->countCardInLocation('discard')),

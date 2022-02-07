@@ -10,12 +10,8 @@ trait ActionTrait {
         Each time a player is doing some game action, one of the methods below is called.
         (note: each method below must match an input method in nicodemus.action.php)
     */
-    
-    public function chooseAdventurer(int $id) {
-        self::checkAction('chooseAdventurer'); 
-        
-        $playerId = intval(self::getActivePlayerId());
 
+    public function applyChooseAdventurer(int $playerId, int $id, bool $soloMode) {
         $adventurer = $this->getAdventurerFromDb($this->adventurers->getCard($id));
 
         if ($adventurer->location != 'deck') {
@@ -29,10 +25,10 @@ trait ActionTrait {
         $this->moveDice($dice, 'player', $playerId);
 
         $newPlayerColor = $this->ADVENTURERS_COLORS[$adventurer->color];
-        self::DbQuery("UPDATE player SET `player_color` = '$newPlayerColor' WHERE player_id = $playerId");
-        self::reloadPlayersBasicInfos();
+        $this->DbQuery("UPDATE player SET `player_color` = '$newPlayerColor' WHERE player_id = $playerId");
+        $this->reloadPlayersBasicInfos();
 
-        self::notifyAllPlayers('chosenAdventurer', clienttranslate('${player_name} chooses adventurer ${adventurerName}'), [
+        $this->notifyAllPlayers('chosenAdventurer', clienttranslate('${player_name} chooses adventurer ${adventurerName}'), [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'adventurer' => $adventurer,
@@ -41,10 +37,10 @@ trait ActionTrait {
             'newPlayerColor' => $newPlayerColor,
         ]);
 
-        self::setStat(1, $adventurer->name);
-        self::setStat(1, $adventurer->name, $playerId);
+        $this->setStat(1, $adventurer->name);
+        $this->setStat(1, $adventurer->name, $playerId);
 
-        if ($this->isSoloMode()) {
+        if ($soloMode) {
             $movedDiceColorsToTable = [];
 
             if ($adventurer->color != 6) {
@@ -57,11 +53,22 @@ trait ActionTrait {
             $movedDiceToTable = array_map(fn($color) => $this->getBigDiceByColor($color, 1)[0], $movedDiceColorsToTable);
 
             $this->moveDice($movedDiceToTable, 'table');
-            self::notifyAllPlayers('setTableDice', '', [
+            $this->notifyAllPlayers('setTableDice', '', [
                 'dice' => $movedDiceToTable,
             ]);
+        }
+    }
+    
+    public function chooseAdventurer(int $id) {
+        $this->checkAction('chooseAdventurer'); 
+        
+        $playerId = intval($this->getActivePlayerId());
+        $soloMode = $this->isSoloMode();
 
-            self::giveExtraTime($playerId);
+        $this->applyChooseAdventurer($playerId, $id, $soloMode);
+
+        if ($this->isSoloMode()) {
+            $this->giveExtraTime($playerId);
             $this->gamestate->nextState('chooseTomDice');
         } else {
             $this->gamestate->nextState('nextPlayer');
@@ -71,9 +78,9 @@ trait ActionTrait {
     public function applyRecruitCompanion(int $playerId, object $companion, $spot = null) {
         $fromCemetery = $companion->location == 'cemetery' ? 5 : 0;
         $companion->location = 'player'.$playerId;
-        $companion->location_arg = intval(self::getGameStateValue(DAY)) * 10 + $fromCemetery;
+        $companion->location_arg = intval($this->getGameStateValue(DAY)) * 10 + $fromCemetery;
         $this->companions->moveCard($companion->id, $companion->location, $companion->location_arg);
-        self::DbQuery("UPDATE player SET `player_recruit_day` = (".$this->getDaySql().") where `player_id` = $playerId");  
+        $this->DbQuery("UPDATE player SET `player_recruit_day` = (".$this->getDaySql().") where `player_id` = $playerId");  
 
         $dice = null;
         if ($spot !== null) {
@@ -82,12 +89,12 @@ trait ActionTrait {
             if ($count > 0) {
                 $this->moveDice($dice, 'player', $playerId);
 
-                self::incStat($count, 'collectedSmallDice');
-                self::incStat($count, 'collectedSmallDice', $playerId);
+                $this->incStat($count, 'collectedSmallDice');
+                $this->incStat($count, 'collectedSmallDice', $playerId);
             }
         }
 
-        self::notifyAllPlayers('chosenCompanion', clienttranslate('${player_name} chooses companion ${companionName}'), [
+        $this->notifyAllPlayers('chosenCompanion', clienttranslate('${player_name} chooses companion ${companionName}'), [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'companion' => $companion,
@@ -111,7 +118,7 @@ trait ActionTrait {
 
                     $multi = ($this->gamestate->state()['name']) == 'resurrect';
                     if ($multi) {
-                        self::DbQuery("UPDATE dice SET `used` = true WHERE die_id = $die->id");
+                        $this->DbQuery("UPDATE dice SET `used` = true WHERE die_id = $die->id");
                         $die->used = true;
                     }
 
@@ -128,7 +135,7 @@ trait ActionTrait {
                 if ($spot !== null) {
                     $availableSpots = array_values(array_map(fn($dbLine) => 
                         intval($dbLine['card_location_arg'])
-                    , self::getCollectionFromDb("select `card_location_arg` from `companion` where `card_location` = 'meeting'")));
+                    , $this->getCollectionFromDb("select `card_location_arg` from `companion` where `card_location` = 'meeting'")));
                 }
 
                 $dieSpot = $availableSpots[bga_rand(0, count($availableSpots) - 1)];
@@ -137,7 +144,7 @@ trait ActionTrait {
                 $this->persistDice([$die]);
                 $this->moveDice([$die], 'meeting', $dieSpot);
 
-                self::notifyAllPlayers('moveBlackDie', clienttranslate('${player_name} adds black die with ${companionName}'), [
+                $this->notifyAllPlayers('moveBlackDie', clienttranslate('${player_name} adds black die with ${companionName}'), [
                     'playerId' => $playerId,
                     'player_name' => $this->getPlayerName($playerId),
                     'companionName' => $companion->name,
@@ -148,7 +155,7 @@ trait ActionTrait {
     }
 
     function redirectAfterRecruit() {
-        if ($this->getPlayerCount() == 2 && intval(self::getActivePlayerId()) == intval(self::getGameStateValue(FIRST_PLAYER))) {
+        if ($this->getPlayerCount() == 2 && intval($this->getActivePlayerId()) == intval($this->getGameStateValue(FIRST_PLAYER))) {
             $this->gamestate->nextState('removeCompanion');
         } else {
             $this->gamestate->nextState('nextPlayer');
@@ -158,14 +165,14 @@ trait ActionTrait {
     
     public function recruitCompanion(int $spot, $ignoreCheck = false) {
         if (!$ignoreCheck) {
-            self::checkAction('recruitCompanion'); 
+            $this->checkAction('recruitCompanion'); 
         }
 
         if ($spot < 1 || $spot > 5) {
             throw new BgaUserException("Not a valid spot");
         }
         
-        $playerId = self::getActivePlayerId();
+        $playerId = $this->getActivePlayerId();
         $solo = $this->isSoloMode();
         if ($solo) {
             $soloTile = $this->getSoloTilesFromDb($this->soloTiles->getCardsInLocation('meeting', $spot))[0];
@@ -203,7 +210,7 @@ trait ActionTrait {
     }
 
     public function selectSketalDie(int $id) {
-        self::checkAction('selectSketalDie');
+        $this->checkAction('selectSketalDie');
         $multi = ($this->gamestate->state()['name']) == 'selectSketalDieMulti';
 
         $die = $this->getDieById($id);
@@ -212,10 +219,10 @@ trait ActionTrait {
             throw new BgaUserException("Die not available");
         }
         
-        $playerId = $multi ? self::getCurrentPlayerId() : self::getActivePlayerId();
+        $playerId = $multi ? $this->getCurrentPlayerId() : $this->getActivePlayerId();
 
         if ($multi) {
-            self::DbQuery("UPDATE dice SET `used` = true WHERE die_id = $die->id");
+            $this->DbQuery("UPDATE dice SET `used` = true WHERE die_id = $die->id");
             $die->used = true;
         }
         
@@ -229,7 +236,7 @@ trait ActionTrait {
     }
     
     public function moveBlackDie(int $spot) {
-        self::checkAction('moveBlackDie'); 
+        $this->checkAction('moveBlackDie'); 
 
         $playerId = $this->getCurrentPlayerId();
 
@@ -244,7 +251,7 @@ trait ActionTrait {
         $this->persistDice([$die]);
         $this->moveDice([$die], 'meeting', $spot);
 
-        self::notifyAllPlayers('moveBlackDie', clienttranslate('${player_name} moves black die'), [
+        $this->notifyAllPlayers('moveBlackDie', clienttranslate('${player_name} moves black die'), [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'die' => $die,
@@ -254,7 +261,7 @@ trait ActionTrait {
     }
     
     public function removeCompanion(int $spot) {
-        self::checkAction('removeCompanion'); 
+        $this->checkAction('removeCompanion'); 
 
         $playerId = $this->getCurrentPlayerId();
 
@@ -275,7 +282,7 @@ trait ActionTrait {
 
         $this->sendToCemetery($playerId, $companion->id);
 
-        self::notifyAllPlayers('removeCompanion', clienttranslate('${player_name} removes companion ${companionName}'), [
+        $this->notifyAllPlayers('removeCompanion', clienttranslate('${player_name} removes companion ${companionName}'), [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'companion' => $companion,
@@ -287,7 +294,7 @@ trait ActionTrait {
     }
 
     public function rollDice(array $ids, array $cost) {
-        self::checkAction('rollDice');
+        $this->checkAction('rollDice');
 
         $playerId = $this->getCurrentPlayerId();
 
@@ -306,12 +313,12 @@ trait ActionTrait {
 
         $this->rollPlayerDice($playerId, $ids, clienttranslate('${player_name} rerolls dice ${originalDice} and gets ${rolledDice}'), $params);
 
-        self::incStat(count($ids), 'rerolledDice');
-        self::incStat(count($ids), 'rerolledDice', $playerId);
+        $this->incStat(count($ids), 'rerolledDice');
+        $this->incStat(count($ids), 'rerolledDice', $playerId);
     }
 
     public function changeDie(int $id, int $face, array $cost) {
-        self::checkAction('changeDie');
+        $this->checkAction('changeDie');
 
         $playerId = intval($this->getCurrentPlayerId());
 
@@ -327,7 +334,7 @@ trait ActionTrait {
 
         $this->persistDice([$die]);
 
-        self::notifyAllPlayers('diceChanged', clienttranslate('${player_name} change die ${originalDice} to ${rolledDice}'), [
+        $this->notifyAllPlayers('diceChanged', clienttranslate('${player_name} change die ${originalDice} to ${rolledDice}'), [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'dice' => [$die],
@@ -336,23 +343,23 @@ trait ActionTrait {
             'rolledDice' => $rolledDiceStr,
         ]);
 
-        self::incStat(1, 'changedDice');
-        self::incStat(1, 'changedDice', $playerId);
+        $this->incStat(1, 'changedDice');
+        $this->incStat(1, 'changedDice', $playerId);
     }
 
     public function keepDice() {
-        self::checkAction('keepDice');
+        $this->checkAction('keepDice');
 
         $playerId = $this->getCurrentPlayerId();
 
-        self::giveExtraTime($playerId);
+        $this->giveExtraTime($playerId);
         $this->gamestate->setPlayerNonMultiactive($playerId, 'keepDice');
     }
 
     
     
     public function resurrect(int $id) {
-        self::checkAction('resurrect');
+        $this->checkAction('resurrect');
 
         $playerId = intval($this->getCurrentPlayerId());
 
@@ -372,7 +379,7 @@ trait ActionTrait {
     } 
 
     public function skipResurrect() {
-        self::checkAction('skipResurrect');
+        $this->checkAction('skipResurrect');
 
         $playerId = intval($this->getCurrentPlayerId());
 
@@ -384,18 +391,18 @@ trait ActionTrait {
 
         $resolveCardsForPlayer = $this->argResolveCardsForPlayer($playerId);
      
-        self::notifyPlayer($playerId, 'resolveCardUpdate', '', [
+        $this->notifyPlayer($playerId, 'resolveCardUpdate', '', [
             'resolveCardsForPlayer' => $resolveCardsForPlayer,
         ]);
 
-        self::incStat(1, 'resolvedCards');
-        self::incStat(1, 'resolvedCards', $playerId);
+        $this->incStat(1, 'resolvedCards');
+        $this->incStat(1, 'resolvedCards', $playerId);
 
         return $resolveCardsForPlayer;
     }
 
     public function resolveCard(int $cardType, int $id, $dieId = 0) {
-        self::checkAction('resolveCard');
+        $this->checkAction('resolveCard');
 
         $playerId = intval($this->getCurrentPlayerId());
         
@@ -408,12 +415,12 @@ trait ActionTrait {
         
         if (count($resolveCardsForPlayer->remainingEffects) === 0) {
             $this->gamestate->setPlayerNonMultiactive($playerId, 'move');
-            self::giveExtraTime($playerId);
+            $this->giveExtraTime($playerId);
         }
     }
 
     public function resolveAll() {
-        self::checkAction('resolveAll');
+        $this->checkAction('resolveAll');
 
         $playerId = intval($this->getCurrentPlayerId());
 
@@ -425,7 +432,7 @@ trait ActionTrait {
         }
         
         $this->gamestate->setPlayerNonMultiactive($playerId, 'move');
-        self::giveExtraTime($playerId);
+        $this->giveExtraTime($playerId);
     }
 
     private function applyMove(int $playerId, object $route) {
@@ -437,9 +444,9 @@ trait ActionTrait {
                 $dice = $this->getDiceByLocation('player', $playerId, false);
                 $die = $this->array_find($dice, fn($die) => $die->value == $effect);
                 if ($die != null) {
-                    self::DbQuery("UPDATE dice SET `used` = true WHERE die_id = $die->id");
+                    $this->DbQuery("UPDATE dice SET `used` = true WHERE die_id = $die->id");
 
-                    self::notifyAllPlayers('usedDice', '', [
+                    $this->notifyAllPlayers('usedDice', '', [
                         'playerId' => $playerId,
                         'dieId' => $die->id,
                     ]);
@@ -455,8 +462,8 @@ trait ActionTrait {
             if (!$this->array_some($destination->effects, fn($effect) => $effect < -20 && $effect > -30)) {
                 // we count footprints as joker only if we are not in a spot that require footprint cost
                 $footprintCost = -($footprintEffect + 20);
-                self::incStat($footprintCost, 'footprintsAsJokers');
-                self::incStat($footprintCost, 'footprintsAsJokers', $playerId);
+                $this->incStat($footprintCost, 'footprintsAsJokers');
+                $this->incStat($footprintCost, 'footprintsAsJokers', $playerId);
             }
         }
 
@@ -467,7 +474,7 @@ trait ActionTrait {
             if (count($args->possibleRoutes) == 0 && $args->canSettle != true) {
                 $this->applyEndTurn($playerId);
             } else {                
-                self::notifyPlayer($playerId, 'moveUpdate', '', [
+                $this->notifyPlayer($playerId, 'moveUpdate', '', [
                     'args' => $args,
                 ]);
             }
@@ -477,13 +484,13 @@ trait ActionTrait {
             $this->applyEndTurn($playerId);
         }
 
-        self::incStat(1, 'moves');
-        self::incStat(1, 'moves', $playerId);
+        $this->incStat(1, 'moves');
+        $this->incStat(1, 'moves', $playerId);
     }
 
     public function move(int $destination, $from = null, $type = null, $id = null) {
         // TODO add die id for companion
-        self::checkAction('move');
+        $this->checkAction('move');
 
         $playerId = intval($this->getCurrentPlayerId());
 
@@ -504,7 +511,7 @@ trait ActionTrait {
 
                 $this->sendToCemetery($playerId, $companion->id);
 
-                self::notifyAllPlayers('removeCompanion', clienttranslate('${player_name} removes companion ${companionName}'), [
+                $this->notifyAllPlayers('removeCompanion', clienttranslate('${player_name} removes companion ${companionName}'), [
                     'playerId' => $playerId,
                     'player_name' => $this->getPlayerName($playerId),
                     'companion' => $companion,
@@ -526,18 +533,18 @@ trait ActionTrait {
 
     private function applyEndTurn(int $playerId) {
         // updates possible routes -> no more possible route as it is end of turn, so empty array
-        self::notifyPlayer($playerId, 'moveUpdate', '', [
+        $this->notifyPlayer($playerId, 'moveUpdate', '', [
             'args' => [],
         ]);
 
         $this->replaceSmallDiceOnMeetingTrack($playerId);
 
         $this->gamestate->setPlayerNonMultiactive($playerId, 'endRound');
-        self::giveExtraTime($playerId);
+        $this->giveExtraTime($playerId);
     }
   	
     public function placeEncampment() {
-        self::checkAction('placeEncampment');
+        $this->checkAction('placeEncampment');
 
         $playerId = intval($this->getCurrentPlayerId());
         $position = $this->getPlayerCompany($playerId)->position;
@@ -552,7 +559,7 @@ trait ActionTrait {
 
   	
     public function endTurn() {
-        self::checkAction('endTurn');
+        $this->checkAction('endTurn');
 
         $playerId = intval($this->getCurrentPlayerId());
 

@@ -53,7 +53,7 @@ trait UtilTrait {
     }
 
     function getFirstPlayerId() {
-        return intval(self::getGameStateValue(FIRST_PLAYER));
+        return intval($this->getGameStateValue(FIRST_PLAYER));
     }
 
     function getPlayersIds() {
@@ -65,7 +65,7 @@ trait UtilTrait {
     }
 
     function getSide() {
-        return intval(self::getGameStateValue(BOARD_SIDE));
+        return intval($this->getGameStateValue(BOARD_SIDE));
     }
 
     function createDice(bool $solo) {
@@ -90,12 +90,12 @@ trait UtilTrait {
         }
 
         $sql .= implode(',', $values);
-        self::DbQuery($sql);
+        $this->DbQuery($sql);
     }
 
     function persistDice(array $dice) {
         foreach($dice as $idie) {
-            self::DbQuery("UPDATE dice SET `die_face` = $idie->face WHERE `die_id` = $idie->id");
+            $this->DbQuery("UPDATE dice SET `die_face` = $idie->face WHERE `die_id` = $idie->id");
         }
     }
 
@@ -148,13 +148,13 @@ trait UtilTrait {
         if ($ignoreBlack) {
             $sql .= " AND `color` <> 8";
         } 
-        $dbDices = self::getCollectionFromDB($sql);
+        $dbDices = $this->getCollectionFromDB($sql);
         return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices));
     }
     
     function getBigDiceByColor(int $color, int $limit) {
         $sql = "SELECT * FROM dice WHERE `location` = 'deck' AND `color` = $color AND `small` = false LIMIT $limit";
-        $dbDices = self::getCollectionFromDB($sql);
+        $dbDices = $this->getCollectionFromDB($sql);
         return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices));
     }
     
@@ -166,7 +166,7 @@ trait UtilTrait {
         if ($used !== null) {
             $sql .= " AND `used` = ".json_encode($used);
         }
-        $dbDices = self::getCollectionFromDB($sql);
+        $dbDices = $this->getCollectionFromDB($sql);
         return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices));
     }
 
@@ -176,37 +176,37 @@ trait UtilTrait {
         }
 
         $sql = "SELECT * FROM dice WHERE `die_id` IN (".implode(',', $ids).")";
-        $dbDices = self::getCollectionFromDB($sql);
+        $dbDices = $this->getCollectionFromDB($sql);
         return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices));
     }
 
     function getDieById(int $id) {
         $sql = "SELECT * FROM dice WHERE `die_id` = $id";
-        $dbDices = self::getCollectionFromDB($sql);
+        $dbDices = $this->getCollectionFromDB($sql);
         return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices))[0];
     }
     
     function getAvailableBigDice() {
         $sql = "SELECT * FROM dice WHERE `location` = 'table' AND `small` = false";
-        $dbDices = self::getCollectionFromDB($sql);
+        $dbDices = $this->getCollectionFromDB($sql);
         return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices));
     }
 
     function getBlackDie() {
         $sql = "SELECT * FROM dice WHERE `color` = 8";
-        $dbDices = self::getCollectionFromDB($sql);
+        $dbDices = $this->getCollectionFromDB($sql);
         return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices))[0];
     }
     
     function getPlayerBigDiceByColor(int $playerId, int $dieColor) {
         $sql = "SELECT * FROM dice WHERE `location` = 'player' AND `location_arg` = $playerId AND `color` = $dieColor AND `small` = false";
-        $dbDices = self::getCollectionFromDB($sql);
+        $dbDices = $this->getCollectionFromDB($sql);
         return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices));
     }
 
     function moveDice(array $dice, string $location, int $locationArg = 0) {
         $ids = array_map(fn($idie) => $idie->id, $dice);
-        self::DbQuery("UPDATE dice SET `location` = '$location', `location_arg` = $locationArg WHERE `die_id` IN (".implode(',', $ids).")");
+        $this->DbQuery("UPDATE dice SET `location` = '$location', `location_arg` = $locationArg WHERE `die_id` IN (".implode(',', $ids).")");
         foreach($dice as &$die) {
             $die->location = $location;
             $die->location_arg = $locationArg;
@@ -214,19 +214,19 @@ trait UtilTrait {
     }
 
     function getPlayerCount() {
-        return intval(self::getUniqueValueFromDB("SELECT count(*) FROM player"));
+        return intval($this->getUniqueValueFromDB("SELECT count(*) FROM player"));
     }
 
     function getPlayerName(int $playerId) {
         if ($playerId == 0) {
             return 'Tom';
         } else {
-            return self::getUniqueValueFromDb("SELECT player_name FROM player WHERE player_id = $playerId");
+            return $this->getUniqueValueFromDb("SELECT player_name FROM player WHERE player_id = $playerId");
         }
     }
 
     function getPlayerScore(int $playerId) {
-        return intval(self::getUniqueValueFromDB("SELECT player_score FROM player where `player_id` = $playerId"));
+        return intval($this->getUniqueValueFromDB("SELECT player_score FROM player where `player_id` = $playerId"));
     }
 
     function incPlayerScore(int $playerId, int $incScore, $message = '', $params = []) {
@@ -235,10 +235,10 @@ trait UtilTrait {
             return;
         }
         
-        self::DbQuery("UPDATE player SET player_score = player_score + $incScore WHERE player_id = $playerId");
+        $this->DbQuery("UPDATE player SET player_score = player_score + $incScore WHERE player_id = $playerId");
         
 
-        self::notifyAllPlayers('points', $message, $params + [
+        $this->notifyAllPlayers('points', $message, $params + [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'points' => $incScore,
@@ -249,9 +249,9 @@ trait UtilTrait {
 
     function decPlayerScore(int $playerId, int $decScore, $message = '', $params = []) {
         $newScore = max(0, $this->getPlayerScore($playerId) - $decScore);
-        self::DbQuery("UPDATE player SET player_score = $newScore WHERE player_id = $playerId");
+        $this->DbQuery("UPDATE player SET player_score = $newScore WHERE player_id = $playerId");
 
-        self::notifyAllPlayers('points', $message, $params + [
+        $this->notifyAllPlayers('points', $message, $params + [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'points' => -$decScore,
@@ -267,13 +267,13 @@ trait UtilTrait {
             return $this->getTomRerolls();
         }
 
-        return intval(self::getUniqueValueFromDB("SELECT `player_rerolls` FROM player where `player_id` = $playerId"));
+        return intval($this->getUniqueValueFromDB("SELECT `player_rerolls` FROM player where `player_id` = $playerId"));
     }
 
     function addPlayerRerolls(int $playerId, int $rerolls, $message = '', $params = []) {
-        self::DbQuery("UPDATE player SET `player_rerolls` = `player_rerolls` + $rerolls WHERE `player_id` = $playerId");
+        $this->DbQuery("UPDATE player SET `player_rerolls` = `player_rerolls` + $rerolls WHERE `player_id` = $playerId");
 
-        self::notifyAllPlayers('rerolls', $message, $params + [
+        $this->notifyAllPlayers('rerolls', $message, $params + [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'rerolls' => $rerolls,
@@ -282,9 +282,9 @@ trait UtilTrait {
 
     function removePlayerRerolls(int $playerId, int $dec, $message = '', $params = []) {
         $newValue = max(0, $this->getPlayerRerolls($playerId) - $dec);
-        self::DbQuery("UPDATE player SET `player_rerolls` = $newValue WHERE player_id = $playerId");
+        $this->DbQuery("UPDATE player SET `player_rerolls` = $newValue WHERE player_id = $playerId");
 
-        self::notifyAllPlayers('rerolls', $message, $params + [
+        $this->notifyAllPlayers('rerolls', $message, $params + [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'rerolls' => -$dec,
@@ -298,17 +298,17 @@ trait UtilTrait {
             return $this->getTomFootprints();
         }
 
-        return intval(self::getUniqueValueFromDB("SELECT `player_footprints` FROM player where `player_id` = $playerId"));
+        return intval($this->getUniqueValueFromDB("SELECT `player_footprints` FROM player where `player_id` = $playerId"));
     }
 
     function addPlayerFootprints(int $playerId, int $footprints, $message = '', $params = []) {
         if ($playerId == 0) {
             $this->addTomFootprints($footprints);
         } else {
-            self::DbQuery("UPDATE player SET `player_footprints` = `player_footprints` + $footprints WHERE `player_id` = $playerId");
+            $this->DbQuery("UPDATE player SET `player_footprints` = `player_footprints` + $footprints WHERE `player_id` = $playerId");
         }
 
-        self::notifyAllPlayers('footprints', $message, $params + [
+        $this->notifyAllPlayers('footprints', $message, $params + [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'footprints' => $footprints,
@@ -321,10 +321,10 @@ trait UtilTrait {
             $newValue = $this->removeTomFootprints($dec);
         } else {
             $newValue = max(0, $this->getPlayerFootprints($playerId) - $dec);
-            self::DbQuery("UPDATE player SET `player_footprints` = $newValue WHERE player_id = $playerId");
+            $this->DbQuery("UPDATE player SET `player_footprints` = $newValue WHERE player_id = $playerId");
         }
 
-        self::notifyAllPlayers('footprints', $message, $params + [
+        $this->notifyAllPlayers('footprints', $message, $params + [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'footprints' => -$dec,
@@ -339,13 +339,13 @@ trait UtilTrait {
             return $this->getTomFireflies();
         }
 
-        return intval(self::getUniqueValueFromDB("SELECT `player_fireflies` FROM player where `player_id` = $playerId"));
+        return intval($this->getUniqueValueFromDB("SELECT `player_fireflies` FROM player where `player_id` = $playerId"));
     }
 
     function addPlayerFireflies(int $playerId, int $fireflies, $message = '', $params = []) {
-        self::DbQuery("UPDATE player SET `player_fireflies` = `player_fireflies` + $fireflies WHERE `player_id` = $playerId");
+        $this->DbQuery("UPDATE player SET `player_fireflies` = `player_fireflies` + $fireflies WHERE `player_id` = $playerId");
 
-        self::notifyAllPlayers('fireflies', $message, $params + [
+        $this->notifyAllPlayers('fireflies', $message, $params + [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'fireflies' => $fireflies,
@@ -388,7 +388,7 @@ trait UtilTrait {
 
             }
             // set face 1 (A) before face 2 (B)
-            self::DbQuery("UPDATE companion SET `card_location_arg` = `card_location_arg` + (100 * (2 - `card_type`)) WHERE `card_location` = 'deck' ");
+            $this->DbQuery("UPDATE companion SET `card_location_arg` = `card_location_arg` + (100 * (2 - `card_type`)) WHERE `card_location` = 'deck' ");
         }
     }
 
@@ -409,13 +409,13 @@ trait UtilTrait {
     }
 
     function getMeetingTrackFootprints(int $spot) {
-        return intval(self::getUniqueValueFromDB("SELECT `footprints` FROM meetingtrack WHERE `spot` = $spot"));
+        return intval($this->getUniqueValueFromDB("SELECT `footprints` FROM meetingtrack WHERE `spot` = $spot"));
     }
 
     function removeMeetingTrackFootprints(int $spot) {
-        self::DbQuery("UPDATE meetingtrack SET `footprints` = 0 WHERE `spot` = $spot");
+        $this->DbQuery("UPDATE meetingtrack SET `footprints` = 0 WHERE `spot` = $spot");
 
-        self::notifyAllPlayers('footprintAdded', '', [
+        $this->notifyAllPlayers('footprintAdded', '', [
             'spot' => $spot,
             'number' => 0,
         ]);
@@ -452,7 +452,7 @@ trait UtilTrait {
     }
 
     function initMeetingTrackSmallDice() {
-        self::DbQuery("INSERT INTO meetingtrack (`spot`, `footprints`) VALUES (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)");
+        $this->DbQuery("INSERT INTO meetingtrack (`spot`, `footprints`) VALUES (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)");
 
         $smallDice = $this->getSmallDice(true);
 
@@ -483,7 +483,7 @@ trait UtilTrait {
 
         $this->moveSmallDiceToMeetingTrack($smallDice);
 
-        self::notifyAllPlayers('replaceSmallDice', '', [
+        $this->notifyAllPlayers('replaceSmallDice', '', [
             'dice' => $smallDice,
         ]);
     }
@@ -505,11 +505,11 @@ trait UtilTrait {
             if (count($dice) === 0) {
                 // add footprint if no die on track
                 $footprints = 1;
-                self::DbQuery("UPDATE meetingtrack SET `footprints` = `footprints` + $footprints WHERE `spot` = $i");
+                $this->DbQuery("UPDATE meetingtrack SET `footprints` = `footprints` + $footprints WHERE `spot` = $i");
 
-                self::notifyAllPlayers('footprintAdded', '', [
+                $this->notifyAllPlayers('footprintAdded', '', [
                     'spot' => $i,
-                    'number' => intval(self::getUniqueValueFromDB("SELECT `footprints` FROM meetingtrack WHERE `spot` = $i")),
+                    'number' => intval($this->getUniqueValueFromDB("SELECT `footprints` FROM meetingtrack WHERE `spot` = $i")),
                 ]);
             }
         }
@@ -532,7 +532,7 @@ trait UtilTrait {
 
         $this->persistDice($dice);
 
-        self::notifyAllPlayers('diceRolled', $message, [
+        $this->notifyAllPlayers('diceRolled', $message, [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'dice' => $dice,
@@ -546,7 +546,7 @@ trait UtilTrait {
 
         $companion = $this->getCompanionFromDb($this->companions->getCard($companionId));
         if ($companion->die) {
-            $removedDieId = $dieId > 0 ? $dieId : intval(self::getUniqueValueFromDB("SELECT `die_id` FROM companion WHERE `card_id` = $companion->id"));
+            $removedDieId = $dieId > 0 ? $dieId : intval($this->getUniqueValueFromDB("SELECT `die_id` FROM companion WHERE `card_id` = $companion->id"));
             
             if ($removedDieId) {
                 $this->removeSketalDie($playerId, $companion, $this->getDieById($removedDieId));
@@ -554,8 +554,8 @@ trait UtilTrait {
         }
 
         if ($playerId > 0) {
-            self::incStat(1, 'discardedCompanions');
-            self::incStat(1, 'discardedCompanions', $playerId);
+            $this->incStat(1, 'discardedCompanions');
+            $this->incStat(1, 'discardedCompanions', $playerId);
         }
     }
         
@@ -598,7 +598,7 @@ trait UtilTrait {
     }
 
     function getRerollUsed(object $companion) {
-        return boolval(self::getUniqueValueFromDB("SELECT `reroll_used` FROM companion WHERE `card_id` = $companion->id"));
+        return boolval($this->getUniqueValueFromDB("SELECT `reroll_used` FROM companion WHERE `card_id` = $companion->id"));
     }
 
     function getPlayerCompanionRerolls(int $playerId) {
@@ -631,7 +631,7 @@ trait UtilTrait {
             $companionsFlagged = 0;
             foreach($companions as $companion) {
                 if ($companionsFlagged < $cost[0] && $companion->reroll && !$this->getRerollUsed($companion)) {
-                    self::DbQuery("UPDATE companion SET `reroll_used` = true WHERE card_id = $companion->id");
+                    $this->DbQuery("UPDATE companion SET `reroll_used` = true WHERE card_id = $companion->id");
                     $companionsFlagged++;
                 }
             }
@@ -650,8 +650,8 @@ trait UtilTrait {
                 throw new BgaUserException('Not enough reroll available (score)');
             }
 
-            self::incStat($cost[2], 'scoreBack');
-            self::incStat($cost[2], 'scoreBack', $playerId);
+            $this->incStat($cost[2], 'scoreBack');
+            $this->incStat($cost[2], 'scoreBack', $playerId);
 
             $this->decPlayerScore($playerId, $args['rerollScore'][$cost[2]]);
         }        
@@ -716,7 +716,7 @@ trait UtilTrait {
 
     private function mustSelectDiscardDie(int $playerId, object $companion) {
         if ($companion->die) {
-            $dieId = intval(self::getUniqueValueFromDB("SELECT `die_id` FROM companion WHERE `card_id` = $companion->id"));
+            $dieId = intval($this->getUniqueValueFromDB("SELECT `die_id` FROM companion WHERE `card_id` = $companion->id"));
             
             if ($dieId) {
                 $die = $this->getDieById($dieId);
@@ -764,7 +764,7 @@ trait UtilTrait {
     public function getRemainingEffects(int $playerId) {
         $allEffects = $this->getTriggeredEffectsForPlayer($playerId);
         $appliedEffects = [];
-        $json_obj = self::getUniqueValueFromDB("SELECT `applied_effects` FROM `player` WHERE `player_id` = $playerId");
+        $json_obj = $this->getUniqueValueFromDB("SELECT `applied_effects` FROM `player` WHERE `player_id` = $playerId");
         if ($json_obj) {
             $appliedEffects = json_decode($json_obj, true);
         }
@@ -782,13 +782,13 @@ trait UtilTrait {
 
     function saveAppliedEffect(int $playerId, array $effectCode) {
         $appliedEffects = [];
-        $json_obj = self::getUniqueValueFromDB("SELECT `applied_effects` FROM `player` WHERE `player_id` = $playerId");
+        $json_obj = $this->getUniqueValueFromDB("SELECT `applied_effects` FROM `player` WHERE `player_id` = $playerId");
         if ($json_obj) {
             $appliedEffects = json_decode($json_obj, true);
         }
         $appliedEffects[] = $effectCode;
         $jsonObj = json_encode($appliedEffects);
-        self::DbQuery("UPDATE `player` SET `applied_effects` = '$jsonObj' WHERE `player_id` = $playerId");
+        $this->DbQuery("UPDATE `player` SET `applied_effects` = '$jsonObj' WHERE `player_id` = $playerId");
     }
 
     // card type
@@ -848,7 +848,7 @@ trait UtilTrait {
 
             $companion = $this->getCompanionFromDb($this->companions->getCard($card->id));
 
-            self::notifyAllPlayers('removeCompanion', '', [
+            $this->notifyAllPlayers('removeCompanion', '', [
                 'playerId' => $playerId,
                 'companion' => $companion,
             ]);
@@ -898,7 +898,7 @@ trait UtilTrait {
 
         switch ($cardType) {
             case 0:
-                self::notifyAllPlayers('resolveCardLog', clienttranslate('${player_name} resolves adventurer ${adventurerName} effects'), [
+                $this->notifyAllPlayers('resolveCardLog', clienttranslate('${player_name} resolves adventurer ${adventurerName} effects'), [
                     'playerId' => $playerId,
                     'player_name' => $this->getPlayerName($playerId),
                     'adventurer' => $card,
@@ -906,14 +906,14 @@ trait UtilTrait {
                 ]);
                 break;
             case 1:
-                self::notifyAllPlayers('resolveCardLog', clienttranslate('${player_name} resolves companion ${companionName} effects'), [
+                $this->notifyAllPlayers('resolveCardLog', clienttranslate('${player_name} resolves companion ${companionName} effects'), [
                     'playerId' => $playerId,
                     'player_name' => $this->getPlayerName($playerId),
                     'companionName' => $card->name,
                 ]);
                 break;
             case 2:
-                self::notifyAllPlayers('resolveCardLog', clienttranslate('${player_name} resolves spell effects'), [
+                $this->notifyAllPlayers('resolveCardLog', clienttranslate('${player_name} resolves spell effects'), [
                     'playerId' => $playerId,
                     'player_name' => $this->getPlayerName($playerId),
                 ]);
@@ -927,7 +927,7 @@ trait UtilTrait {
                     $lastCompanion = $companions[count($companions) - 1];
                     $this->sendToCemetery($playerId, $lastCompanion->id);
 
-                    self::notifyAllPlayers('removeCompanion', '', [
+                    $this->notifyAllPlayers('removeCompanion', '', [
                         'playerId' => $playerId,
                         'companion' => $lastCompanion,
                         'removedBySpell' => $spellCard,
@@ -955,9 +955,9 @@ trait UtilTrait {
         
         $companion = $companions[count($companions) - 1];
         
-        self::DbQuery("UPDATE `companion` SET `die_id` = $die->id WHERE `card_id` = $companion->id");
+        $this->DbQuery("UPDATE `companion` SET `die_id` = $die->id WHERE `card_id` = $companion->id");
 
-        self::notifyAllPlayers('takeSketalDie', clienttranslate('${player_name} takes ${companionName} die'), [
+        $this->notifyAllPlayers('takeSketalDie', clienttranslate('${player_name} takes ${companionName} die'), [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'die' => $die,
@@ -969,9 +969,9 @@ trait UtilTrait {
     public function removeSketalDie(int $playerId, object $companion, object $die) {
         $this->moveDice([$die], 'table');
 
-        self::DbQuery("UPDATE `companion` SET `die_id` = null WHERE `die_id` = $die->id");
+        $this->DbQuery("UPDATE `companion` SET `die_id` = null WHERE `die_id` = $die->id");
 
-        self::notifyAllPlayers('removeSketalDie', clienttranslate('${player_name} loses ${companionName} die'), [
+        $this->notifyAllPlayers('removeSketalDie', clienttranslate('${player_name} loses ${companionName} die'), [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'die' => $die,
@@ -986,7 +986,7 @@ trait UtilTrait {
             $spellsIds[$playerId] = $this->getSpellFromDb($this->spells->pickCardForLocation('deck', 'player', $playerId))->id;
         }
 
-        self::notifyAllPlayers('giveHiddenSpells', clienttranslate('${player_name} gives spell token to ${player_name2} with ${companionName}'), [
+        $this->notifyAllPlayers('giveHiddenSpells', clienttranslate('${player_name} gives spell token to ${player_name2} with ${companionName}'), [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($originPlayerId),
             'player_name2' => $this->getPlayerName($playerId),
@@ -1000,14 +1000,14 @@ trait UtilTrait {
         $spells = [];
         foreach ($allSpells as &$spell) {
             if (!$spell->visible) {
-                self::DbQuery("UPDATE `spells` SET `card_type_arg` = 1 WHERE `card_id` = $spell->id");
+                $this->DbQuery("UPDATE `spells` SET `card_type_arg` = 1 WHERE `card_id` = $spell->id");
                 $spell->visible = true;
                 $spells[] = $spell;
             }
         }
 
         if (count($spells) > 0) {
-            self::notifyAllPlayers('revealSpells', clienttranslate('Hidden spells are revealed !'), [
+            $this->notifyAllPlayers('revealSpells', clienttranslate('Hidden spells are revealed !'), [
                 'spells' => $spells,
             ]);
         }
@@ -1016,7 +1016,7 @@ trait UtilTrait {
     public function discardSpell(int $playerId, object $spell) {
         $this->spells->moveCard($spell->id, 'discard');
 
-        self::notifyAllPlayers('removeSpell', '', [
+        $this->notifyAllPlayers('removeSpell', '', [
             'playerId' => $playerId,
             'spell' => $spell,
         ]);
@@ -1034,6 +1034,30 @@ trait UtilTrait {
             return count($dice) > 0;
         } else {
             return count(array_filter($dice, fn($die) => $die->color == $dieColor)) > 0;
+        }
+    }
+
+    public function setRandomAdventurers(array $playersIds) {
+        $soloMode = $this->isSoloMode();
+
+        $possibleAdventurers = array_keys($this->ADVENTURERS);
+        $affectedAdventurers = [];
+
+        foreach ($playersIds as $playerId) {
+
+            $adventurer = $possibleAdventurers[bga_rand(1, count($possibleAdventurers)) - 1];
+            while (in_array($adventurer, $affectedAdventurers)) {
+                $adventurer = $possibleAdventurers[bga_rand(1, count($possibleAdventurers)) - 1];
+            }
+            $affectedMonsters[$playerId] = $adventurer;
+
+            $this->applyChooseAdventurer($playerId, $adventurer, $soloMode);
+        }
+
+        if ($soloMode) {
+            $this->gamestate->nextState('chooseTomDice');
+        } else {
+            $this->gamestate->nextState('recruit');
         }
     }
 }
