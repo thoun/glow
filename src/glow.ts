@@ -221,12 +221,16 @@ class Glow implements GlowGame {
     }
 
     private onEnteringStateRecruitCompanion(args: EnteringRecruitCompanionArgs) {
+        if (!args) {
+            return;
+        }
+
         this.meetingTrackClickAction = 'recruit';
 
         const solo = this.isSolo();
 
         args.companions.forEach((meetingTrackSpot, spot) =>  {
-            if (spot >=1 && spot <=5) {
+            if (spot >= 1 && spot <= 5) {
                 this.meetingTrack.setCompanion(meetingTrackSpot.companion, spot);
                 this.meetingTrack.placeSmallDice(meetingTrackSpot.dice);
                 this.meetingTrack.setFootprintTokens(spot, meetingTrackSpot.footprints);

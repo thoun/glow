@@ -1057,13 +1057,13 @@ var PlayerTable = /** @class */ (function () {
         var _loop_5 = function (i) {
             var valueDice = dice.filter(function (die) { return SYMBOL_INDEX_TO_DIE_VALUE[Number(die.dataset.dieValue)] === i; });
             if (valueDice.length) {
-                var forbidden_1 = valueDice.some(function (die) { return die.dataset.dieColor == '8'; });
+                var forbidden_1 = valueDice.some(function (die) { return die.dataset.dieColor == '8'; }) && i <= 5;
                 valueDice.forEach(function (die) {
                     die.classList.toggle('forbidden', forbidden_1 && die.dataset.dieColor != '8');
                 });
             }
         };
-        for (var i = 1; i <= 5; i++) {
+        for (var i = 1; i <= 8; i++) {
             _loop_5(i);
         }
     };
@@ -1257,6 +1257,9 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.onEnteringStateRecruitCompanion = function (args) {
         var _this = this;
+        if (!args) {
+            return;
+        }
         this.meetingTrackClickAction = 'recruit';
         var solo = this.isSolo();
         args.companions.forEach(function (meetingTrackSpot, spot) {

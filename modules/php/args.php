@@ -148,7 +148,7 @@ trait ArgsTrait {
 
                     if (
                         !$this->array_some($possibleRoutes, fn($p) => $possibleRoute->from == $p->from && $possibleRoute->destination == $p->destination)
-                        && !$this->array_some($meeples, fn($m) => $possibleRoute->destination == $m->position)
+                        && !$this->array_some($meeples, fn($m) => $possibleRoute->destination == $m->position && $m->type < 2)
                     ) {
                         $possibleRoutes[] = $possibleRoute;
                     }
