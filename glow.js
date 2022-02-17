@@ -193,10 +193,9 @@ function getEffectTooltip(effect) {
     return "\n    <div class=\"tooltip-effect-title\">" + _("Conditions") + "</div>\n    " + conditions + "\n    <hr>\n    <div class=\"tooltip-effect-title\">" + _("Effects") + "</div>\n    " + effect.effects.map(function (effect) { return getEffectExplanation(effect); }).join('<br>') + "\n    ";
 }
 function setupAdventurerCard(game, cardDiv, type) {
-    var tooltip = getEffectTooltip(game.gamedatas.ADVENTURERS_EFFECTS[type]);
-    if (tooltip) {
-        game.addTooltipHtml(cardDiv.id, tooltip);
-    }
+    var adventurer = game.gamedatas.ADVENTURERS[type];
+    var tooltip = getEffectTooltip(adventurer.effect);
+    game.addTooltipHtml(cardDiv.id, "<h3>" + adventurer.name + "</h3>" + (tooltip || ''));
     var adventurerPoints = ADVENTURERS_POINTS[type];
     if (adventurerPoints) {
         dojo.place("<div class=\"score-contrast\">" + adventurerPoints + "</div>", cardDiv);
@@ -217,17 +216,10 @@ function getCompanionTooltip(type) {
     return null;
 }
 function setupCompanionCard(game, cardDiv, type) {
-    var tooltip = getEffectTooltip(game.gamedatas.COMPANIONS_EFFECTS[type]);
+    var companion = game.gamedatas.COMPANIONS[type];
+    var tooltip = getEffectTooltip(companion.effect);
     var companionTooltip = getCompanionTooltip(type);
-    if (tooltip && companionTooltip) {
-        game.addTooltipHtml(cardDiv.id, tooltip + "<hr>" + companionTooltip);
-    }
-    else if (tooltip) {
-        game.addTooltipHtml(cardDiv.id, tooltip);
-    }
-    else if (companionTooltip) {
-        game.addTooltipHtml(cardDiv.id, companionTooltip);
-    }
+    game.addTooltipHtml(cardDiv.id, "<h3>" + companion.name + "</h3>" + (tooltip || '') + (tooltip && companionTooltip ? '<hr>' : '') + (companionTooltip || ''));
     cardDiv.classList.add('card-inner');
     dojo.place("<div class=\"card-front\" style=\"" + cardDiv.attributes.getNamedItem('style').nodeValue.replace(/"/g, '\'') + "\"></div>", cardDiv);
     dojo.place("<div class=\"card-back back" + (type > 23 ? 'B' : 'A') + "\"></div>", cardDiv);

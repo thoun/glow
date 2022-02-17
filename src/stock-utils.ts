@@ -175,10 +175,9 @@ function getEffectTooltip(effect: Effect) {
 }
 
 function setupAdventurerCard(game: Game, cardDiv: HTMLDivElement, type: number) {
-    const tooltip = getEffectTooltip(((game as any).gamedatas as GlowGamedatas).ADVENTURERS_EFFECTS[type]);
-    if (tooltip) {
-        (game as any).addTooltipHtml(cardDiv.id, tooltip);
-    }
+    const adventurer = ((game as any).gamedatas as GlowGamedatas).ADVENTURERS[type];
+    const tooltip = getEffectTooltip(adventurer.effect);
+    (game as any).addTooltipHtml(cardDiv.id, `<h3>${adventurer.name}</h3>${tooltip || ''}`);
 
     const adventurerPoints = ADVENTURERS_POINTS[type];
     if (adventurerPoints) {
@@ -211,15 +210,10 @@ function getCompanionTooltip(type: number) {
 }
 
 function setupCompanionCard(game: Game, cardDiv: HTMLDivElement, type: number) {
-    const tooltip = getEffectTooltip(((game as any).gamedatas as GlowGamedatas).COMPANIONS_EFFECTS[type]);
+    const companion = ((game as any).gamedatas as GlowGamedatas).COMPANIONS[type];
+    const tooltip = getEffectTooltip(companion.effect);
     const companionTooltip = getCompanionTooltip(type);
-    if (tooltip && companionTooltip) {
-        (game as any).addTooltipHtml(cardDiv.id, `${tooltip}<hr>${companionTooltip}`);
-    } else if (tooltip) {
-        (game as any).addTooltipHtml(cardDiv.id, tooltip);
-    } else if (companionTooltip) {
-        (game as any).addTooltipHtml(cardDiv.id, companionTooltip);
-    }
+    (game as any).addTooltipHtml(cardDiv.id, `<h3>${companion.name}</h3>${tooltip || ''}${tooltip && companionTooltip ? '<hr>' : ''}${companionTooltip || ''}`);
 
     cardDiv.classList.add('card-inner');
     dojo.place(`<div class="card-front" style="${cardDiv.attributes.getNamedItem('style').nodeValue.replace(/"/g, '\'')}"></div>`, cardDiv);

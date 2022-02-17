@@ -236,8 +236,8 @@ class Glow extends Table {
             $result['tom']->color = '000000';
         }
 
-        $result['ADVENTURERS_EFFECTS'] = array_map(fn($card) => $card->effect, $this->ADVENTURERS);
-        $result['COMPANIONS_EFFECTS'] = array_map(fn($card) => $card->effect, $this->COMPANIONS);
+        $result['ADVENTURERS'] = $this->ADVENTURERS;
+        $result['COMPANIONS'] = $this->COMPANIONS;
         $result['SPELLS_EFFECTS'] = array_map(fn ($card) => $card->effect, $this->SPELLS);
         $result['SOLO_TILES'] = $this->SOLO_TILES;
   

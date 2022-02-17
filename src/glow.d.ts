@@ -5,6 +5,7 @@ interface Effect {
 
 interface Adventurer {
     id: number;
+    name?: string;
     color: number;
     location: string;
     location_arg: number;
@@ -15,6 +16,7 @@ interface Adventurer {
 
 interface Companion {
     id: number;
+    name?: string;
     type: number;
     subType: number;
     location: string;
@@ -123,8 +125,8 @@ interface GlowGamedatas {
 
     tom: GlowPlayer;
 
-    ADVENTURERS_EFFECTS: Effect[];
-    COMPANIONS_EFFECTS: Effect[];
+    ADVENTURERS: Adventurer[];
+    COMPANIONS: Companion[];
     SPELLS_EFFECTS: Effect[];
     SOLO_TILES: SoloTileCard[];
 }
