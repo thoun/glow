@@ -1049,7 +1049,7 @@ trait UtilTrait {
             while (in_array($adventurer, $affectedAdventurers)) {
                 $adventurer = $possibleAdventurers[bga_rand(1, count($possibleAdventurers)) - 1];
             }
-            $affectedMonsters[$playerId] = $adventurer;
+            $affectedAdventurers[] = $adventurer;
 
             $this->applyChooseAdventurer($playerId, $adventurer, $soloMode);
         }
