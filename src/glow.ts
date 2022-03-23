@@ -321,7 +321,8 @@ class Glow implements GlowGame {
 
             (this as any).addActionButton(`skipResurrect-button`, _("Skip"), () => this.skipResurrect(), null, null, 'red');
         }
-        
+
+        this.tableHeightChange();        
     }
 
     private onEnteringStateResolveCards() {
@@ -483,6 +484,7 @@ class Glow implements GlowGame {
             this.cemetaryCompanionsStock.removeAllTo(CEMETERY);
             (this as any).fadeOutAndDestroy('cemetary-companions-stock');
             this.cemetaryCompanionsStock = null;
+            setTimeout(() => this.tableHeightChange(), 200);
         }
     }
 
@@ -538,13 +540,9 @@ class Glow implements GlowGame {
         dojo.toggleClass('zoom-out', 'disabled', newIndex === 0);
 
         const div = document.getElementById('full-table');
-        if (zoom === 1) {
-            div.style.transform = '';
-            div.style.margin = '';
-        } else {
-            div.style.transform = `scale(${zoom})`;
-            div.style.margin = `0 ${ZOOM_LEVELS_MARGIN[newIndex]}% ${(1-zoom)*-100}% 0`;
-        }
+        div.style.transform = zoom === 1 ? '' : `scale(${zoom})`;
+        div.style.marginRight = `${ZOOM_LEVELS_MARGIN[newIndex]}%`;
+        this.tableHeightChange();
         document.getElementById('board').classList.toggle('hd', this.zoom > 1);
 
         const stocks = this.playersTables.map(pt => pt.companionsStock);
@@ -557,6 +555,13 @@ class Glow implements GlowGame {
 
         const fullBoardWrapperDiv = document.getElementById('full-board-wrapper');
         fullBoardWrapperDiv.style.display = fullBoardWrapperDiv.clientWidth < 916*zoom ? 'block' : 'flex';
+    }
+
+    public tableHeightChange() {
+        setTimeout(() => {
+            const div = document.getElementById('full-table');
+            document.getElementById('zoom-wrapper').style.height = `${div.getBoundingClientRect().height}px`;
+        }, 500);
     }
 
     public zoomIn() {

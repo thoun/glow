@@ -908,6 +908,7 @@ var PlayerTable = /** @class */ (function () {
         moveToAnotherStock(from, this.companionsStock, companion.subType, '' + companion.id);
         this.moveCompanionSpellStock();
         this.addMouseEvents(this.companionsStock, companion);
+        this.game.tableHeightChange();
     };
     PlayerTable.prototype.addDice = function (dice) {
         var _this = this;
@@ -932,6 +933,7 @@ var PlayerTable = /** @class */ (function () {
         else {
             this.moveCompanionSpellStock();
         }
+        this.game.tableHeightChange();
     };
     PlayerTable.prototype.setUsedDie = function (dieId) {
         dojo.addClass("die" + dieId, 'used');
@@ -1330,6 +1332,7 @@ var Glow = /** @class */ (function () {
             this.cemetaryCompanionsStock.setSelectionMode(1);
             this.addActionButton("skipResurrect-button", _("Skip"), function () { return _this.skipResurrect(); }, null, null, 'red');
         }
+        this.tableHeightChange();
     };
     Glow.prototype.onEnteringStateResolveCards = function () {
         var _this = this;
@@ -1455,10 +1458,12 @@ var Glow = /** @class */ (function () {
         this.setDiceSelectionActive(false);
     };
     Glow.prototype.onLeavingResurrect = function () {
+        var _this = this;
         if (document.getElementById('cemetary-companions-stock')) {
             this.cemetaryCompanionsStock.removeAllTo(CEMETERY);
             this.fadeOutAndDestroy('cemetary-companions-stock');
             this.cemetaryCompanionsStock = null;
+            setTimeout(function () { return _this.tableHeightChange(); }, 200);
         }
     };
     Glow.prototype.onLeavingResolveCards = function () {
@@ -1507,14 +1512,9 @@ var Glow = /** @class */ (function () {
         dojo.toggleClass('zoom-in', 'disabled', newIndex === ZOOM_LEVELS.length - 1);
         dojo.toggleClass('zoom-out', 'disabled', newIndex === 0);
         var div = document.getElementById('full-table');
-        if (zoom === 1) {
-            div.style.transform = '';
-            div.style.margin = '';
-        }
-        else {
-            div.style.transform = "scale(" + zoom + ")";
-            div.style.margin = "0 " + ZOOM_LEVELS_MARGIN[newIndex] + "% " + (1 - zoom) * -100 + "% 0";
-        }
+        div.style.transform = zoom === 1 ? '' : "scale(" + zoom + ")";
+        div.style.marginRight = ZOOM_LEVELS_MARGIN[newIndex] + "%";
+        this.tableHeightChange();
         document.getElementById('board').classList.toggle('hd', this.zoom > 1);
         var stocks = this.playersTables.map(function (pt) { return pt.companionsStock; });
         if (this.adventurersStock) {
@@ -1524,6 +1524,12 @@ var Glow = /** @class */ (function () {
         document.getElementById('zoom-wrapper').style.height = div.getBoundingClientRect().height + "px";
         var fullBoardWrapperDiv = document.getElementById('full-board-wrapper');
         fullBoardWrapperDiv.style.display = fullBoardWrapperDiv.clientWidth < 916 * zoom ? 'block' : 'flex';
+    };
+    Glow.prototype.tableHeightChange = function () {
+        setTimeout(function () {
+            var div = document.getElementById('full-table');
+            document.getElementById('zoom-wrapper').style.height = div.getBoundingClientRect().height + "px";
+        }, 500);
     };
     Glow.prototype.zoomIn = function () {
         if (this.zoom === ZOOM_LEVELS[ZOOM_LEVELS.length - 1]) {

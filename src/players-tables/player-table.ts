@@ -204,6 +204,8 @@ class PlayerTable {
         moveToAnotherStock(from, this.companionsStock, companion.subType, ''+companion.id);
         this.moveCompanionSpellStock();
         this.addMouseEvents(this.companionsStock, companion);
+
+        this.game.tableHeightChange();
     }
     
     public addDice(dice: Die[]) {
@@ -230,6 +232,8 @@ class PlayerTable {
         } else {
             this.moveCompanionSpellStock();
         }
+
+        this.game.tableHeightChange();
     }
 
     public setUsedDie(dieId: number) {

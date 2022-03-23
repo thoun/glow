@@ -148,6 +148,7 @@ interface GlowGame extends Game {
     moveBlackDie(spot: number): void;
     selectSketalDie(dieId: number): void;
     isSolo(): boolean;
+    tableHeightChange(): void;
 }
 
 interface EnteringChooseAdventurerArgs {
