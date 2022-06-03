@@ -22,7 +22,7 @@ $gameinfos = [
 'artist' => 'Ben Basso, Vincent Dutrait',         
 
 // Year of FIRST publication of this game. Can be negative.
-'year' => 2021,          
+'year' => 2021,
 
 // Game publisher (use empty string if there is no publisher)
 'publisher' => 'Bombyx',

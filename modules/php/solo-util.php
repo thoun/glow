@@ -166,14 +166,14 @@ trait SoloUtilTrait {
 
     function applyTomCompanyEffect(int $moveCompany) {
         $company = $this->incTomCompany($moveCompany);
-        $this->incTomScore($company, _('${player_name} moves band token ${incCompany} spaces and gains ${points} bursts of light with played tile'), [
+        $this->incTomScore($company, clienttranslate('${player_name} moves band token ${incCompany} spaces and gains ${points} bursts of light with played tile'), [
             'incCompany' => $moveCompany,
             'company' => $company,
         ]);
     }
 
     function applyTomScoreEffect(int $moveScore) {
-        $this->incTomScore($moveScore, _('${player_name} gains ${points} bursts of light with played tile'));
+        $this->incTomScore($moveScore, clienttranslate('${player_name} gains ${points} bursts of light with played tile'));
     }
 
     function applyTomMeepleEffectForSide1() {
