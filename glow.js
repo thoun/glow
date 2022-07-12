@@ -1817,7 +1817,7 @@ var Glow = /** @class */ (function () {
         }
         var originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
         document.getElementById('pagemaintitletext').innerHTML = property ?
-            originalState['description' + property] :
+            _(originalState['description' + property]) :
             this.originalTextRollDice;
     };
     Glow.prototype.getResolveArgs = function () {
