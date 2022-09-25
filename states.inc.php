@@ -244,8 +244,8 @@ $playerActionsGameStates = [
         "transitions" => [
             "selectSketalDie" => ST_MULTIPLAYER_PLAYER_SELECT_SKETAL_DIE,
             "resolveCards" => ST_MULTIPLAYER_RESOLVE_CARDS,
-            "zombiePass" => ST_MULTIPLAYER_MOVE,
-            //"zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
+            //"zombiePass" => ST_MULTIPLAYER_MOVE,
+            "zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
         ],
     ],
 
@@ -260,8 +260,8 @@ $playerActionsGameStates = [
         ],
         "transitions" => [
             "resolveCards" => ST_MULTIPLAYER_RESOLVE_CARDS,
-            "zombiePass" => ST_MULTIPLAYER_MOVE,
-            //"zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
+            //"zombiePass" => ST_MULTIPLAYER_MOVE,
+            "zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
         ]
     ],
 
@@ -278,10 +278,10 @@ $playerActionsGameStates = [
             "resolveAll", 
         ],
         "transitions" => [
-            "move" => ST_MULTIPLAYER_MOVE,
-            "zombiePass" => ST_MULTIPLAYER_MOVE,
-            //"move" => ST_MULTIPLAYER_PRIVATE_MOVE,
-            //"zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
+            //"move" => ST_MULTIPLAYER_MOVE,
+            //"zombiePass" => ST_MULTIPLAYER_MOVE,
+            "move" => ST_MULTIPLAYER_PRIVATE_MOVE,
+            "zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
         ],
     ],
 
