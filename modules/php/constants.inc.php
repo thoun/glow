@@ -32,6 +32,8 @@ define('ST_MULTIPLAYER_RESOLVE_CARDS', 40);
 
 // afternoon
 define('ST_MULTIPLAYER_MOVE', 50);
+define('ST_MULTIPLAYER_PRIVATE_MOVE', 51);
+define('ST_PRIVATE_MOVE', 52);
 
 //Evening
 define('ST_END_ROUND', 80);

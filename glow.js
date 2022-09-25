@@ -1127,6 +1127,12 @@ var Glow = /** @class */ (function () {
         this.dontPreloadImage('side1-hd.png');
         this.dontPreloadImage('side2-hd.png');
         log("Starting game setup");
+        /*if (gamedatas.side == 2) {
+            Object.values(this.gamedatas.gamestates).filter(gamestate => ['move', 'multiMove', 'privateMove'].includes(gamestate.name)).forEach(gamestate => {
+                gamestate.description = gamestate.descriptionboat;
+                gamestate.descriptionmyturn = gamestate.descriptionmyturnboat;
+            });
+        }*/
         for (var color = 1; color <= 8; color++) {
             var facesStr = '';
             for (var face = 1; face <= 6; face++) {
@@ -1198,6 +1204,14 @@ var Glow = /** @class */ (function () {
             case 'move':
                 this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
                 break;
+            case 'multiMove':
+                this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
+                this.onLeavingResolveCards();
+                break;
+            case 'privateMove':
+                this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
+                this.onEnteringStatePrivateMove(args.args);
+                break;
             case 'endRound':
                 var playerTable = this.getPlayerTable(this.getPlayerId());
                 playerTable === null || playerTable === void 0 ? void 0 : playerTable.clearUsedDice();
@@ -1215,10 +1229,17 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.setGamestateDescription = function (property) {
         if (property === void 0) { property = ''; }
+        //console.log('setGamestateDescription', property);
         var originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
-        this.gamedatas.gamestate.description = "" + originalState['description' + property];
-        this.gamedatas.gamestate.descriptionmyturn = "" + originalState['descriptionmyturn' + property];
-        this.updatePageTitle();
+        //console.log(this.gamedatas.gamestate);
+        if (this.gamedatas.gamestate.description != originalState['description' + property] || this.gamedatas.gamestate.descriptionmyturn != originalState['descriptionmyturn' + property] || (this.gamedatas.gamestate.private_state && this.gamedatas.gamestate.private_state.descriptionmyturn != originalState['descriptionmyturn' + property])) {
+            this.gamedatas.gamestate.description = originalState['description' + property];
+            this.gamedatas.gamestate.descriptionmyturn = originalState['descriptionmyturn' + property];
+            if (this.gamedatas.gamestate.private_state) {
+                this.gamedatas.gamestate.private_state.descriptionmyturn = originalState['descriptionmyturn' + property];
+            }
+            this.updatePageTitle();
+        }
     };
     Glow.prototype.onEnteringStateStartRound = function () {
         if (document.getElementById('adventurers-stock')) {
@@ -1385,6 +1406,24 @@ var Glow = /** @class */ (function () {
             this.startActionTimer('endTurn-button', 10);
         }
     };
+    Glow.prototype.onEnteringStatePrivateMove = function (moveArgs) {
+        var _this = this;
+        var _a;
+        //console.log('onEnteringStatePrivateMove', moveArgs);
+        this.board.createDestinationZones((_a = moveArgs.possibleRoutes) === null || _a === void 0 ? void 0 : _a.map(function (route) { return route; }));
+        if (this.gamedatas.side === 1) {
+            if (!document.getElementById("placeEncampment-button")) {
+                this.addActionButton("placeEncampment-button", _("Place encampment"), function () { return _this.placeEncampment(); });
+            }
+            dojo.toggleClass("placeEncampment-button", 'disabled', !moveArgs.canSettle);
+        }
+        if (!document.getElementById("endTurn-button")) {
+            this.addActionButton("endTurn-button", _("End turn"), function () { return _this.endTurn(); }, null, null, 'red');
+        }
+        if (moveArgs.possibleRoutes && !moveArgs.possibleRoutes.length && !moveArgs.canSettle) {
+            this.startActionTimer('endTurn-button', 10);
+        }
+    };
     Glow.prototype.onEnteringShowScore = function (fromReload) {
         var _this = this;
         if (fromReload === void 0) { fromReload = false; }
@@ -1492,6 +1531,13 @@ var Glow = /** @class */ (function () {
                     break;
                 case 'move':
                     this.setActionBarMove(false);
+                    break;
+                case 'multiMove':
+                    this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
+                    break;
+                case 'privateMove':
+                    this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
+                    this.onEnteringStatePrivateMove(args);
                     break;
             }
         }
@@ -1824,7 +1870,9 @@ var Glow = /** @class */ (function () {
         return this.gamedatas.gamestate.args[this.getPlayerId()];
     };
     Glow.prototype.getMoveArgs = function () {
-        return this.gamedatas.gamestate.args[this.getPlayerId()];
+        var _a;
+        //console.log('getMoveArgs', this.gamedatas.gamestate);
+        return ((_a = this.gamedatas.gamestate.args) === null || _a === void 0 ? void 0 : _a[this.getPlayerId()]) || this.gamedatas.gamestate.private_state.args;
     };
     Glow.prototype.setActionBarRollDice = function (fromCancel) {
         var _this = this;
@@ -1921,6 +1969,7 @@ var Glow = /** @class */ (function () {
         document.querySelectorAll(".action-button[id^=\"selectDiscardDie\"]").forEach(function (elem) { return elem.parentElement.removeChild(elem); });
     };
     Glow.prototype.setResolveGamestateDescription = function (property) {
+        //console.log('setResolveGamestateDescription', property);
         if (!this.originalTextResolve) {
             this.originalTextResolve = document.getElementById('pagemaintitletext').innerHTML;
         }
@@ -1961,6 +2010,7 @@ var Glow = /** @class */ (function () {
         });
     };
     Glow.prototype.setMoveGamestateDescription = function (property) {
+        //console.log('setMoveGamestateDescription', property);
         if (!this.originalTextMove) {
             this.originalTextMove = document.getElementById('pagemaintitletext').innerHTML;
         }
@@ -1970,6 +2020,7 @@ var Glow = /** @class */ (function () {
             this.originalTextMove;
     };
     Glow.prototype.setActionBarMove = function (fromCancel) {
+        //console.log('setActionBarMove', fromCancel);
         this.removeMoveActionButtons();
         if (fromCancel) {
             this.setMoveGamestateDescription();
@@ -2137,11 +2188,11 @@ var Glow = /** @class */ (function () {
                 this.resolveCard(type, id);
             }
         }
-        else if (this.gamedatas.gamestate.name === 'move') {
+        else if (['move', 'multiMove', 'privateMove'].includes(this.gamedatas.gamestate.name)) {
             this.move(this.selectedRoute.destination, this.selectedRoute.from, type, id);
         }
         else {
-            console.error('No card action in the state');
+            console.error('No card action in the state', this.gamedatas.gamestate.name);
         }
     };
     Glow.prototype.rollDice = function (cost) {
@@ -2555,6 +2606,7 @@ var Glow = /** @class */ (function () {
         playerTable.setUsedDie(notif.args.dieId);
     };
     Glow.prototype.notif_moveUpdate = function (notif) {
+        //console.log('notif_moveUpdate');
         this.gamedatas.gamestate.args[this.getPlayerId()] = notif.args.args;
         this.setActionBarMove(true);
     };

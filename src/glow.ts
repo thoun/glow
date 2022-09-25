@@ -79,6 +79,13 @@ class Glow implements GlowGame {
 
         log( "Starting game setup" );
 
+        /*if (gamedatas.side == 2) {
+            Object.values(this.gamedatas.gamestates).filter(gamestate => ['move', 'multiMove', 'privateMove'].includes(gamestate.name)).forEach(gamestate => {
+                gamestate.description = gamestate.descriptionboat;
+                gamestate.descriptionmyturn = gamestate.descriptionmyturnboat;
+            });
+        }*/
+
         for (let color=1; color<=8; color++) {
             let facesStr = '';
             for (let face=1; face<=6; face++) {
@@ -162,6 +169,16 @@ class Glow implements GlowGame {
             case 'move':
                 this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
                 break;
+
+            case 'multiMove':
+                this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
+                this.onLeavingResolveCards();
+                break;
+            case 'privateMove':
+                this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
+                this.onEnteringStatePrivateMove(args.args);
+                break;
+
             case 'endRound':
                 const playerTable = this.getPlayerTable(this.getPlayerId());
                 playerTable?.clearUsedDice();
@@ -180,10 +197,17 @@ class Glow implements GlowGame {
     }
     
     private setGamestateDescription(property: string = '') {
+        //console.log('setGamestateDescription', property);
         const originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
-        this.gamedatas.gamestate.description = `${originalState['description' + property]}`; 
-        this.gamedatas.gamestate.descriptionmyturn = `${originalState['descriptionmyturn' + property]}`; 
-        (this as any).updatePageTitle();        
+        //console.log(this.gamedatas.gamestate);
+        if (this.gamedatas.gamestate.description != originalState['description' + property] || this.gamedatas.gamestate.descriptionmyturn != originalState['descriptionmyturn' + property] || (this.gamedatas.gamestate.private_state && this.gamedatas.gamestate.private_state.descriptionmyturn != originalState['descriptionmyturn' + property])) {
+            this.gamedatas.gamestate.description = originalState['description' + property]; 
+            this.gamedatas.gamestate.descriptionmyturn = originalState['descriptionmyturn' + property]; 
+            if (this.gamedatas.gamestate.private_state) {
+                this.gamedatas.gamestate.private_state.descriptionmyturn = originalState['descriptionmyturn' + property]; 
+            }
+            (this as any).updatePageTitle();
+        }
     }
 
     private onEnteringStateStartRound() {
@@ -379,6 +403,26 @@ class Glow implements GlowGame {
         }
     }
 
+    private onEnteringStatePrivateMove(moveArgs: EnteringMoveForPlayer) {
+        //console.log('onEnteringStatePrivateMove', moveArgs);
+        this.board.createDestinationZones(moveArgs.possibleRoutes?.map(route => route));
+        
+        if (this.gamedatas.side === 1) {
+            if (!document.getElementById(`placeEncampment-button`)) {
+                (this as any).addActionButton(`placeEncampment-button`, _("Place encampment"), () => this.placeEncampment());
+            }
+            dojo.toggleClass(`placeEncampment-button`, 'disabled', !moveArgs.canSettle);
+        }
+
+        if (!document.getElementById(`endTurn-button`)) {
+            (this as any).addActionButton(`endTurn-button`, _("End turn"), () => this.endTurn(), null, null, 'red');
+        }
+
+        if (moveArgs.possibleRoutes && !moveArgs.possibleRoutes.length && !moveArgs.canSettle) {
+            this.startActionTimer('endTurn-button', 10);
+        }
+    }
+
     onEnteringShowScore(fromReload: boolean = false) {
         const lastTurnBar = document.getElementById('last-round');
         if (lastTurnBar) {
@@ -516,6 +560,14 @@ class Glow implements GlowGame {
                     this.setActionBarMove(false);
                     break;
 
+                case 'multiMove':
+                    this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
+                    break;
+                case 'privateMove':
+                    this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
+                    this.onEnteringStatePrivateMove(args);
+                    break;
+                
             }
         }
 
@@ -946,7 +998,8 @@ class Glow implements GlowGame {
     }
 
     private getMoveArgs(): EnteringMoveForPlayer {
-        return this.gamedatas.gamestate.args[this.getPlayerId()];
+        //console.log('getMoveArgs', this.gamedatas.gamestate);
+        return this.gamedatas.gamestate.args?.[this.getPlayerId()] || this.gamedatas.gamestate.private_state.args;
     }
     
     private setActionBarRollDice(fromCancel: boolean) {
@@ -1058,6 +1111,7 @@ class Glow implements GlowGame {
     }
     
     private setResolveGamestateDescription(property?: string) {
+        //console.log('setResolveGamestateDescription', property);
         if (!this.originalTextResolve) {
             this.originalTextResolve = document.getElementById('pagemaintitletext').innerHTML;
         }
@@ -1106,6 +1160,7 @@ class Glow implements GlowGame {
     }
     
     private setMoveGamestateDescription(property?: string) {
+        //console.log('setMoveGamestateDescription', property);
         if (!this.originalTextMove) {
             this.originalTextMove = document.getElementById('pagemaintitletext').innerHTML;
         }
@@ -1117,6 +1172,7 @@ class Glow implements GlowGame {
     }
     
     private setActionBarMove(fromCancel: boolean) {
+        //console.log('setActionBarMove', fromCancel);
         this.removeMoveActionButtons();
         if (fromCancel) {
             this.setMoveGamestateDescription();
@@ -1294,10 +1350,10 @@ class Glow implements GlowGame {
             } else {
                 this.resolveCard(type, id);
             }
-        } else if (this.gamedatas.gamestate.name === 'move') {
+        } else if (['move', 'multiMove', 'privateMove'].includes(this.gamedatas.gamestate.name)) {
             this.move(this.selectedRoute.destination, this.selectedRoute.from, type, id);
         } else {
-            console.error('No card action in the state');
+            console.error('No card action in the state', this.gamedatas.gamestate.name);
         }
     }
 
@@ -1799,6 +1855,7 @@ class Glow implements GlowGame {
     }
 
     notif_moveUpdate(notif: Notif<NotifMoveUpdateArgs>) {
+        //console.log('notif_moveUpdate');
         this.gamedatas.gamestate.args[this.getPlayerId()] = notif.args.args;
         this.setActionBarMove(true);
     }

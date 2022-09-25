@@ -245,6 +245,7 @@ $playerActionsGameStates = [
             "selectSketalDie" => ST_MULTIPLAYER_PLAYER_SELECT_SKETAL_DIE,
             "resolveCards" => ST_MULTIPLAYER_RESOLVE_CARDS,
             "zombiePass" => ST_MULTIPLAYER_MOVE,
+            //"zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
         ],
     ],
 
@@ -260,6 +261,7 @@ $playerActionsGameStates = [
         "transitions" => [
             "resolveCards" => ST_MULTIPLAYER_RESOLVE_CARDS,
             "zombiePass" => ST_MULTIPLAYER_MOVE,
+            //"zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
         ]
     ],
 
@@ -278,6 +280,8 @@ $playerActionsGameStates = [
         "transitions" => [
             "move" => ST_MULTIPLAYER_MOVE,
             "zombiePass" => ST_MULTIPLAYER_MOVE,
+            //"move" => ST_MULTIPLAYER_PRIVATE_MOVE,
+            //"zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
         ],
     ],
 
@@ -298,6 +302,41 @@ $playerActionsGameStates = [
         ],
         "transitions" => [
             "endRound" => ST_END_ROUND,
+            "zombiePass" => ST_END_ROUND,
+        ],
+    ],
+
+    ST_MULTIPLAYER_PRIVATE_MOVE => [
+        "name" => "multiMove",
+        "description" => clienttranslate('Players can move their company'),
+        "descriptionboat" => clienttranslate('Players can move one of their boats'),
+        "descriptionmyturn" => clienttranslate('${you} can move your company'),
+        "descriptionmyturnboat" => clienttranslate('${you} can move one of your boats'),
+        "descriptiondiscard" => clienttranslate('Choose a companion or spell to discard'),
+        "type" => "multipleactiveplayer",
+        "initialprivate" => ST_PRIVATE_MOVE,
+        "action" => "stMultiMove",
+        "possibleactions" => [],
+        "transitions" => [
+            "endRound" => ST_END_ROUND,
+            "zombiePass" => ST_END_ROUND,
+        ],
+    ],
+
+    ST_PRIVATE_MOVE => [
+        "name" => "privateMove",
+        "descriptionmyturn" => clienttranslate('${you} can move your company'),
+        "descriptionmyturnboat" => clienttranslate('${you} can move one of your boats'),
+        "descriptiondiscard" => clienttranslate('Choose a companion or spell to discard'),
+        "type" => "private",
+        "args" => "argMoveForPlayer",
+        "possibleactions" => [ 
+            "move", 
+            "placeEncampment",
+            "endTurn",
+        ],
+        "transitions" => [
+            "move" => ST_PRIVATE_MOVE,
             "zombiePass" => ST_END_ROUND,
         ],
     ],

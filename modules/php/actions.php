@@ -473,10 +473,14 @@ trait ActionTrait {
             $args = $this->argMoveForPlayer($playerId);
             if (count($args->possibleRoutes) == 0 && $args->canSettle != true) {
                 $this->applyEndTurn($playerId);
-            } else {                
-                $this->notifyPlayer($playerId, 'moveUpdate', '', [
-                    'args' => $args,
-                ]);
+            } else {         
+                if (intval($this->gamestate->state_id() == ST_MULTIPLAYER_MOVE)) {
+                    $this->notifyPlayer($playerId, 'moveUpdate', '', [
+                        'args' => $args,
+                    ]);
+                } else {
+                    $this->gamestate->nextPrivateState($playerId, 'move');
+                }
             }
         } else if ($side === 2) {
             $this->movePlayerBoat($playerId, $route->destination, $route->from);
@@ -533,9 +537,11 @@ trait ActionTrait {
 
     private function applyEndTurn(int $playerId) {
         // updates possible routes -> no more possible route as it is end of turn, so empty array
-        $this->notifyPlayer($playerId, 'moveUpdate', '', [
-            'args' => [],
-        ]);
+        if (intval($this->gamestate->state_id() == ST_MULTIPLAYER_MOVE)) {
+            $this->notifyPlayer($playerId, 'moveUpdate', '', [
+                'args' => [],
+            ]);
+        }
 
         $this->replaceSmallDiceOnMeetingTrack($playerId);
 
