@@ -1482,6 +1482,9 @@ var Glow = /** @class */ (function () {
             case 'resolveCards':
                 this.onLeavingResolveCards();
                 break;
+            case 'multiMove':
+                this.board.createDestinationZones(null);
+                break;
         }
     };
     Glow.prototype.onLeavingChooseAdventurer = function () {
@@ -1538,6 +1541,13 @@ var Glow = /** @class */ (function () {
                 case 'privateMove':
                     this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
                     this.onEnteringStatePrivateMove(args);
+                    break;
+            }
+        }
+        else {
+            switch (stateName) {
+                case 'multiMove':
+                    this.board.createDestinationZones(null);
                     break;
             }
         }

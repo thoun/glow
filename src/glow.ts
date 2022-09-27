@@ -504,6 +504,9 @@ class Glow implements GlowGame {
             case 'resolveCards':
                 this.onLeavingResolveCards();
                 break;
+            case 'multiMove':
+                this.board.createDestinationZones(null);
+                break;
         }
     }
 
@@ -569,6 +572,13 @@ class Glow implements GlowGame {
                     break;
                 
             }
+        } else {
+            switch (stateName) {
+                case 'multiMove':
+                    this.board.createDestinationZones(null);
+                    break;
+            }
+            
         }
 
         switch (stateName) {
