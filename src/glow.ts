@@ -383,6 +383,39 @@ class Glow implements GlowGame {
         document.getElementById(`resolveAll-button`).classList.toggle('disabled', resolveArgs.remainingEffects.some(remainingEffect => remainingEffect[2]));
     }
 
+    private onEnteringStatePrivateResolveCards(resolveArgs: ResolveCardsForPlayer) {
+
+        this.onLeavingResolveCards();
+
+        const playerId = this.getPlayerId();
+        const playerTable = this.getPlayerTable(playerId);
+        
+        resolveArgs.remainingEffects.forEach(possibleEffect => {
+            const cardType = possibleEffect[0];
+            const cardId = possibleEffect[1];
+            if (cardType === 0) { // adventurer
+                playerTable.adventurerStock.setSelectionMode(1);
+                dojo.addClass(`${playerTable.adventurerStock.container_div.id}_item_${cardId}`, 'selectable');
+            } else if (cardType === 1) { // adventurer
+                playerTable.companionsStock.setSelectionMode(1);
+                dojo.addClass(`${playerTable.companionsStock.container_div.id}_item_${cardId}`, 'selectable');
+            } if (cardType === 2) { // spells
+                playerTable.spellsStock.setSelectionMode(1);
+                if (document.getElementById(`${playerTable.spellsStock.container_div.id}_item_${cardId}`)) {
+                    dojo.addClass(`${playerTable.spellsStock.container_div.id}_item_${cardId}`, 'selectable');
+                } else if (playerTable.companionSpellStock && document.getElementById(`${playerTable.companionSpellStock.container_div.id}_item_${cardId}`)) {
+                    playerTable.companionSpellStock.setSelectionMode(1);
+                    dojo.addClass(`${playerTable.companionSpellStock.container_div.id}_item_${cardId}`, 'selectable');
+                }
+            }
+        });
+        
+        if (!document.getElementById(`resolveAll-button`)) {
+            (this as any).addActionButton(`resolveAll-button`, _("Resolve all"), () => this.resolveAll(), null, null, 'red');
+        }
+        document.getElementById(`resolveAll-button`).classList.toggle('disabled', resolveArgs.remainingEffects.some(remainingEffect => remainingEffect[2]));
+    }
+
     private onEnteringStateMove() {
         const moveArgs = this.getMoveArgs();
         this.board.createDestinationZones(moveArgs.possibleRoutes?.map(route => route));
@@ -502,6 +535,7 @@ class Glow implements GlowGame {
                 this.onLeavingResurrect();
                 break;
             case 'resolveCards':
+            case 'multiResolveCards':
                 this.onLeavingResolveCards();
                 break;
             case 'multiMove':
@@ -558,6 +592,11 @@ class Glow implements GlowGame {
                     break;
                 case 'resolveCards':
                     this.setActionBarResolve(false);
+                    break;
+                case 'privateResolveCards':                    
+                    // make cards unselectable
+                    this.onLeavingResolveCards();
+                    this.onEnteringStatePrivateResolveCards(args);
                     break;
                 case 'move':
                     this.setActionBarMove(false);
@@ -1004,7 +1043,7 @@ class Glow implements GlowGame {
     }
 
     private getResolveArgs(): ResolveCardsForPlayer {
-        return this.gamedatas.gamestate.args[this.getPlayerId()];
+        return this.gamedatas.gamestate.args?.[this.getPlayerId()] || this.gamedatas.gamestate.private_state?.args;
     }
 
     private getMoveArgs(): EnteringMoveForPlayer {
@@ -1352,7 +1391,7 @@ class Glow implements GlowGame {
     }
 
     public cardClick(type: number, id: number) {
-        if (this.gamedatas.gamestate.name === 'resolveCards') {
+        if (['resolveCards', 'multiResolveCards', 'privateResolveCards'].includes(this.gamedatas.gamestate.name)) {
             const args = this.getResolveArgs();
             const remainingEffect = args.remainingEffects.find(re => re[0] == type && re[1] == id);
             if (remainingEffect[2]) {

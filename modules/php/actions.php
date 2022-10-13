@@ -391,9 +391,14 @@ trait ActionTrait {
 
         $resolveCardsForPlayer = $this->argResolveCardsForPlayer($playerId);
      
-        $this->notifyPlayer($playerId, 'resolveCardUpdate', '', [
-            'resolveCardsForPlayer' => $resolveCardsForPlayer,
-        ]);
+        if (intval($this->gamestate->state_id() == ST_MULTIPLAYER_RESOLVE_CARDS)) {
+            $this->notifyPlayer($playerId, 'resolveCardUpdate', '', [
+                'resolveCardsForPlayer' => $resolveCardsForPlayer,
+            ]);
+        } else {
+            $this->gamestate->nextPrivateState($playerId, 'resolve');
+        }
+        
 
         $this->incStat(1, 'resolvedCards');
         $this->incStat(1, 'resolvedCards', $playerId);

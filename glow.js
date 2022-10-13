@@ -1388,6 +1388,38 @@ var Glow = /** @class */ (function () {
         }
         document.getElementById("resolveAll-button").classList.toggle('disabled', resolveArgs.remainingEffects.some(function (remainingEffect) { return remainingEffect[2]; }));
     };
+    Glow.prototype.onEnteringStatePrivateResolveCards = function (resolveArgs) {
+        var _this = this;
+        this.onLeavingResolveCards();
+        var playerId = this.getPlayerId();
+        var playerTable = this.getPlayerTable(playerId);
+        resolveArgs.remainingEffects.forEach(function (possibleEffect) {
+            var cardType = possibleEffect[0];
+            var cardId = possibleEffect[1];
+            if (cardType === 0) { // adventurer
+                playerTable.adventurerStock.setSelectionMode(1);
+                dojo.addClass(playerTable.adventurerStock.container_div.id + "_item_" + cardId, 'selectable');
+            }
+            else if (cardType === 1) { // adventurer
+                playerTable.companionsStock.setSelectionMode(1);
+                dojo.addClass(playerTable.companionsStock.container_div.id + "_item_" + cardId, 'selectable');
+            }
+            if (cardType === 2) { // spells
+                playerTable.spellsStock.setSelectionMode(1);
+                if (document.getElementById(playerTable.spellsStock.container_div.id + "_item_" + cardId)) {
+                    dojo.addClass(playerTable.spellsStock.container_div.id + "_item_" + cardId, 'selectable');
+                }
+                else if (playerTable.companionSpellStock && document.getElementById(playerTable.companionSpellStock.container_div.id + "_item_" + cardId)) {
+                    playerTable.companionSpellStock.setSelectionMode(1);
+                    dojo.addClass(playerTable.companionSpellStock.container_div.id + "_item_" + cardId, 'selectable');
+                }
+            }
+        });
+        if (!document.getElementById("resolveAll-button")) {
+            this.addActionButton("resolveAll-button", _("Resolve all"), function () { return _this.resolveAll(); }, null, null, 'red');
+        }
+        document.getElementById("resolveAll-button").classList.toggle('disabled', resolveArgs.remainingEffects.some(function (remainingEffect) { return remainingEffect[2]; }));
+    };
     Glow.prototype.onEnteringStateMove = function () {
         var _this = this;
         var _a;
@@ -1480,6 +1512,7 @@ var Glow = /** @class */ (function () {
                 this.onLeavingResurrect();
                 break;
             case 'resolveCards':
+            case 'multiResolveCards':
                 this.onLeavingResolveCards();
                 break;
             case 'multiMove':
@@ -1531,6 +1564,11 @@ var Glow = /** @class */ (function () {
                     break;
                 case 'resolveCards':
                     this.setActionBarResolve(false);
+                    break;
+                case 'privateResolveCards':
+                    // make cards unselectable
+                    this.onLeavingResolveCards();
+                    this.onEnteringStatePrivateResolveCards(args);
                     break;
                 case 'move':
                     this.setActionBarMove(false);
@@ -1877,7 +1915,8 @@ var Glow = /** @class */ (function () {
             this.originalTextRollDice;
     };
     Glow.prototype.getResolveArgs = function () {
-        return this.gamedatas.gamestate.args[this.getPlayerId()];
+        var _a, _b;
+        return ((_a = this.gamedatas.gamestate.args) === null || _a === void 0 ? void 0 : _a[this.getPlayerId()]) || ((_b = this.gamedatas.gamestate.private_state) === null || _b === void 0 ? void 0 : _b.args);
     };
     Glow.prototype.getMoveArgs = function () {
         var _a;
@@ -2188,7 +2227,7 @@ var Glow = /** @class */ (function () {
         }
     };
     Glow.prototype.cardClick = function (type, id) {
-        if (this.gamedatas.gamestate.name === 'resolveCards') {
+        if (['resolveCards', 'multiResolveCards', 'privateResolveCards'].includes(this.gamedatas.gamestate.name)) {
             var args = this.getResolveArgs();
             var remainingEffect = args.remainingEffects.find(function (re) { return re[0] == type && re[1] == id; });
             if (remainingEffect[2]) {

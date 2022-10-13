@@ -244,6 +244,7 @@ $playerActionsGameStates = [
         "transitions" => [
             "selectSketalDie" => ST_MULTIPLAYER_PLAYER_SELECT_SKETAL_DIE,
             "resolveCards" => ST_MULTIPLAYER_RESOLVE_CARDS,
+            // "resolveCards" => ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS,
             //"zombiePass" => ST_MULTIPLAYER_MOVE,
             "zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
         ],
@@ -260,6 +261,7 @@ $playerActionsGameStates = [
         ],
         "transitions" => [
             "resolveCards" => ST_MULTIPLAYER_RESOLVE_CARDS,
+            //"resolveCards" => ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS,
             //"zombiePass" => ST_MULTIPLAYER_MOVE,
             "zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
         ]
@@ -281,6 +283,37 @@ $playerActionsGameStates = [
             //"move" => ST_MULTIPLAYER_MOVE,
             //"zombiePass" => ST_MULTIPLAYER_MOVE,
             "move" => ST_MULTIPLAYER_PRIVATE_MOVE,
+            "zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
+        ],
+    ],
+
+    ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS => [
+        "name" => "multiResolveCards",
+        "description" => clienttranslate('Players must resolve their cards'),
+        "descriptionmyturn" => clienttranslate('${you} must resolve your cards (select the card to resolve first)'),
+        "descriptiondiscardDie" => clienttranslate('Choose a die to discard'),
+        "type" => "multipleactiveplayer",
+        "initialprivate" => ST_PRIVATE_RESOLVE_CARDS,
+        "action" => "stMultiResolveCards",
+        "possibleactions" => [],
+        "transitions" => [
+            "move" => ST_MULTIPLAYER_PRIVATE_MOVE,
+            "zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
+        ],
+    ],
+
+    ST_PRIVATE_RESOLVE_CARDS => [
+        "name" => "privateResolveCards",
+        "descriptionmyturn" => clienttranslate('${you} must resolve your cards (select the card to resolve first)'),
+        "descriptiondiscardDie" => clienttranslate('Choose a die to discard'),
+        "type" => "private",
+        "args" => "argResolveCardsForPlayer",
+        "possibleactions" => [ 
+            "resolveCard", 
+            "resolveAll", 
+        ],
+        "transitions" => [
+            "resolve" => ST_PRIVATE_RESOLVE_CARDS,
             "zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
         ],
     ],
