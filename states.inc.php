@@ -457,8 +457,8 @@ $gameGameStates = [
         "type" => "game",
         "action" => "stEndRecruit",
         "transitions" => [ 
-            "" => ST_MULTIPLAYER_ROLL_DICE,
-            //"" => ST_MULTIPLAYER_CHANGE_DICE,
+            //"" => ST_MULTIPLAYER_ROLL_DICE,
+            "" => ST_MULTIPLAYER_CHANGE_DICE,
         ],
     ],
 
