@@ -82,6 +82,11 @@ trait StateTrait {
     function stRollDice() {
         $this->gamestate->setAllPlayersMultiactive();
     }
+    
+    function stChangeDice() { 
+        $this->gamestate->setAllPlayersMultiactive();
+        $this->gamestate->initializePrivateStateForAllActivePlayers(); 
+    }
 
     function stResurrect() {
         $playerWithCromaugActivated = [];

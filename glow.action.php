@@ -111,6 +111,22 @@
 
     }
 
+    public function selectDiceToRoll() {
+        $this->setAjaxMode();     
+
+        $this->game->selectDiceToRoll();
+
+        $this->ajaxResponse();
+    }
+
+    public function selectDieToChange() {
+        $this->setAjaxMode();
+
+        $this->game->selectDieToChange();
+
+        $this->ajaxResponse();
+    }
+
     public function changeDie() {
         $this->setAjaxMode();     
 
@@ -118,6 +134,15 @@
         $value = $this->getArg('value', AT_posint, true);
         $cost = explode(',', $this->getArg("cost", AT_numberlist, true)); // cost : [companion, tokens, score]
         $this->game->changeDie($id, $value, $cost);
+
+        $this->ajaxResponse();
+
+    }
+
+    public function cancel() {
+        $this->setAjaxMode();     
+
+        $this->game->cancel();
 
         $this->ajaxResponse();
 

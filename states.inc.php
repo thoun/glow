@@ -230,6 +230,69 @@ $playerActionsGameStates = [
         ],
     ],
 
+    ST_MULTIPLAYER_CHANGE_DICE => [
+        "name" => "changeDice",
+        "description" => clienttranslate('Players can reroll or change their dice'),
+        "descriptionmyturn" => clienttranslate('${you} can reroll or change your dice'),
+        "type" => "multipleactiveplayer",
+        "initialprivate" => ST_PRIVATE_SELECT_DICE_ACTION,
+        "action" => "stChangeDice",
+        "possibleactions" => [],
+        "transitions" => [
+            "keepDice" => ST_MULTIPLAYER_RESURRECT,
+            "zombiePass" => ST_MULTIPLAYER_RESURRECT,
+        ],
+    ],
+
+    ST_PRIVATE_SELECT_DICE_ACTION => [
+        "name" => "privateSelectDiceAction",
+        "descriptionmyturn" => clienttranslate('${you} can reroll or change your dice'),
+        "type" => "private",
+        "args" => "argRollDiceForPlayer",
+        "possibleactions" => [ 
+            "selectDiceToRoll", 
+            "selectDieToChange", 
+            "keepDice",
+        ],
+        "transitions" => [
+            "rollDice" => ST_PRIVATE_ROLL_DICE,
+            "changeDie" => ST_PRIVATE_CHANGE_DIE,
+            "zombiePass" => ST_MULTIPLAYER_RESURRECT,
+        ],
+    ],
+
+    ST_PRIVATE_ROLL_DICE => [
+        "name" => "privateRollDice",
+        "descriptionmyturn" => clienttranslate('Select 1 or 2 dice to reroll'),
+        "type" => "private",
+        "args" => "argRollDiceForPlayer",
+        "possibleactions" => [ 
+            "rollDice", 
+            "cancel",
+        ],
+        "transitions" => [
+            "selectDice" => ST_PRIVATE_SELECT_DICE_ACTION,
+            "cancel" => ST_PRIVATE_SELECT_DICE_ACTION,
+            "zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
+        ],
+    ],
+
+    ST_PRIVATE_CHANGE_DIE => [
+        "name" => "privateChangeDie",
+        "descriptionmyturn" => clienttranslate('Select 1 die to change'),
+        "type" => "private",
+        "args" => "argRollDiceForPlayer",
+        "possibleactions" => [ 
+            "changeDie", 
+            "cancel",
+        ],
+        "transitions" => [
+            "selectDice" => ST_PRIVATE_SELECT_DICE_ACTION,
+            "cancel" => ST_PRIVATE_SELECT_DICE_ACTION,
+            "zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
+        ],
+    ],
+
     ST_MULTIPLAYER_RESURRECT => [
         "name" => "resurrect",
         "description" => clienttranslate('Players with Cromaug can take a companion from the cemetery'),
@@ -395,6 +458,7 @@ $gameGameStates = [
         "action" => "stEndRecruit",
         "transitions" => [ 
             "" => ST_MULTIPLAYER_ROLL_DICE,
+            //"" => ST_MULTIPLAYER_CHANGE_DICE,
         ],
     ],
 
