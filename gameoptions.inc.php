@@ -40,6 +40,7 @@ $game_options = [
             ],
         ],
         'default' => 1,
+        'level' => 'major',
     ],
 
     101 => [
