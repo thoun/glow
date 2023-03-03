@@ -72,11 +72,12 @@ trait DebugUtilTrait {
         } 
 
 		// These are the id's from the BGAtable I need to debug.
-		$ids = [
+		/*$ids = [
 			20260903,
             89065765,
             89988159,
-		];
+		];*/
+        $ids = array_map(fn($dbPlayer) => intval($dbPlayer['player_id']), array_values($this->getCollectionFromDb('select player_id from player order by player_no')));
 
 		// Id of the first player in BGA Studio
 		$sid = 2343492;

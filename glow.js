@@ -2108,7 +2108,7 @@ var Glow = /** @class */ (function () {
         }
         var originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
         document.getElementById('pagemaintitletext').innerHTML = property ?
-            originalState['description' + property] :
+            _(originalState['description' + property]) :
             this.originalTextMove;
     };
     Glow.prototype.setActionBarMove = function (fromCancel) {
