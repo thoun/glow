@@ -5,7 +5,7 @@
       "module": "none",
       "lib": ["dom", "esnext"],  
       "sourceMap": false,
-      "outFile": "glow.js",
+      "outFile": "glowexpansion.js",
     },
     "files": [
         "src/framework.d.ts",

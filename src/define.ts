@@ -5,5 +5,5 @@ define([
     "ebg/stock"
 ],
 function (dojo, declare) {
-    return declare("bgagame.glow", ebg.core.gamegui, new Glow());             
+    return declare("bgagame.glowexpansion", ebg.core.gamegui, new Glow());             
 });

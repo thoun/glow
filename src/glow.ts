@@ -1675,12 +1675,12 @@ class Glow implements GlowGame {
     public takeAction(action: string, data?: any) {
         data = data || {};
         data.lock = true;
-        (this as any).ajaxcall(`/glow/glow/${action}.html`, data, this, () => {});
+        (this as any).ajaxcall(`/glowexpansion/glowexpansion/${action}.html`, data, this, () => {});
     }
 
     public takeNoLockAction(action: string, data?: any) {
         data = data || {};
-        (this as any).ajaxcall(`/glow/glow/${action}.html`, data, this, () => {});
+        (this as any).ajaxcall(`/glowexpansion/glowexpansion/${action}.html`, data, this, () => {});
     }
     
     private setPoints(playerId: number, points: number) {

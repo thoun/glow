@@ -2471,11 +2471,11 @@ var Glow = /** @class */ (function () {
     Glow.prototype.takeAction = function (action, data) {
         data = data || {};
         data.lock = true;
-        this.ajaxcall("/glow/glow/" + action + ".html", data, this, function () { });
+        this.ajaxcall("/glowexpansion/glowexpansion/" + action + ".html", data, this, function () { });
     };
     Glow.prototype.takeNoLockAction = function (action, data) {
         data = data || {};
-        this.ajaxcall("/glow/glow/" + action + ".html", data, this, function () { });
+        this.ajaxcall("/glowexpansion/glowexpansion/" + action + ".html", data, this, function () { });
     };
     Glow.prototype.setPoints = function (playerId, points) {
         var _a;
@@ -2858,5 +2858,5 @@ define([
     "ebg/counter",
     "ebg/stock"
 ], function (dojo, declare) {
-    return declare("bgagame.glow", ebg.core.gamegui, new Glow());
+    return declare("bgagame.glowexpansion", ebg.core.gamegui, new Glow());
 });

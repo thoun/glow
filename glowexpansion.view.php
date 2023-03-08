@@ -2,13 +2,13 @@
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
- * Glow implementation : © <Your name here> <Your email address here>
+ * GlowExpansion implementation : © <Your name here> <Your email address here>
  *
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
  * -----
  *
- * glow.view.php
+ * glowexpansion.view.php
  *
  * This is your "view" file.
  *
@@ -17,7 +17,7 @@
  * _ when a player refreshes the game page (F5)
  *
  * "build_page" method allows you to dynamically modify the HTML generated for the game interface. In
- * particular, you can set here the values of variables elements defined in glow_glow.tpl (elements
+ * particular, you can set here the values of variables elements defined in glowexpansion_glowexpansion.tpl (elements
  * like {MY_VARIABLE_ELEMENT}), and insert HTML block elements (also defined in your HTML template file)
  *
  * Note: if the HTML of your game interface is always the same, you don't have to place anything here.
@@ -26,10 +26,10 @@
   
   require_once( APP_BASE_PATH."view/common/game.view.php" );
   
-  class view_glow_glow extends game_view
+  class view_glowexpansion_glowexpansion extends game_view
   {
     function getGameName() {
-        return "glow";
+        return "glowexpansion";
     }    
   	function build_page( $viewArgs )
   	{		

@@ -58,6 +58,7 @@ define('SOLO_DECK', 'SOLO_DECK');
  */
 define('BOARD_SIDE', 'BOARD_SIDE');
 define('RANDOM_ADVENTURERS', 'RANDOM_ADVENTURERS');
+define('EXPANSION', 'EXPANSION');
 
 /*
  * Cards

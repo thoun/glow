@@ -2,13 +2,13 @@
  /**
   *------
   * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
-  * Glow implementation : © <Your name here> <Your email address here>
+  * GlowExpansion implementation : © <Your name here> <Your email address here>
   * 
   * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
   * See http://en.boardgamearena.com/#!doc/Studio for more information.
   * -----
   * 
-  * glow.game.php
+  * glowexpansion.game.php
   *
   * This is the main file for your game logic.
   *
@@ -30,7 +30,7 @@ require_once('modules/php/solo-args.php');
 require_once('modules/php/solo-actions.php');
 require_once('modules/php/debug-util.php');
 
-class Glow extends Table {
+class GlowExpansion extends Table {
     use UtilTrait;
     use ActionTrait;
     use StateTrait;
@@ -59,6 +59,7 @@ class Glow extends Table {
             
             BOARD_SIDE => 100,
             RANDOM_ADVENTURERS => 101,
+            EXPANSION => 110,
         ]); 
 		
         $this->adventurers = $this->getNew("module.common.deck");
@@ -76,7 +77,7 @@ class Glow extends Table {
 	
     protected function getGameName() {
 		// Used for translations and stuff. Please do not modify.
-        return "glow";
+        return "glowexpansion";
     }	
 
     /*

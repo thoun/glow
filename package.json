@@ -1,11 +1,11 @@
 {
-  "name": "glow",
+  "name": "glowexpansion",
   "version": "1.0.0",
   "description": "",
-  "main": "glow.js",
+  "main": "glowexpansion.js",
   "scripts": {
     "build:ts": "tsc",
-    "build:scss": "sass --no-source-map src/glow.scss glow.css"
+    "build:scss": "sass --no-source-map src/glow.scss glowexpansion.css"
   },
   "author": "",
   "license": "ISC",

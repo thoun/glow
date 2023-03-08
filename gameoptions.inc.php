@@ -56,6 +56,31 @@ $game_options = [
         ],
         'default' => 1,
     ],
+
+    110 => [
+        'name' => totranslate('Expansion'),
+        'values' => [
+            1 => [
+                'name' => totranslate('Disabled'),
+            ],
+            2 => [
+                'name' => totranslate('Enabled'),
+                'tmdisplay' => totranslate('Expansion'),
+                'alpha' => true,
+            ],
+        ],
+        'default' => 2,
+        'startcondition' => [
+            1 => [
+                [
+                    'type' => 'maxplayers',
+                    'value' => 4,
+                    'message' => totranslate('You can only player with 5-6 players if the expansion is activated'),
+                ]
+            ],
+            2 => [],
+        ],
+    ],
 ];
 
 $game_preferences = [

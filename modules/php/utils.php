@@ -68,6 +68,10 @@ trait UtilTrait {
         return intval($this->getGameStateValue(BOARD_SIDE));
     }
 
+    function isExpansion() {
+        return intval($this->getGameStateValue(EXPANSION)) == 2;
+    }
+
     function createDice(bool $solo) {
         $sql = "INSERT INTO dice (`color`, `small`, `die_face`) VALUES ";
         $values = [];
