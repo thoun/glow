@@ -87,7 +87,9 @@ class GlowExpansion extends Table {
         In this method, you must setup the game according to the game rules, so that
         the game is ready to be played.
     */
-    protected function setupNewGame($players, $options = []) {   
+    protected function setupNewGame($players, $options = []) { 
+        $isExpansion = $this->isExpansion();
+
         // Create players
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
         $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_score, player_avatar, player_rerolls) VALUES ";
@@ -145,13 +147,13 @@ class GlowExpansion extends Table {
             $this->initTom();
         }
         
-        $this->createDice($solo);
+        $this->createDice($isExpansion, $solo);
         $meeplePlayersIds = array_keys($players);
         if ($solo) {
             $meeplePlayersIds[] = 0;
         }
         $this->createMeeples($meeplePlayersIds);
-        $this->createAdventurers();
+        $this->createAdventurers($isExpansion);
         $this->createCompanions($solo);
         if ($solo) {
             $this->createSoloTiles();
@@ -180,6 +182,8 @@ class GlowExpansion extends Table {
         _ when a player refreshes the game page (F5)
     */
     protected function getAllDatas() {
+        $isExpansion = $this->isExpansion();
+        
         $result = [];
     
         // Get information about players
@@ -241,6 +245,8 @@ class GlowExpansion extends Table {
         $result['COMPANIONS'] = $this->COMPANIONS;
         $result['SPELLS_EFFECTS'] = array_map(fn ($card) => $card->effect, $this->SPELLS);
         $result['SOLO_TILES'] = $this->SOLO_TILES;
+
+        $result['expansion'] = $isExpansion;
   
         return $result;
     }

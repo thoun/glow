@@ -55,12 +55,13 @@ COMPANION_POINTS[46] = 4;
 
 function setupAdventurersCards(adventurerStock: Stock) {
     const cardsurl = `${g_gamethemeurl}img/adventurers.png`;
+    const cardsurlExpansion = `${g_gamethemeurl}img/adventurers-expansion1.png`;
 
-    for (let i=0; i<=7;i++) {
+    for (let i=0; i<=11;i++) {
         adventurerStock.addItemType(
             i, 
             i, 
-            cardsurl, 
+            i > 7 ? cardsurlExpansion : cardsurl, 
             i
         );
     }
@@ -115,9 +116,9 @@ function setupSoloTileCards(soloTilesStock: Stock) {
 }
 
 function getEffectExplanation(effect: number) {    
-    if (effect > 100) {
+    if (effect > 100 && effect < 200) {
         return dojo.string.substitute(_("Earn ${points} burst(s) of light."), { points: `<strong>${effect - 100}</strong>` });
-    } else if (effect < -100) {
+    } else if (effect < -100 && effect > -200) {
         return dojo.string.substitute(_("Lose ${points} burst(s) of light."), { points: `<strong>${-(effect + 100)}</strong>` });
     }
 
@@ -146,7 +147,16 @@ function getEffectTooltip(effect: Effect) {
     }
 
     let conditions = null;
-    if (effect.conditions.every(condition => condition > 0)) {
+    if (effect.conditions.every(condition => condition > 200) && effect.conditions.length == 2) {
+        const message = effect.conditions[0] == effect.conditions[1] ?
+            _("Exactly ${min} different element symbols on dice triggers the effect.") :
+            _("Between ${min} and ${max} different element symbols on dice triggers the effect.");
+
+        conditions = dojo.string.substitute(message, { 
+            min: `<strong>${effect.conditions[0] - 200}</strong>` ,
+            max: `<strong>${effect.conditions[1] - 200}</strong>` ,
+        });
+    } else if (effect.conditions.every(condition => condition > 0)) {
         conditions = dojo.string.substitute(_("${symbols} triggers the effect."), { 
             symbols: formatTextIcons(effect.conditions.map(condition => `[symbol${condition}]`).join('')) 
         });

@@ -38,7 +38,7 @@ class PlayerTable {
         for (let i=1; i<=8; i++) { html += `<div id="player-table-${this.playerId}-dice-grid-symbol${i}" class="hidden"></div>`; }
         html += `        </div>`;
         
-        if (game.getBoardSide() === 2) {
+        if (game.getBoardSide() === 2 || game.isExpansion()) {
             html += `<div id="player-table-${this.playerId}-symbol-count" class="player-symbol-count"></div>`;
         }
 
@@ -134,7 +134,7 @@ class PlayerTable {
         this.setTokens('footprint', player.footprints);
         this.setTokens('firefly', player.fireflies);
 
-        if (game.getBoardSide() === 2) {
+        if (game.getBoardSide() === 2 || game.isExpansion()) {
             (game as any).addTooltipHtml(`player-table-${this.playerId}-symbol-count`, _('Number of different element symbols on dice. The special symbols do not count.'));
         }        
     }
@@ -352,7 +352,7 @@ class PlayerTable {
         }
         document.getElementById(`player-table-${this.playerId}-dice-grid`).style.gridTemplateColumns = `repeat(${columns}, auto)`;
 
-        if (this.game.getBoardSide() === 2) {
+        if (this.game.getBoardSide() === 2 || this.game.isExpansion()) {
             document.getElementById(`player-table-${this.playerId}-symbol-count`).innerHTML = ''+symbolCount;
         }
 

@@ -846,6 +846,9 @@ class Glow implements GlowGame {
     public isColorBlindMode(): boolean {
         return (this as any).prefs[201].value == 1;
     }
+    public isExpansion(): boolean {
+        return this.gamedatas.expansion;
+    }
 
     public getOpponentId(playerId: number): number {
         return Number(Object.values(this.gamedatas.players).find(player => Number(player.id) != playerId).id);

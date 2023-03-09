@@ -114,8 +114,9 @@ COMPANION_POINTS[45] = 1;
 COMPANION_POINTS[46] = 4;
 function setupAdventurersCards(adventurerStock) {
     var cardsurl = g_gamethemeurl + "img/adventurers.png";
-    for (var i = 0; i <= 7; i++) {
-        adventurerStock.addItemType(i, i, cardsurl, i);
+    var cardsurlExpansion = g_gamethemeurl + "img/adventurers-expansion1.png";
+    for (var i = 0; i <= 11; i++) {
+        adventurerStock.addItemType(i, i, i > 7 ? cardsurlExpansion : cardsurl, i);
     }
 }
 function setupCompanionCards(companionsStock) {
@@ -142,10 +143,10 @@ function setupSoloTileCards(soloTilesStock) {
     soloTilesStock.addItemType(0, 0, cardsurl, 0);
 }
 function getEffectExplanation(effect) {
-    if (effect > 100) {
+    if (effect > 100 && effect < 200) {
         return dojo.string.substitute(_("Earn ${points} burst(s) of light."), { points: "<strong>" + (effect - 100) + "</strong>" });
     }
-    else if (effect < -100) {
+    else if (effect < -100 && effect > -200) {
         return dojo.string.substitute(_("Lose ${points} burst(s) of light."), { points: "<strong>" + -(effect + 100) + "</strong>" });
     }
     else if (effect > 20 && effect < 30) {
@@ -169,7 +170,16 @@ function getEffectTooltip(effect) {
         return null;
     }
     var conditions = null;
-    if (effect.conditions.every(function (condition) { return condition > 0; })) {
+    if (effect.conditions.every(function (condition) { return condition > 200; }) && effect.conditions.length == 2) {
+        var message = effect.conditions[0] == effect.conditions[1] ?
+            _("Exactly ${min} different element symbols on dice triggers the effect.") :
+            _("Between ${min} and ${max} different element symbols on dice triggers the effect.");
+        conditions = dojo.string.substitute(message, {
+            min: "<strong>" + (effect.conditions[0] - 200) + "</strong>",
+            max: "<strong>" + (effect.conditions[1] - 200) + "</strong>",
+        });
+    }
+    else if (effect.conditions.every(function (condition) { return condition > 0; })) {
         conditions = dojo.string.substitute(_("${symbols} triggers the effect."), {
             symbols: formatTextIcons(effect.conditions.map(function (condition) { return "[symbol" + condition + "]"; }).join(''))
         });
@@ -775,7 +785,7 @@ var PlayerTable = /** @class */ (function () {
             html += "<div id=\"player-table-" + this.playerId + "-dice-grid-symbol" + i + "\" class=\"hidden\"></div>";
         }
         html += "        </div>";
-        if (game.getBoardSide() === 2) {
+        if (game.getBoardSide() === 2 || game.isExpansion()) {
             html += "<div id=\"player-table-" + this.playerId + "-symbol-count\" class=\"player-symbol-count\"></div>";
         }
         html += "    </div>\n            <div class=\"adventurer-and-companions\">\n                <div id=\"player-table-" + this.playerId + "-spells\" class=\"player-table-spells normal\"></div>\n                <div id=\"player-table-" + this.playerId + "-adventurer\" class=\"player-table-adventurer\"></div>\n                <div id=\"player-table-" + this.playerId + "-companions\" class=\"player-table-companions\"></div>\n            </div>\n        </div>";
@@ -851,7 +861,7 @@ var PlayerTable = /** @class */ (function () {
         this.setTokens('reroll', player.rerolls);
         this.setTokens('footprint', player.footprints);
         this.setTokens('firefly', player.fireflies);
-        if (game.getBoardSide() === 2) {
+        if (game.getBoardSide() === 2 || game.isExpansion()) {
             game.addTooltipHtml("player-table-" + this.playerId + "-symbol-count", _('Number of different element symbols on dice. The special symbols do not count.'));
         }
     }
@@ -1045,7 +1055,7 @@ var PlayerTable = /** @class */ (function () {
             _loop_4(i);
         }
         document.getElementById("player-table-" + this.playerId + "-dice-grid").style.gridTemplateColumns = "repeat(" + columns + ", auto)";
-        if (this.game.getBoardSide() === 2) {
+        if (this.game.getBoardSide() === 2 || this.game.isExpansion()) {
             document.getElementById("player-table-" + this.playerId + "-symbol-count").innerHTML = '' + symbolCount;
         }
         this.setForbidden();
@@ -1786,6 +1796,9 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.isColorBlindMode = function () {
         return this.prefs[201].value == 1;
+    };
+    Glow.prototype.isExpansion = function () {
+        return this.gamedatas.expansion;
     };
     Glow.prototype.getOpponentId = function (playerId) {
         return Number(Object.values(this.gamedatas.players).find(function (player) { return Number(player.id) != playerId; }).id);

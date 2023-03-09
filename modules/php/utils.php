@@ -43,6 +43,15 @@ trait UtilTrait {
         }
         return false;
     }
+        
+    function array_every(array $array, callable $fn) {
+        foreach ($array as $value) {
+            if(!$fn($value)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     function isTurnBased() {
         return intval($this->gamestate->table_globals[200]) >= 10;
@@ -69,22 +78,26 @@ trait UtilTrait {
     }
 
     function isExpansion() {
-        return intval($this->getGameStateValue(EXPANSION)) == 2;
+        return intval($this->getGameStateValue(EXPANSION)) >= 2;
     }
 
-    function createDice(bool $solo) {
+    function createDice(bool $isExpansion, bool $solo) {
         $sql = "INSERT INTO dice (`color`, `small`, `die_face`) VALUES ";
         $values = [];
-        foreach($this->DICES as $color => $counts) {
-            if ($solo && $color == 8) {
-                continue;
-            }
+
+        $DICE = $isExpansion ? ($this->DICES + $this->DICES_EXPANSION1) : $this->DICES;
+
+        foreach($DICE as $color => $counts) {
 
             $face = min($color, 6);
 
             // big
             for ($i=0; $i<$counts[0]; $i++) {
                 $values[] = "($color, false, $face)";
+            }
+
+            if ($solo && $color == 8) {
+                continue;
             }
 
             // small
@@ -356,9 +369,11 @@ trait UtilTrait {
         ]);
     }
 
-    function createAdventurers() {        
+    function createAdventurers(bool $expansion) {        
         foreach($this->ADVENTURERS as $type => $adventurer) {
-            $adventurers[] = [ 'type' => $type, 'type_arg' => null, 'nbr' => 1];
+            if ($expansion || $type <= 7) {
+                $adventurers[] = [ 'type' => $type, 'type_arg' => null, 'nbr' => 1];
+            }
         }
         $this->adventurers->createCards($adventurers, 'deck');
     }
@@ -676,6 +691,17 @@ trait UtilTrait {
         return 1 + $this->countRepetitionInDiceForEffectCondition($unusedValues, $conditions);
     }
 
+    public function getDiceDifferentColors(array $dice) {
+        $groups = [];
+        foreach ($dice as $playerDie) {
+            if ($playerDie->value <= 5) {
+                $groups[$playerDie->value] = true;
+            }
+        }
+        $colors = count($groups);
+        return $colors;
+    }
+
     public function isTriggeredEffectsForCard(array $dice, object $effect) {
         // we check if we have a forbidden die, preventing the effect
         foreach($effect->conditions as $condition) {
@@ -684,9 +710,18 @@ trait UtilTrait {
             }
         }
 
+        if ($this->array_every($effect->conditions, fn($condition) => $condition > 200)) { // number of colors
+            $colors = $this->getDiceDifferentColors($dice);
+
+            $min = $effect->conditions[0] - 200;
+            $max = $effect->conditions[1] - 200;
+            
+            return $colors >= $min && $colors <= $max ? 1 : 0;
+        }
+
         $diceValues = array_map(fn($die) => $die->value, $dice);
         // we remove forbidden signs, as they have been checked before
-        $effectConditions = array_values(array_filter($effect->conditions, fn ($condition) => $condition >= 0));
+        $effectConditions = array_values(array_filter($effect->conditions, fn($condition) => $condition >= 0));
         if (count($effectConditions) === 0) {
             return 1;
         }
@@ -827,9 +862,9 @@ trait UtilTrait {
         }
         $args['effectOrigin'] = $effectOrigin;
 
-        if ($effect > 100) {
+        if ($effect > 100 && $effect < 200) {
             $this->incPlayerScore($playerId, $effect - 100, clienttranslate('${player_name} ${gainsloses} ${abspoints} burst of light with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('gains'), 'i18n' => ['gainsloses']]);
-        } else if ($effect < -100) {
+        } else if ($effect < -100 && $effect > -200) {
             $this->decPlayerScore($playerId, -($effect + 100), clienttranslate('${player_name} ${gainsloses} ${abspoints} burst of light with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
         }
 

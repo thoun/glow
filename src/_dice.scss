@@ -100,7 +100,7 @@ $size: 0.25rem;
 
     box-sizing: border-box;
 
-    @for $i from 1 through 8 {
+    @for $i from 1 through 11 {
         &.color#{$i} {
             background-image: url('img/die#{$i}.png');
         }
@@ -115,6 +115,9 @@ $size: 0.25rem;
     &.color6 { border-color: #8a298a; }
     &.color7 { border-color: #ffd503; }
     &.color8 { border-color: #000000; }
+    &.color9 { border-color: #a97c50; }
+    &.color10 { border-color: #eca3c8; }
+    &.color11 { border-color: #ffd503; }
 
     background-size: auto 100%;
 

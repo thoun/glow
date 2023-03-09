@@ -99,6 +99,10 @@ $ADVENTURERS = [
     5 => 'Moloc\'h',
     6 => 'Noctiluca',
     7 => 'Orium',
+    8 => 'Richard',
+    9 => 'Malac\'h',
+    10 => 'Kaploum',
+    11 => 'Uriom',
 ];
 
 foreach($ADVENTURERS as $id => $adventurer) {

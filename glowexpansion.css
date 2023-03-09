@@ -113,6 +113,15 @@
 .die-item.color8 {
   background-image: url("img/die8.png");
 }
+.die-item.color9 {
+  background-image: url("img/die9.png");
+}
+.die-item.color10 {
+  background-image: url("img/die10.png");
+}
+.die-item.color11 {
+  background-image: url("img/die11.png");
+}
 .die-item.color1 {
   border-color: #00995c;
 }
@@ -136,6 +145,15 @@
 }
 .die-item.color8 {
   border-color: #000000;
+}
+.die-item.color9 {
+  border-color: #a97c50;
+}
+.die-item.color10 {
+  border-color: #eca3c8;
+}
+.die-item.color11 {
+  border-color: #ffd503;
 }
 .die-item.side1 {
   background-position: 0% 100%;

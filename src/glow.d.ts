@@ -129,6 +129,8 @@ interface GlowGamedatas {
     COMPANIONS: Companion[];
     SPELLS_EFFECTS: Effect[];
     SOLO_TILES: SoloTileCard[];
+
+    expansion: boolean;
 }
 
 interface GlowGame extends Game {
@@ -137,6 +139,7 @@ interface GlowGame extends Game {
     getPlayerId(): number;
     getBoardSide(): number;
     isColorBlindMode(): boolean;
+    isExpansion(): boolean;
     chooseAdventurer(id: number): void;
     selectMeetingTrackCompanion(spot: number): void;
     //createAndPlaceDieHtml(die: Die, destinationId: string): void;    

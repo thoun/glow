@@ -225,14 +225,7 @@ trait MapTrait {
                 }
     
             } else if ($side === 2) {
-                
-                $groups = [];
-                foreach ($dice as $playerDie) {
-                    if ($playerDie->value <= 5) {
-                        $groups[$playerDie->value] = true;
-                    }
-                }
-                $colors = count($groups);
+                $colors = $this->getDiceDifferentColors($dice);
 
                 $canGoForFree = $route->min === null || ($colors >= $route->min && $colors <= $route->max);
                 $canGoByPaying = 0;
