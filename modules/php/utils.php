@@ -85,7 +85,12 @@ trait UtilTrait {
         $sql = "INSERT INTO dice (`color`, `small`, `die_face`) VALUES ";
         $values = [];
 
-        $DICE = $isExpansion ? ($this->DICES + $this->DICES_EXPANSION1) : $this->DICES;
+        $DICE = $this->DICES;
+        if ($isExpansion) {
+            foreach($this->DICES_EXPANSION1 as $color => $numbers) {
+                $DICE[$color] = $numbers;
+            }
+        }
 
         foreach($DICE as $color => $counts) {
 
@@ -210,7 +215,7 @@ trait UtilTrait {
     }
 
     function getBlackDie() {
-        $sql = "SELECT * FROM dice WHERE `color` = 8";
+        $sql = "SELECT * FROM dice WHERE `color` = 8 AND `small` = true";
         $dbDices = $this->getCollectionFromDB($sql);
         return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices))[0];
     }

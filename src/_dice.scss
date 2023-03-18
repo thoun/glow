@@ -105,6 +105,9 @@ $size: 0.25rem;
             background-image: url('img/die#{$i}.png');
         }
     }
+    &.color80 {
+      background-image: url('img/die80.png');
+    }
 
     
     &.color1 { border-color: #00995c; }
@@ -118,6 +121,7 @@ $size: 0.25rem;
     &.color9 { border-color: #a97c50; }
     &.color10 { border-color: #eca3c8; }
     &.color11 { border-color: #ffd503; }
+    &.color80 { border-color: #888888; }
 
     background-size: auto 100%;
 

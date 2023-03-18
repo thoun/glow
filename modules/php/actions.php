@@ -22,6 +22,12 @@ trait ActionTrait {
 
         // take big dice
         $dice = $this->getBigDiceByColor($adventurer->color, $adventurer->dice);
+        if ($adventurer->color == 8) {
+            $dice = array_merge(
+                $this->getBigDiceByColor(8, 1),
+                $this->getBigDiceByColor(80, 2),
+            );
+        }
         $this->moveDice($dice, 'player', $playerId);
 
         $newPlayerColor = $this->ADVENTURERS_COLORS[$adventurer->color];

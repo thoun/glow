@@ -122,6 +122,9 @@
 .die-item.color11 {
   background-image: url("img/die11.png");
 }
+.die-item.color80 {
+  background-image: url("img/die80.png");
+}
 .die-item.color1 {
   border-color: #00995c;
 }
@@ -154,6 +157,9 @@
 }
 .die-item.color11 {
   border-color: #ffd503;
+}
+.die-item.color80 {
+  border-color: #888888;
 }
 .die-item.side1 {
   background-position: 0% 100%;
