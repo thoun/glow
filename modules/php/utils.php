@@ -403,9 +403,13 @@ trait UtilTrait {
         ]);
     }
 
-    function createAdventurers(bool $expansion) {        
+    function createAdventurers(bool $expansion, bool $solo) {        
         foreach($this->ADVENTURERS as $type => $adventurer) {
-            if ($expansion || $type <= 7) {
+            $create = $expansion || $type <= 7;
+            if ($solo && $type == 9) {
+                $create = false;
+            }
+            if ($create) {
                 $adventurers[] = [ 'type' => $type, 'type_arg' => null, 'nbr' => 1];
             }
         }

@@ -154,7 +154,7 @@ class GlowExpansion extends Table {
             $meeplePlayersIds[] = 0;
         }
         $this->createMeeples($meeplePlayersIds);
-        $this->createAdventurers($isExpansion);
+        $this->createAdventurers($isExpansion, $solo);
         $this->createCompanions($solo);
         if ($solo) {
             $this->createSoloTiles();
