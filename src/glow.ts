@@ -72,10 +72,16 @@ class Glow implements GlowGame {
     */
 
     public setup(gamedatas: GlowGamedatas) {
-        (this as any).dontPreloadImage('publisher.png');
         (this as any).dontPreloadImage(`side${gamedatas.side == 2 ? 1 : 2}.png`);
         (this as any).dontPreloadImage('side1-hd.png');
         (this as any).dontPreloadImage('side2-hd.png');
+        const playerCount = Object.keys(gamedatas.players).length;
+        if (playerCount != 5) {            
+            (this as any).dontPreloadImage('meeting-track-little-board-5p.png');
+        }
+        if (playerCount != 6) {            
+            (this as any).dontPreloadImage('meeting-track-little-board-6p.png');
+        }
 
         log( "Starting game setup" );
 
@@ -105,7 +111,7 @@ class Glow implements GlowGame {
             players.push(gamedatas.tom);
         }
         this.board = new Board(this, players, gamedatas.tableDice);
-        this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack, gamedatas.topDeckType, gamedatas.topDeckBType, gamedatas.topCemeteryType, gamedatas.discardedSoloTiles);
+        this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack, gamedatas.topDeckType, gamedatas.topDeckBType, gamedatas.topCemeteryType, gamedatas.discardedSoloTiles, playerCount);
         this.createPlayerTables(gamedatas);
         if (gamedatas.day > 0) {
             this.roundCounter = new ebg.counter();
@@ -259,7 +265,7 @@ class Glow implements GlowGame {
         const solo = this.isSolo();
 
         args.companions.forEach((meetingTrackSpot, spot) =>  {
-            if (spot >= 1 && spot <= 5) {
+            if (spot >= 1 && spot <= this.getSpotCount()) {
                 this.meetingTrack.setCompanion(meetingTrackSpot.companion, spot);
                 this.meetingTrack.placeSmallDice(meetingTrackSpot.dice);
                 this.meetingTrack.setFootprintTokens(spot, meetingTrackSpot.footprints);
@@ -301,7 +307,7 @@ class Glow implements GlowGame {
         this.meetingTrackClickAction = 'remove';
 
         args.companions.forEach((meetingTrackSpot, spot) =>  {
-            if (spot >=1 && spot <=5) {
+            if (spot >=1 && spot <=this.getSpotCount()) {
                 this.meetingTrack.setCompanion(meetingTrackSpot.companion, spot);
             }
         });
@@ -944,6 +950,11 @@ class Glow implements GlowGame {
             }
             
             if (!solo) {
+                if (player.smallBoard) {
+                    dojo.place(`<div id="player_board_${player.id}_meeting_track" class="meeting-track-icon" data-players="${players.length}"></div>`, `player_board_${player.id}`);
+                    (this as any).addTooltipHtml(`player_board_${player.id}_meeting_track`, _("This player will place its small dice on the meeting track small board"));
+                }
+
                 // first player token
                 dojo.place(`<div id="player_board_${player.id}_firstPlayerWrapper"></div>`, `player_board_${player.id}`);
 
@@ -1063,6 +1074,15 @@ class Glow implements GlowGame {
         } else if (attempt < 5) {
             setTimeout(() => this.addRollToDiv(dieDiv, rollClass, attempt + 1), 200); 
         }
+    }
+
+    public getSpotCount(): number {
+        let spotCount = 5;
+        const playerCount = Object.keys(this.gamedatas.players).length;
+        if (playerCount >= 5) {
+            spotCount = playerCount + 2;
+        }
+        return  spotCount;
     }
 
     private removeRollDiceActionButtons() {

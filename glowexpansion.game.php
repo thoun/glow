@@ -92,15 +92,16 @@ class GlowExpansion extends Table {
 
         // Create players
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
-        $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_score, player_avatar, player_rerolls) VALUES ";
+        $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_score, player_avatar, player_rerolls, player_small_board) VALUES ";
         $values = [];
         $i = 0;
         foreach($players as $playerId => $player) {
 
             // The player on the right of first player receives 2 reroll tokens.
             $lastPlayer = $i > 0 && $i == count($players) - 1;
+            $smallBoard = $i >= 4 ? 1 : 0;
 
-            $values[] = "('".$playerId."','000000','".$player['player_canal']."','".addslashes( $player['player_name'] )."', 10, '".addslashes( $player['player_avatar'] )."', ".($lastPlayer ? 2 : 0).")";
+            $values[] = "('".$playerId."','000000','".$player['player_canal']."','".addslashes( $player['player_name'] )."', 10, '".addslashes( $player['player_avatar'] )."', ".($lastPlayer ? 2 : 0).", $smallBoard)";
 
             if ($i == 0) {
                 $this->setGameStateValue(FIRST_PLAYER, $playerId);
@@ -147,7 +148,7 @@ class GlowExpansion extends Table {
             $this->initTom();
         }
         
-        $this->createDice($isExpansion, $solo);
+        $this->createDice($isExpansion, count($players));
         $meeplePlayersIds = array_keys($players);
         if ($solo) {
             $meeplePlayersIds[] = 0;
@@ -188,7 +189,7 @@ class GlowExpansion extends Table {
     
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = "SELECT player_id id, player_score score, player_no playerNo, player_rerolls rerolls, player_footprints footprints, player_fireflies fireflies, player_score_before_end scoreBeforeEnd, player_score_cards scoreCards, player_score_board scoreBoard, player_score_after_end scoreAfterEnd FROM player ";
+        $sql = "SELECT player_id id, player_score score, player_no playerNo, player_rerolls rerolls, player_footprints footprints, player_fireflies fireflies, player_score_before_end scoreBeforeEnd, player_score_cards scoreCards, player_score_board scoreBoard, player_score_after_end scoreAfterEnd, player_small_board smallBoard FROM player ";
         $result['players'] = $this->getCollectionFromDb($sql);
 
         $solo = count($result['players']) == 1;
@@ -209,7 +210,8 @@ class GlowExpansion extends Table {
         $tomDiceSetAside = array_values(array_filter($dice, fn($idie) => $idie->location_arg === 0));
         $meetingTrack[0] = new MeetingTrackSpot(null, $tomDiceSetAside);
 
-        for ($i=1;$i<=5;$i++) {
+        $spotCount = $this->getSpotCount();
+        for ($i=1;$i<=$spotCount;$i++) {
             $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting', $i));
             $companion = count($companions) > 0 ? $companions[0] : null;
 
@@ -233,6 +235,7 @@ class GlowExpansion extends Table {
             $player['rerolls'] = intval($player['rerolls']);
             $player['footprints'] = intval($player['footprints']);
             $player['fireflies'] = intval($player['fireflies']);
+            $player['smallBoard'] = boolval($player['smallBoard']);
         }
 
         if ($solo) {

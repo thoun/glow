@@ -22,7 +22,7 @@ trait StateTrait {
     }
 
     function stStartRound() {
-        $solo = $this->isSoloMode();
+        $playerCount = $this->getPlayerCount();
 
         $day = intval($this->getGameStateValue(DAY)) + 1;
         $this->setGameStateValue(DAY, $day);
@@ -35,11 +35,11 @@ trait StateTrait {
         ]);
 
         if ($day == 1) {
-            if ($solo) {
+            if ($playerCount == 1) {
                 $this->placeSoloTilesOnMeetingTrack();
             }
             $this->placeCompanionsOnMeetingTrack();
-            $this->initMeetingTrackSmallDice();
+            $this->initMeetingTrackSmallDice($playerCount);
             $this->addFootprintsOnMeetingTrack();
         }
 

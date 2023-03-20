@@ -49,6 +49,8 @@ interface SoloTile extends SoloTileCard {
 
 interface Die {
     id: number;
+    location: string;
+    location_arg: number;
     face: number;
     value: number;
     color: number;
@@ -89,6 +91,7 @@ interface GlowPlayer extends Player {
     rerolls: number;
     footprints: number;
     fireflies: number;
+    smallBoard: boolean;
     company?: number; // tom company score
 }
 
@@ -152,6 +155,7 @@ interface GlowGame extends Game {
     selectSketalDie(dieId: number): void;
     isSolo(): boolean;
     tableHeightChange(): void;
+    getSpotCount(): number;
 }
 
 interface EnteringChooseAdventurerArgs {

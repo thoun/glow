@@ -518,6 +518,30 @@
   background-image: url("img/meeting-track.png");
   margin-bottom: 260px;
 }
+#meeting-track #meeting-track-expansion {
+  position: absolute;
+  width: 419px;
+  height: 163px;
+  top: 0;
+  left: 916px;
+}
+#meeting-track #meeting-track-expansion[data-players="5"] {
+  background-image: url("img/meeting-track-little-board-5p.png");
+}
+#meeting-track #meeting-track-expansion[data-players="6"] {
+  background-image: url("img/meeting-track-little-board-6p.png");
+}
+#meeting-track #meeting-track-expansion .label {
+  position: absolute;
+  width: 70px;
+  top: 2px;
+  right: 0;
+  color: white;
+  font-family: "glow";
+  text-align: center;
+  font-size: 16pt;
+  white-space: nowrap;
+}
 #meeting-track .meeting-track-zone {
   position: absolute;
   width: 129px;
@@ -878,6 +902,20 @@ ol.help-list {
 
 #avatar_active_0 {
   background: url("img/gear.png");
+}
+
+.meeting-track-icon {
+  display: inline-block;
+  width: 84px;
+  height: 32px;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+.meeting-track-icon[data-players="5"] {
+  background-image: url("img/meeting-track-little-board-5p.png");
+}
+.meeting-track-icon[data-players="6"] {
+  background-image: url("img/meeting-track-little-board-6p.png");
 }
 
 html {

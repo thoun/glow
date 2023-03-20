@@ -81,8 +81,8 @@ trait UtilTrait {
         return intval($this->getGameStateValue(EXPANSION)) >= 2;
     }
 
-    function createDice(bool $isExpansion, bool $solo) {
-        $sql = "INSERT INTO dice (`color`, `small`, `die_face`) VALUES ";
+    function createDice(bool $isExpansion, int $playerCount) {
+        $sql = "INSERT INTO dice (`color`, `small`, `die_face`, `location`) VALUES ";
         $values = [];
 
         $DICE = $this->DICES;
@@ -98,16 +98,28 @@ trait UtilTrait {
 
             // big
             for ($i=0; $i<$counts[0]; $i++) {
-                $values[] = "($color, false, $face)";
+                $values[] = "($color, false, $face, 'deck')";
             }
 
-            if ($solo && $color == 8) {
+            if ($playerCount == 1 && $color == 8) {
                 continue;
             }
 
             // small
             for ($i=0; $i<$counts[1]; $i++) {
-                $values[] = "($color, true, $face)";
+                $values[] = "($color, true, $face, 'deck')";
+            }
+        }
+
+        if ($playerCount >= 5) {
+            foreach ([1, 2, 3, 6] as $color) {
+                $values[] = "($color, true, $face, 'decksmall')";
+            }
+
+            if ($playerCount >= 6) {
+                foreach ([4, 5] as $color) {
+                    $values[] = "($color, true, $face, 'decksmall')";
+                }
             }
         }
 
@@ -165,11 +177,11 @@ trait UtilTrait {
         return array_map(fn($dbObject) => $this->getSoloTileFromDb($dbObject), array_values($dbObjects));
     }
     
-    function getSmallDice(bool $ignoreBlack) {
-        $sql = "SELECT * FROM dice WHERE `small` = true ";
+    function getSmallDice(bool $ignoreBlack, string $location) {
+        $sql = "SELECT * FROM dice WHERE `small` = true AND `location` = '$location' ";
         if ($ignoreBlack) {
             $sql .= " AND `color` <> 8";
-        } 
+        }
         $dbDices = $this->getCollectionFromDB($sql);
         return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices));
     }
@@ -239,6 +251,15 @@ trait UtilTrait {
         return intval($this->getUniqueValueFromDB("SELECT count(*) FROM player"));
     }
 
+    function getSpotCount() {
+        $spotCount = 5;
+        $playerCount = $this->getPlayerCount();
+        if ($playerCount >= 5) {
+            $spotCount = $playerCount + 2;
+        }
+        return  $spotCount;
+    }        
+
     function getPlayerName(int $playerId) {
         if ($playerId == 0) {
             return 'Tom';
@@ -249,6 +270,14 @@ trait UtilTrait {
 
     function getPlayerScore(int $playerId) {
         return intval($this->getUniqueValueFromDB("SELECT player_score FROM player where `player_id` = $playerId"));
+    }
+
+    function getPlayerSmallBoard(int $playerId) {
+        if ($playerId == 0) {
+            return false;
+        } else {
+            return boolval($this->getUniqueValueFromDb("SELECT player_small_board FROM player WHERE player_id = $playerId"));
+        }
     }
 
     function incPlayerScore(int $playerId, int $incScore, $message = '', $params = []) {
@@ -447,8 +476,8 @@ trait UtilTrait {
 
     function placeCompanionsOnMeetingTrack() {        
         $solo = $this->isSoloMode();
-
-        for ($i=1;$i<=5;$i++) {
+        $spotCount = $this->getSpotCount();
+        for ($i=1;$i<=$spotCount;$i++) {
             $bigDieInSpot = false;
             if ($solo) {
                 $dice = $this->getDiceByLocation('meeting', $i);
@@ -475,10 +504,10 @@ trait UtilTrait {
         }
     }
 
-    function initMeetingTrackSmallDice() {
+    function initMeetingTrackSmallDice(int $playerCount) {
         $this->DbQuery("INSERT INTO meetingtrack (`spot`, `footprints`) VALUES (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)");
 
-        $smallDice = $this->getSmallDice(true);
+        $smallDice = $this->getSmallDice(true, 'deck');
 
         // rolls the 9 small dice
         foreach($smallDice as &$idie) {
@@ -490,7 +519,28 @@ trait UtilTrait {
             }
         }
 
-        $this->moveSmallDiceToMeetingTrack($smallDice);
+        $this->moveSmallDiceToMeetingTrack($smallDice, false);
+
+        if ($playerCount >= 5) {
+            $this->DbQuery("INSERT INTO meetingtrack (`spot`, `footprints`) VALUES (6, 0), (7, 0)");
+            if ($playerCount >= 6) {
+                $this->DbQuery("INSERT INTO meetingtrack (`spot`, `footprints`) VALUES (8, 0)");
+            }
+
+            $smallDice = $this->getSmallDice(true, 'decksmall');
+
+            // rolls the remaining small dice
+            foreach($smallDice as &$idie) {
+                $idie->roll();
+
+                // If the purple die indicates the footprint symbol, it is rerolled
+                while ($idie->color === 6 && $idie->face === 6) {
+                    $idie->roll();
+                }
+            }
+
+            $this->moveSmallDiceToMeetingTrack($smallDice, true);
+        }
     }
 
     
@@ -505,26 +555,29 @@ trait UtilTrait {
             }
         }
 
-        $this->moveSmallDiceToMeetingTrack($smallDice);
+        $this->moveSmallDiceToMeetingTrack($smallDice, $this->getPlayerSmallBoard($playerId));
 
         $this->notifyAllPlayers('replaceSmallDice', '', [
             'dice' => $smallDice,
         ]);
     }
 
-    private function moveSmallDiceToMeetingTrack(array $smallDice) {
+    private function moveSmallDiceToMeetingTrack(array $smallDice, bool $toSmallBoard) {
+        $playerCount = $this->getPlayerCount();
+
         for ($i=1; $i<=5; $i++) {
             $colorDice = array_values(array_filter($smallDice, fn($idie) => $idie->value === $i));
             if (count($colorDice) > 0) {
-                $this->moveDice($colorDice, 'meeting', $i);
+                $this->moveDice($colorDice, 'meeting', $toSmallBoard ? $this->SMALL_BOARD_COLOR[$playerCount][$i] : $i);
             }
         }
 
         $this->persistDice($smallDice);
     }
 
-    private function addFootprintsOnMeetingTrack() {
-        for ($i=1; $i<=5; $i++) {
+    private function addFootprintsOnMeetingTrack() {        
+        $spotCount = $this->getSpotCount();
+        for ($i=1;$i<=$spotCount;$i++) {
             $dice = $this->getDiceByLocation('meeting', $i);
             if (count($dice) === 0) {
                 // add footprint if no die on track

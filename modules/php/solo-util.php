@@ -298,7 +298,7 @@ trait SoloUtilTrait {
             }
         }
 
-        $this->moveSmallDiceToMeetingTrack($smallDice);
+        $this->moveSmallDiceToMeetingTrack($smallDice, false);
     }
 
     function provinceOfShadowLastMove() {

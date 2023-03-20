@@ -593,23 +593,33 @@ var MEETING_SPOT_BY_COLOR = [
     2,
 ];
 var MeetingTrack = /** @class */ (function () {
-    function MeetingTrack(game, meetingTrackSpot, topDeckType, topDeckBType, topCemeteryType, discardedSoloTiles) {
+    function MeetingTrack(game, meetingTrackSpot, topDeckType, topDeckBType, topCemeteryType, discardedSoloTiles, playerCount) {
         var _this = this;
         this.game = game;
         this.companionsStocks = [];
         this.soloTilesStocks = [];
-        var solo = this.game.isSolo();
+        var solo = playerCount == 1;
+        if (playerCount >= 5) {
+            document.getElementById("meeting-track").insertAdjacentHTML('afterbegin', "\n                <div id=\"meeting-track-expansion\" data-players=\"" + playerCount + "\">\n                    <div class=\"label\">" + _('${playerCount} players').replace('${playerCount}', playerCount) + "</div>\n                </div>\n            ");
+        }
         if (solo) {
             dojo.place("<div id=\"meeting-track-dice-0\" class=\"meeting-track-zone dice\" style=\"left: 57px;\"></div>", 'meeting-track');
             meetingTrackSpot[0].dice.forEach(function (die) { return _this.game.createOrMoveDie(die, "meeting-track-dice-0"); });
         }
+        var spotCount = 5;
+        if (playerCount >= 5) {
+            spotCount = playerCount + 2;
+        }
         var _loop_1 = function (i) {
             var left = 245 + 135 * MEETING_SPOT_BY_COLOR[i];
+            if (i > 5) {
+                left = 4 + (i - 6) * 135;
+            }
             var html = "\n            <div id=\"meeting-track-dice-" + i + "\" class=\"meeting-track-zone dice\" style=\"left: " + left + "px;\"></div>\n            <div id=\"meeting-track-footprints-" + i + "\" class=\"meeting-track-zone footprints\" style=\"left: " + left + "px;\"></div>\n            <div id=\"meeting-track-companion-" + i + "\" class=\"meeting-track-stock\" style=\"left: " + left + "px;\"></div>\n            ";
             if (solo) {
                 html += "<div id=\"meeting-track-soloTile-" + i + "\" class=\"meeting-track-solo-tile\" style=\"left: " + left + "px;\"></div>";
             }
-            dojo.place(html, 'meeting-track');
+            dojo.place(html, i > 5 ? 'meeting-track-expansion' : 'meeting-track');
             var spot = meetingTrackSpot[i];
             // companions
             this_1.companionsStocks[i] = new ebg.stock();
@@ -640,7 +650,7 @@ var MeetingTrack = /** @class */ (function () {
             }
         };
         var this_1 = this;
-        for (var i = 1; i <= 5; i++) {
+        for (var i = 1; i <= spotCount; i++) {
             _loop_1(i);
         }
         var _loop_2 = function (i) {
@@ -654,7 +664,7 @@ var MeetingTrack = /** @class */ (function () {
         };
         var this_2 = this;
         // place dice only after spots creation
-        for (var i = 1; i <= 5; i++) {
+        for (var i = 1; i <= spotCount; i++) {
             _loop_2(i);
         }
         this.setDeckTop(DECK, topDeckType);
@@ -708,12 +718,12 @@ var MeetingTrack = /** @class */ (function () {
         }
     };
     MeetingTrack.prototype.removeCompanions = function () {
-        for (var i = 1; i <= 5; i++) {
+        for (var i = 1; i <= this.game.getSpotCount(); i++) {
             this.removeCompanion(i);
         }
     };
     MeetingTrack.prototype.setSelectionMode = function (mode) {
-        for (var i = 1; i <= 5; i++) {
+        for (var i = 1; i <= this.game.getSpotCount(); i++) {
             this.companionsStocks[i].setSelectionMode(mode);
         }
     };
@@ -737,7 +747,7 @@ var MeetingTrack = /** @class */ (function () {
     MeetingTrack.prototype.placeSmallDice = function (dice) {
         var _this = this;
         dice.forEach(function (die) {
-            return _this.game.createOrMoveDie(die, "meeting-track-dice-" + die.value);
+            return _this.game.createOrMoveDie(die, "meeting-track-dice-" + die.location_arg);
         });
     };
     MeetingTrack.prototype.setDeckTop = function (deckId, type) {
@@ -747,7 +757,7 @@ var MeetingTrack = /** @class */ (function () {
         var _loop_3 = function (i) {
             dojo.toggleClass("meeting-track-dice-" + i, 'selectable', possibleSpots.some(function (ps) { return ps === i; }));
         };
-        for (var i = 1; i <= 5; i++) {
+        for (var i = 1; i <= this.game.getSpotCount(); i++) {
             _loop_3(i);
         }
     };
@@ -1137,10 +1147,16 @@ var Glow = /** @class */ (function () {
     */
     Glow.prototype.setup = function (gamedatas) {
         var _this = this;
-        this.dontPreloadImage('publisher.png');
         this.dontPreloadImage("side" + (gamedatas.side == 2 ? 1 : 2) + ".png");
         this.dontPreloadImage('side1-hd.png');
         this.dontPreloadImage('side2-hd.png');
+        var playerCount = Object.keys(gamedatas.players).length;
+        if (playerCount != 5) {
+            this.dontPreloadImage('meeting-track-little-board-5p.png');
+        }
+        if (playerCount != 6) {
+            this.dontPreloadImage('meeting-track-little-board-6p.png');
+        }
         log("Starting game setup");
         /*if (gamedatas.side == 2) {
             Object.values(this.gamedatas.gamestates).filter(gamestate => ['move', 'multiMove', 'privateMove'].includes(gamestate.name)).forEach(gamestate => {
@@ -1164,7 +1180,7 @@ var Glow = /** @class */ (function () {
             players.push(gamedatas.tom);
         }
         this.board = new Board(this, players, gamedatas.tableDice);
-        this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack, gamedatas.topDeckType, gamedatas.topDeckBType, gamedatas.topCemeteryType, gamedatas.discardedSoloTiles);
+        this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack, gamedatas.topDeckType, gamedatas.topDeckBType, gamedatas.topCemeteryType, gamedatas.discardedSoloTiles, playerCount);
         this.createPlayerTables(gamedatas);
         if (gamedatas.day > 0) {
             this.roundCounter = new ebg.counter();
@@ -1298,7 +1314,7 @@ var Glow = /** @class */ (function () {
         this.meetingTrackClickAction = 'recruit';
         var solo = this.isSolo();
         args.companions.forEach(function (meetingTrackSpot, spot) {
-            if (spot >= 1 && spot <= 5) {
+            if (spot >= 1 && spot <= _this.getSpotCount()) {
                 _this.meetingTrack.setCompanion(meetingTrackSpot.companion, spot);
                 _this.meetingTrack.placeSmallDice(meetingTrackSpot.dice);
                 _this.meetingTrack.setFootprintTokens(spot, meetingTrackSpot.footprints);
@@ -1334,7 +1350,7 @@ var Glow = /** @class */ (function () {
         var _this = this;
         this.meetingTrackClickAction = 'remove';
         args.companions.forEach(function (meetingTrackSpot, spot) {
-            if (spot >= 1 && spot <= 5) {
+            if (spot >= 1 && spot <= _this.getSpotCount()) {
                 _this.meetingTrack.setCompanion(meetingTrackSpot.companion, spot);
             }
         });
@@ -1848,6 +1864,10 @@ var Glow = /** @class */ (function () {
                 _this.updateFireflyCounterIcon(playerId);
             }
             if (!solo) {
+                if (player.smallBoard) {
+                    dojo.place("<div id=\"player_board_" + player.id + "_meeting_track\" class=\"meeting-track-icon\" data-players=\"" + players.length + "\"></div>", "player_board_" + player.id);
+                    _this.addTooltipHtml("player_board_" + player.id + "_meeting_track", _("This player will place its small dice on the meeting track small board"));
+                }
                 // first player token
                 dojo.place("<div id=\"player_board_" + player.id + "_firstPlayerWrapper\"></div>", "player_board_" + player.id);
                 if (gamedatas.firstPlayer === playerId) {
@@ -1949,6 +1969,14 @@ var Glow = /** @class */ (function () {
         else if (attempt < 5) {
             setTimeout(function () { return _this.addRollToDiv(dieDiv, rollClass, attempt + 1); }, 200);
         }
+    };
+    Glow.prototype.getSpotCount = function () {
+        var spotCount = 5;
+        var playerCount = Object.keys(this.gamedatas.players).length;
+        if (playerCount >= 5) {
+            spotCount = playerCount + 2;
+        }
+        return spotCount;
     };
     Glow.prototype.removeRollDiceActionButtons = function () {
         var ids = ROLL_DICE_ACTION_BUTTONS_IDS;

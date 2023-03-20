@@ -30,7 +30,8 @@ trait ArgsTrait {
 
         $dice = $this->getDiceByLocation('meeting');
 
-        for ($i=1;$i<=5;$i++) {
+        $spotCount = $this->getSpotCount();
+        for ($i=1;$i<=$spotCount;$i++) {
             $companionsFromDb = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting', $i));
             $companion = count($companionsFromDb) > 0 ? $companionsFromDb[0] : null;
 
@@ -69,7 +70,8 @@ trait ArgsTrait {
         $companions = [];
         $companions[0] = null;
         
-        for ($i=1;$i<=5;$i++) {
+        $spotCount = $this->getSpotCount();
+        for ($i=1;$i<=$spotCount;$i++) {
             $companionsFromDb = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting', $i));
             $companion = count($companionsFromDb) > 0 ? $companionsFromDb[0] : null;
             $companions[$i] = new MeetingTrackSpot($companion);

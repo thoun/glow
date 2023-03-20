@@ -137,7 +137,13 @@ trait ActionTrait {
 
             // black die enters the game
             if ($die->location == 'table') {
-                $availableSpots = [1,2,3,4,5];
+                
+                $availableSpots = [];
+                $spotCount = $this->getSpotCount();
+                for ($i=1;$i<=$spotCount;$i++) {
+                    $availableSpots[] = $i;
+                }
+
                 if ($spot !== null) {
                     $availableSpots = array_values(array_map(fn($dbLine) => 
                         intval($dbLine['card_location_arg'])
@@ -174,7 +180,8 @@ trait ActionTrait {
             $this->checkAction('recruitCompanion'); 
         }
 
-        if ($spot < 1 || $spot > 5) {
+        $spotCount = $this->getSpotCount();
+        if ($spot < 1 || $spot > $spotCount) {
             throw new BgaUserException("Not a valid spot");
         }
         
@@ -246,7 +253,8 @@ trait ActionTrait {
 
         $playerId = $this->getCurrentPlayerId();
 
-        if ($spot < 1 || $spot > 5) {
+        $spotCount = $this->getSpotCount();
+        if ($spot < 1 || $spot > $spotCount) {
             throw new BgaUserException("Not a valid spot");
         }
 
@@ -271,7 +279,8 @@ trait ActionTrait {
 
         $playerId = $this->getCurrentPlayerId();
 
-        if ($spot < 1 || $spot > 5) {
+        $spotCount = $this->getSpotCount();
+        if ($spot < 1 || $spot > $spotCount) {
             throw new BgaUserException("Not a valid spot");
         }
         $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting', $spot));

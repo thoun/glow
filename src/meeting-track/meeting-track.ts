@@ -18,17 +18,35 @@ class MeetingTrack {
         topDeckBType: number,
         topCemeteryType: number,
         discardedSoloTiles: number,
+        playerCount: number,
     ) {
-        const solo = this.game.isSolo();
+        const solo = playerCount == 1;
+
+        if (playerCount >= 5) {
+            document.getElementById(`meeting-track`).insertAdjacentHTML('afterbegin', `
+                <div id="meeting-track-expansion" data-players="${playerCount}">
+                    <div class="label">${_('${playerCount} players').replace('${playerCount}', playerCount)}</div>
+                </div>
+            `);
+        }
 
         if (solo) {
             dojo.place(`<div id="meeting-track-dice-0" class="meeting-track-zone dice" style="left: 57px;"></div>`, 'meeting-track');
             meetingTrackSpot[0].dice.forEach(die => this.game.createOrMoveDie(die, `meeting-track-dice-0`));
         }
 
-        for (let i=1; i<=5; i++) {
+        let spotCount = 5;
+        if (playerCount >= 5) {
+            spotCount = playerCount + 2;
+        }
+
+        for (let i=1; i<=spotCount; i++) {
             
-            const left = 245 + 135*MEETING_SPOT_BY_COLOR[i];
+            let left = 245 + 135*MEETING_SPOT_BY_COLOR[i];
+            if (i > 5) {
+                left = 4 + (i-6) * 135;
+            }
+
             let html = `
             <div id="meeting-track-dice-${i}" class="meeting-track-zone dice" style="left: ${left}px;"></div>
             <div id="meeting-track-footprints-${i}" class="meeting-track-zone footprints" style="left: ${left}px;"></div>
@@ -37,7 +55,7 @@ class MeetingTrack {
             if (solo) {
                 html += `<div id="meeting-track-soloTile-${i}" class="meeting-track-solo-tile" style="left: ${left}px;"></div>`;
             }
-            dojo.place(html, 'meeting-track');
+            dojo.place(html, i > 5 ? 'meeting-track-expansion' : 'meeting-track');
 
             const spot = meetingTrackSpot[i];
 
@@ -80,7 +98,7 @@ class MeetingTrack {
         }
         
         // place dice only after spots creation
-        for (let i=1; i<=5; i++) {
+        for (let i=1; i<=spotCount; i++) {
             const spot = meetingTrackSpot[i];
             this.placeSmallDice(spot.dice);
 
@@ -150,13 +168,13 @@ class MeetingTrack {
     }
 
     public removeCompanions() {
-        for (let i=1; i<=5; i++) {
+        for (let i=1; i<=this.game.getSpotCount(); i++) {
             this.removeCompanion(i);
         }
     }
 
     public setSelectionMode(mode: number) {
-        for (let i=1; i<=5; i++) {
+        for (let i=1; i<=this.game.getSpotCount(); i++) {
             this.companionsStocks[i].setSelectionMode(mode);
         }
     }
@@ -184,7 +202,7 @@ class MeetingTrack {
     
     public placeSmallDice(dice: Die[]) {
         dice.forEach(die => 
-            this.game.createOrMoveDie(die, `meeting-track-dice-${die.value}`)
+            this.game.createOrMoveDie(die, `meeting-track-dice-${die.location_arg}`)
         );
     }
 
@@ -193,7 +211,7 @@ class MeetingTrack {
     }
     
     public setSelectableDice(possibleSpots: number[]) {
-        for (let i=1; i<=5; i++) {
+        for (let i=1; i<=this.game.getSpotCount(); i++) {
             dojo.toggleClass(`meeting-track-dice-${i}`, 'selectable', possibleSpots.some(ps => ps === i));
         }
     }
