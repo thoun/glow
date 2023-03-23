@@ -104,7 +104,7 @@ class MeetingTrack {
 
             document.getElementById(`meeting-track-dice-${i}`).addEventListener('click', () => {
                 if (dojo.hasClass(`meeting-track-dice-${i}`, 'selectable')) {
-                    this.game.moveBlackDie(i);
+                    this.game.onMeetingTrackDiceClick(i);
                 }
             });
         }

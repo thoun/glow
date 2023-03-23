@@ -184,10 +184,18 @@ function getEffectTooltip(effect: Effect) {
     `;
 }
 
+function getAdventurerTooltip(type: number) {
+    switch (type) {
+        case 11: return `<p>` + _(`TODO special Uriom rules`) + `</p>`;
+    }
+    return null;
+}
+
 function setupAdventurerCard(game: Game, cardDiv: HTMLDivElement, type: number) {
     const adventurer = ((game as any).gamedatas as GlowGamedatas).ADVENTURERS[type];
     const tooltip = getEffectTooltip(adventurer.effect);
-    (game as any).addTooltipHtml(cardDiv.id, `<h3>${adventurer.name}</h3>${tooltip || ''}`);
+    const adventurerTooltip = getAdventurerTooltip(type);
+    (game as any).addTooltipHtml(cardDiv.id, `<h3>${adventurer.name}</h3>${tooltip || ''}${tooltip && adventurerTooltip ? '<hr>' : ''}${adventurerTooltip || ''}`);
 
     const adventurerPoints = ADVENTURERS_POINTS[type];
     if (adventurerPoints) {

@@ -151,7 +151,7 @@ interface GlowGame extends Game {
     createOrMoveDie(die: Die, destinationId: string, rollClass?: string): void;
     cardClick(type: number, id: number): void;
     selectMove(possibleDestination: Route): void;
-    moveBlackDie(spot: number): void;
+    onMeetingTrackDiceClick(spot: number): void;
     selectSketalDie(dieId: number): void;
     isSolo(): boolean;
     tableHeightChange(): void;
@@ -183,6 +183,10 @@ interface EnteringSelectSketalDieArgs {
 
 interface EnteringMoveBlackDieArgs {
     possibleSpots: number[];
+}
+
+interface EnteringUriomRecruitCompanionArgs {
+    spot: number;
 }
 
 interface EnteringResurrectArgs {

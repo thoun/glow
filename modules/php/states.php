@@ -48,8 +48,36 @@ trait StateTrait {
         $this->gamestate->nextState('morning');
     }
 
-    function stNextPlayerRecruitCompanion() {     
-        $playerId = $this->getActivePlayerId();
+    function stRecuitCompanion() {
+        $uriomIntervention = $this->getGlobalVariable(URIOM_INTERVENTION);
+        if ($uriomIntervention !== null && $uriomIntervention->activated === false) {
+            $this->recruitCompanionAction($uriomIntervention->activePlayerId, $uriomIntervention->spot);
+        } else if (intval($this->getUniqueValueFromDB("SELECT player_recruit_day FROM player where `player_id` = ".$this->getActivePlayerId())) == intval($this->getGameStateValue(DAY)))  {
+            // if Uriom has already played with its intervention, we skip its turn
+            $this->gamestate->nextState('nextPlayer');
+        }
+    }
+
+    function stNextPlayerRecruitCompanion() {
+        $playerId = intval($this->getActivePlayerId());
+
+        $uriomIntervention = $this->getGlobalVariable(URIOM_INTERVENTION);
+        if ($uriomIntervention !== null) {
+            if ($uriomIntervention->activated === null) {
+                // redirect to uriom player
+                $this->gamestate->changeActivePlayer($uriomIntervention->uriomPlayerId);
+                $this->gamestate->nextState('uriomRecruit');
+                return;
+            } else if ($playerId == $uriomIntervention->uriomPlayerId) {
+                // redirect from uriom player to previous active player
+                $this->gamestate->changeActivePlayer($uriomIntervention->activePlayerId);
+                $this->gamestate->nextState('nextPlayer');
+                return;
+            } else {
+                // after a uriom intervention and active player  finished its turn
+                $this->deleteGlobalVariable(URIOM_INTERVENTION);
+            }
+        }
 
         $this->activeNextPlayer();
     

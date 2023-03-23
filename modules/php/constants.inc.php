@@ -18,6 +18,7 @@ define('ST_PLAYER_RECRUIT_COMPANION', 20);
 define('ST_PLAYER_REMOVE_COMPANION', 21);
 define('ST_PLAYER_SELECT_SKETAL_DIE', 22);
 define('ST_PLAYER_MOVE_BLACK_DIE', 23);
+define('ST_PLAYER_URIOM_RECRUIT_COMPANION', 25);
 define('ST_NEXT_PLAYER_RECRUIT_COMPANION', 28);
 define('ST_END_RECRUIT', 29);
 
@@ -52,6 +53,12 @@ define('END_SCORE', 100);
 define('DAY', 'DAY');
 define('FIRST_PLAYER', 'FIRST_PLAYER');
 define('SOLO_DECK', 'SOLO_DECK');
+
+/*
+ * Global Variables
+ */
+define('TOM', 'TOM');
+define('URIOM_INTERVENTION', 'URIOM_INTERVENTION');
 
 /*
  * Options

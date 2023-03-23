@@ -53,6 +53,28 @@ trait UtilTrait {
         return true;
     }
 
+    function setGlobalVariable(string $name, /*object|array*/ $obj) {
+        /*if ($obj == null) {
+            throw new \Error('Global Variable null');
+        }*/
+        $jsonObj = json_encode($obj);
+        $this->DbQuery("INSERT INTO `global_variables`(`name`, `value`)  VALUES ('$name', '$jsonObj') ON DUPLICATE KEY UPDATE `value` = '$jsonObj'");
+    }
+
+    function getGlobalVariable(string $name, $asArray = null) {
+        $json_obj = $this->getUniqueValueFromDB("SELECT `value` FROM `global_variables` where `name` = '$name'");
+        if ($json_obj) {
+            $object = json_decode($json_obj, $asArray);
+            return $object;
+        } else {
+            return null;
+        }
+    }
+
+    function deleteGlobalVariable(string $name) {
+        $this->DbQuery("DELETE FROM `global_variables` where `name` = '$name'");
+    }
+
     function isTurnBased() {
         return intval($this->gamestate->table_globals[200]) >= 10;
     }
@@ -226,8 +248,11 @@ trait UtilTrait {
         return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices));
     }
 
-    function getBlackDie() {
-        $sql = "SELECT * FROM dice WHERE `color` = 8 AND `small` = true";
+    function getBlackDie(bool $onlySmall) {
+        $sql = "SELECT * FROM dice WHERE `color` = 8";
+        if ($onlySmall) {
+            $sql .= " AND `small` = true";
+        }
         $dbDices = $this->getCollectionFromDB($sql);
         return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices))[0];
     }
@@ -503,7 +528,7 @@ trait UtilTrait {
             $this->moveDice([$bigDie], 'table');
         }
         if (!$solo) {
-            $blackDie = $this->getBlackDie();
+            $blackDie = $this->getBlackDie(true);
             $this->moveDice([$blackDie], 'table');
         }
     }
@@ -583,6 +608,7 @@ trait UtilTrait {
         $spotCount = $this->getSpotCount();
         for ($i=1;$i<=$spotCount;$i++) {
             $dice = $this->getDiceByLocation('meeting', $i);
+            $dice = array_values(array_filter($dice, fn($die) => $die->color != 11 || !$die->small));
             if (count($dice) === 0) {
                 // add footprint if no die on track
                 $footprints = 1;
@@ -1160,5 +1186,24 @@ trait UtilTrait {
         } else {
             $this->gamestate->nextState('recruit');
         }
+    }
+
+    public function spotHasUriomDice(int $spot) {
+        $spotDice = $this->getDiceByLocation('meeting', $spot);
+
+        return $this->array_some($spotDice, fn($die) => $die->color == 11 && $die->small);
+    }
+
+    public function getPlayerWithUriom() {
+        return intval($this->getUniqueValueFromDB("SELECT card_location_arg FROM adventurer where `card_location` = 'player' AND `card_type` = 11"));
+    }
+
+    public function uriomHasRecruited(int $playerId) {
+        $playerWithUriom = $this->getPlayerWithUriom();
+        // ignore this check if no Uriom, or if the active player is the one with Uriom
+        if ($playerWithUriom == 0 || $playerWithUriom == $playerId) {
+            return true;
+        }
+        return intval($this->getUniqueValueFromDB("SELECT player_recruit_day FROM player where player_id = $playerWithUriom")) == intval($this->getGameStateValue(DAY));
     }
 }

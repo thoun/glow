@@ -27,18 +27,11 @@ trait SoloUtilTrait {
     }
 
     function setTom(object $tom) {
-        $jsonObj = json_encode($tom);
-        $this->DbQuery("INSERT INTO `global_variables`(`name`, `value`)  VALUES ('TOM', '$jsonObj') ON DUPLICATE KEY UPDATE `value` = '$jsonObj'");
+        $this->setGlobalVariable(TOM, $tom);
     }
 
     function getTom() {
-        $json_obj = $this->getUniqueValueFromDB("SELECT `value` FROM `global_variables` where `name` = 'TOM'");
-        if ($json_obj) {
-            $tom = json_decode($json_obj);
-            return $tom;
-        } else {
-            return null;
-        }
+        return $this->getGlobalVariable(TOM);
     }
 
     function setTomDice(array $dice) {

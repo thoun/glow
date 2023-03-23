@@ -45,8 +45,8 @@ CREATE TABLE IF NOT EXISTS `meetingtrack` (
 
 CREATE TABLE IF NOT EXISTS `adventurer` (
   `card_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `card_type` int(1) NOT NULL,
-  `card_type_arg` int(1) NULL,
+  `card_type` tinyint NOT NULL,
+  `card_type_arg` tinyint NULL,
   `card_location` varchar(16) NOT NULL,
   `card_location_arg` int(11) NOT NULL,
   PRIMARY KEY (`card_id`)

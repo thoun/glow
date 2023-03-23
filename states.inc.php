@@ -94,6 +94,7 @@ $basicGameStates = [
         "action" => "stNextPlayerRecruitCompanion",
         "transitions" => [
             "nextPlayer" => ST_PLAYER_RECRUIT_COMPANION, 
+            "uriomRecruit" => ST_PLAYER_URIOM_RECRUIT_COMPANION,
             "end" => ST_END_RECRUIT,
         ],
     ],
@@ -149,6 +150,7 @@ $playerActionsGameStates = [
         "descriptionmyturn" => clienttranslate('${you} must recruit a companion'),
         "type" => "activeplayer",
         "args" => "argRecuitCompanion",
+        "action" => "stRecuitCompanion",
         "updateGameProgression" => true,
         "possibleactions" => [ 
             "recruitCompanion",
@@ -208,6 +210,27 @@ $playerActionsGameStates = [
             "nextPlayer" => ST_NEXT_PLAYER_RECRUIT_COMPANION,
             "zombiePass" => ST_NEXT_PLAYER_RECRUIT_COMPANION,
         ]
+    ],
+
+    ST_PLAYER_URIOM_RECRUIT_COMPANION => [
+        "name" => "uriomRecruitCompanion",
+        "description" => clienttranslate('${actplayer} can recruit the selected companion (Uriom power)'),
+        "descriptionmyturn" => clienttranslate('${you} can recruit the selected companion (Uriom power)'),
+        "type" => "activeplayer",
+        "args" => "argUriomRecruitCompanion",
+        "possibleactions" => [ 
+            "recruitCompanionUriom", 
+            "passUriomRecruit", 
+        ],
+        "transitions" => [
+            "moveBlackDie" => ST_PLAYER_MOVE_BLACK_DIE,
+            "selectSketalDie" => ST_PLAYER_SELECT_SKETAL_DIE,
+            "nextPlayer" => ST_NEXT_PLAYER_RECRUIT_COMPANION,
+            "removeCompanion" => ST_PLAYER_REMOVE_COMPANION,
+            "zombiePass" => ST_NEXT_PLAYER_RECRUIT_COMPANION,
+            "pass" => ST_NEXT_PLAYER_RECRUIT_COMPANION,
+            "zombiePass" => ST_PLAYER_RECRUIT_COMPANION,
+        ],
     ],
 
     ST_MULTIPLAYER_CHANGE_DICE => [

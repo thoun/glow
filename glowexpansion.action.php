@@ -99,6 +99,22 @@
         $this->ajaxResponse();
     }
 
+    public function recruitCompanionUriom() {
+        $this->setAjaxMode();     
+
+        $this->game->recruitCompanionUriom();
+
+        $this->ajaxResponse();
+    }
+
+    public function passUriomRecruit() {
+        $this->setAjaxMode();     
+
+        $this->game->passUriomRecruit();
+
+        $this->ajaxResponse();
+    }
+
     public function rollDice() {
         $this->setAjaxMode();     
 

@@ -35,11 +35,11 @@ $this->DICES = [
 
 $this->DICES_EXPANSION1 = [
   // color is the key, then large number and small number
+  7 => [3, 0], // yellow
   8 => [1, 1], // black
   80 => [2, 0], // black/gray/multi
   9 => [2, 0], // brown
   10 => [2, 0], // pink
-  11 => [1, 2], // another yellow?
 ];
 
 $this->ADVENTURERS = [ // (string $name, int $points, int $dice, $effect)
@@ -54,7 +54,7 @@ $this->ADVENTURERS = [ // (string $name, int $points, int $dice, $effect)
   8 => new AdventurerCard('Richard', 0, 3, new Effect([201, 202], [30, 103])),
   9 => new AdventurerCard('Malac\'h', 4, 2, new Effect([203, 203], [21, 11])),
   10 => new AdventurerCard('Kaploum', 0, 2, new Effect([204, 204], [107])),
-  11 => new AdventurerCard('Uriom', 0, 3, null),
+  11 => new AdventurerCard('Uriom', 0, 1, null),
 ];
 
 $this->COMPANIONS = [ // (string $name, int $points, $effect, bool $reroll, int $fireflies, bool $die, int $dieColor)

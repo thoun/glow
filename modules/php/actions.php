@@ -1,5 +1,7 @@
 <?php
 
+require_once(__DIR__.'/objects/uriom-intervention.php');
+
 trait ActionTrait {
 
     //////////////////////////////////////////////////////////////////////////////
@@ -27,8 +29,25 @@ trait ActionTrait {
                 $this->getBigDiceByColor(8, 1),
                 $this->getBigDiceByColor(80, 2),
             );
+        } else if ($adventurer->color == 11) {
+            $dice = array_merge(
+                $this->getBigDiceByColor(7, $adventurer->dice),
+            );
         }
         $this->moveDice($dice, 'player', $playerId);
+
+        if ($adventurer->color == 11) {
+            // we create and place the 2 special yellow small dice
+            $sql = "INSERT INTO dice (`color`, `small`, `die_face`, `location`) VALUES ";
+            $values = [];
+            $deck = $this->getPlayerSmallBoard($playerId) ? 'decksmall' : 'deck';
+            foreach ([1, 2] as $i) {
+                $values[] = "(11, true, ".bga_rand(1, 5).", '$deck')";
+            }
+    
+            $sql .= implode(',', $values);
+            $this->DbQuery($sql);
+        }
 
         $newPlayerColor = $this->ADVENTURERS_COLORS[$adventurer->color];
         $this->DbQuery("UPDATE player SET `player_color` = '$newPlayerColor' WHERE player_id = $playerId");
@@ -91,6 +110,9 @@ trait ActionTrait {
         $dice = null;
         if ($spot !== null) {
             $dice = $this->getDiceByLocation('meeting', $spot);
+            if ($playerId != $this->getPlayerWithUriom()) {
+                $dice = array_values(array_filter($dice, fn($die) => $die->color != 11 || !$die->small));
+            }
             $count = count($dice);
             if ($count > 0) {
                 $this->moveDice($dice, 'player', $playerId);
@@ -133,7 +155,7 @@ trait ActionTrait {
                 }
             }
         } else if ($companion->subType == KAAR) {
-            $die = $this->getBlackDie();
+            $die = $this->getBlackDie(true);
 
             // black die enters the game
             if ($die->location == 'table') {
@@ -167,7 +189,7 @@ trait ActionTrait {
     }
 
     function redirectAfterRecruit() {
-        if ($this->getPlayerCount() == 2 && intval($this->getActivePlayerId()) == intval($this->getGameStateValue(FIRST_PLAYER))) {
+        if ($this->getPlayerCount() == 2 && intval($this->companions->countCardInLocation('meeting')) >= 4) {
             $this->gamestate->nextState('removeCompanion');
         } else {
             $this->gamestate->nextState('nextPlayer');
@@ -186,6 +208,18 @@ trait ActionTrait {
         }
         
         $playerId = $this->getActivePlayerId();
+
+        $spotDice = $this->getDiceByLocation('meeting', $spot);
+        if ($this->array_some($spotDice, fn($die) => $die->color == 11 && $die->small) && !$this->uriomHasRecruited($playerId)) {
+            $this->setGlobalVariable(URIOM_INTERVENTION, new UriomIntervention($playerId, $this->getPlayerWithUriom(), $spot));
+            $this->gamestate->nextState('nextPlayer');
+            return;
+        }
+
+        $this->recruitCompanionAction($playerId, $spot);
+    }
+
+    public function recruitCompanionAction(int $playerId, int $spot) {
         $solo = $this->isSoloMode();
         if ($solo) {
             $soloTile = $this->getSoloTilesFromDb($this->soloTiles->getCardsInLocation('meeting', $spot))[0];
@@ -194,7 +228,8 @@ trait ActionTrait {
         }
 
         $spotDice = $this->getDiceByLocation('meeting', $spot);
-        if ($this->array_some($spotDice, fn($die) => $die->color == 8)) {
+
+        if ($this->array_some($spotDice, fn($die) => $die->color == 8 && $die->small)) {
             $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId, null, 'location_arg'));
             if ($this->array_some($companions, fn($companion) => $companion->subType == KAAR)) {
                 $this->gamestate->nextState('moveBlackDie');
@@ -258,7 +293,7 @@ trait ActionTrait {
             throw new BgaUserException("Not a valid spot");
         }
 
-        $die = $this->getBlackDie();
+        $die = $this->getBlackDie(true);
         $currentSpot = $die->location_arg;
 
         $die->setFace($spot);
@@ -277,12 +312,17 @@ trait ActionTrait {
     public function removeCompanion(int $spot) {
         $this->checkAction('removeCompanion'); 
 
-        $playerId = $this->getCurrentPlayerId();
+        $playerId = intval($this->getCurrentPlayerId());
 
         $spotCount = $this->getSpotCount();
         if ($spot < 1 || $spot > $spotCount) {
             throw new BgaUserException("Not a valid spot");
         }
+
+        if ($this->spotHasUriomDice($spot) && $playerId != $this->getPlayerWithUriom()) {
+            throw new BgaUserException("You can't remove a card with a small yellow die"); // TODO check translation / make translatable
+        }
+
         $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting', $spot));
 
         if (count($companions) == 0) {
@@ -306,6 +346,26 @@ trait ActionTrait {
         ]);
         
         $this->gamestate->nextState('nextPlayer');
+    }
+
+    public function recruitCompanionUriom() {
+        $this->checkAction('recruitCompanionUriom');
+
+        $uriomIntervention = $this->getGlobalVariable(URIOM_INTERVENTION);
+        $uriomIntervention->activated = true;
+        $this->setGlobalVariable(URIOM_INTERVENTION, $uriomIntervention);
+
+        $this->recruitCompanionAction($uriomIntervention->uriomPlayerId, $uriomIntervention->spot);
+    }
+    
+    public function passUriomRecruit() {
+        $this->checkAction('passUriomRecruit');
+
+        $uriomIntervention = $this->getGlobalVariable(URIOM_INTERVENTION);
+        $uriomIntervention->activated = false;
+        $this->setGlobalVariable(URIOM_INTERVENTION, $uriomIntervention);
+
+        $this->gamestate->nextState('pass');
     }
     
     public function selectDiceToRoll() {

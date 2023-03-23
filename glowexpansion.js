@@ -202,10 +202,17 @@ function getEffectTooltip(effect) {
     }
     return "\n    <div class=\"tooltip-effect-title\">" + _("Conditions") + "</div>\n    " + conditions + "\n    <hr>\n    <div class=\"tooltip-effect-title\">" + _("Effects") + "</div>\n    " + effect.effects.map(function (effect) { return getEffectExplanation(effect); }).join('<br>') + "\n    ";
 }
+function getAdventurerTooltip(type) {
+    switch (type) {
+        case 11: return "<p>" + _("TODO special Uriom rules") + "</p>";
+    }
+    return null;
+}
 function setupAdventurerCard(game, cardDiv, type) {
     var adventurer = game.gamedatas.ADVENTURERS[type];
     var tooltip = getEffectTooltip(adventurer.effect);
-    game.addTooltipHtml(cardDiv.id, "<h3>" + adventurer.name + "</h3>" + (tooltip || ''));
+    var adventurerTooltip = getAdventurerTooltip(type);
+    game.addTooltipHtml(cardDiv.id, "<h3>" + adventurer.name + "</h3>" + (tooltip || '') + (tooltip && adventurerTooltip ? '<hr>' : '') + (adventurerTooltip || ''));
     var adventurerPoints = ADVENTURERS_POINTS[type];
     if (adventurerPoints) {
         dojo.place("<div class=\"score-contrast\">" + adventurerPoints + "</div>", cardDiv);
@@ -295,7 +302,7 @@ function formatTextIcons(rawText) {
         .replace(/\[reroll\]/ig, '<span class="icon reroll"></span>')
         .replace(/\[point\]/ig, '<span class="icon point"></span>')
         .replace(/\[symbol(\d)\]/ig, '<span class="icon symbol$1"></span>')
-        .replace(/\[die:(\d):(\d)\]/ig, '<span class="die-icon" data-color="$1" data-face="$2"></span>');
+        .replace(/\[die:(\d+):(\d)\]/ig, '<span class="die-icon" data-color="$1" data-face="$2"></span>');
 }
 var POINT_CASE_SIZE = 25.5;
 var BOARD_POINTS_MARGIN = 38;
@@ -658,7 +665,7 @@ var MeetingTrack = /** @class */ (function () {
             this_2.placeSmallDice(spot.dice);
             document.getElementById("meeting-track-dice-" + i).addEventListener('click', function () {
                 if (dojo.hasClass("meeting-track-dice-" + i, 'selectable')) {
-                    _this.game.moveBlackDie(i);
+                    _this.game.onMeetingTrackDiceClick(i);
                 }
             });
         };
@@ -1229,6 +1236,9 @@ var Glow = /** @class */ (function () {
             case 'moveBlackDie':
                 this.onEnteringStateMoveBlackDie(args.args);
                 break;
+            case 'uriomRecruitCompanion':
+                this.onEnteringStateUriomRecruitCompanion(args.args);
+                break;
             case 'privateSelectDiceAction':
                 this.setDiceSelectionActive(false);
                 break;
@@ -1361,6 +1371,11 @@ var Glow = /** @class */ (function () {
     Glow.prototype.onEnteringStateMoveBlackDie = function (args) {
         if (this.isCurrentPlayerActive()) {
             this.meetingTrack.setSelectableDice(args.possibleSpots);
+        }
+    };
+    Glow.prototype.onEnteringStateUriomRecruitCompanion = function (args) {
+        if (this.isCurrentPlayerActive()) {
+            this.meetingTrack.setSelectableDice([args.spot]);
         }
     };
     Glow.prototype.onEnteringStateRollDice = function () {
@@ -1541,6 +1556,9 @@ var Glow = /** @class */ (function () {
             case 'moveBlackDie':
                 this.onLeavingMoveBlackDie();
                 break;
+            case 'uriomRecruitCompanion':
+                this.onLeavingUriomRecruitCompanion();
+                break;
             case 'rollDice':
             case 'changeDice':
             case 'privateSelectDiceAction':
@@ -1565,6 +1583,9 @@ var Glow = /** @class */ (function () {
         this.meetingTrack.setSelectionMode(0);
     };
     Glow.prototype.onLeavingMoveBlackDie = function () {
+        this.meetingTrack.setSelectableDice([]);
+    };
+    Glow.prototype.onLeavingUriomRecruitCompanion = function () {
         this.meetingTrack.setSelectableDice([]);
     };
     Glow.prototype.onLeavingRollDice = function () {
@@ -1597,6 +1618,10 @@ var Glow = /** @class */ (function () {
                 case 'selectSketalDie':
                 case 'selectSketalDieMulti':
                     this.onEnteringSelectSketalDie(args);
+                    break;
+                case 'uriomRecruitCompanion':
+                    this.addActionButton("recruitCompanionUriom-button", _("Recruit selected companion"), function () { return _this.recruitCompanionUriom(); });
+                    this.addActionButton("passUriomRecruit-button", _("Pass"), function () { return _this.passUriomRecruit(); });
                     break;
                 case 'rollDice':
                     this.gamedatas.gamestate.args[this.getPlayerId()] = args[this.getPlayerId()];
@@ -2335,6 +2360,15 @@ var Glow = /** @class */ (function () {
             console.error('No card action in the state', this.gamedatas.gamestate.name);
         }
     };
+    Glow.prototype.onMeetingTrackDiceClick = function (spot) {
+        var stateName = this.gamedatas.gamestate.name;
+        if (stateName === 'moveBlackDie') {
+            this.moveBlackDie(spot);
+        }
+        else if (stateName === 'uriomRecruitCompanion' && spot == this.gamedatas.gamestate.args.spot) {
+            this.recruitCompanionUriom();
+        }
+    };
     Glow.prototype.selectDiceToRoll = function () {
         if (!this.checkAction('selectDiceToRoll')) {
             return;
@@ -2440,6 +2474,18 @@ var Glow = /** @class */ (function () {
         this.takeAction('moveBlackDie', {
             spot: spot
         });
+    };
+    Glow.prototype.recruitCompanionUriom = function () {
+        if (!this.checkAction('recruitCompanionUriom')) {
+            return;
+        }
+        this.takeAction('recruitCompanionUriom');
+    };
+    Glow.prototype.passUriomRecruit = function () {
+        if (!this.checkAction('passUriomRecruit')) {
+            return;
+        }
+        this.takeAction('passUriomRecruit');
     };
     Glow.prototype.keepDice = function () {
         if (!this.checkAction('keepDice')) {

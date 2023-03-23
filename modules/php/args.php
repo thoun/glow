@@ -153,13 +153,20 @@ trait ArgsTrait {
         $sql = "select `card_location_arg` from `companion` where `card_location` = 'meeting'";
         $availableSpots = array_values(array_map(fn($dbLine) => intval($dbLine['card_location_arg']), $this->getCollectionFromDb($sql)));
 
-        $die = $this->getBlackDie();
+        $die = $this->getBlackDie(true);
         $dieSpot = $die->location_arg;
 
         $possibleSpots = array_values(array_filter($availableSpots, fn($spot) => $spot != $dieSpot));
 
         return [
             'possibleSpots' => $possibleSpots,
+        ];
+    }
+
+    function argUriomRecruitCompanion() {
+        $uriomIntervention = $this->getGlobalVariable(URIOM_INTERVENTION);
+        return [
+            'spot' => $uriomIntervention->spot,
         ];
     }
 }

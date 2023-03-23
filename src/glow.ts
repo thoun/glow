@@ -169,6 +169,9 @@ class Glow implements GlowGame {
             case 'moveBlackDie':                
                 this.onEnteringStateMoveBlackDie(args.args);
                 break;
+            case 'uriomRecruitCompanion':
+                this.onEnteringStateUriomRecruitCompanion(args.args);
+                break;
             case 'privateSelectDiceAction':
                 this.setDiceSelectionActive(false);
                 break;
@@ -320,6 +323,12 @@ class Glow implements GlowGame {
     private onEnteringStateMoveBlackDie(args: EnteringMoveBlackDieArgs) {
         if ((this as any).isCurrentPlayerActive()) {
             this.meetingTrack.setSelectableDice(args.possibleSpots);
+        }
+    }
+
+    private onEnteringStateUriomRecruitCompanion(args: EnteringUriomRecruitCompanionArgs) {
+        if ((this as any).isCurrentPlayerActive()) {
+            this.meetingTrack.setSelectableDice([args.spot]);
         }
     }
 
@@ -539,6 +548,9 @@ class Glow implements GlowGame {
             case 'moveBlackDie':                
                 this.onLeavingMoveBlackDie();
                 break;
+            case 'uriomRecruitCompanion':
+                this.onLeavingUriomRecruitCompanion();
+                break;
             case 'rollDice':
             case 'changeDice':
             case 'privateSelectDiceAction':
@@ -566,6 +578,10 @@ class Glow implements GlowGame {
     }
 
     private onLeavingMoveBlackDie() {
+        this.meetingTrack.setSelectableDice([]);
+    }
+
+    private onLeavingUriomRecruitCompanion() {
         this.meetingTrack.setSelectableDice([]);
     }
 
@@ -599,6 +615,10 @@ class Glow implements GlowGame {
                 case 'selectSketalDie': case 'selectSketalDieMulti':
                     this.onEnteringSelectSketalDie(args as EnteringSelectSketalDieArgs);
                     break;
+                case 'uriomRecruitCompanion':
+                    (this as any).addActionButton(`recruitCompanionUriom-button`, _("Recruit selected companion"), () => this.recruitCompanionUriom());
+                    (this as any).addActionButton(`passUriomRecruit-button`, _("Pass"), () => this.passUriomRecruit());
+                    break;    
                 case 'rollDice':
                     this.gamedatas.gamestate.args[this.getPlayerId()] = (args as EnteringRollDiceArgs)[this.getPlayerId()];
                     this.setActionBarRollDice(false);
@@ -1478,6 +1498,16 @@ class Glow implements GlowGame {
         }
     }
 
+    public onMeetingTrackDiceClick(spot: number) {
+        const stateName = this.gamedatas.gamestate.name;
+
+        if (stateName === 'moveBlackDie') {
+            this.moveBlackDie(spot);
+        } else if (stateName === 'uriomRecruitCompanion' && spot == this.gamedatas.gamestate.args.spot) {
+            this.recruitCompanionUriom();
+        }
+    }
+
     private selectDiceToRoll() {
         if(!(this as any).checkAction('selectDiceToRoll')) {
             return;
@@ -1607,6 +1637,22 @@ class Glow implements GlowGame {
         this.takeAction('moveBlackDie', {
             spot
         });
+    }
+
+    public recruitCompanionUriom() {
+        if(!(this as any).checkAction('recruitCompanionUriom')) {
+            return;
+        }
+
+        this.takeAction('recruitCompanionUriom');
+    }
+
+    public passUriomRecruit() {
+        if(!(this as any).checkAction('passUriomRecruit')) {
+            return;
+        }
+
+        this.takeAction('passUriomRecruit');
     }
 
     public keepDice() {
