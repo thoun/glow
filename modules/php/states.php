@@ -78,10 +78,6 @@ trait StateTrait {
 
         $this->gamestate->nextState('');
     }
-
-    function stRollDice() {
-        $this->gamestate->setAllPlayersMultiactive();
-    }
     
     function stChangeDice() { 
         $this->gamestate->setAllPlayersMultiactive();
@@ -129,34 +125,6 @@ trait StateTrait {
         }
     }
 
-    function stResolveCards() {
-
-        $playerWithEffects = [];
-
-        $playersIds = $this->getPlayersIds();
-
-        foreach($playersIds as $playerId) {
-            $dice = $this->getDiceByLocation('player', $playerId);
-
-            foreach($dice as &$idie) {
-                if ($idie->color > 5 && $idie->face == 6 && $idie->location == 'player') { // we apply yellow/purple/black die special effect
-                    $this->applyEffect($idie->location_arg, $idie->value, 3, null);
-                }
-            }
-
-
-            if (count($this->getRemainingEffects($playerId)) > 0) {
-                $playerWithEffects[] = $playerId;
-            }
-        }
-
-        if (count($playerWithEffects) > 0) {
-            $this->gamestate->setPlayersMultiactive($playerWithEffects, 'move', true);
-        } else {
-            $this->gamestate->nextState('move');
-        }
-    }
-
     function stMultiResolveCards() {
 
         $playerWithEffects = [];
@@ -183,28 +151,6 @@ trait StateTrait {
             $this->gamestate->initializePrivateStateForAllActivePlayers(); 
         } else {
             $this->gamestate->nextState('move');
-        }
-    }
-
-    function stMove() {
-        $playerWithRoutes = [];
-
-        $playersIds = $this->getPlayersIds();
-        $autoSkipImpossibleActions = $this->autoSkipImpossibleActions();
-
-        foreach($playersIds as $playerId) {
-            if (!$autoSkipImpossibleActions || count($this->getPossibleRoutes($playerId)) > 0) {
-                $playerWithRoutes[] = $playerId;
-            } else {
-                // player finishes its turn, replace die
-                $this->replaceSmallDiceOnMeetingTrack($playerId);
-            }
-        }
-
-        if (count($playerWithRoutes) > 0) {
-            $this->gamestate->setPlayersMultiactive($playerWithRoutes, 'endRound', true);
-        } else {
-            $this->gamestate->nextState('endRound');
         }
     }
 

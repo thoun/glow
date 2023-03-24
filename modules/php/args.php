@@ -93,17 +93,6 @@ trait ArgsTrait {
         ];
     }
 
-    function argRollDice() {
-        $playersIds = $this->getPlayersIds();
-        $args = [];
-
-        foreach($playersIds as $playerId) {
-            $args[$playerId] = $this->argRollDiceForPlayer($playerId);
-        }
-
-        return $args;
-    }
-
     function argResurrect() {
         $cards = $this->getCompanionsFromDb($this->companions->getCardsInLocation('cemetery'));
 
@@ -122,17 +111,6 @@ trait ArgsTrait {
         $resolveCardsForPlayer = new stdClass();
         $resolveCardsForPlayer->remainingEffects = $this->getRemainingEffects($playerId);
         return $resolveCardsForPlayer;
-    }
-
-    function argResolveCards() {
-        $playersIds = $this->getPlayersIds();
-        $args = [];
-
-        foreach($playersIds as $playerId) {
-            $args[$playerId] = $this->argResolveCardsForPlayer($playerId);
-        }
-
-        return $args;
     }
 
     function getPossibleRoutes(int $playerId) {
@@ -165,17 +143,6 @@ trait ArgsTrait {
         $args = new stdClass();
         $args->possibleRoutes = $this->getPossibleRoutes($playerId);
         $args->canSettle = $side == 1 ? $this->canSettle($playerId) : null;
-
-        return $args;
-    }
-
-    function argMove() {
-        $playersIds = $this->getPlayersIds();
-        $args = [];
-
-        foreach($playersIds as $playerId) {
-            $args[$playerId] = $this->argMoveForPlayer($playerId);
-        }
 
         return $args;
     }

@@ -311,10 +311,6 @@ trait ActionTrait {
     }
 
     public function rollDice(array $ids, array $cost) {
-        if (intval($this->gamestate->state_id() == ST_MULTIPLAYER_ROLL_DICE)) {
-            $this->rollDiceOld($ids, $cost);
-            return;
-        }
         $this->checkAction('rollDice');
 
         $playerId = $this->getCurrentPlayerId();
@@ -336,36 +332,7 @@ trait ActionTrait {
         $this->gamestate->nextPrivateState($playerId, 'selectDice');
     }
 
-    public function rollDiceOld(array $ids, array $cost) {
-        $this->checkAction('rollDice');
-
-        $playerId = $this->getCurrentPlayerId();
-
-        foreach($ids as $id) {
-            $die = $this->getDieById($id);
-            if ($die->location_arg != $playerId) {
-                throw new BgaUserException("You can't roll this die");
-            }
-        }
-
-        $this->applyRollDieCost($playerId, 1, $cost);
-
-        $params = [
-            'args' => $this->argRollDice(),
-        ];
-
-        $this->rollPlayerDice($playerId, $ids, clienttranslate('${player_name} rerolls dice ${originalDice} and gets ${rolledDice}'), $params);
-
-        $this->incStat(count($ids), 'rerolledDice');
-        $this->incStat(count($ids), 'rerolledDice', $playerId);
-    }
-
     public function changeDie(int $id, int $face, array $cost) {
-        if (intval($this->gamestate->state_id() == ST_MULTIPLAYER_ROLL_DICE)) {
-            $this->changeDieOld($id, $face, $cost);
-            return;
-        }
-
         $this->checkAction('changeDie');
 
         $playerId = intval($this->getCurrentPlayerId());
@@ -394,36 +361,6 @@ trait ActionTrait {
         $this->incStat(1, 'changedDice', $playerId);
 
         $this->gamestate->nextPrivateState($playerId, 'selectDice');
-    }
-
-    public function changeDieOld(int $id, int $face, array $cost) {
-        $this->checkAction('changeDie');
-
-        $playerId = intval($this->getCurrentPlayerId());
-
-        $die = $this->getDieById($id);
-        if ($die->location_arg != $playerId) {
-            throw new BgaUserException("You can't roll this die");
-        }
-
-        $this->applyRollDieCost($playerId, 3, $cost);
-        $originalDiceStr = $this->getDieFaceLogName($die);
-        $die->setFace($face);
-        $rolledDiceStr = $this->getDieFaceLogName($die);
-
-        $this->persistDice([$die]);
-
-        $this->notifyAllPlayers('diceChanged', clienttranslate('${player_name} change die ${originalDice} to ${rolledDice}'), [
-            'playerId' => $playerId,
-            'player_name' => $this->getPlayerName($playerId),
-            'dice' => [$die],
-            'args' => $this->argRollDice(),
-            'originalDice' => $originalDiceStr,
-            'rolledDice' => $rolledDiceStr,
-        ]);
-
-        $this->incStat(1, 'changedDice');
-        $this->incStat(1, 'changedDice', $playerId);
     }
 
     public function cancel() {
@@ -476,14 +413,7 @@ trait ActionTrait {
 
         $resolveCardsForPlayer = $this->argResolveCardsForPlayer($playerId);
      
-        if (intval($this->gamestate->state_id() == ST_MULTIPLAYER_RESOLVE_CARDS)) {
-            $this->notifyPlayer($playerId, 'resolveCardUpdate', '', [
-                'resolveCardsForPlayer' => $resolveCardsForPlayer,
-            ]);
-        } else {
-            $this->gamestate->nextPrivateState($playerId, 'resolve');
-        }
-        
+        $this->gamestate->nextPrivateState($playerId, 'resolve');        
 
         $this->incStat(1, 'resolvedCards');
         $this->incStat(1, 'resolvedCards', $playerId);
@@ -564,13 +494,7 @@ trait ActionTrait {
             if (count($args->possibleRoutes) == 0 && $args->canSettle != true) {
                 $this->applyEndTurn($playerId);
             } else {         
-                if (intval($this->gamestate->state_id() == ST_MULTIPLAYER_MOVE)) {
-                    $this->notifyPlayer($playerId, 'moveUpdate', '', [
-                        'args' => $args,
-                    ]);
-                } else {
-                    $this->gamestate->nextPrivateState($playerId, 'move');
-                }
+                $this->gamestate->nextPrivateState($playerId, 'move');
             }
         } else if ($side === 2) {
             $this->movePlayerBoat($playerId, $route->destination, $route->from);
@@ -626,13 +550,6 @@ trait ActionTrait {
     }
 
     private function applyEndTurn(int $playerId) {
-        // updates possible routes -> no more possible route as it is end of turn, so empty array
-        if (intval($this->gamestate->state_id() == ST_MULTIPLAYER_MOVE)) {
-            $this->notifyPlayer($playerId, 'moveUpdate', '', [
-                'args' => [],
-            ]);
-        }
-
         $this->replaceSmallDiceOnMeetingTrack($playerId);
 
         $this->gamestate->setPlayerNonMultiactive($playerId, 'endRound');

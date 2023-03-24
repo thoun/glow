@@ -210,26 +210,6 @@ $playerActionsGameStates = [
         ]
     ],
 
-    ST_MULTIPLAYER_ROLL_DICE => [
-        "name" => "rollDice",
-        "description" => clienttranslate('Players can reroll or change their dice'),
-        "descriptionmyturn" => clienttranslate('${you} can reroll or change your dice'),
-        "descriptionrollDice" => clienttranslate('Select 1 or 2 dice to reroll'),
-        "descriptionchangeDie" => clienttranslate('Select 1 die to change'),
-        "type" => "multipleactiveplayer",
-        "action" => "stRollDice",
-        "args" => "argRollDice",
-        "possibleactions" => [ 
-            "rollDice", 
-            "changeDie", 
-            "keepDice" 
-        ],
-        "transitions" => [
-            "keepDice" => ST_MULTIPLAYER_RESURRECT,
-            "zombiePass" => ST_MULTIPLAYER_RESURRECT,
-        ],
-    ],
-
     ST_MULTIPLAYER_CHANGE_DICE => [
         "name" => "changeDice",
         "description" => clienttranslate('Players can reroll or change their dice'),
@@ -306,9 +286,7 @@ $playerActionsGameStates = [
         ],
         "transitions" => [
             "selectSketalDie" => ST_MULTIPLAYER_PLAYER_SELECT_SKETAL_DIE,
-            //"resolveCards" => ST_MULTIPLAYER_RESOLVE_CARDS,
             "resolveCards" => ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS,
-            //"zombiePass" => ST_MULTIPLAYER_MOVE,
             "zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
         ],
     ],
@@ -323,31 +301,9 @@ $playerActionsGameStates = [
             "selectSketalDie",
         ],
         "transitions" => [
-            //"resolveCards" => ST_MULTIPLAYER_RESOLVE_CARDS,
             "resolveCards" => ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS,
-            //"zombiePass" => ST_MULTIPLAYER_MOVE,
             "zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
         ]
-    ],
-
-    ST_MULTIPLAYER_RESOLVE_CARDS => [
-        "name" => "resolveCards",
-        "description" => clienttranslate('Players must resolve their cards'),
-        "descriptionmyturn" => clienttranslate('${you} must resolve your cards (select the card to resolve first)'),
-        "descriptiondiscardDie" => clienttranslate('Choose a die to discard'),
-        "type" => "multipleactiveplayer",
-        "action" => "stResolveCards",
-        "args" => "argResolveCards",
-        "possibleactions" => [ 
-            "resolveCard", 
-            "resolveAll", 
-        ],
-        "transitions" => [
-            //"move" => ST_MULTIPLAYER_MOVE,
-            //"zombiePass" => ST_MULTIPLAYER_MOVE,
-            "move" => ST_MULTIPLAYER_PRIVATE_MOVE,
-            "zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
-        ],
     ],
 
     ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS => [
@@ -378,27 +334,6 @@ $playerActionsGameStates = [
         "transitions" => [
             "resolve" => ST_PRIVATE_RESOLVE_CARDS,
             "zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
-        ],
-    ],
-
-    ST_MULTIPLAYER_MOVE => [
-        "name" => "move",
-        "description" => clienttranslate('Players can move their company'),
-        "descriptionmyturn" => clienttranslate('${you} can move your company'),
-        "descriptionboat" => clienttranslate('Players can move one of their boats'),
-        "descriptionmyturnboat" => clienttranslate('${you} can move one of your boats'),
-        "descriptiondiscard" => clienttranslate('Choose a companion or spell to discard'),
-        "type" => "multipleactiveplayer",
-        "action" => "stMove",
-        "args" => "argMove",
-        "possibleactions" => [ 
-            "move", 
-            "placeEncampment",
-            "endTurn",
-        ],
-        "transitions" => [
-            "endRound" => ST_END_ROUND,
-            "zombiePass" => ST_END_ROUND,
         ],
     ],
 
@@ -457,7 +392,6 @@ $gameGameStates = [
         "type" => "game",
         "action" => "stEndRecruit",
         "transitions" => [ 
-            //"" => ST_MULTIPLAYER_ROLL_DICE,
             "" => ST_MULTIPLAYER_CHANGE_DICE,
         ],
     ],
