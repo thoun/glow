@@ -189,7 +189,7 @@ trait ActionTrait {
     }
 
     function redirectAfterRecruit() {
-        if ($this->getPlayerCount() == 2 && intval($this->companions->countCardInLocation('meeting')) >= 4) {
+        if ($this->getPlayerCount() == 2 && intval($this->getActivePlayerId()) == intval($this->getGameStateValue(FIRST_PLAYER))) {
             $this->gamestate->nextState('removeCompanion');
         } else {
             $this->gamestate->nextState('nextPlayer');

@@ -466,11 +466,10 @@ trait UtilTrait {
             // remove 3 of each face
             for ($face=1; $face<=2; $face++) {
                 $removed = array_slice($this->getCompanionsFromDb($this->companions->getCardsOfTypeInLocation($face, null, 'deck')), 0, 3);
-                $this->companions->moveCards(array_map(fn($companion) => $companion->id, $removed), 'discard');
-
+                $this->companions->moveCards(array_map(fn($companion) => $companion->id, $removed), 'malach');
             }
             // set face 1 (A) before face 2 (B)
-            $this->DbQuery("UPDATE companion SET `card_location_arg` = `card_location_arg` + (100 * (2 - `card_type`)) WHERE `card_location` = 'deck' ");
+            $this->DbQuery("UPDATE companion SET `card_location_arg` = `card_location_arg` + (100 * (2 - `card_type`)) WHERE `card_location` IN ('deck', 'malach') ");
         }
     }
 
