@@ -455,6 +455,67 @@ trait ActionTrait {
         $this->gamestate->setPlayerNonMultiactive($playerId, 'keepDice');
     }
     
+    public function swap(int $id) {
+        $this->checkAction('swap');
+
+        $playerId = intval($this->getCurrentPlayerId());
+
+        $companion = $this->getCompanionFromDb($this->companions->getCardOnTop('malach'));
+        $replaced = $this->getCompanionFromDb($this->companions->getCard($id));
+
+        if ($companion->location != 'malach' || $replaced->location != 'player'.$playerId) {
+            throw new BgaUserException("Companion not available");
+        }
+
+        $this->applyRecruitCompanion($playerId, $companion);
+
+        $this->DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 1 where `card_location` = 'malach'");
+        $this->companions->moveCard($replaced->id, 'malach', 0);        
+        $this->notifyAllPlayers('removeCompanion', '', [
+            'playerId' => $playerId,
+            'companion' => $replaced,
+        ]);
+
+        $dice = $this->getEffectiveDice($playerId);
+        $unusedMalachDice = array_values(array_filter($dice, fn($die) => $die->color == 9 && $die->value == 9 && !$die->used));
+        if (count($unusedMalachDice) > 0) {
+            $die = $unusedMalachDice[0];
+            $this->DbQuery("UPDATE dice SET `used` = true WHERE die_id = $die->id");
+        }
+
+        if ($companion->die && $companion->dieColor === 0 && $this->canChooseSketalDie()) {
+            $this->gamestate->nextPrivateState($playerId, 'selectSketalDie'); // we don't disable player so he stays active for selectSketalDieMulti
+        } else if (count($unusedMalachDice) > 1) {
+            $this->gamestate->nextPrivateState($playerId, 'stay');
+        } else {
+            $this->gamestate->setPlayerNonMultiactive($playerId, 'next');
+        }
+    } 
+
+    public function skipSwap() {
+        $this->checkAction('skipSwap');
+
+        $playerId = intval($this->getCurrentPlayerId());
+        $companion = $this->getCompanionFromDb($this->companions->getCardOnTop('malach'));
+
+        $dice = $this->getEffectiveDice($playerId);
+        $unusedMalachDice = array_values(array_filter($dice, fn($die) => $die->color == 9 && $die->value == 9 && !$die->used));
+        if (count($unusedMalachDice) > 0) {
+            $die = $unusedMalachDice[0];
+            $this->DbQuery("UPDATE dice SET `used` = true WHERE die_id = $die->id");
+        }
+
+        // put the card under the deck
+        $this->DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 1 where `card_location` = 'malach'");
+        $this->DbQuery("UPDATE companion SET `card_location_arg` = 0 where `card_id` = $companion->id");
+
+        if (count($unusedMalachDice) > 1) {            
+            $this->gamestate->nextPrivateState($playerId, 'stay');
+        } else {
+            $this->gamestate->setPlayerNonMultiactive($playerId, 'next');
+        }
+    }
+    
     public function resurrect(int $id) {
         $this->checkAction('resurrect');
 

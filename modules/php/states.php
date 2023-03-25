@@ -112,6 +112,28 @@ trait StateTrait {
         $this->gamestate->initializePrivateStateForAllActivePlayers(); 
     }
 
+    function stSwap() {
+        $playerWithMalachDiceActivated = [];
+
+        $playersIds = $this->getPlayersIds();
+
+        foreach($playersIds as $playerId) {
+            $dice = $this->getEffectiveDice($playerId);
+            $unusedMalachDice = array_filter($dice, fn($die) => $die->color == 9 && $die->value == 9 && !$die->used);
+
+            if (count($unusedMalachDice) > 0) {
+                $playerWithMalachDiceActivated[] = $playerId;
+            }
+        }
+
+        if (count($playerWithMalachDiceActivated) > 0) {
+            $this->gamestate->setPlayersMultiactive($playerWithMalachDiceActivated, 'next', true);
+            $this->gamestate->initializePrivateStateForAllActivePlayers(); 
+        } else {
+            $this->gamestate->nextState('next');
+        }
+    }
+
     function stResurrect() {
         $playerWithCromaugActivated = [];
 

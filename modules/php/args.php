@@ -95,6 +95,18 @@ trait ArgsTrait {
         ];
     }
 
+    function argSwap() {
+        $companion = $this->getCompanionFromDb($this->companions->getCardOnTop('malach'));
+
+        if ($companion && $companion->die) {
+            $companion->noDieWarning = !$this->isBigDieAvailable($companion->dieColor);
+        }
+
+        return [
+            'card' => $companion,
+        ];
+    }
+
     function argResurrect() {
         $cards = $this->getCompanionsFromDb($this->companions->getCardsInLocation('cemetery'));
 

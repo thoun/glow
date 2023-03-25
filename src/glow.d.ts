@@ -189,6 +189,10 @@ interface EnteringUriomRecruitCompanionArgs {
     spot: number;
 }
 
+interface EnteringSwapArgs {
+    card: Companion;
+}
+
 interface EnteringResurrectArgs {
     cemeteryCards: Companion[];
 }
@@ -232,6 +236,7 @@ interface NotifChosenCompanionArgs {
     dice: Die[];
     removedBySpell: Spell;
     cemetaryTop?: Companion;
+    ignoreCemetary?: boolean;
 }
 
 interface NotifRemoveCompanionsArgs {

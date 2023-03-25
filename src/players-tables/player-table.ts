@@ -222,10 +222,10 @@ class PlayerTable {
         dice.forEach(die => (this.game as any).fadeOutAndDestroy(`die${die.id}`));
     }
     
-    public removeCompanion(companion: Companion, removedBySpell?: Spell) {
+    public removeCompanion(companion: Companion, removedBySpell?: Spell, ignoreCemetary: boolean = false) {
         const id = `${this.companionsStock.container_div.id}_item_${companion.id}`;
         const card = document.getElementById(id);
-        this.companionsStock.removeFromStockById(''+companion.id, CEMETERY);
+        this.companionsStock.removeFromStockById(''+companion.id, ignoreCemetary ? CEMETERY : undefined);
         if (card) {
             card.classList.add('flipped');
             setTimeout(() => card.style.visibility = 'hidden', 500);

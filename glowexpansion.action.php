@@ -172,6 +172,24 @@
         $this->ajaxResponse();
     }
     
+    public function swap() {
+        $this->setAjaxMode();
+
+        $id = $this->getArg('id', AT_posint, true);
+
+        $this->game->swap($id);
+
+        $this->ajaxResponse();
+    } 
+
+    public function skipSwap() {
+        $this->setAjaxMode();
+
+        $this->game->skipSwap();
+
+        $this->ajaxResponse();
+    } 
+    
     public function resurrect() {
         $this->setAjaxMode();
 

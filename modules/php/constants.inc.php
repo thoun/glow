@@ -28,7 +28,9 @@ define('ST_PRIVATE_SELECT_DICE_ACTION', 32);
 define('ST_PRIVATE_ROLL_DICE', 331);
 define('ST_PRIVATE_CHANGE_DIE', 332);
 
-// just before noon (Cromaug)
+// just before noon (Malach & Cromaug)
+define('ST_MULTIPLAYER_SWAP', 34);
+define('ST_PRIVATE_SWAP', 341);
 define('ST_MULTIPLAYER_RESURRECT', 35);
 define('ST_PRIVATE_RESURRECT', 351);
 define('ST_PRIVATE_SELECT_SKETAL_DIE', 36);

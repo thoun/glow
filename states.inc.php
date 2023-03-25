@@ -242,8 +242,8 @@ $playerActionsGameStates = [
         "action" => "stChangeDice",
         "possibleactions" => [],
         "transitions" => [
-            "keepDice" => ST_MULTIPLAYER_RESURRECT,
-            "zombiePass" => ST_MULTIPLAYER_RESURRECT,
+            "keepDice" => ST_MULTIPLAYER_SWAP,
+            "zombiePass" => ST_MULTIPLAYER_SWAP,
         ],
     ],
 
@@ -260,7 +260,7 @@ $playerActionsGameStates = [
         "transitions" => [
             "rollDice" => ST_PRIVATE_ROLL_DICE,
             "changeDie" => ST_PRIVATE_CHANGE_DIE,
-            "zombiePass" => ST_MULTIPLAYER_RESURRECT,
+            "zombiePass" => ST_MULTIPLAYER_SWAP,
         ],
     ],
 
@@ -276,7 +276,7 @@ $playerActionsGameStates = [
         "transitions" => [
             "selectDice" => ST_PRIVATE_SELECT_DICE_ACTION,
             "cancel" => ST_PRIVATE_SELECT_DICE_ACTION,
-            "zombiePass" => ST_MULTIPLAYER_RESURRECT,
+            "zombiePass" => ST_MULTIPLAYER_SWAP,
         ],
     ],
 
@@ -292,7 +292,38 @@ $playerActionsGameStates = [
         "transitions" => [
             "selectDice" => ST_PRIVATE_SELECT_DICE_ACTION,
             "cancel" => ST_PRIVATE_SELECT_DICE_ACTION,
-            "zombiePass" => ST_MULTIPLAYER_RESURRECT,
+            "zombiePass" => ST_MULTIPLAYER_SWAP,
+        ],
+    ],
+
+    ST_MULTIPLAYER_SWAP => [
+        "name" => "swapMulti",
+        "description" => clienttranslate("Players with Malac'h can swap one companion with his special deck"),
+        "descriptionmyturn" => clienttranslate('${you} can swap one of your companion with this card'),
+        "type" => "multipleactiveplayer",
+        "initialprivate" => ST_PRIVATE_SWAP,
+        "action" => "stSwap",
+        "args" => "argSwap",
+        "possibleactions" => [],
+        "transitions" => [
+            "next" => ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS,
+            "zombiePass" => ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS,
+        ],
+    ],
+
+    ST_PRIVATE_SWAP => [
+        "name" => "swap",
+        "descriptionmyturn" => clienttranslate('${you} can swap one of your companion with this card'),
+        "type" => "private",
+        "args" => "argSwap",
+        "possibleactions" => [ 
+            "swap", 
+            "skipSwap", 
+        ],
+        "transitions" => [
+            "stay" => ST_PRIVATE_SWAP,
+            "selectSketalDie" => ST_PRIVATE_SELECT_SKETAL_DIE,
+            "zombiePass" => ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS,
         ],
     ],
 

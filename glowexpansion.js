@@ -951,10 +951,11 @@ var PlayerTable = /** @class */ (function () {
         var _this = this;
         dice.forEach(function (die) { return _this.game.fadeOutAndDestroy("die" + die.id); });
     };
-    PlayerTable.prototype.removeCompanion = function (companion, removedBySpell) {
+    PlayerTable.prototype.removeCompanion = function (companion, removedBySpell, ignoreCemetary) {
+        if (ignoreCemetary === void 0) { ignoreCemetary = false; }
         var id = this.companionsStock.container_div.id + "_item_" + companion.id;
         var card = document.getElementById(id);
-        this.companionsStock.removeFromStockById('' + companion.id, CEMETERY);
+        this.companionsStock.removeFromStockById('' + companion.id, ignoreCemetary ? CEMETERY : undefined);
         if (card) {
             card.classList.add('flipped');
             setTimeout(function () { return card.style.visibility = 'hidden'; }, 500);
@@ -1171,7 +1172,7 @@ var Glow = /** @class */ (function () {
                 gamestate.descriptionmyturn = gamestate.descriptionmyturnboat;
             });
         }*/
-        for (var color = 1; color <= 8; color++) {
+        for (var color = 1; color <= 10; color++) {
             var facesStr = '';
             for (var face = 1; face <= 6; face++) {
                 facesStr += "[die:" + color + ":" + face + "]";
@@ -1383,6 +1384,31 @@ var Glow = /** @class */ (function () {
         this.setDiceSelectionActive(true);
         setTimeout(function () { return _this.playersTables.forEach(function (playerTable) { return playerTable.sortDice(); }); }, 500);
     };
+    Glow.prototype.onEnteringSwap = function (args) {
+        var _this = this;
+        var companion = args.card;
+        if (!document.getElementById('cemetary-companions-stock')) {
+            dojo.place("<div id=\"cemetary-companions-stock\"></div>", 'currentplayertable', 'before');
+            this.cemetaryCompanionsStock = new ebg.stock();
+            this.cemetaryCompanionsStock.create(this, $('cemetary-companions-stock'), CARD_WIDTH, CARD_HEIGHT);
+            this.cemetaryCompanionsStock.setSelectionMode(0);
+            this.cemetaryCompanionsStock.setSelectionAppearance('class');
+            this.cemetaryCompanionsStock.selectionClass = 'nothing';
+            this.cemetaryCompanionsStock.centerItems = true;
+            this.cemetaryCompanionsStock.onItemCreate = function (cardDiv, type) { return setupCompanionCard(_this, cardDiv, type); };
+            setupCompanionCards(this.cemetaryCompanionsStock);
+            this.cemetaryCompanionsStock.addToStockWithId(companion.subType, '' + companion.id);
+        }
+        else {
+            this.cemetaryCompanionsStock.removeAll();
+            this.cemetaryCompanionsStock.addToStockWithId(companion.subType, '' + companion.id);
+        }
+        if (this.isCurrentPlayerActive()) {
+            this.getCurrentPlayerTable().companionsStock.setSelectionMode(1);
+            this.addActionButton("skipSwap-button", _("Skip"), function () { return _this.skipSwap(); }, null, null, 'red');
+        }
+        this.tableHeightChange();
+    };
     Glow.prototype.onEnteringResurrect = function (args) {
         var _this = this;
         var companions = args.cemeteryCards;
@@ -1564,6 +1590,9 @@ var Glow = /** @class */ (function () {
             case 'privateSelectDiceAction':
                 this.onLeavingRollDice();
                 break;
+            case 'swapMulti':
+                this.onLeavingSwap();
+                break;
             case 'resurrect':
                 this.onLeavingResurrect();
                 break;
@@ -1590,6 +1619,17 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.onLeavingRollDice = function () {
         this.setDiceSelectionActive(false);
+    };
+    Glow.prototype.onLeavingSwap = function () {
+        var _this = this;
+        var _a, _b;
+        if (document.getElementById('cemetary-companions-stock')) {
+            (_a = this.cemetaryCompanionsStock) === null || _a === void 0 ? void 0 : _a.removeAll();
+            this.fadeOutAndDestroy('cemetary-companions-stock');
+            this.cemetaryCompanionsStock = null;
+            setTimeout(function () { return _this.tableHeightChange(); }, 200);
+            (_b = this.getCurrentPlayerTable()) === null || _b === void 0 ? void 0 : _b.companionsStock.setSelectionMode(0);
+        }
     };
     Glow.prototype.onLeavingResurrect = function () {
         var _this = this;
@@ -1689,6 +1729,9 @@ var Glow = /** @class */ (function () {
             }
         }
         switch (stateName) {
+            case 'swap':
+                this.onEnteringSwap(args);
+                break;
             case 'resurrect':
                 this.onEnteringResurrect(args);
                 break;
@@ -1850,6 +1893,10 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.getPlayerTable = function (playerId) {
         return this.playersTables.find(function (playerTable) { return playerTable.playerId === playerId; });
+    };
+    Glow.prototype.getCurrentPlayerTable = function () {
+        var _this = this;
+        return this.playersTables.find(function (playerTable) { return playerTable.playerId === _this.getPlayerId(); });
     };
     Glow.prototype.createPlayerPanels = function (gamedatas) {
         var _this = this;
@@ -2356,6 +2403,9 @@ var Glow = /** @class */ (function () {
         else if (['move', 'multiMove', 'privateMove'].includes(this.gamedatas.gamestate.name)) {
             this.move(this.selectedRoute.destination, this.selectedRoute.from, type, id);
         }
+        else if (['swap', 'swapMulti'].includes(this.gamedatas.gamestate.name)) {
+            this.swap(id);
+        }
         else {
             console.error('No card action in the state', this.gamedatas.gamestate.name);
         }
@@ -2492,6 +2542,29 @@ var Glow = /** @class */ (function () {
             return;
         }
         this.takeNoLockAction('keepDice');
+    };
+    Glow.prototype.swap = function (id, warningPrompted) {
+        var _this = this;
+        if (warningPrompted === void 0) { warningPrompted = false; }
+        if (!this.checkAction('swap')) {
+            return;
+        }
+        if (!warningPrompted) {
+            var args = this.gamedatas.gamestate.args;
+            if (args.card.noDieWarning) {
+                this.confirmationDialog(_("Are you sure you want to take that card? There is no available big die for it."), function () { return _this.swap(id, true); });
+                return;
+            }
+        }
+        this.takeAction('swap', {
+            id: id
+        });
+    };
+    Glow.prototype.skipSwap = function () {
+        if (!this.checkAction('skipSwap')) {
+            return;
+        }
+        this.takeAction('skipSwap');
     };
     Glow.prototype.resurrect = function (id, warningPrompted) {
         var _this = this;
@@ -2739,14 +2812,16 @@ var Glow = /** @class */ (function () {
         else {
             var playerId = notif.args.playerId;
             var playerTable = this.getPlayerTable(playerId);
-            playerTable.removeCompanion(companion, notif.args.removedBySpell);
+            playerTable.removeCompanion(companion, notif.args.removedBySpell, notif.args.ignoreCemetary);
             if (companion === null || companion === void 0 ? void 0 : companion.fireflies) {
                 this.fireflyCounters[playerId].incValue(-companion.fireflies);
             }
             this.companionCounters[playerId].incValue(-1);
             this.updateFireflyCounterIcon(playerId);
         }
-        this.meetingTrack.setDeckTop(CEMETERY, (_a = notif.args.companion) === null || _a === void 0 ? void 0 : _a.type);
+        if (!notif.args.ignoreCemetary) {
+            this.meetingTrack.setDeckTop(CEMETERY, (_a = notif.args.companion) === null || _a === void 0 ? void 0 : _a.type);
+        }
     };
     Glow.prototype.notif_removeCompanions = function (notif) {
         this.meetingTrack.removeCompanions();

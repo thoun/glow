@@ -92,7 +92,7 @@ class Glow implements GlowGame {
             });
         }*/
 
-        for (let color=1; color<=8; color++) {
+        for (let color=1; color<=10; color++) {
             let facesStr = '';
             for (let face=1; face<=6; face++) {
                 facesStr += `[die:${color}:${face}]`;
@@ -338,6 +338,36 @@ class Glow implements GlowGame {
         setTimeout(() => this.playersTables.forEach(playerTable => playerTable.sortDice()), 500);
     }
 
+    private onEnteringSwap(args: EnteringSwapArgs) {
+        
+        const companion = args.card;
+        if (!document.getElementById('cemetary-companions-stock')) {
+            dojo.place(`<div id="cemetary-companions-stock"></div>`, 'currentplayertable', 'before');
+            
+            this.cemetaryCompanionsStock = new ebg.stock() as Stock;
+            this.cemetaryCompanionsStock.create(this, $('cemetary-companions-stock'), CARD_WIDTH, CARD_HEIGHT);
+            this.cemetaryCompanionsStock.setSelectionMode(0);            
+            this.cemetaryCompanionsStock.setSelectionAppearance('class');
+            this.cemetaryCompanionsStock.selectionClass = 'nothing';
+            this.cemetaryCompanionsStock.centerItems = true;
+            this.cemetaryCompanionsStock.onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupCompanionCard(this, cardDiv, type);
+
+            setupCompanionCards(this.cemetaryCompanionsStock);
+
+            this.cemetaryCompanionsStock.addToStockWithId(companion.subType, ''+companion.id);
+        } else {
+            this.cemetaryCompanionsStock.removeAll();
+            this.cemetaryCompanionsStock.addToStockWithId(companion.subType, ''+companion.id);
+        }
+        
+        if ((this as any).isCurrentPlayerActive()) {
+            this.getCurrentPlayerTable().companionsStock.setSelectionMode(1);
+            (this as any).addActionButton(`skipSwap-button`, _("Skip"), () => this.skipSwap(), null, null, 'red');
+        }
+
+        this.tableHeightChange();        
+    }
+
     private onEnteringResurrect(args: EnteringResurrectArgs) {
         
         const companions = args.cemeteryCards;
@@ -556,6 +586,9 @@ class Glow implements GlowGame {
             case 'privateSelectDiceAction':
                 this.onLeavingRollDice();
                 break;
+            case 'swapMulti':
+                this.onLeavingSwap();
+                break;
             case 'resurrect':
                 this.onLeavingResurrect();
                 break;
@@ -587,6 +620,16 @@ class Glow implements GlowGame {
 
     private onLeavingRollDice() {
         this.setDiceSelectionActive(false);
+    }
+
+    private onLeavingSwap() {
+        if (document.getElementById('cemetary-companions-stock')) {
+            this.cemetaryCompanionsStock?.removeAll();
+            (this as any).fadeOutAndDestroy('cemetary-companions-stock');
+            this.cemetaryCompanionsStock = null;
+            setTimeout(() => this.tableHeightChange(), 200);
+            this.getCurrentPlayerTable()?.companionsStock.setSelectionMode(0);
+        }
     }
 
     private onLeavingResurrect() {
@@ -696,6 +739,9 @@ class Glow implements GlowGame {
         }
 
         switch (stateName) {
+            case 'swap':
+                this.onEnteringSwap(args as EnteringSwapArgs);
+                break;
             case 'resurrect':
                 this.onEnteringResurrect(args as EnteringResurrectArgs);
                 break;
@@ -886,6 +932,10 @@ class Glow implements GlowGame {
 
     private getPlayerTable(playerId: number): PlayerTable {
         return this.playersTables.find(playerTable => playerTable.playerId === playerId);
+    }
+
+    private getCurrentPlayerTable(): PlayerTable | null {
+        return this.playersTables.find(playerTable => playerTable.playerId === this.getPlayerId());
     }
 
     private createPlayerPanels(gamedatas: GlowGamedatas) {
@@ -1493,6 +1543,8 @@ class Glow implements GlowGame {
             }
         } else if (['move', 'multiMove', 'privateMove'].includes(this.gamedatas.gamestate.name)) {
             this.move(this.selectedRoute.destination, this.selectedRoute.from, type, id);
+        } else if (['swap', 'swapMulti'].includes(this.gamedatas.gamestate.name)) {
+            this.swap(id);
         } else {
             console.error('No card action in the state', this.gamedatas.gamestate.name);
         }
@@ -1661,6 +1713,35 @@ class Glow implements GlowGame {
         }
 
         this.takeNoLockAction('keepDice');
+    }
+
+    public swap(id: number, warningPrompted: boolean = false) {
+        if(!(this as any).checkAction('swap')) {
+            return;
+        }
+
+        if (!warningPrompted) {
+            const args = this.gamedatas.gamestate.args as EnteringSwapArgs;
+            if (args.card.noDieWarning) {
+                (this as any).confirmationDialog(
+                    _("Are you sure you want to take that card? There is no available big die for it."), 
+                    () => this.swap(id, true)
+                );
+                return;
+            }
+        }
+
+        this.takeAction('swap', {
+            id
+        });
+    }
+
+    public skipSwap() {
+        if(!(this as any).checkAction('skipSwap')) {
+            return;
+        }
+
+        this.takeAction('skipSwap');
     }
 
     public resurrect(id: number, warningPrompted: boolean = false) {
@@ -1961,7 +2042,7 @@ class Glow implements GlowGame {
         } else {
             const playerId = notif.args.playerId;
             const playerTable = this.getPlayerTable(playerId);
-            playerTable.removeCompanion(companion, notif.args.removedBySpell);
+            playerTable.removeCompanion(companion, notif.args.removedBySpell, notif.args.ignoreCemetary);
 
             if (companion?.fireflies) {
                 this.fireflyCounters[playerId].incValue(-companion.fireflies);
@@ -1969,7 +2050,9 @@ class Glow implements GlowGame {
             this.companionCounters[playerId].incValue(-1);
             this.updateFireflyCounterIcon(playerId);
         }
-        this.meetingTrack.setDeckTop(CEMETERY, notif.args.companion?.type);
+        if (!notif.args.ignoreCemetary) {
+            this.meetingTrack.setDeckTop(CEMETERY, notif.args.companion?.type);
+        }
     }
 
     notif_removeCompanions(notif: Notif<NotifRemoveCompanionsArgs>) {
