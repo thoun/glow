@@ -196,12 +196,16 @@ class PlayerTable {
         this.addMouseEvents(this.adventurerStock, adventurer);
     }
     
-    public addCompanion(companion: Companion, from: Stock) {
+    public addCompanion(companion: Companion, from?: Stock) {
         const newWeights = {};
         newWeights[companion.subType] = companion.location_arg;
         this.companionsStock.changeItemsWeight(newWeights);
 
-        moveToAnotherStock(from, this.companionsStock, companion.subType, ''+companion.id);
+        if (from) {
+            moveToAnotherStock(from, this.companionsStock, companion.subType, ''+companion.id);
+        } else {
+            this.companionsStock.addToStockWithId(companion.subType, ''+companion.id);
+        }
         this.moveCompanionSpellStock();
         this.addMouseEvents(this.companionsStock, companion);
 

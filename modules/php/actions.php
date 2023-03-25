@@ -211,7 +211,7 @@ trait ActionTrait {
 
     public function selectSketalDie(int $id) {
         $this->checkAction('selectSketalDie');
-        $multi = ($this->gamestate->state()['name']) == 'selectSketalDieMulti';
+        $multi = ($this->gamestate->state()['name']) != 'selectSketalDie';
 
         $die = $this->getDieById($id);
 
@@ -229,7 +229,7 @@ trait ActionTrait {
         $this->takeSketalDie($playerId, $die);
 
         if ($multi) {
-            $this->gamestate->setPlayerNonMultiactive($playerId, 'resolveCards');
+            $this->gamestate->setPlayerNonMultiactive($playerId, 'next');
         } else {
             $this->redirectAfterRecruit();
         }
@@ -394,9 +394,9 @@ trait ActionTrait {
         $this->applyRecruitCompanion($playerId, $companion);
 
         if ($companion->die && $companion->dieColor === 0 && $this->canChooseSketalDie()) {
-            $this->gamestate->nextState('selectSketalDie'); // we don't disable player so he stays active for selectSketalDieMulti
+            $this->gamestate->nextPrivateState($playerId, 'selectSketalDie'); // we don't disable player so he stays active for selectSketalDieMulti
         } else {
-            $this->gamestate->setPlayerNonMultiactive($playerId, 'resolveCards');
+            $this->gamestate->setPlayerNonMultiactive($playerId, 'next');
         }
     } 
 
@@ -405,7 +405,7 @@ trait ActionTrait {
 
         $playerId = intval($this->getCurrentPlayerId());
 
-        $this->gamestate->setPlayerNonMultiactive($playerId, 'resolveCards');
+        $this->gamestate->setPlayerNonMultiactive($playerId, 'next');
     }
 
     public function applyResolveCard(int $playerId, int $cardType, int $id, $dieId = 0) {

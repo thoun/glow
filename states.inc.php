@@ -253,7 +253,7 @@ $playerActionsGameStates = [
         "transitions" => [
             "selectDice" => ST_PRIVATE_SELECT_DICE_ACTION,
             "cancel" => ST_PRIVATE_SELECT_DICE_ACTION,
-            "zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
+            "zombiePass" => ST_MULTIPLAYER_RESURRECT,
         ],
     ],
 
@@ -269,40 +269,51 @@ $playerActionsGameStates = [
         "transitions" => [
             "selectDice" => ST_PRIVATE_SELECT_DICE_ACTION,
             "cancel" => ST_PRIVATE_SELECT_DICE_ACTION,
-            "zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
+            "zombiePass" => ST_MULTIPLAYER_RESURRECT,
         ],
     ],
 
     ST_MULTIPLAYER_RESURRECT => [
-        "name" => "resurrect",
+        "name" => "resurrectMulti",
         "description" => clienttranslate('Players with Cromaug can take a companion from the cemetery'),
         "descriptionmyturn" => clienttranslate('${you} can take a companion from the cemetery'),
         "type" => "multipleactiveplayer",
+        "initialprivate" => ST_PRIVATE_RESURRECT,
         "action" => "stResurrect",
+        "args" => "argResurrect",
+        "possibleactions" => [],
+        "transitions" => [
+            "next" => ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS,
+            "zombiePass" => ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS,
+        ],
+    ],
+
+    ST_PRIVATE_RESURRECT => [
+        "name" => "resurrect",
+        "descriptionmyturn" => clienttranslate('${you} can take a companion from the cemetery'),
+        "type" => "private",
         "args" => "argResurrect",
         "possibleactions" => [ 
             "resurrect", 
             "skipResurrect", 
         ],
         "transitions" => [
-            "selectSketalDie" => ST_MULTIPLAYER_PLAYER_SELECT_SKETAL_DIE,
-            "resolveCards" => ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS,
-            "zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
+            "selectSketalDie" => ST_PRIVATE_SELECT_SKETAL_DIE,
+            "zombiePass" => ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS,
         ],
     ],
 
-    ST_MULTIPLAYER_PLAYER_SELECT_SKETAL_DIE => [
+    ST_PRIVATE_SELECT_SKETAL_DIE => [
         "name" => "selectSketalDieMulti",
         "description" => clienttranslate('${actplayer} must choose a new die'),
         "descriptionmyturn" => clienttranslate('${you} must choose a new die'),
-        "type" => "multipleactiveplayer",
+        "type" => "private",
         "args" => "argSelectSketalDie",
         "possibleactions" => [ 
             "selectSketalDie",
         ],
         "transitions" => [
-            "resolveCards" => ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS,
-            "zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
+            "zombiePass" => ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS,
         ]
     ],
 

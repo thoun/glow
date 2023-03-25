@@ -118,10 +118,10 @@ trait StateTrait {
         }
 
         if (count($playerWithCromaugActivated) > 0) {
-            
-            $this->gamestate->setPlayersMultiactive($playerWithCromaugActivated, 'resolveCards', true);
+            $this->gamestate->setPlayersMultiactive($playerWithCromaugActivated, 'next', true);
+            $this->gamestate->initializePrivateStateForAllActivePlayers(); 
         } else {
-            $this->gamestate->nextState('resolveCards');
+            $this->gamestate->nextState('next');
         }
     }
 

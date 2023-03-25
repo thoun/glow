@@ -905,7 +905,12 @@ var PlayerTable = /** @class */ (function () {
         var newWeights = {};
         newWeights[companion.subType] = companion.location_arg;
         this.companionsStock.changeItemsWeight(newWeights);
-        moveToAnotherStock(from, this.companionsStock, companion.subType, '' + companion.id);
+        if (from) {
+            moveToAnotherStock(from, this.companionsStock, companion.subType, '' + companion.id);
+        }
+        else {
+            this.companionsStock.addToStockWithId(companion.subType, '' + companion.id);
+        }
         this.moveCompanionSpellStock();
         this.addMouseEvents(this.companionsStock, companion);
         this.game.tableHeightChange();
@@ -1541,8 +1546,9 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.onLeavingResurrect = function () {
         var _this = this;
+        var _a;
         if (document.getElementById('cemetary-companions-stock')) {
-            this.cemetaryCompanionsStock.removeAllTo(CEMETERY);
+            (_a = this.cemetaryCompanionsStock) === null || _a === void 0 ? void 0 : _a.removeAllTo(CEMETERY);
             this.fadeOutAndDestroy('cemetary-companions-stock');
             this.cemetaryCompanionsStock = null;
             setTimeout(function () { return _this.tableHeightChange(); }, 200);

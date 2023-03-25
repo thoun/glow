@@ -159,7 +159,7 @@ class Glow extends Table {
         }
 
         // TODO TEMP card to test
-        //$this->debugSetup();
+        $this->debugSetup();
 
         $this->setDiceOnTable($solo);
 

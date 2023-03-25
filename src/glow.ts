@@ -569,7 +569,7 @@ class Glow implements GlowGame {
 
     private onLeavingResurrect() {
         if (document.getElementById('cemetary-companions-stock')) {
-            this.cemetaryCompanionsStock.removeAllTo(CEMETERY);
+            this.cemetaryCompanionsStock?.removeAllTo(CEMETERY);
             (this as any).fadeOutAndDestroy('cemetary-companions-stock');
             this.cemetaryCompanionsStock = null;
             setTimeout(() => this.tableHeightChange(), 200);
