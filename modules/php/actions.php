@@ -404,7 +404,8 @@ trait ActionTrait {
         $this->incStat(count($ids), 'rerolledDice');
         $this->incStat(count($ids), 'rerolledDice', $playerId);
 
-        $this->gamestate->nextPrivateState($playerId, 'selectDice');
+        $args = $this->argRerollImmediate($playerId);
+        $this->gamestate->nextPrivateState($playerId, $args['selectedDie'] !== null ? 'rerollImmediate' : 'selectDice');
     }
 
     public function changeDie(int $id, int $face, array $cost) {
@@ -436,6 +437,33 @@ trait ActionTrait {
         $this->incStat(1, 'changedDice', $playerId);
 
         $this->gamestate->nextPrivateState($playerId, 'selectDice');
+    }
+
+    public function rerollImmediate(int $id) {
+        $this->checkAction('rerollImmediate');
+
+        $playerId = $this->getCurrentPlayerId();
+
+        $args = $this->argRerollImmediate($playerId);
+        $ids = [$args['selectedDie']->id];
+        if ($id > 0) {
+            $ids[] = $id;
+        }
+
+        foreach($ids as $id) {
+            $die = $this->getDieById($id);
+            if ($die->location_arg != $playerId) {
+                throw new BgaUserException("You can't roll this die");
+            }
+        }
+
+        $this->rollPlayerDice($playerId, $ids, clienttranslate('${player_name} rerolls dice ${originalDice} and gets ${rolledDice}'), []);
+
+        $this->incStat(count($ids), 'rerolledDice');
+        $this->incStat(count($ids), 'rerolledDice', $playerId);
+
+        $args = $this->argRerollImmediate($playerId);
+        $this->gamestate->nextPrivateState($playerId, $args['selectedDie'] !== null ? 'rerollImmediate' : 'selectDice');
     }
 
     public function cancel() {

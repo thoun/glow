@@ -252,6 +252,7 @@ $playerActionsGameStates = [
         "descriptionmyturn" => clienttranslate('${you} can reroll or change your dice'),
         "type" => "private",
         "args" => "argRollDiceForPlayer",
+        "action" => "stSelectDiceAction",
         "possibleactions" => [ 
             "selectDiceToRoll", 
             "selectDieToChange", 
@@ -260,6 +261,7 @@ $playerActionsGameStates = [
         "transitions" => [
             "rollDice" => ST_PRIVATE_ROLL_DICE,
             "changeDie" => ST_PRIVATE_CHANGE_DIE,
+            "rerollImmediate" => ST_PRIVATE_REROLL_IMMEDIATE,
             "zombiePass" => ST_MULTIPLAYER_SWAP,
         ],
     ],
@@ -274,8 +276,24 @@ $playerActionsGameStates = [
             "cancel",
         ],
         "transitions" => [
+            "rerollImmediate" => ST_PRIVATE_REROLL_IMMEDIATE,
             "selectDice" => ST_PRIVATE_SELECT_DICE_ACTION,
             "cancel" => ST_PRIVATE_SELECT_DICE_ACTION,
+            "zombiePass" => ST_MULTIPLAYER_SWAP,
+        ],
+    ],
+
+    ST_PRIVATE_REROLL_IMMEDIATE => [
+        "name" => "privateRerollImmediate",
+        "descriptionmyturn" => clienttranslate('${you} can select a die to reroll with the pink die'),
+        "type" => "private",
+        "args" => "argRerollImmediate",
+        "possibleactions" => [ 
+            "rerollImmediate",
+        ],
+        "transitions" => [
+            "rerollImmediate" => ST_PRIVATE_REROLL_IMMEDIATE,
+            "selectDice" => ST_PRIVATE_SELECT_DICE_ACTION,
             "zombiePass" => ST_MULTIPLAYER_SWAP,
         ],
     ],

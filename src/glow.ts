@@ -36,7 +36,7 @@ class Glow implements GlowGame {
     private originalTextRollDice: string;
     private originalTextResolve: string;
     private originalTextMove: string;
-    private isChangeDie: boolean = false;
+    private currentDieAction?: 'roll' | 'change' | 'rerollImmediate';
     private selectedRoute: Route;
 
     public adventurersStock: Stock;
@@ -179,6 +179,9 @@ class Glow implements GlowGame {
             case 'privateRollDice':
             case 'privateChangeDie':
                 this.onEnteringStateRollDice();
+                break;
+            case 'privateRerollImmediate':
+                this.onEnteringStateRerollImmediate(args.args);
                 break;
             case 'move':
                 this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
@@ -336,6 +339,12 @@ class Glow implements GlowGame {
         this.setDiceSelectionActive(true);
 
         setTimeout(() => this.playersTables.forEach(playerTable => playerTable.sortDice()), 500);
+    }
+    
+    private onEnteringStateRerollImmediate(args: EnteringRerollImmediateArgs) {
+        this.onEnteringStateRollDice();
+
+        this.getDieDiv(args.selectedDie).classList.add('selected-pink');
     }
 
     private onEnteringSwap(args: EnteringSwapArgs) {
@@ -586,6 +595,9 @@ class Glow implements GlowGame {
             case 'privateSelectDiceAction':
                 this.onLeavingRollDice();
                 break;
+            case 'privateRerollImmediate':
+                this.onLeavingRerollImmediate();
+                break;
             case 'swapMulti':
                 this.onLeavingSwap();
                 break;
@@ -620,6 +632,11 @@ class Glow implements GlowGame {
 
     private onLeavingRollDice() {
         this.setDiceSelectionActive(false);
+    }
+
+    private onLeavingRerollImmediate() {
+        this.onLeavingRollDice();
+        (Array.from(document.getElementsByClassName('selected-pink')) as HTMLElement[]).forEach(elem => elem.classList.remove('selected-pink'));
     }
 
     private onLeavingSwap() {
@@ -667,7 +684,7 @@ class Glow implements GlowGame {
                     this.setActionBarRollDice(false);
                     break;
                 case 'privateSelectDiceAction':
-                    this.isChangeDie = false;
+                    this.currentDieAction = null;
 
                     const rollDiceArgs = args as EnteringRollDiceForPlayer;
                     const possibleRerolls = rollDiceArgs.rerollCompanion + rollDiceArgs.rerollTokens + Object.values(rollDiceArgs.rerollScore).length;
@@ -680,7 +697,7 @@ class Glow implements GlowGame {
                     dojo.toggleClass(`setChangeDie-button`, 'disabled', possibleRerolls < 3);
                     break;
                 case 'privateRollDice':
-                    this.isChangeDie = false;
+                    this.currentDieAction = 'roll';
 
                     const possibleCostsRollDice = this.getPossibleCosts(1, args);
                     possibleCostsRollDice.forEach((possibleCost, index) => {
@@ -692,7 +709,7 @@ class Glow implements GlowGame {
                     (this as any).addActionButton(`cancel-button`, _("Cancel"), () => this.cancel());
                     break;
                 case 'privateChangeDie':
-                    this.isChangeDie = true;
+                    this.currentDieAction = 'change';
 
                     dojo.place(`<div id="change-die-faces-buttons"></div>`, 'generalactions');
 
@@ -703,6 +720,17 @@ class Glow implements GlowGame {
                         dojo.addClass(`changeDie-button${index}`, 'disabled');
                     });
                     (this as any).addActionButton(`cancelRollDice-button`, _("Cancel"), () => this.cancel());
+
+                    if (this.selectedDice.length === 1) {
+                        this.onSelectedDiceChange();
+                    }
+                    break;
+                case 'privateRerollImmediate':
+                    this.currentDieAction = 'rerollImmediate';
+
+                    (this as any).addActionButton(`rerollImmediate-button`, _("Reroll selected and pink dice"), () => this.rerollImmediate());
+                    (this as any).addActionButton(`rerollImmediateOnlyPink-button`, _("Reroll only pink dice"), () => this.rerollImmediate(true));
+                    document.getElementById(`rerollImmediate-button`).classList.add('disabled');
 
                     if (this.selectedDice.length === 1) {
                         this.onSelectedDiceChange();
@@ -1194,7 +1222,7 @@ class Glow implements GlowGame {
     }
     
     private setActionBarRollDice(fromCancel: boolean) {
-        this.isChangeDie = false;
+        this.currentDieAction = 'roll';
         this.removeRollDiceActionButtons();
         if (fromCancel) {
             this.setRollDiceGamestateDescription();
@@ -1255,7 +1283,7 @@ class Glow implements GlowGame {
     }
 
     private setActionBarSelectRollDice() {
-        this.isChangeDie = false;
+        this.currentDieAction = 'roll';
         this.removeRollDiceActionButtons();
         this.setRollDiceGamestateDescription(`rollDice`);
 
@@ -1270,7 +1298,7 @@ class Glow implements GlowGame {
     }
     
     private setActionBarSelectChangeDie() {
-        this.isChangeDie = true;
+        this.currentDieAction = 'change';
         this.removeRollDiceActionButtons();
         this.setRollDiceGamestateDescription(`changeDie`);
 
@@ -1415,7 +1443,7 @@ class Glow implements GlowGame {
         const count = this.selectedDice.length;
         this.getRollDiceButtons().forEach(button => dojo.toggleClass(button, 'disabled', count < 1 || count > 2));
 
-        if (this.isChangeDie) {
+        if (this.currentDieAction == 'change') {
             if (count === 1) {
                 this.selectedDieFace = null;
                 const die = this.selectedDice[0];
@@ -1451,6 +1479,9 @@ class Glow implements GlowGame {
                     elem?.parentElement.removeChild(elem);
                 }
             }
+        } else if (this.currentDieAction == 'rerollImmediate') {
+            document.getElementById(`rerollImmediate-button`).classList.toggle('disabled', count !== 1);
+            document.getElementById(`rerollImmediateOnlyPink-button`).classList.toggle('disabled', count !== 0);
         }
     }
 
@@ -1600,6 +1631,16 @@ class Glow implements GlowGame {
             id: this.selectedDice[0].id,
             value : this.selectedDieFace,
             cost: cost.join(','),
+        });
+    }
+
+    private rerollImmediate(onlyPink: boolean = false) {
+        if(!(this as any).checkAction('rerollImmediate')) {
+            return;
+        }
+
+        this.takeNoLockAction('rerollImmediate', { 
+            id: onlyPink ? 0 : this.selectedDice[0].id,
         });
     }
     

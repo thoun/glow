@@ -155,6 +155,15 @@
 
     }
 
+    public function rerollImmediate() {
+        $this->setAjaxMode();     
+
+        $id = $this->getArg('id', AT_posint, true);
+        $this->game->rerollImmediate($id);
+
+        $this->ajaxResponse();
+    }    
+
     public function cancel() {
         $this->setAjaxMode();     
 

@@ -181,6 +181,10 @@ interface EnteringSelectSketalDieArgs {
     dice: Die[];
 }
 
+interface EnteringRerollImmediateArgs {
+    selectedDie: Die;
+}
+
 interface EnteringMoveBlackDieArgs {
     possibleSpots: number[];
 }

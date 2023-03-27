@@ -95,6 +95,16 @@ trait ArgsTrait {
         ];
     }
 
+    function argRerollImmediate(int $playerId) {
+        $dice = $this->getEffectiveDice($playerId);
+        $rerollImmediateDice = array_values(array_filter($dice, fn($die) => $die->color == 10 && $die->face == 6));
+        $die = count($rerollImmediateDice) > 0 ? $rerollImmediateDice[0] : null;
+
+        return [
+            'selectedDie' => $die,
+        ];
+    }
+
     function argSwap() {
         $companion = $this->getCompanionFromDb($this->companions->getCardOnTop('malach'));
 

@@ -112,6 +112,14 @@ trait StateTrait {
         $this->gamestate->initializePrivateStateForAllActivePlayers(); 
     }
 
+    function stSelectDiceAction(int $playerId) {
+        $args = $this->argRerollImmediate($playerId);
+
+        if ($args['selectedDie'] !== null) {
+            $this->gamestate->nextPrivateState($playerId, 'rerollImmediate');
+        }
+    }
+
     function stSwap() {
         $playerWithMalachDiceActivated = [];
 

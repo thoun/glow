@@ -55,6 +55,11 @@ $size: 0.25rem;
         z-index: 1;
         transform: translateZ(20px);
     }
+
+    &.selected-pink {
+      outline: 5px dashed #eca3c8;
+      pointer-events: none;
+    }
 }
 
 @keyframes selected-dice-animation {

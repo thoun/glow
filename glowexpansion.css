@@ -45,6 +45,10 @@
   z-index: 1;
   transform: translateZ(20px);
 }
+.die.selected-pink {
+  outline: 5px dashed #eca3c8;
+  pointer-events: none;
+}
 
 @keyframes selected-dice-animation {
   100% {
@@ -1261,6 +1265,12 @@ html {
 }
 .die-icon[data-color="8"] {
   background-image: url("img/die8.png");
+}
+.die-icon[data-color="9"] {
+  background-image: url("img/die9.png");
+}
+.die-icon[data-color="10"] {
+  background-image: url("img/die10.png");
 }
 .die-icon[data-face="1"] {
   background-position: 0% 100%;

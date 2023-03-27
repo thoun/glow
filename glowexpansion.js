@@ -1132,7 +1132,6 @@ var Glow = /** @class */ (function () {
         this.selectedDice = [];
         this.selectedDieFace = null;
         this.diceSelectionActive = false;
-        this.isChangeDie = false;
         this.playersTables = [];
         this.zoom = 1;
         this.DICE_FACES_TOOLTIP = [];
@@ -1247,6 +1246,9 @@ var Glow = /** @class */ (function () {
             case 'privateRollDice':
             case 'privateChangeDie':
                 this.onEnteringStateRollDice();
+                break;
+            case 'privateRerollImmediate':
+                this.onEnteringStateRerollImmediate(args.args);
                 break;
             case 'move':
                 this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
@@ -1383,6 +1385,10 @@ var Glow = /** @class */ (function () {
         var _this = this;
         this.setDiceSelectionActive(true);
         setTimeout(function () { return _this.playersTables.forEach(function (playerTable) { return playerTable.sortDice(); }); }, 500);
+    };
+    Glow.prototype.onEnteringStateRerollImmediate = function (args) {
+        this.onEnteringStateRollDice();
+        this.getDieDiv(args.selectedDie).classList.add('selected-pink');
     };
     Glow.prototype.onEnteringSwap = function (args) {
         var _this = this;
@@ -1590,6 +1596,9 @@ var Glow = /** @class */ (function () {
             case 'privateSelectDiceAction':
                 this.onLeavingRollDice();
                 break;
+            case 'privateRerollImmediate':
+                this.onLeavingRerollImmediate();
+                break;
             case 'swapMulti':
                 this.onLeavingSwap();
                 break;
@@ -1619,6 +1628,10 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.onLeavingRollDice = function () {
         this.setDiceSelectionActive(false);
+    };
+    Glow.prototype.onLeavingRerollImmediate = function () {
+        this.onLeavingRollDice();
+        Array.from(document.getElementsByClassName('selected-pink')).forEach(function (elem) { return elem.classList.remove('selected-pink'); });
     };
     Glow.prototype.onLeavingSwap = function () {
         var _this = this;
@@ -1668,7 +1681,7 @@ var Glow = /** @class */ (function () {
                     this.setActionBarRollDice(false);
                     break;
                 case 'privateSelectDiceAction':
-                    this.isChangeDie = false;
+                    this.currentDieAction = null;
                     var rollDiceArgs = args;
                     var possibleRerolls = rollDiceArgs.rerollCompanion + rollDiceArgs.rerollTokens + Object.values(rollDiceArgs.rerollScore).length;
                     this.addActionButton("setRollDice-button", _("Reroll 1 or 2 dice") + formatTextIcons(' (1 [reroll] )'), function () { return _this.selectDiceToRoll(); });
@@ -1678,7 +1691,7 @@ var Glow = /** @class */ (function () {
                     dojo.toggleClass("setChangeDie-button", 'disabled', possibleRerolls < 3);
                     break;
                 case 'privateRollDice':
-                    this.isChangeDie = false;
+                    this.currentDieAction = 'roll';
                     var possibleCostsRollDice = this.getPossibleCosts(1, args);
                     possibleCostsRollDice.forEach(function (possibleCost, index) {
                         var costStr = possibleCost.map(function (cost, costTypeIndex) { return _this.getRollDiceCostStr(costTypeIndex, cost, args); }).filter(function (str) { return str !== null; }).join(' ');
@@ -1688,7 +1701,7 @@ var Glow = /** @class */ (function () {
                     this.addActionButton("cancel-button", _("Cancel"), function () { return _this.cancel(); });
                     break;
                 case 'privateChangeDie':
-                    this.isChangeDie = true;
+                    this.currentDieAction = 'change';
                     dojo.place("<div id=\"change-die-faces-buttons\"></div>", 'generalactions');
                     var possibleCostsChangeDie = this.getPossibleCosts(3, args);
                     possibleCostsChangeDie.forEach(function (possibleCost, index) {
@@ -1697,6 +1710,15 @@ var Glow = /** @class */ (function () {
                         dojo.addClass("changeDie-button" + index, 'disabled');
                     });
                     this.addActionButton("cancelRollDice-button", _("Cancel"), function () { return _this.cancel(); });
+                    if (this.selectedDice.length === 1) {
+                        this.onSelectedDiceChange();
+                    }
+                    break;
+                case 'privateRerollImmediate':
+                    this.currentDieAction = 'rerollImmediate';
+                    this.addActionButton("rerollImmediate-button", _("Reroll selected and pink dice"), function () { return _this.rerollImmediate(); });
+                    this.addActionButton("rerollImmediateOnlyPink-button", _("Reroll only pink dice"), function () { return _this.rerollImmediate(true); });
+                    document.getElementById("rerollImmediate-button").classList.add('disabled');
                     if (this.selectedDice.length === 1) {
                         this.onSelectedDiceChange();
                     }
@@ -2086,7 +2108,7 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.setActionBarRollDice = function (fromCancel) {
         var _this = this;
-        this.isChangeDie = false;
+        this.currentDieAction = 'roll';
         this.removeRollDiceActionButtons();
         if (fromCancel) {
             this.setRollDiceGamestateDescription();
@@ -2141,7 +2163,7 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.setActionBarSelectRollDice = function () {
         var _this = this;
-        this.isChangeDie = false;
+        this.currentDieAction = 'roll';
         this.removeRollDiceActionButtons();
         this.setRollDiceGamestateDescription("rollDice");
         var possibleCosts = this.getPossibleCosts(1);
@@ -2154,7 +2176,7 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.setActionBarSelectChangeDie = function () {
         var _this = this;
-        this.isChangeDie = true;
+        this.currentDieAction = 'change';
         this.removeRollDiceActionButtons();
         this.setRollDiceGamestateDescription("changeDie");
         dojo.place("<div id=\"change-die-faces-buttons\"></div>", 'generalactions');
@@ -2279,7 +2301,7 @@ var Glow = /** @class */ (function () {
         var _this = this;
         var count = this.selectedDice.length;
         this.getRollDiceButtons().forEach(function (button) { return dojo.toggleClass(button, 'disabled', count < 1 || count > 2); });
-        if (this.isChangeDie) {
+        if (this.currentDieAction == 'change') {
             if (count === 1) {
                 this.selectedDieFace = null;
                 var die = this.selectedDice[0];
@@ -2316,6 +2338,10 @@ var Glow = /** @class */ (function () {
                     elem === null || elem === void 0 ? void 0 : elem.parentElement.removeChild(elem);
                 }
             }
+        }
+        else if (this.currentDieAction == 'rerollImmediate') {
+            document.getElementById("rerollImmediate-button").classList.toggle('disabled', count !== 1);
+            document.getElementById("rerollImmediateOnlyPink-button").classList.toggle('disabled', count !== 0);
         }
     };
     Glow.prototype.onDiceClick = function (die, forceValue) {
@@ -2452,6 +2478,15 @@ var Glow = /** @class */ (function () {
             id: this.selectedDice[0].id,
             value: this.selectedDieFace,
             cost: cost.join(','),
+        });
+    };
+    Glow.prototype.rerollImmediate = function (onlyPink) {
+        if (onlyPink === void 0) { onlyPink = false; }
+        if (!this.checkAction('rerollImmediate')) {
+            return;
+        }
+        this.takeNoLockAction('rerollImmediate', {
+            id: onlyPink ? 0 : this.selectedDice[0].id,
         });
     };
     Glow.prototype.cancel = function () {

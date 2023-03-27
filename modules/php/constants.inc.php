@@ -27,6 +27,7 @@ define('ST_MULTIPLAYER_CHANGE_DICE', 31);
 define('ST_PRIVATE_SELECT_DICE_ACTION', 32);
 define('ST_PRIVATE_ROLL_DICE', 331);
 define('ST_PRIVATE_CHANGE_DIE', 332);
+define('ST_PRIVATE_REROLL_IMMEDIATE', 333);
 
 // just before noon (Malach & Cromaug)
 define('ST_MULTIPLAYER_SWAP', 34);
