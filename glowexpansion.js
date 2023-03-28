@@ -798,9 +798,11 @@ var PlayerTable = /** @class */ (function () {
         for (var i = 1; i <= 8; i++) {
             html += "<div id=\"player-table-" + this.playerId + "-dice-grid-symbol" + i + "-th\" class=\"hidden th-symbol th-symbol" + i + "\"><div class=\"icon symbol" + i + "\"></div><sub id=\"player-table-" + this.playerId + "-dice-grid-symbol" + i + "-counter\"></sub></div>";
         }
+        html += "<div id=\"player-table-" + this.playerId + "-dice-grid-symbol0-th\" class=\"hidden th-symbol th-symbol0\"><sub id=\"player-table-" + this.playerId + "-dice-grid-symbol0-counter\"></sub></div>";
         for (var i = 1; i <= 8; i++) {
             html += "<div id=\"player-table-" + this.playerId + "-dice-grid-symbol" + i + "\" class=\"hidden\"></div>";
         }
+        html += "<div id=\"player-table-" + this.playerId + "-dice-grid-symbol0\" class=\"hidden\"></div>";
         html += "        </div>";
         if (game.getBoardSide() === 2 || game.isExpansion()) {
             html += "<div id=\"player-table-" + this.playerId + "-symbol-count\" class=\"player-symbol-count\"></div>";
@@ -1052,25 +1054,40 @@ var PlayerTable = /** @class */ (function () {
         var columns = 0;
         var symbolCount = 0;
         var _loop_4 = function (i) {
-            var valueDice = dice.filter(function (die) { return SYMBOL_INDEX_TO_DIE_VALUE[Number(die.dataset.dieValue)] === i; });
-            document.getElementById("player-table-" + this_3.playerId + "-dice-grid-symbol" + i + "-th").classList.toggle('hidden', valueDice.length === 0);
-            var destination = document.getElementById("player-table-" + this_3.playerId + "-dice-grid-symbol" + i);
-            destination.classList.toggle('hidden', valueDice.length === 0);
-            if (valueDice.length) {
+            // basic die faces
+            var valueDice_1 = dice.filter(function (die) { return SYMBOL_INDEX_TO_DIE_VALUE[Number(die.dataset.dieValue)] === i; });
+            document.getElementById("player-table-" + this_3.playerId + "-dice-grid-symbol" + i + "-th").classList.toggle('hidden', valueDice_1.length === 0);
+            var destination_1 = document.getElementById("player-table-" + this_3.playerId + "-dice-grid-symbol" + i);
+            destination_1.classList.toggle('hidden', valueDice_1.length === 0);
+            if (valueDice_1.length) {
                 columns++;
-                if (i <= 5 && !valueDice.some(function (die) { return die.dataset.dieColor == '8'; })) {
+                if (i <= 5 && !valueDice_1.some(function (die) { return die.dataset.dieColor == '8'; })) {
                     symbolCount++;
                 }
-                valueDice.forEach(function (die) {
+                valueDice_1.forEach(function (die) {
                     die.classList.remove('rolled');
-                    destination.appendChild(die);
+                    destination_1.appendChild(die);
                 });
-                document.getElementById("player-table-" + this_3.playerId + "-dice-grid-symbol" + i + "-counter").innerHTML = valueDice.length > 1 ? "(" + valueDice.length + ")" : '';
+                document.getElementById("player-table-" + this_3.playerId + "-dice-grid-symbol" + i + "-counter").innerHTML = valueDice_1.length > 1 ? "(" + valueDice_1.length + ")" : '';
             }
         };
         var this_3 = this;
         for (var i = 1; i <= 8; i++) {
             _loop_4(i);
+        }
+        // special faces
+        var valueDice = dice.filter(function (die) { return !SYMBOL_INDEX_TO_DIE_VALUE[Number(die.dataset.dieValue)]; });
+        document.getElementById("player-table-" + this.playerId + "-dice-grid-symbol0-th").classList.toggle('hidden', valueDice.length === 0);
+        var destination = document.getElementById("player-table-" + this.playerId + "-dice-grid-symbol0");
+        destination.classList.toggle('hidden', valueDice.length === 0);
+        if (valueDice.length) {
+            columns++;
+            symbolCount++;
+            valueDice.forEach(function (die) {
+                die.classList.remove('rolled');
+                destination.appendChild(die);
+            });
+            document.getElementById("player-table-" + this.playerId + "-dice-grid-symbol0-counter").innerHTML = valueDice.length > 1 ? "(" + valueDice.length + ")" : '';
         }
         document.getElementById("player-table-" + this.playerId + "-dice-grid").style.gridTemplateColumns = "repeat(" + columns + ", auto)";
         if (this.game.getBoardSide() === 2 || this.game.isExpansion()) {
@@ -1093,6 +1110,7 @@ var PlayerTable = /** @class */ (function () {
         for (var i = 1; i <= 8; i++) {
             _loop_5(i);
         }
+        dice.filter(function (die) { return !SYMBOL_INDEX_TO_DIE_VALUE[Number(die.dataset.dieValue)]; }).forEach(function (die) { return die.classList.remove('forbidden'); });
     };
     return PlayerTable;
 }());
@@ -1170,13 +1188,7 @@ var Glow = /** @class */ (function () {
             this.dontPreloadImage('companions-expansion1-set3.png');
         }
         log("Starting game setup");
-        /*if (gamedatas.side == 2) {
-            Object.values(this.gamedatas.gamestates).filter(gamestate => ['move', 'multiMove', 'privateMove'].includes(gamestate.name)).forEach(gamestate => {
-                gamestate.description = gamestate.descriptionboat;
-                gamestate.descriptionmyturn = gamestate.descriptionmyturnboat;
-            });
-        }*/
-        [1, 2, 3, 4, 5, 6, 7, 8, 80, 9, 10].forEach(function (color) {
+        [1, 2, 3, 4, 5, 6, 7, 8, 80, 9, 10, 11].forEach(function (color) {
             var facesStr = '';
             for (var face = 1; face <= 6; face++) {
                 facesStr += "[die:" + color + ":" + face + "]";

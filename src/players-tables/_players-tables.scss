@@ -68,7 +68,7 @@
                     }
                 }
 
-                $colors: (1: #00995c, 2: #0077ba, 3: #57cbf5, 4: #bf1e2e, 5: #ea7d28,  6: #8a298a, 7: #ffd503, 8: #000000);
+                $colors: (0: #939598, 1: #00995c, 2: #0077ba, 3: #57cbf5, 4: #bf1e2e, 5: #ea7d28,  6: #8a298a, 7: #ffd503, 8: #000000);
                 @each $colorIndex, $color in $colors {
                     .th-symbol#{$colorIndex} {
                         border-color: $color;

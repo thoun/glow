@@ -90,14 +90,7 @@ class Glow implements GlowGame {
 
         log( "Starting game setup" );
 
-        /*if (gamedatas.side == 2) {
-            Object.values(this.gamedatas.gamestates).filter(gamestate => ['move', 'multiMove', 'privateMove'].includes(gamestate.name)).forEach(gamestate => {
-                gamestate.description = gamestate.descriptionboat;
-                gamestate.descriptionmyturn = gamestate.descriptionmyturnboat;
-            });
-        }*/
-
-        [1, 2, 3, 4, 5, 6, 7, 8, 80, 9, 10].forEach(color => {
+        [1, 2, 3, 4, 5, 6, 7, 8, 80, 9, 10, 11].forEach(color => {
             let facesStr = '';
             for (let face=1; face<=6; face++) {
                 facesStr += `[die:${color}:${face}]`;

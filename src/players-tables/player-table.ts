@@ -35,7 +35,9 @@ class PlayerTable {
                 <div id="player-table-${this.playerId}-dice" class="player-dice"></div>
                 <div id="player-table-${this.playerId}-dice-grid" class="player-dice-grid">`;
         for (let i=1; i<=8; i++) { html += `<div id="player-table-${this.playerId}-dice-grid-symbol${i}-th" class="hidden th-symbol th-symbol${i}"><div class="icon symbol${i}"></div><sub id="player-table-${this.playerId}-dice-grid-symbol${i}-counter"></sub></div>`; }
-        for (let i=1; i<=8; i++) { html += `<div id="player-table-${this.playerId}-dice-grid-symbol${i}" class="hidden"></div>`; }
+        html += `<div id="player-table-${this.playerId}-dice-grid-symbol0-th" class="hidden th-symbol th-symbol0"><sub id="player-table-${this.playerId}-dice-grid-symbol0-counter"></sub></div>`;
+        for (let i=1; i<=8; i++) { html += `<div id="player-table-${this.playerId}-dice-grid-symbol${i}" class="hidden"></div>`; }        
+        html += `<div id="player-table-${this.playerId}-dice-grid-symbol0" class="hidden"></div>`;
         html += `        </div>`;
         
         if (game.getBoardSide() === 2 || game.isExpansion()) {
@@ -332,6 +334,7 @@ class PlayerTable {
         let columns = 0;
         let symbolCount = 0;
         for (let i = 1; i <= 8; i++) {
+            // basic die faces
             const valueDice = dice.filter(die => SYMBOL_INDEX_TO_DIE_VALUE[Number(die.dataset.dieValue)] === i);
             document.getElementById(`player-table-${this.playerId}-dice-grid-symbol${i}-th`).classList.toggle('hidden', valueDice.length === 0);
             const destination = document.getElementById(`player-table-${this.playerId}-dice-grid-symbol${i}`);
@@ -349,6 +352,21 @@ class PlayerTable {
                 });
                 document.getElementById(`player-table-${this.playerId}-dice-grid-symbol${i}-counter`).innerHTML = valueDice.length > 1 ? `(${valueDice.length})` : '';
             }
+        }
+        // special faces
+        const valueDice = dice.filter(die => !SYMBOL_INDEX_TO_DIE_VALUE[Number(die.dataset.dieValue)]);
+        document.getElementById(`player-table-${this.playerId}-dice-grid-symbol0-th`).classList.toggle('hidden', valueDice.length === 0);
+        const destination = document.getElementById(`player-table-${this.playerId}-dice-grid-symbol0`);
+        destination.classList.toggle('hidden', valueDice.length === 0);
+        if (valueDice.length) {
+            columns++;
+            symbolCount++;
+
+            valueDice.forEach(die => {
+                die.classList.remove('rolled');
+                destination.appendChild(die);
+            });
+            document.getElementById(`player-table-${this.playerId}-dice-grid-symbol0-counter`).innerHTML = valueDice.length > 1 ? `(${valueDice.length})` : '';
         }
         document.getElementById(`player-table-${this.playerId}-dice-grid`).style.gridTemplateColumns = `repeat(${columns}, auto)`;
 
@@ -371,5 +389,6 @@ class PlayerTable {
                 });
             }
         }
+        dice.filter(die => !SYMBOL_INDEX_TO_DIE_VALUE[Number(die.dataset.dieValue)]).forEach(die => die.classList.remove('forbidden'));
     }
 }

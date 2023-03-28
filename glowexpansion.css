@@ -677,6 +677,9 @@
 #currentplayertable .player-table .name-and-dice .player-dice-grid .th-symbol sub, #playerstables .player-table .name-and-dice .player-dice-grid .th-symbol sub {
   vertical-align: bottom;
 }
+#currentplayertable .player-table .name-and-dice .player-dice-grid .th-symbol0, #playerstables .player-table .name-and-dice .player-dice-grid .th-symbol0 {
+  border-color: #939598;
+}
 #currentplayertable .player-table .name-and-dice .player-dice-grid .th-symbol1, #playerstables .player-table .name-and-dice .player-dice-grid .th-symbol1 {
   border-color: #00995c;
 }
@@ -1271,6 +1274,9 @@ html {
 }
 .die-icon[data-color="10"] {
   background-image: url("img/die10.png");
+}
+.die-icon[data-color="11"] {
+  background-image: url("img/die11.png");
 }
 .die-icon[data-color="80"] {
   background-image: url("img/die80.png");

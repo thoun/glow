@@ -354,7 +354,7 @@ html {
   display: inline-block;
   margin-bottom: -4px;
 
-  @for $i from 1 through 10 {
+  @for $i from 1 through 11 {
       &[data-color="#{$i}"] {
         background-image: url('img/die#{$i}.png');
       }
