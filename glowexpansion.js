@@ -1164,6 +1164,11 @@ var Glow = /** @class */ (function () {
         if (playerCount != 6) {
             this.dontPreloadImage('meeting-track-little-board-6p.png');
         }
+        if (!gamedatas.expansion) {
+            this.dontPreloadImage('companions-expansion1-set1.png');
+            this.dontPreloadImage('companions-expansion1-set2.png');
+            this.dontPreloadImage('companions-expansion1-set3.png');
+        }
         log("Starting game setup");
         /*if (gamedatas.side == 2) {
             Object.values(this.gamedatas.gamestates).filter(gamestate => ['move', 'multiMove', 'privateMove'].includes(gamestate.name)).forEach(gamestate => {

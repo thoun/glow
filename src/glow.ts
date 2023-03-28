@@ -82,6 +82,11 @@ class Glow implements GlowGame {
         if (playerCount != 6) {            
             (this as any).dontPreloadImage('meeting-track-little-board-6p.png');
         }
+        if (!gamedatas.expansion) {
+            (this as any).dontPreloadImage('companions-expansion1-set1.png');
+            (this as any).dontPreloadImage('companions-expansion1-set2.png');
+            (this as any).dontPreloadImage('companions-expansion1-set3.png');
+        }
 
         log( "Starting game setup" );
 
