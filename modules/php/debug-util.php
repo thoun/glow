@@ -22,6 +22,7 @@ trait DebugUtilTrait {
         //$this->debugSetCompanionForPlayer(2343492, 41);
         //$this->debugSetPoints(19);
         $this->debugSetFootprints(30);
+        $this->debugSetRerolls(30);
         //$this->debugSkipAdventurers();
 
         //$this->debugMoveMeeple(2343492, 15, 0);
@@ -57,6 +58,10 @@ trait DebugUtilTrait {
 
     function debugSetFootprints($number) {
         $this->DbQuery("UPDATE player SET `player_footprints` = $number");
+    }
+
+    function debugSetRerolls($number) {
+        $this->DbQuery("UPDATE player SET `player_rerolls` = $number");
     }
 
     function debug($debugData) {

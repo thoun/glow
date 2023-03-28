@@ -1082,7 +1082,6 @@ var PlayerTable = /** @class */ (function () {
         destination.classList.toggle('hidden', valueDice.length === 0);
         if (valueDice.length) {
             columns++;
-            symbolCount++;
             valueDice.forEach(function (die) {
                 die.classList.remove('rolled');
                 destination.appendChild(die);

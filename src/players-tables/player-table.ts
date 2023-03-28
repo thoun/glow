@@ -360,7 +360,6 @@ class PlayerTable {
         destination.classList.toggle('hidden', valueDice.length === 0);
         if (valueDice.length) {
             columns++;
-            symbolCount++;
 
             valueDice.forEach(die => {
                 die.classList.remove('rolled');

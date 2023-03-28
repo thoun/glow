@@ -29,7 +29,7 @@ class Dice {
         if ($face == 6) {
             if ($this->color === 8) {
                 $this->value = -102;
-            } else if ($this->color === 7) {
+            } else if ($this->color === 7 || $this->color === 11) {
                 $this->value = 103;
             } else if ($this->color === 6) {
                 $this->value = 22;
