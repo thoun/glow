@@ -359,6 +359,9 @@ html {
         background-image: url('img/die#{$i}.png');
       }
   }
+  &[data-color="80"] {
+    background-image: url('img/die80.png');
+  }
 
   @for $i from 1 through 6 {
       &[data-face="#{$i}"] {

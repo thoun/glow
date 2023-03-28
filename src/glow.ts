@@ -92,13 +92,13 @@ class Glow implements GlowGame {
             });
         }*/
 
-        for (let color=1; color<=10; color++) {
+        [1, 2, 3, 4, 5, 6, 7, 8, 80, 9, 10].forEach(color => {
             let facesStr = '';
             for (let face=1; face<=6; face++) {
                 facesStr += `[die:${color}:${face}]`;
             }
             this.DICE_FACES_TOOLTIP[color] = `<h3>${_("Die faces")}</h3> <div>${formatTextIcons(facesStr)}</div>`;
-        }
+        });
         
         this.gamedatas = gamedatas;
 
@@ -679,10 +679,6 @@ class Glow implements GlowGame {
                     (this as any).addActionButton(`recruitCompanionUriom-button`, _("Recruit selected companion"), () => this.recruitCompanionUriom());
                     (this as any).addActionButton(`passUriomRecruit-button`, _("Pass"), () => this.passUriomRecruit());
                     break;    
-                case 'rollDice':
-                    this.gamedatas.gamestate.args[this.getPlayerId()] = (args as EnteringRollDiceArgs)[this.getPlayerId()];
-                    this.setActionBarRollDice(false);
-                    break;
                 case 'privateSelectDiceAction':
                     this.currentDieAction = null;
 
@@ -690,18 +686,19 @@ class Glow implements GlowGame {
                     const possibleRerolls = rollDiceArgs.rerollCompanion + rollDiceArgs.rerollTokens + Object.values(rollDiceArgs.rerollScore).length;
             
                     (this as any).addActionButton(`setRollDice-button`, _("Reroll 1 or 2 dice") + formatTextIcons(' (1 [reroll] )'), () => this.selectDiceToRoll());
-                    (this as any).addActionButton(`setChangeDie-button`, _("Change die face") + formatTextIcons(' (3 [reroll] )'), () => this.selectDieToChange());
-                    (this as any).addActionButton(`keepDice-button`, _("Keep current dice"), () => this.keepDice(), null, null, 'red');
+                    (this as any).addActionButton(`setChangeDie-button`, _("Change die face") + formatTextIcons(` (3 [reroll]${rollDiceArgs.grayMultiDice ? ' / ' + _('free for ${symbol}').replace('${symbol}', '[symbol0]') : ''})`), () => this.selectDieToChange());
+                    (this as any).addActionButton(`keepDice-button`, _("Keep current dice") + (rollDiceArgs.grayMultiDice ? formatTextIcons(` (${_('change ${symbol} face before').replace('${symbol}', '[symbol0]')})`) : ''), () => this.keepDice(), null, null, 'red');
             
                     dojo.toggleClass(`setRollDice-button`, 'disabled', possibleRerolls < 1);
-                    dojo.toggleClass(`setChangeDie-button`, 'disabled', possibleRerolls < 3);
+                    dojo.toggleClass(`setChangeDie-button`, 'disabled', possibleRerolls < 3 && !rollDiceArgs.grayMultiDice);
+                    dojo.toggleClass(`keepDice-button`, 'disabled', rollDiceArgs.grayMultiDice);
                     break;
                 case 'privateRollDice':
                     this.currentDieAction = 'roll';
 
-                    const possibleCostsRollDice = this.getPossibleCosts(1, args);
+                    const possibleCostsRollDice = this.getPossibleCosts(1);
                     possibleCostsRollDice.forEach((possibleCost, index) => {
-                        const costStr = possibleCost.map((cost, costTypeIndex) => this.getRollDiceCostStr(costTypeIndex, cost, args)).filter(str => str !== null).join(' ');
+                        const costStr = possibleCost.map((cost, costTypeIndex) => this.getRollDiceCostStr(costTypeIndex, cost)).filter(str => str !== null).join(' ');
                         (this as any).addActionButton(`rollDice-button${index}`, _("Reroll selected dice") + ` (${costStr})`, () => this.rollDice(possibleCost));
                         dojo.toggleClass(`rollDice-button${index}`, 'disabled', this.selectedDice.length < 1 || this.selectedDice.length > 2);
 
@@ -713,13 +710,7 @@ class Glow implements GlowGame {
 
                     dojo.place(`<div id="change-die-faces-buttons"></div>`, 'generalactions');
 
-                    const possibleCostsChangeDie = this.getPossibleCosts(3, args);
-                    possibleCostsChangeDie.forEach((possibleCost, index) => {
-                        const costStr = possibleCost.map((cost, costTypeIndex) => this.getRollDiceCostStr(costTypeIndex, cost, args)).filter(str => str !== null).join(' ');
-                        (this as any).addActionButton(`changeDie-button${index}`, _("Change selected die") + ` (${costStr})`, () => this.changeDie(possibleCost));
-                        dojo.addClass(`changeDie-button${index}`, 'disabled');
-                    });
-                    (this as any).addActionButton(`cancelRollDice-button`, _("Cancel"), () => this.cancel());
+                    this.createChangeDieButtons();
 
                     if (this.selectedDice.length === 1) {
                         this.onSelectedDiceChange();
@@ -1221,27 +1212,8 @@ class Glow implements GlowGame {
         return this.gamedatas.gamestate.args?.[this.getPlayerId()] || this.gamedatas.gamestate.private_state.args;
     }
     
-    private setActionBarRollDice(fromCancel: boolean) {
-        this.currentDieAction = 'roll';
-        this.removeRollDiceActionButtons();
-        if (fromCancel) {
-            this.setRollDiceGamestateDescription();
-            this.unselectDice();
-        }
-
-        const rollDiceArgs = this.gamedatas.gamestate.args[this.getPlayerId()];
-        const possibleRerolls = rollDiceArgs.rerollCompanion + rollDiceArgs.rerollTokens + Object.values(rollDiceArgs.rerollScore).length;
-
-        (this as any).addActionButton(`setRollDice-button`, _("Reroll 1 or 2 dice") + formatTextIcons(' (1 [reroll] )'), () => this.setActionBarSelectRollDice());
-        (this as any).addActionButton(`setChangeDie-button`, _("Change die face") + formatTextIcons(' (3 [reroll] )'), () => this.setActionBarSelectChangeDie());
-        (this as any).addActionButton(`keepDice-button`, _("Keep current dice"), () => this.keepDice(), null, null, 'red');
-
-        dojo.toggleClass(`setRollDice-button`, 'disabled', possibleRerolls < 1);
-        dojo.toggleClass(`setChangeDie-button`, 'disabled', possibleRerolls < 3);
-    }
-    
-    private getPossibleCosts(costNumber: number, args: EnteringRollDiceForPlayer | null = null) {
-        const playerArgs: EnteringRollDiceForPlayer = args ?? this.gamedatas.gamestate.args[this.getPlayerId()];
+    private getPossibleCosts(costNumber: number) {
+        const playerArgs: EnteringRollDiceForPlayer = this.gamedatas.gamestate.private_state.args;
 
         const possibleCosts = [];
         const canUse = [
@@ -1282,39 +1254,22 @@ class Glow implements GlowGame {
         return Array.from(document.querySelectorAll('[id^="changeDie-button"]'));
     }
 
-    private setActionBarSelectRollDice() {
-        this.currentDieAction = 'roll';
-        this.removeRollDiceActionButtons();
-        this.setRollDiceGamestateDescription(`rollDice`);
+    private createChangeDieButtons(free: boolean = false) {
+        const changeDieButtons = this.getChangeDieButtons();
+        changeDieButtons.forEach(elem => elem.parentElement.removeChild(elem));
+        document.getElementById(`cancelRollDice-button`)?.remove();
 
-        const possibleCosts = this.getPossibleCosts(1);
-        possibleCosts.forEach((possibleCost, index) => {
-            const costStr = possibleCost.map((cost, costTypeIndex) => this.getRollDiceCostStr(costTypeIndex, cost)).filter(str => str !== null).join(' ');
-            (this as any).addActionButton(`rollDice-button${index}`, _("Reroll selected dice") + ` (${costStr})`, () => this.rollDice(possibleCost));
-            dojo.toggleClass(`rollDice-button${index}`, 'disabled', this.selectedDice.length < 1 || this.selectedDice.length > 2);
-
-        });
-        (this as any).addActionButton(`cancelRollDice-button`, _("Cancel"), () => this.setActionBarRollDice(true));
-    }
-    
-    private setActionBarSelectChangeDie() {
-        this.currentDieAction = 'change';
-        this.removeRollDiceActionButtons();
-        this.setRollDiceGamestateDescription(`changeDie`);
-
-        dojo.place(`<div id="change-die-faces-buttons"></div>`, 'generalactions');
-
-        const possibleCosts = this.getPossibleCosts(3);
-        possibleCosts.forEach((possibleCost, index) => {
-            const costStr = possibleCost.map((cost, costTypeIndex) => this.getRollDiceCostStr(costTypeIndex, cost)).filter(str => str !== null).join(' ');
-            (this as any).addActionButton(`changeDie-button${index}`, _("Change selected die") + ` (${costStr})`, () => this.changeDie(possibleCost));
-            dojo.addClass(`changeDie-button${index}`, 'disabled');
-        });
-        (this as any).addActionButton(`cancelRollDice-button`, _("Cancel"), () => this.setActionBarRollDice(true));
-
-        if (this.selectedDice.length === 1) {
-            this.onSelectedDiceChange();
+        if (free) {
+            (this as any).addActionButton(`changeDie-buttonFree`, _("Change selected die") + ` (${_('free')})`, () => this.changeDie([]));
+        } else {
+            const possibleCosts = this.getPossibleCosts(3);
+            possibleCosts.forEach((possibleCost, index) => {
+                const costStr = possibleCost.map((cost, costTypeIndex) => this.getRollDiceCostStr(costTypeIndex, cost)).filter(str => str !== null).join(' ');
+                (this as any).addActionButton(`changeDie-button${index}`, _("Change selected die") + ` (${costStr})`, () => this.changeDie(possibleCost));
+                dojo.addClass(`changeDie-button${index}`, 'disabled');
+            });
         }
+        (this as any).addActionButton(`cancelRollDice-button`, _("Cancel"), () => this.cancel());
     }
 
     private removeResolveActionButtons() {
@@ -1424,7 +1379,7 @@ class Glow implements GlowGame {
         dice.forEach(die => this.createOrMoveDie({...die, id: 1000 + die.id}, `tomDiceWrapper`));
     }
 
-    private getRollDiceCostStr(typeIndex: number, cost: number, args: EnteringRollDiceForPlayer | null = null) {
+    private getRollDiceCostStr(typeIndex: number, cost: number) {
         if (cost < 1) {
             return null;
         }
@@ -1434,7 +1389,7 @@ class Glow implements GlowGame {
             case 1:
                 return formatTextIcons(`-${cost} [reroll]`);
             case 2:
-                const playerArgs: EnteringRollDiceForPlayer = args ?? this.gamedatas.gamestate.args[this.getPlayerId()];
+                const playerArgs: EnteringRollDiceForPlayer = this.gamedatas.gamestate.private_state.args;
                 return formatTextIcons(`-${playerArgs.rerollScore[cost]} [point] `);
         }
     }
@@ -1444,13 +1399,13 @@ class Glow implements GlowGame {
         this.getRollDiceButtons().forEach(button => dojo.toggleClass(button, 'disabled', count < 1 || count > 2));
 
         if (this.currentDieAction == 'change') {
+            this.createChangeDieButtons(count === 1 && this.selectedDice[0].color == 80 && this.selectedDice[0].face == 6);
+
             if (count === 1) {
                 this.selectedDieFace = null;
                 const die = this.selectedDice[0];
-                const cancel = document.getElementById(`cancelRollDice-button`);
-                cancel?.parentElement.removeChild(cancel);
 
-                const faces = die.color <= 5 ? 5 : 6;
+                const faces = die.color <= 5 || die.color == 80 ? 5 : 6;
                 const facesButtons = document.getElementById('change-die-faces-buttons');
 
                 for (let i=1; i<=faces; i++) {
@@ -1471,8 +1426,6 @@ class Glow implements GlowGame {
                     }, null, null, 'gray');
                     facesButtons.appendChild(document.getElementById(`changeDie${i}-button`));                    
                 }
-
-                (this as any).addActionButton(`cancelRollDice-button`, _("Cancel"), () => this.setActionBarRollDice(true));
             } else {
                 for (let i=1; i<=6; i++) {
                     const elem = document.getElementById(`changeDie${i}-button`);
@@ -1535,13 +1488,6 @@ class Glow implements GlowGame {
             this.setNewFace(die);
             this.addRollToDiv(this.getDieDiv(die), changed ? 'change' : (Math.random() > 0.5 ? 'odd' : 'even'));
         });
-
-        if (args) {
-            this.gamedatas.gamestate.args[this.getPlayerId()] = args[this.getPlayerId()];
-            if (isCurrentPlayer && (this as any).isCurrentPlayerActive()) {
-                this.setActionBarRollDice(true);
-            }
-        }
     }
 
     public selectMove(possibleDestination: Route): void {

@@ -88,10 +88,14 @@ trait ArgsTrait {
         $rerollTokens = $this->getPlayerRerolls($playerId);
         $rerollScore = $this->getRerollScoreCost($this->getPlayerScore($playerId));
 
+        $dice = $this->getEffectiveDice($playerId);
+        $grayMultiDice = array_values(array_filter($dice, fn($die) => $die->color == 80 && $die->face == 6));
+
         return [
             'rerollCompanion' => $rerollCompanion,
             'rerollTokens' => $rerollTokens,
             'rerollScore' => $rerollScore,
+            'grayMultiDice' => count($grayMultiDice) > 0,
         ];
     }
 

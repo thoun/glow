@@ -171,6 +171,7 @@ interface EnteringRollDiceForPlayer {
     rerollCompanion: number;
     rerollTokens: number;
     rerollScore: { [rerolls: number]: number }; // number of rerolls -> cost
+    grayMultiDice: boolean;
 }
 
 interface EnteringRollDiceArgs {

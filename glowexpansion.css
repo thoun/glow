@@ -1272,6 +1272,9 @@ html {
 .die-icon[data-color="10"] {
   background-image: url("img/die10.png");
 }
+.die-icon[data-color="80"] {
+  background-image: url("img/die80.png");
+}
 .die-icon[data-face="1"] {
   background-position: 0% 100%;
 }

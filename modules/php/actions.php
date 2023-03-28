@@ -418,7 +418,10 @@ trait ActionTrait {
             throw new BgaUserException("You can't roll this die");
         }
 
-        $this->applyRollDieCost($playerId, 3, $cost);
+        $free = $die->color == 80 && $die->face == 6;
+        if (!$free) {
+            $this->applyRollDieCost($playerId, 3, $cost);
+        }
         $originalDiceStr = $this->getDieFaceLogName($die);
         $die->setFace($face);
         $rolledDiceStr = $this->getDieFaceLogName($die);
@@ -478,6 +481,12 @@ trait ActionTrait {
         $this->checkAction('keepDice');
 
         $playerId = $this->getCurrentPlayerId();
+
+        $dice = $this->getEffectiveDice($playerId);
+        $grayMultiDice = array_values(array_filter($dice, fn($die) => $die->color == 80 && $die->face == 6));
+        if (count($grayMultiDice) > 0) {
+            throw new BgaUserException("You must change multi die face");
+        }
 
         $this->giveExtraTime($playerId);
         $this->gamestate->setPlayerNonMultiactive($playerId, 'keepDice');
