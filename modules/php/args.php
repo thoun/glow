@@ -179,7 +179,7 @@ trait ArgsTrait {
         $sql = "select `card_location_arg` from `companion` where `card_location` = 'meeting'";
         $availableSpots = array_values(array_map(fn($dbLine) => intval($dbLine['card_location_arg']), $this->getCollectionFromDb($sql)));
 
-        $die = $this->getBlackDie(true);
+        $die = $this->getSmallBlackDie();
         $dieSpot = $die->location_arg;
 
         $possibleSpots = array_values(array_filter($availableSpots, fn($spot) => $spot != $dieSpot));

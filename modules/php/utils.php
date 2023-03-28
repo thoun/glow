@@ -248,11 +248,8 @@ trait UtilTrait {
         return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices));
     }
 
-    function getBlackDie(bool $onlySmall) {
-        $sql = "SELECT * FROM dice WHERE `color` = 8";
-        if ($onlySmall) {
-            $sql .= " AND `small` = true";
-        }
+    function getSmallBlackDie() {
+        $sql = "SELECT * FROM dice WHERE `color` = 8 AND `small` = true";
         $dbDices = $this->getCollectionFromDB($sql);
         return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices))[0];
     }
@@ -527,7 +524,7 @@ trait UtilTrait {
             $this->moveDice([$bigDie], 'table');
         }
         if (!$solo) {
-            $blackDie = $this->getBlackDie(true);
+            $blackDie = $this->getSmallBlackDie();
             $this->moveDice([$blackDie], 'table');
         }
     }

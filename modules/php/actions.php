@@ -155,9 +155,9 @@ trait ActionTrait {
                 }
             }
         } else if ($companion->subType == KAAR) {
-            $die = $this->getBlackDie(true);
+            $die = $this->getSmallBlackDie();
 
-            // black die enters the game
+            // small black die enters the game
             if ($die->location == 'table') {
                 
                 $availableSpots = [];
@@ -184,6 +184,20 @@ trait ActionTrait {
                     'companionName' => $companion->name,
                     'die' => $die,
                 ]);
+
+                // remove big black die if Kaar is played
+                $dbDices = $this->getCollectionFromDB("SELECT * FROM dice WHERE `location` = 'player' AND `color` = 8 AND `small` = false");
+                $bigBlackDice = array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices));
+                if (count($bigBlackDice) > 0) {
+                    $bigBlackDie = $bigBlackDice[0];
+                    $this->moveDice([$bigBlackDie], 'table');
+
+                    $this->notifyAllPlayers('removeSketalDie', clienttranslate('${player_name} loses the big black die'), [
+                        'playerId' => $playerId,
+                        'player_name' => $this->getPlayerName($playerId),
+                        'die' => $bigBlackDie,
+                    ]);
+                }
             }
         }
     }
@@ -293,7 +307,7 @@ trait ActionTrait {
             throw new BgaUserException("Not a valid spot");
         }
 
-        $die = $this->getBlackDie(true);
+        $die = $this->getSmallBlackDie();
         $currentSpot = $die->location_arg;
 
         $die->setFace($spot);
