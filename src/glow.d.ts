@@ -297,6 +297,7 @@ interface NotifUsedDiceArgs {
 interface NotifSketalDieArgs {
     playerId: number;
     die: Die;
+    remove: true;
 }
 
 interface NotifMoveBlackDieArgs {

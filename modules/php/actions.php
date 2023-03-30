@@ -184,18 +184,23 @@ trait ActionTrait {
                     'companionName' => $companion->name,
                     'die' => $die,
                 ]);
+            }
 
-                // remove big black die if Kaar is played
+            $adventurers = $this->getAdventurersFromDb($this->adventurers->getCardsInLocation('player', $playerId));
+            $adventurer = count($adventurers) > 0 ? $adventurers[0] : null;
+            // remove big black die if Kaar is played
+            if ($adventurer->color == 8) {
                 $dbDices = $this->getCollectionFromDB("SELECT * FROM dice WHERE `location` = 'player' AND `color` = 8 AND `small` = false");
                 $bigBlackDice = array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices));
                 if (count($bigBlackDice) > 0) {
                     $bigBlackDie = $bigBlackDice[0];
-                    $this->moveDice([$bigBlackDie], 'table');
+                    $this->moveDice([$bigBlackDie], 'richard');
 
                     $this->notifyAllPlayers('removeSketalDie', clienttranslate('${player_name} loses the big black die'), [
                         'playerId' => $playerId,
                         'player_name' => $this->getPlayerName($playerId),
                         'die' => $bigBlackDie,
+                        'remove' => true,
                     ]);
                 }
             }
@@ -503,7 +508,7 @@ trait ActionTrait {
         }
 
         $this->giveExtraTime($playerId);
-        $this->gamestate->setPlayerNonMultiactive($playerId, 'keepDice');
+        $this->gamestate->setPlayerNonMultiactive($playerId, 'next');
     }
     
     public function swap(int $id) {

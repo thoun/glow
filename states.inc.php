@@ -242,7 +242,7 @@ $playerActionsGameStates = [
         "action" => "stChangeDice",
         "possibleactions" => [],
         "transitions" => [
-            "keepDice" => ST_MULTIPLAYER_SWAP,
+            "next" => ST_MULTIPLAYER_SWAP,
             "zombiePass" => ST_MULTIPLAYER_SWAP,
         ],
     ],
@@ -324,8 +324,8 @@ $playerActionsGameStates = [
         "args" => "argSwap",
         "possibleactions" => [],
         "transitions" => [
-            "next" => ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS,
-            "zombiePass" => ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS,
+            "next" => ST_MULTIPLAYER_RESURRECT,
+            "zombiePass" => ST_MULTIPLAYER_RESURRECT,
         ],
     ],
 
@@ -341,7 +341,7 @@ $playerActionsGameStates = [
         "transitions" => [
             "stay" => ST_PRIVATE_SWAP,
             "selectSketalDie" => ST_PRIVATE_SELECT_SKETAL_DIE,
-            "zombiePass" => ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS,
+            "zombiePass" => ST_MULTIPLAYER_RESURRECT,
         ],
     ],
 

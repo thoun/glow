@@ -2838,7 +2838,12 @@ var Glow = /** @class */ (function () {
         playerTable.addDice([notif.args.die]);
     };
     Glow.prototype.notif_removeSketalDie = function (notif) {
-        this.createOrMoveDie(notif.args.die, 'table-dice');
+        if (notif.args.remove) {
+            this.getDieDiv(notif.args.die).remove();
+        }
+        else {
+            this.createOrMoveDie(notif.args.die, 'table-dice');
+        }
     };
     Glow.prototype.notif_points = function (notif) {
         this.setPoints(notif.args.playerId, notif.args.newScore);

@@ -529,22 +529,26 @@ trait UtilTrait {
         }
     }
 
-    function initMeetingTrackSmallDice(int $playerCount) {
-        $this->DbQuery("INSERT INTO meetingtrack (`spot`, `footprints`) VALUES (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)");
-
-        $smallDice = $this->getSmallDice(true, 'deck');
+    function intRollAndPlaceSmallDice(bool $smallBoard) {
+        $smallDice = $this->getSmallDice(true, $smallBoard ? 'decksmall' : 'deck');
 
         // rolls the 9 small dice
         foreach($smallDice as &$idie) {
             $idie->roll();
 
             // If the purple die indicates the footprint symbol, it is rerolled
-            while ($idie->color === 6 && $idie->face === 6) {
+            while (in_array($idie->color, [6, 11]) && $idie->face === 6) {
                 $idie->roll();
             }
         }
 
-        $this->moveSmallDiceToMeetingTrack($smallDice, false);
+        $this->moveSmallDiceToMeetingTrack($smallDice, $smallBoard);
+    }
+
+    function initMeetingTrackSmallDice(int $playerCount) {
+        $this->DbQuery("INSERT INTO meetingtrack (`spot`, `footprints`) VALUES (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)");
+
+        $this->intRollAndPlaceSmallDice(false);
 
         if ($playerCount >= 5) {
             $this->DbQuery("INSERT INTO meetingtrack (`spot`, `footprints`) VALUES (6, 0), (7, 0)");
@@ -552,19 +556,7 @@ trait UtilTrait {
                 $this->DbQuery("INSERT INTO meetingtrack (`spot`, `footprints`) VALUES (8, 0)");
             }
 
-            $smallDice = $this->getSmallDice(true, 'decksmall');
-
-            // rolls the remaining small dice
-            foreach($smallDice as &$idie) {
-                $idie->roll();
-
-                // If the purple die indicates the footprint symbol, it is rerolled
-                while ($idie->color === 6 && $idie->face === 6) {
-                    $idie->roll();
-                }
-            }
-
-            $this->moveSmallDiceToMeetingTrack($smallDice, true);
+            $this->intRollAndPlaceSmallDice(true);
         }
     }
 
@@ -653,6 +645,29 @@ trait UtilTrait {
             
             if ($removedDieId) {
                 $this->removeSketalDie($playerId, $companion, $this->getDieById($removedDieId));
+            }
+        }
+
+        if ($companion->subType == KAAR) {   
+            $playersIds = $this->getPlayersIds();
+            foreach($playersIds as $pId) {
+                $adventurers = $this->getAdventurersFromDb($this->adventurers->getCardsInLocation('player', $pId));
+                $adventurer = count($adventurers) > 0 ? $adventurers[0] : null;
+                // get back the big black die if Kaar is removed
+                if ($adventurer->color == 8) {
+                    $dbDices = $this->getCollectionFromDB("SELECT * FROM dice WHERE `location` = 'richard' AND `color` = 8 AND `small` = false");
+                    $bigBlackDice = array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices));
+                    if (count($bigBlackDice) > 0) {
+                        $bigBlackDie = $bigBlackDice[0];
+                        $this->moveDice([$bigBlackDie], 'player', $pId);
+
+                        $this->notifyAllPlayers('takeSketalDie', clienttranslate('${player_name} takes back the black die'), [
+                            'playerId' => $playerId,
+                            'player_name' => $this->getPlayerName($playerId),
+                            'die' => $bigBlackDie,
+                        ]);
+                    }
+                }
             }
         }
 
