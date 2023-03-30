@@ -22,6 +22,7 @@ ADVENTURERS_POINTS[1] = 1;
 ADVENTURERS_POINTS[3] = 4;
 ADVENTURERS_POINTS[4] = 4;
 ADVENTURERS_POINTS[5] = 3;
+ADVENTURERS_POINTS[9] = 4;
 const COMPANION_POINTS = [];
 COMPANION_POINTS[10] = -1;
 COMPANION_POINTS[11] = 6;
@@ -52,6 +53,22 @@ COMPANION_POINTS[43] = 5;
 COMPANION_POINTS[44] = 2;
 COMPANION_POINTS[45] = 1;
 COMPANION_POINTS[46] = 4;
+COMPANION_POINTS[101] = 2;
+COMPANION_POINTS[102] = -1;
+COMPANION_POINTS[103] = -1;
+COMPANION_POINTS[104] = -1;
+COMPANION_POINTS[106] = 1;
+COMPANION_POINTS[107] = 7;
+COMPANION_POINTS[108] = 4;
+COMPANION_POINTS[201] = -3;
+COMPANION_POINTS[205] = 3;
+COMPANION_POINTS[207] = 2;
+COMPANION_POINTS[208] = 2;
+COMPANION_POINTS[301] = -3;
+COMPANION_POINTS[303] = 6;
+COMPANION_POINTS[306] = 3;
+COMPANION_POINTS[307] = 1;
+COMPANION_POINTS[308] = 3;
 
 function setupAdventurersCards(adventurerStock: Stock) {
     const cardsurl = `${g_gamethemeurl}img/adventurers.png`;
@@ -79,6 +96,18 @@ function setupCompanionCards(companionsStock: Stock) {
             cardsurl, 
             subType + (subType > 23 ? 1 : 0)
         );
+    }
+
+    for (let module=1; module<=3;module++) {
+        const cardsurl = `${g_gamethemeurl}img/companions-expansion1-set${module}.png`;
+        for (let subType=1; subType<=8;subType++) {
+            companionsStock.addItemType(
+                module*100 + subType, 
+                0, 
+                cardsurl, 
+                subType
+            );
+        }
     }
 
     companionsStock.addItemType(1001,  0, cardsurl, 0);

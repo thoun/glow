@@ -24,6 +24,8 @@
  *
  */
 
+require_once 'modules/php/constants.inc.php';
+
 $game_options = [
 
     /* note: game variant ID should start at 100 (ie: 100, 101, 102, ...). The maximum is 199.*/
@@ -57,7 +59,7 @@ $game_options = [
         'default' => 1,
     ],
 
-    110 => [
+    OPTION_EXPANSION => [
         'name' => totranslate('Expansion'),
         'values' => [
             1 => [
@@ -80,6 +82,80 @@ $game_options = [
             ],
             2 => [],
         ],
+    ],
+
+    OPTION_EXPANSION_MODULE1 => [
+        'name' => totranslate('Expansion module 1'),
+        'values' => [
+            1 => [
+                'name' => totranslate('Disabled'),
+            ],
+            2 => [
+                'name' => totranslate('Enabled'),
+                'tmdisplay' => totranslate('Expansion module 1'),
+                'alpha' => true,
+            ],
+        ],
+        'default' => 1,
+        'displaycondition' => [
+            [
+              'type' => 'otheroption',
+              'id' => OPTION_EXPANSION,
+              'value' => [2],
+            ],
+            /*[
+              'type' => 'minplayers',
+              'value' => [2],
+            ],*/
+          ],
+    ],
+
+    OPTION_EXPANSION_MODULE2 => [
+        'name' => totranslate('Expansion module 2'),
+        'values' => [
+            1 => [
+                'name' => totranslate('Disabled'),
+            ],
+            2 => [
+                'name' => totranslate('Enabled'),
+                'tmdisplay' => totranslate('Expansion module 2'),
+                'alpha' => true,
+            ],
+        ],
+        'default' => 1,
+        'displaycondition' => [
+            [
+              'type' => 'otheroption',
+              'id' => OPTION_EXPANSION,
+              'value' => [2],
+            ],
+          ],
+    ],
+
+    OPTION_EXPANSION_MODULE3 => [
+        'name' => totranslate('Expansion module 3'),
+        'values' => [
+            1 => [
+                'name' => totranslate('Disabled'),
+            ],
+            2 => [
+                'name' => totranslate('Enabled'),
+                'tmdisplay' => totranslate('Expansion module 3'),
+                'alpha' => true,
+            ],
+        ],
+        'default' => 1,
+        'displaycondition' => [
+            [
+              'type' => 'otheroption',
+              'id' => OPTION_EXPANSION,
+              'value' => [2],
+            ],
+            /*[
+              'type' => 'minplayers',
+              'value' => [2],
+            ],*/
+          ],
     ],
 ];
 

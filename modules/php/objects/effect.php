@@ -7,6 +7,7 @@
 // 30 : reroll, 33 skull, 34 black die, 35 resurect, 36 spell, 37 skull/spell
 // +10x, -10x : points
 // 20x, 20y : min/max colors
+// 300 : exchange token, +30x, -30x tokens
 
 class Effect {
     public /*int[]*/ $conditions;

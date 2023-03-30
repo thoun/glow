@@ -115,6 +115,71 @@ $this->REMOVED_COMPANION_FOR_SOLO = [
   25, 33, 38, 41, 44, 46, 34,
 ];
 
+$this->COMPANIONS_EXPANSION1_SETS = [
+  1 => [
+    'adds' => [
+      // A
+      101 => new CompanionCard('Drak', 2, new Effect([203, 203], [-30, 21]), false, 1), // TODO TEST -30
+      102 => new CompanionCard('Goerge', -1, new Effect([201, 202], [22, 30]), false, 1),
+      103 => new CompanionCard('Oredkappa', -1, new Effect([204, 204], [104, 30, 30])),
+      104 => new CompanionCard('Sketal', -1, new Effect([-1, -2], [33, 12]), false, 0, true, 6),
+      // B
+      105 => new CompanionCard('Oapak', 0, new Effect([203, 203], [103, 12])),
+      106 => new CompanionCard('Merveilleux', 1, new Effect([-3], [-22, 108]), false, 1), // TODO TEST -22
+      107 => new CompanionCard('Marty', 7, null), // TODO
+      108 => new CompanionCard('Torpadgrue', 4, new Effect([5, 5], [37, 103])),
+    ],
+    'removes' => [
+      // A
+      20, 10, 12, 8,
+      // B
+      41, 44, 29, 28,
+    ],
+  ],
+
+  2 => [
+    'adds' => [
+      // A
+      201 => new CompanionCard('Raykil', -3, new Effect([5, 2], [302, 21])), // TODO TEST 302
+      202 => new CompanionCard('Croa', 0, new Effect([1, 3], [301, 11]), false, 2),
+      203 => new CompanionCard('Aou', 0, new Effect([4], [301])),
+      204 => new CompanionCard('Sir Wapo', 0, new Effect([2, 1], [302])),
+      // B
+      205 => new CompanionCard('Graou', 3, new Effect([3], [-30, 300]), false, 1),
+      206 => new CompanionCard('Maisonnette', 0, new Effect([-2], [-30, 300]), true /*2 TODO*/), // TODO TEST 300
+      207 => new CompanionCard('Wabala', 2, new Effect([5, 4], [-301, 104])), // TODO TEST -301
+      208 => new CompanionCard('MrPulpe', 2, new Effect([1, -4], [302, 21])),
+    ],
+    'removes' => [
+      // A
+      4, 22, 2, 18,
+      // B
+      40, 36, 30, 32,
+    ],
+  ],
+
+  3 => [
+    'adds' => [
+      // A
+      301 => new CompanionCard('Lovd', -3, new Effect([3, 4], [103, 12])),
+      302 => new CompanionCard('Zzibela', 0, new Effect([1, -3], [102, 21]), false, 2),
+      303 => new CompanionCard('Biki', 6, new Effect([-5], [33, -30, -30])),
+      304 => new CompanionCard('Gok\'Xar', 0, new Effect([3, 5], [30, 21])),
+      // B
+      305 => new CompanionCard('Baby Snarexe', 0, new Effect([3, 1], [33, 108])),
+      306 => new CompanionCard('Snako', 3, new Effect([5, 2], [11, 30]), false, 1),
+      307 => new CompanionCard('Lilipili', 1, new Effect([1, 1], [30, 30]), true),
+      308 => new CompanionCard('Pervi', 3, new Effect([2, 2], [22, -30, -30])), // TODO test double -30
+    ],
+    'removes' => [
+      // A
+      11, 7, 19, 23,
+      // B
+      25, 33, 26, 37,
+    ],
+  ],
+];
+
 $this->SPELLS = [
   1 => new SpellCard(new Effect([1, 1], [-105])),
   2 => new SpellCard(new Effect([2, 2], [-105])),

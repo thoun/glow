@@ -59,7 +59,10 @@ class GlowExpansion extends Table {
             
             BOARD_SIDE => 100,
             RANDOM_ADVENTURERS => 101,
-            EXPANSION => 110,
+            OPTION_EXPANSION => OPTION_EXPANSION,
+            OPTION_EXPANSION_MODULE1 => OPTION_EXPANSION_MODULE1,
+            OPTION_EXPANSION_MODULE2 => OPTION_EXPANSION_MODULE2,
+            OPTION_EXPANSION_MODULE3 => OPTION_EXPANSION_MODULE3,
         ]); 
 		
         $this->adventurers = $this->getNew("module.common.deck");
@@ -143,19 +146,21 @@ class GlowExpansion extends Table {
             $this->initStat('player', $adventurer->name, 0);
         }
 
-        $solo = count($players) == 1;
+        $playerCount = count($players);
+        $solo = $playerCount == 1;
         if ($solo) {
             $this->initTom();
         }
         
-        $this->createDice($isExpansion, count($players));
+        $this->createDice($isExpansion, $playerCount);
         $meeplePlayersIds = array_keys($players);
         if ($solo) {
             $meeplePlayersIds[] = 0;
         }
         $this->createMeeples($meeplePlayersIds);
         $this->createAdventurers($isExpansion, $solo);
-        $this->createCompanions($solo);
+        $expansionCompanions = $this->getExpansionCompanions($playerCount);
+        $this->createCompanions($solo, $expansionCompanions[0], $expansionCompanions[1]);
         if ($solo) {
             $this->createSoloTiles();
         } else {
@@ -245,7 +250,7 @@ class GlowExpansion extends Table {
         }
 
         $result['ADVENTURERS'] = $this->ADVENTURERS;
-        $result['COMPANIONS'] = $this->COMPANIONS;
+        $result['COMPANIONS'] = $this->getAllCompanions();
         $result['SPELLS_EFFECTS'] = array_map(fn ($card) => $card->effect, $this->SPELLS);
         $result['SOLO_TILES'] = $this->SOLO_TILES;
 

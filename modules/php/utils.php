@@ -100,7 +100,7 @@ trait UtilTrait {
     }
 
     function isExpansion() {
-        return intval($this->getGameStateValue(EXPANSION)) >= 2;
+        return intval($this->getGameStateValue(OPTION_EXPANSION)) >= 2;
     }
 
     function createDice(bool $isExpansion, int $playerCount) {
@@ -166,11 +166,20 @@ trait UtilTrait {
         return array_map(fn($dbObject) => $this->getAdventurerFromDb($dbObject), array_values($dbObjects));
     }
 
+    function getAllCompanions() {
+        $COMPANIONS = $this->COMPANIONS;
+        foreach ([1, 2, 3] as $moduleNumber) {
+            $COMPANIONS = $COMPANIONS + $this->COMPANIONS_EXPANSION1_SETS[$moduleNumber]['adds'];
+        }
+        return $COMPANIONS;
+    }
+
     function getCompanionFromDb($dbObject) {
         if (!$dbObject || !array_key_exists('id', $dbObject)) {
             throw new BgaSystemException("Companion doesn't exists ".json_encode($dbObject));
         }
-        return new Companion($dbObject, $this->COMPANIONS);
+
+        return new Companion($dbObject, $this->getAllCompanions());
     }
 
     function getCompanionsFromDb(array $dbObjects) {
@@ -438,15 +447,25 @@ trait UtilTrait {
         $this->adventurers->createCards($adventurers, 'deck');
     }
 
-    function createCompanions(bool $solo) {
+    function createCompanions(bool $solo, array $addedCompanions, array $removedCompanions) {
         $companions = [];
         $companionsB = [];
-        foreach($this->COMPANIONS as $subType => $companion) {
-            if ($solo && in_array($subType, $this->REMOVED_COMPANION_FOR_SOLO)) {
+        foreach ($this->COMPANIONS as $subType => $companion) {
+            if (in_array($subType, $removedCompanions) || ($solo && in_array($subType, $this->REMOVED_COMPANION_FOR_SOLO))) {
                 continue;
             }
-            $card = [ 'type' => $subType > 23 ? 2 : 1, 'type_arg' => $subType, 'nbr' => 1];
-            if ($solo && $subType > 23) {
+            $typeB = $subType > 23;
+            $card = [ 'type' => $typeB ? 2 : 1, 'type_arg' => $subType, 'nbr' => 1];
+            if ($solo && $typeB) {
+                $companionsB[] = $card;
+            } else {
+                $companions[] = $card;
+            }
+        }
+        foreach ($addedCompanions as $subType => $companion) {
+            $typeB = $subType % 100 > 4;
+            $card = [ 'type' => $typeB ? 2 : 1, 'type_arg' => $subType, 'nbr' => 1];
+            if ($solo && $typeB) {
                 $companionsB[] = $card;
             } else {
                 $companions[] = $card;
@@ -466,7 +485,7 @@ trait UtilTrait {
                 $this->companions->moveCards(array_map(fn($companion) => $companion->id, $removed), 'malach');
             }
             // set face 1 (A) before face 2 (B)
-            $this->DbQuery("UPDATE companion SET `card_location_arg` = `card_location_arg` + (100 * (2 - `card_type`)) WHERE `card_location` IN ('deck', 'malach') ");
+            $this->DbQuery("UPDATE companion SET `card_location_arg` = `card_location_arg` + (1000 * (2 - `card_type`)) WHERE `card_location` IN ('deck', 'malach') ");
         }
     }
 
@@ -1216,5 +1235,55 @@ trait UtilTrait {
             return true;
         }
         return intval($this->getUniqueValueFromDB("SELECT player_recruit_day FROM player where player_id = $playerWithUriom")) == intval($this->getGameStateValue(DAY));
+    }
+
+    public function getExpansionCompanions(int $playerCount) {
+        $addedCompanions = [];
+        $removedCompanions = [];
+
+        $activatedModules = [];
+        $removedModules = [];
+
+        foreach (($playerCount == 1 ? [2] : [1, 2, 3]) as $moduleNumber) {
+            if (intval($this->getGameStateValue(OPTION_EXPANSION + $moduleNumber)) >= 2) {
+                $activatedModules[] = $moduleNumber;
+            }
+        }
+
+        $minSets = 0;
+        if ($playerCount < 5) {
+            $removedModules = $activatedModules;
+        } else {
+            $minSets = $playerCount - 3;
+            while (count($activatedModules) < $minSets) {
+                $unactivatedModule = array_values(array_filter([1, 2, 3], fn($m) => !in_array($m, $activatedModules)));
+                $moduleNumber = $unactivatedModule[bga_rand(0, count($unactivatedModule) -1)];
+                $activatedModules[] = $moduleNumber;
+                $this->setGameStateValue(OPTION_EXPANSION + $moduleNumber, 2);
+
+                $this->notifyAllPlayers('log', clienttranslate('Expansion cards from expansion module ${number} have been added to the deck'), [
+                    'number' => $moduleNumber,
+                ]);
+            }
+
+            if ($playerCount == 5 && count($activatedModules) == 3) {
+                $moduleNumber = bga_rand(1, 3);
+                $removedModules[] = $moduleNumber;
+                
+                $this->notifyAllPlayers('log', clienttranslate('Replaced cards from expansion module ${number} are removed from the deck'), [
+                    'number' => $moduleNumber,
+                ]);
+            }
+        }
+
+        foreach ($activatedModules as $moduleNumber) {
+            $addedCompanions = $addedCompanions + $this->COMPANIONS_EXPANSION1_SETS[$moduleNumber]['adds'];
+        }
+
+        foreach ($removedModules as $moduleNumber) {
+            $removedCompanions = array_merge($removedCompanions, $this->COMPANIONS_EXPANSION1_SETS[$moduleNumber]['removes']);
+        }
+
+        return [$addedCompanions, $removedCompanions];
     }
 }
