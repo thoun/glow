@@ -73,6 +73,8 @@ class MeetingTrack {
     
             if (spot.companion) {
                 this.companionsStocks[i].addToStockWithId(spot.companion.subType, ''+spot.companion.id);
+                // TODO TEMP for expansion
+                document.getElementById(`meeting-track-companion-${i}_item_${spot.companion.id}`)?.classList.add(`expansion-set-${Math.floor(spot.companion.subType / 100)}`);
             }
 
             // footprints
@@ -136,6 +138,8 @@ class MeetingTrack {
         }
 
         this.companionsStocks[spot].addToStockWithId(companion.subType, ''+companion.id, DECK);
+        // TODO TEMP for expansion
+        document.getElementById(`meeting-track-companion-${spot}_item_${companion.id}`)?.classList.add(`expansion-set-${Math.floor(companion.subType / 100)}`);
     }
     
     public setSoloTile(meetingTrackSpot: MeetingTrackSpot, spot: number): void {

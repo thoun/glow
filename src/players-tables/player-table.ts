@@ -98,6 +98,9 @@ class PlayerTable {
         player.companions.forEach(companion => {
             this.companionsStock.addToStockWithId(companion.subType, ''+companion.id);
             this.addMouseEvents(this.companionsStock, companion);
+        
+            // TODO TEMP for expansion
+            document.getElementById(`player-table-${this.playerId}-companions_item_${companion.id}`)?.classList.add(`expansion-set-${Math.floor(companion.subType / 100)}`);
         });
 
         // spells
@@ -208,6 +211,10 @@ class PlayerTable {
         } else {
             this.companionsStock.addToStockWithId(companion.subType, ''+companion.id);
         }
+        
+        // TODO TEMP for expansion
+        document.getElementById(`player-table-${this.playerId}-companions_item_${companion.id}`)?.classList.add(`expansion-set-${Math.floor(companion.subType / 100)}`);
+
         this.moveCompanionSpellStock();
         this.addMouseEvents(this.companionsStock, companion);
 

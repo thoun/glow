@@ -117,6 +117,12 @@ class GlowExpansion extends Table {
         $this->reloadPlayersBasicInfos();
         
         /************ Start the game initialization *****/
+        // make sure exansion options aren't activated if expansion is not activated
+        if (!$isExpansion) {
+            foreach ([1, 2, 3] as $moduleNumber) {
+                $this->setGameStateValue(OPTION_EXPANSION + $moduleNumber, 1);
+            }
+        }
 
         // Init global values with their initial values
         $this->setGameStateInitialValue('DAY', 0);

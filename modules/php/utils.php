@@ -735,7 +735,7 @@ trait UtilTrait {
     }
 
     function getRerollUsed(object $companion) {
-        return boolval($this->getUniqueValueFromDB("SELECT `reroll_used` FROM companion WHERE `card_id` = $companion->id"));
+        return intval($this->getUniqueValueFromDB("SELECT `reroll_used` FROM companion WHERE `card_id` = $companion->id"));
     }
 
     function getPlayerCompanionRerolls(int $playerId) {
@@ -743,8 +743,11 @@ trait UtilTrait {
 
         $rerolls = 0;
         foreach($companions as $companion) {
-            if ($companion->reroll && !$this->getRerollUsed($companion)) {
-                $rerolls++;
+            if ($companion->reroll > 0) {
+                $used = $this->getRerollUsed($companion);
+                if ($used < $companion->reroll) {
+                    $rerolls += ($companion->reroll - $used);
+                }
             }
         }
 
@@ -767,9 +770,13 @@ trait UtilTrait {
             $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId, null, 'location_arg'));
             $companionsFlagged = 0;
             foreach($companions as $companion) {
-                if ($companionsFlagged < $cost[0] && $companion->reroll && !$this->getRerollUsed($companion)) {
-                    $this->DbQuery("UPDATE companion SET `reroll_used` = true WHERE card_id = $companion->id");
-                    $companionsFlagged++;
+                if ($companionsFlagged < $cost[0] && $companion->reroll > 0) {
+                    $used = $this->getRerollUsed($companion);
+                    if ($used < $companion->reroll) {
+                        $diff = min($cost[0] - $companionsFlagged, $companion->reroll - $used);
+                        $this->DbQuery("UPDATE companion SET `reroll_used` = `reroll_used` + $diff WHERE card_id = $companion->id");
+                        $companionsFlagged += $diff;
+                    }
                 }
             }
         }
@@ -1244,7 +1251,19 @@ trait UtilTrait {
         $activatedModules = [];
         $removedModules = [];
 
-        foreach (($playerCount == 1 ? [2] : [1, 2, 3]) as $moduleNumber) {
+        if ($playerCount === 1) {
+            foreach ([1, 3] as $moduleNumber) {
+                if (intval($this->getGameStateValue(OPTION_EXPANSION + $moduleNumber)) >= 2) {
+                    $this->setGameStateValue(OPTION_EXPANSION + $moduleNumber, 1);
+
+                    $this->notifyAllPlayers('log', clienttranslate('The expansion module ${number} have been disabled (not available in solo mode)'), [
+                        'number' => $moduleNumber,
+                    ]);
+                }
+            }
+        }
+
+        foreach ([1, 2, 3] as $moduleNumber) {
             if (intval($this->getGameStateValue(OPTION_EXPANSION + $moduleNumber)) >= 2) {
                 $activatedModules[] = $moduleNumber;
             }

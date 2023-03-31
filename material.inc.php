@@ -59,52 +59,52 @@ $this->ADVENTURERS = [ // (string $name, int $points, int $dice, $effect)
 
 $this->COMPANIONS = [ // (string $name, int $points, $effect, bool $reroll, int $fireflies, bool $die, int $dieColor)
   // A
-  1 => new CompanionCard('Likyar', 0, new Effect([1, 4], [30, 101]), false, 2),
+  1 => new CompanionCard('Likyar', 0, new Effect([1, 4], [30, 101]), 2),
   2 => new CompanionCard('Thoape', 0, new Effect([2, 5], [11, 102])),
   3 => new CompanionCard('Torke', 0, new Effect([0, 0, 0], [104])),
-  4 => new CompanionCard('Tamnuca', 0, new Effect([5], [101]), false, 1),
-  5 => new CompanionCard('Ladawa', 0, new Effect([4, 4], [104]), false, 1),
-  6 => new CompanionCard('Mindaroo', 0, new Effect([-1, -2], [104]), false, 2),
+  4 => new CompanionCard('Tamnuca', 0, new Effect([5], [101]), 1),
+  5 => new CompanionCard('Ladawa', 0, new Effect([4, 4], [104]), 1),
+  6 => new CompanionCard('Mindaroo', 0, new Effect([-1, -2], [104]), 2),
   7 => new CompanionCard('Mindaroo', 0, new Effect([-3, -4], [106])),
   8 => new CompanionCard('Donillilu', 0, new Effect([-2], [30, 102])),
   9 => new CompanionCard('Oshra', 0, new Effect([-1], [103])),
   10 => new CompanionCard('Xar\'gok', -1, new Effect([4, 4], [33, 36])),
   11 => new CompanionCard('Briki', 6, new Effect([2, 2], [33, 21])),
   12 => new CompanionCard('Briki', 5, new Effect([3, 4], [33, 22])),
-  13 => new CompanionCard('Sketal', 1, new Effect([2, 2, 2], [33, -104]), false, 0, true, 5),
-  14 => new CompanionCard('Sketal', 1, new Effect([1, 1, 1], [33, -104]), false, 0, true, 3),
-  15 => new CompanionCard('Sketal', 0, new Effect([5, 5], [33, 102]), false, 0, true, 1),
-  16 => new CompanionCard('Sketal', 1, new Effect([4, 4, 4], [33, -105]), false, 0, true, 2),
-  17 => new CompanionCard('Sketal', 1, new Effect([3, 3, 3], [33, -104]), false, 0, true, 4),
-  18 => new CompanionCard('Lumipili', 0, new Effect([1, 1], [33, 22]), true),
-  19 => new CompanionCard('Snarexe', 0, new Effect([0, 0, 0, 0], [33, 110]), false, 1),
+  13 => new CompanionCard('Sketal', 1, new Effect([2, 2, 2], [33, -104]), 0, 0, true, 5),
+  14 => new CompanionCard('Sketal', 1, new Effect([1, 1, 1], [33, -104]), 0, 0, true, 3),
+  15 => new CompanionCard('Sketal', 0, new Effect([5, 5], [33, 102]), 0, 0, true, 1),
+  16 => new CompanionCard('Sketal', 1, new Effect([4, 4, 4], [33, -105]), 0, 0, true, 2),
+  17 => new CompanionCard('Sketal', 1, new Effect([3, 3, 3], [33, -104]), 0, 0, true, 4),
+  18 => new CompanionCard('Lumipili', 0, new Effect([1, 1], [33, 22]), 0, 1),
+  19 => new CompanionCard('Snarexe', 0, new Effect([0, 0, 0, 0], [33, 110]), 1),
   20 => new CompanionCard('Kaar', 4, null),
-  21 => new CompanionCard('Hymoros', -2, new Effect([2], [21]), false, 1),
+  21 => new CompanionCard('Hymoros', -2, new Effect([2], [21]), 1),
   22 => new CompanionCard('Dvol', -5, new Effect([3], [21, 101])),
   23 => new CompanionCard('Okans', -2, new Effect([1], [30, 101])),
   // B
-  24 => new CompanionCard('Brikix', 4, new Effect([5, 5, 5], [33]), false, 1),
-  25 => new CompanionCard('Zzibelu', 0, new Effect([3, 5], [105]), false, 1),
-  26 => new CompanionCard('Torke', 0, new Effect([0, 0], [102]), false, 1),
+  24 => new CompanionCard('Brikix', 4, new Effect([5, 5, 5], [33]), 1),
+  25 => new CompanionCard('Zzibelu', 0, new Effect([3, 5], [105]), 1),
+  26 => new CompanionCard('Torke', 0, new Effect([0, 0], [102]), 1),
   27 => new CompanionCard('Torkos', 2, new Effect([0, 0, 0], [106])),
-  28 => new CompanionCard('Wapoki', 2, new Effect([1, 2], [11, 102]), false, 1),
+  28 => new CompanionCard('Wapoki', 2, new Effect([1, 2], [11, 102]), 1),
   29 => new CompanionCard('Tamnuca', 2, new Effect([5], [21])),
   30 => new CompanionCard('Zellyf', 5, new Effect([2, 2], [-102])),
   31 => new CompanionCard('Zellyf', 0, new Effect([2], [103])),
-  32 => new CompanionCard('Biraii', 1, new Effect([4], [11, 101]), false, 1),
-  33 => new CompanionCard('Biraii', 0, new Effect([4], [11, 21]), false, 2),
+  32 => new CompanionCard('Biraii', 1, new Effect([4], [11, 101]), 1),
+  33 => new CompanionCard('Biraii', 0, new Effect([4], [11, 21]), 2),
   34 => new CompanionCard('Dvol', 4, new Effect([3, 3, 3], [103])),
   35 => new CompanionCard('Dvol', 3, new Effect([3], [101])),
   36 => new CompanionCard('Okanios', 3, new Effect([1, 1, 1], [105])),
-  37 => new CompanionCard('Gluach', 0, new Effect([2, -5], [106]), false, 2),
+  37 => new CompanionCard('Gluach', 0, new Effect([2, -5], [106]), 2),
   38 => new CompanionCard('Drel', 3, new Effect([-4], [102])),
-  39 => new CompanionCard('Oshra', 2, new Effect([-5], [103]), false, 1),
+  39 => new CompanionCard('Oshra', 2, new Effect([-5], [103]), 1),
   40 => new CompanionCard('Drel', 2, new Effect([-3], [104])),
   41 => new CompanionCard('Cromaug', -1, new Effect([3], [33, 35])),
   42 => new CompanionCard('Kapaoro', 5, new Effect([0, 0, 0], [33])),
   43 => new CompanionCard('Kapao', 5, new Effect([3, 3], [33])),
-  44 => new CompanionCard('Sketal', 2, new Effect([1, 1], [33, 22]), false, 0, true, 0),
-  45 => new CompanionCard('Lumipili', 1, new Effect([4, 4], [33, 106]), true),
+  44 => new CompanionCard('Sketal', 2, new Effect([1, 1], [33, 22]), 0, 0, true, 0),
+  45 => new CompanionCard('Lumipili', 1, new Effect([4, 4], [33, 106]), 0, 1),
   46 => new CompanionCard('Kapao', 4, new Effect([2, 2], [33, 22])),
 ];
 
@@ -119,13 +119,13 @@ $this->COMPANIONS_EXPANSION1_SETS = [
   1 => [
     'adds' => [
       // A
-      101 => new CompanionCard('Drak', 2, new Effect([203, 203], [-30, 21]), false, 1), // TODO TEST -30
-      102 => new CompanionCard('Goerge', -1, new Effect([201, 202], [22, 30]), false, 1),
+      101 => new CompanionCard('Drak', 2, new Effect([203, 203], [-30, 21]), 1), // TODO TEST -30
+      102 => new CompanionCard('Goerge', -1, new Effect([201, 202], [22, 30]), 1),
       103 => new CompanionCard('Oredkappa', -1, new Effect([204, 204], [104, 30, 30])),
-      104 => new CompanionCard('Sketal', -1, new Effect([-1, -2], [33, 12]), false, 0, true, 6),
+      104 => new CompanionCard('Sketal', -1, new Effect([-1, -2], [33, 12]), 0, 0, true, 6),
       // B
       105 => new CompanionCard('Oapak', 0, new Effect([203, 203], [103, 12])),
-      106 => new CompanionCard('Merveilleux', 1, new Effect([-3], [-22, 108]), false, 1), // TODO TEST -22
+      106 => new CompanionCard('Merveilleux', 1, new Effect([-3], [-22, 108]), 1), // TODO TEST -22
       107 => new CompanionCard('Marty', 7, null), // TODO
       108 => new CompanionCard('Torpadgrue', 4, new Effect([5, 5], [37, 103])),
     ],
@@ -146,7 +146,7 @@ $this->COMPANIONS_EXPANSION1_SETS = [
       204 => new CompanionCard('Sir Wapo', 0, new Effect([2, 1], [302])),
       // B
       205 => new CompanionCard('Graou', 3, new Effect([3], [-30, 300]), false, 1),
-      206 => new CompanionCard('Maisonnette', 0, new Effect([-2], [-30, 300]), true /*2 TODO*/), // TODO TEST 300
+      206 => new CompanionCard('Maisonnette', 0, new Effect([-2], [-30, 300]), 0, 2), // TODO TEST 300
       207 => new CompanionCard('Wabala', 2, new Effect([5, 4], [-301, 104])), // TODO TEST -301
       208 => new CompanionCard('MrPulpe', 2, new Effect([1, -4], [302, 21])),
     ],
@@ -162,13 +162,13 @@ $this->COMPANIONS_EXPANSION1_SETS = [
     'adds' => [
       // A
       301 => new CompanionCard('Lovd', -3, new Effect([3, 4], [103, 12])),
-      302 => new CompanionCard('Zzibela', 0, new Effect([1, -3], [102, 21]), false, 2),
+      302 => new CompanionCard('Zzibela', 0, new Effect([1, -3], [102, 21]), 2),
       303 => new CompanionCard('Biki', 6, new Effect([-5], [33, -30, -30])),
       304 => new CompanionCard('Gok\'Xar', 0, new Effect([3, 5], [30, 21])),
       // B
       305 => new CompanionCard('Baby Snarexe', 0, new Effect([3, 1], [33, 108])),
-      306 => new CompanionCard('Snako', 3, new Effect([5, 2], [11, 30]), false, 1),
-      307 => new CompanionCard('Lilipili', 1, new Effect([1, 1], [30, 30]), true),
+      306 => new CompanionCard('Snako', 3, new Effect([5, 2], [11, 30]), 1),
+      307 => new CompanionCard('Lilipili', 1, new Effect([1, 1], [30, 30]), 0, 1),
       308 => new CompanionCard('Pervi', 3, new Effect([2, 2], [22, -30, -30])), // TODO test double -30
     ],
     'removes' => [

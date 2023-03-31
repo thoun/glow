@@ -1383,7 +1383,7 @@ class Glow implements GlowGame {
         }
         switch (typeIndex) {
             case 0:
-                return `${cost > 1 ? `${cost} ` : ''}Lumipili`;
+                return `${cost > 1 ? `${cost} ` : ''}${_('use companion')}`;
             case 1:
                 return formatTextIcons(`-${cost} [reroll]`);
             case 2:

@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS `companion` (
   `card_type_arg` int(2) NOT NULL,
   `card_location` varchar(16) NOT NULL,
   `card_location_arg` int(11) NOT NULL,
-  `reroll_used` TINYINT UNSIGNED,
+  `reroll_used` TINYINT UNSIGNED DEFAULT 0,
   `die_id` TINYINT UNSIGNED,
   PRIMARY KEY (`card_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;

@@ -105,7 +105,7 @@ function setupCompanionCards(companionsStock: Stock) {
                 module*100 + subType, 
                 0, 
                 cardsurl, 
-                subType
+                subType - 1
             );
         }
     }

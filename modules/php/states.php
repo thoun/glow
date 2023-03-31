@@ -27,7 +27,7 @@ trait StateTrait {
         $day = intval($this->getGameStateValue(DAY)) + 1;
         $this->setGameStateValue(DAY, $day);
 
-        $this->DbQuery("UPDATE companion SET `reroll_used` = false");
+        $this->DbQuery("UPDATE companion SET `reroll_used` = 0");
         $this->DbQuery("UPDATE player SET `applied_effects` = null, visited_spots = null");
 
         $this->notifyAllPlayers('newDay', clienttranslate('Day ${day} begins'), [
