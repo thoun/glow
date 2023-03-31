@@ -19,7 +19,7 @@ trait DebugUtilTrait {
         //$this->DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (37)");
         $this->DbQuery("UPDATE companion SET `card_location` = 'cemetery' where `card_type_arg` in (44, 13, 14, 15, 16, 17)");
         //$this->DbQuery("UPDATE companion SET `card_location` = 'cemetery' where `card_type_arg` in (17)");
-        $this->debugSetCompanionForPlayer(2343492, 206);
+        $this->debugSetCompanionForPlayer(2343492, 308);
         //$this->debugSetPoints(19);
         $this->debugSetFootprints(30);
         $this->debugSetRerolls(30);
@@ -42,7 +42,8 @@ trait DebugUtilTrait {
     }
 
     private function debugSetCompanionForPlayer($playerId, $subType) {
-        $card = $this->getCompanionsFromDb($this->companions->getCardsOfType($subType <= 23 ? 1 : 2, $subType))[0];
+        $type = ($subType > 100 ? ($subType % 100 <= 4) : $subType <= 23) ? 1 : 2;
+        $card = $this->getCompanionsFromDb($this->companions->getCardsOfType($type, $subType))[0];
         $this->companions->moveCard($card->id, 'player'.$playerId, 0);
     }
 

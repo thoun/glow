@@ -181,8 +181,11 @@ function getEffectExplanation(effect) {
     else if (effect > 10 && effect < 20) {
         return dojo.string.substitute(_("Earn ${fireflies} firefly(ies)."), { fireflies: "<strong>" + (effect - 10) + "</strong>" });
     }
-    else if (effect === 30) {
-        return _("Earn 1 reroll token.");
+    else if (effect > 40 && effect < 50) {
+        return dojo.string.substitute(_("Earn ${rerolls} reroll token(s)."), { rerolls: "<strong>" + (effect - 40) + "</strong>" });
+    }
+    else if (effect < -40 && effect > -50) {
+        return dojo.string.substitute(_("Lose ${rerolls} reroll token(s)."), { rerolls: "<strong>" + -(effect + 40) + "</strong>" });
     }
     else if (effect === 33) {
         return _("The companion is immediately placed in the cemetery.");
@@ -2424,11 +2427,13 @@ var Glow = /** @class */ (function () {
         if (['resolveCards', 'multiResolveCards', 'privateResolveCards'].includes(this.gamedatas.gamestate.name)) {
             var args = this.getResolveArgs();
             var remainingEffect = args.remainingEffects.find(function (re) { return re[0] == type && re[1] == id; });
-            if (remainingEffect[2]) {
-                this.setActionBarResolveDiscardDie(type, id, remainingEffect[2]);
-            }
-            else {
-                this.resolveCard(type, id);
+            if (remainingEffect) {
+                if (remainingEffect[2]) {
+                    this.setActionBarResolveDiscardDie(type, id, remainingEffect[2]);
+                }
+                else {
+                    this.resolveCard(type, id);
+                }
             }
         }
         else if (['move', 'multiMove', 'privateMove'].includes(this.gamedatas.gamestate.name)) {

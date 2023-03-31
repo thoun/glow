@@ -1511,10 +1511,12 @@ class Glow implements GlowGame {
         if (['resolveCards', 'multiResolveCards', 'privateResolveCards'].includes(this.gamedatas.gamestate.name)) {
             const args = this.getResolveArgs();
             const remainingEffect = args.remainingEffects.find(re => re[0] == type && re[1] == id);
-            if (remainingEffect[2]) {
-                this.setActionBarResolveDiscardDie(type, id, remainingEffect[2] as any as Die[]);
-            } else {
-                this.resolveCard(type, id);
+            if (remainingEffect) {
+                if (remainingEffect[2]) {
+                    this.setActionBarResolveDiscardDie(type, id, remainingEffect[2] as any as Die[]);
+                } else {
+                    this.resolveCard(type, id);
+                }
             }
         } else if (['move', 'multiMove', 'privateMove'].includes(this.gamedatas.gamestate.name)) {
             this.move(this.selectedRoute.destination, this.selectedRoute.from, type, id);

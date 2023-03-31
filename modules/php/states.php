@@ -155,7 +155,7 @@ trait StateTrait {
     
             foreach($companions as $companion) {
                 if ($companion->subType == 41) { // Cromaug
-                    if ($this->isTriggeredEffectsForCard($dice, $companion->effect)) {
+                    if ($this->isTriggeredEffectsForCard($playerId, $dice, $companion->effect)) {
                         $cromaugCard = $companion;
                         break;
                     }

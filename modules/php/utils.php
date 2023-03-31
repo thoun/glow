@@ -359,6 +359,7 @@ trait UtilTrait {
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'rerolls' => $rerolls,
+            'absrerolls' => $rerolls,
         ]);
     }
 
@@ -370,6 +371,7 @@ trait UtilTrait {
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'rerolls' => -$dec,
+            'absrerolls' => $dec,
         ]);
 
         return $newValue;
@@ -827,12 +829,26 @@ trait UtilTrait {
         return $colors;
     }
 
-    public function isTriggeredEffectsForCard(array $dice, object $effect) {
+    public function isTriggeredEffectsForCard(int $playerId, array $dice, object $effect) {
         // we check if we have a forbidden die, preventing the effect
         foreach($effect->conditions as $condition) {
             if ($condition >= -5 && $condition <= -1 && $this->array_some($dice, fn($die) => $die->value == -$condition)) {
                 return 0;
             }
+        }
+
+        // we check if card needs to remove tokens we don't have
+        $allEffectsOnCard = array_merge($effect->conditions, $effect->effects);
+        $negativeFootprintsEffects = array_filter($allEffectsOnCard, fn($effect) => $effect < -20 && $effect > -30);
+        $negativeFootprints = array_reduce(array_map(fn($effect) => -$effect -20, $negativeFootprintsEffects), fn($a, $b) => $a + $b, 0);
+        if ($negativeFootprints > 0 && $this->getPlayerFootprints($playerId) < $negativeFootprints) {
+            return false;
+        }
+        
+        $negativeRerollEffects = array_filter($allEffectsOnCard, fn($effect) => $effect < -40 && $effect > -50);
+        $negativeRerolls = array_reduce(array_map(fn($effect) => -$effect -40, $negativeRerollEffects), fn($a, $b) => $a + $b, 0);
+        if ($negativeRerolls > 0 && $this->getPlayerRerolls($playerId) < $negativeRerolls) {
+            return false;
         }
 
         if ($this->array_every($effect->conditions, fn($condition) => $condition > 200)) { // number of colors
@@ -898,7 +914,7 @@ trait UtilTrait {
 
         $adventurer = $this->getAdventurersFromDb($this->adventurers->getCardsInLocation('player', $playerId))[0];
         if ($adventurer->effect != null) {
-            $count = $this->isTriggeredEffectsForCard($dice, $adventurer->effect);
+            $count = $this->isTriggeredEffectsForCard($playerId, $dice, $adventurer->effect);
             for ($i=0; $i<$count; $i++) {
                 $effectsCodes[] = [0, $adventurer->id, null];
             }
@@ -907,7 +923,7 @@ trait UtilTrait {
         $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId, null, 'location_arg'));
         foreach($companions as $companion) {
             if ($companion->effect != null) {
-                $count = $this->isTriggeredEffectsForCard($dice, $companion->effect);
+                $count = $this->isTriggeredEffectsForCard($playerId, $dice, $companion->effect);
                 $discardDieSelection = $this->mustSelectDiscardDie($playerId, $companion);
                 for ($i=0; $i<$count; $i++) {
                     $effectsCodes[] = [1, $companion->id, $discardDieSelection];
@@ -917,7 +933,7 @@ trait UtilTrait {
 
         $spells = $this->getSpellsFromDb($this->spells->getCardsInLocation('player', $playerId));
         foreach($spells as $spell) {
-            if ($spell->visible && $this->isTriggeredEffectsForCard($dice, $spell->effect)) {
+            if ($spell->visible && $this->isTriggeredEffectsForCard($playerId, $dice, $spell->effect)) {
                 $effectsCodes[] = [2, $spell->id, null];
             }
         }
@@ -1003,8 +1019,10 @@ trait UtilTrait {
             $this->addPlayerFireflies($playerId, $effect - 10, clienttranslate('${player_name} gains ${fireflies} fireflies with ${effectOrigin} effect'), $args);
         }
 
-        else if ($effect === 30) {
-            $this->addPlayerRerolls($playerId, 1, clienttranslate('${player_name} gains ${rerolls} rerolls with ${effectOrigin} effect'), $args);
+        else if ($effect > 40 && $effect < 50) {
+            $this->addPlayerRerolls($playerId, $effect - 40, clienttranslate('${player_name} ${gainsloses} ${absrerolls} rerolls with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
+        } else if ($effect < -40 && $effect > -50) {
+            $this->removePlayerRerolls($playerId, -($effect + 40), clienttranslate('${player_name} ${gainsloses} ${absrerolls} rerolls with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
         }
 
         else if ($effect === 33) { // skull

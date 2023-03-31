@@ -44,14 +44,14 @@ $this->DICES_EXPANSION1 = [
 
 $this->ADVENTURERS = [ // (string $name, int $points, int $dice, $effect)
   1 => new AdventurerCard('Braccio', 1, 2, new Effect([1, 1], [21, 103])),
-  2 => new AdventurerCard('Taetyss', 0, 2, new Effect([3, 2], [30, 103])),
+  2 => new AdventurerCard('Taetyss', 0, 2, new Effect([3, 2], [41, 103])),
   3 => new AdventurerCard('Eoles', 4, 2, new Effect([3, 5], [11, 102])),
   4 => new AdventurerCard('Pocana', 4, 3, null),
   5 => new AdventurerCard('Moloc\'h', 3, 2, new Effect([5], [21])),
   6 => new AdventurerCard('Noctiluca', 0, 2, new Effect([0, 0, 0], [105])),
   7 => new AdventurerCard('Orium', 0, 2, new Effect([0, 0], [101])),
   // expansion 1
-  8 => new AdventurerCard('Richard', 0, 3, new Effect([201, 202], [30, 103])),
+  8 => new AdventurerCard('Richard', 0, 3, new Effect([201, 202], [41, 103])),
   9 => new AdventurerCard('Malac\'h', 4, 2, new Effect([203, 203], [21, 11])),
   10 => new AdventurerCard('Kaploum', 0, 2, new Effect([204, 204], [107])),
   11 => new AdventurerCard('Uriom', 0, 1, null),
@@ -59,14 +59,14 @@ $this->ADVENTURERS = [ // (string $name, int $points, int $dice, $effect)
 
 $this->COMPANIONS = [ // (string $name, int $points, $effect, bool $reroll, int $fireflies, bool $die, int $dieColor)
   // A
-  1 => new CompanionCard('Likyar', 0, new Effect([1, 4], [30, 101]), 2),
+  1 => new CompanionCard('Likyar', 0, new Effect([1, 4], [41, 101]), 2),
   2 => new CompanionCard('Thoape', 0, new Effect([2, 5], [11, 102])),
   3 => new CompanionCard('Torke', 0, new Effect([0, 0, 0], [104])),
   4 => new CompanionCard('Tamnuca', 0, new Effect([5], [101]), 1),
   5 => new CompanionCard('Ladawa', 0, new Effect([4, 4], [104]), 1),
   6 => new CompanionCard('Mindaroo', 0, new Effect([-1, -2], [104]), 2),
   7 => new CompanionCard('Mindaroo', 0, new Effect([-3, -4], [106])),
-  8 => new CompanionCard('Donillilu', 0, new Effect([-2], [30, 102])),
+  8 => new CompanionCard('Donillilu', 0, new Effect([-2], [41, 102])),
   9 => new CompanionCard('Oshra', 0, new Effect([-1], [103])),
   10 => new CompanionCard('Xar\'gok', -1, new Effect([4, 4], [33, 36])),
   11 => new CompanionCard('Briki', 6, new Effect([2, 2], [33, 21])),
@@ -81,7 +81,7 @@ $this->COMPANIONS = [ // (string $name, int $points, $effect, bool $reroll, int 
   20 => new CompanionCard('Kaar', 4, null),
   21 => new CompanionCard('Hymoros', -2, new Effect([2], [21]), 1),
   22 => new CompanionCard('Dvol', -5, new Effect([3], [21, 101])),
-  23 => new CompanionCard('Okans', -2, new Effect([1], [30, 101])),
+  23 => new CompanionCard('Okans', -2, new Effect([1], [41, 101])),
   // B
   24 => new CompanionCard('Brikix', 4, new Effect([5, 5, 5], [33]), 1),
   25 => new CompanionCard('Zzibelu', 0, new Effect([3, 5], [105]), 1),
@@ -119,13 +119,13 @@ $this->COMPANIONS_EXPANSION1_SETS = [
   1 => [
     'adds' => [
       // A
-      101 => new CompanionCard('Drak', 2, new Effect([203, 203], [-30, 21]), 1), // TODO TEST -30
-      102 => new CompanionCard('Goerge', -1, new Effect([201, 202], [22, 30]), 1),
-      103 => new CompanionCard('Oredkappa', -1, new Effect([204, 204], [104, 30, 30])),
+      101 => new CompanionCard('Drak', 2, new Effect([203, 203], [-41, 21]), 1),
+      102 => new CompanionCard('Goerge', -1, new Effect([201, 202], [22, 41]), 1),
+      103 => new CompanionCard('Oredkappa', -1, new Effect([204, 204], [104, 42])),
       104 => new CompanionCard('Sketal', -1, new Effect([-1, -2], [33, 12]), 0, 0, true, 6),
       // B
       105 => new CompanionCard('Oapak', 0, new Effect([203, 203], [103, 12])),
-      106 => new CompanionCard('Merveilleux', 1, new Effect([-3], [-22, 108]), 1), // TODO TEST -22
+      106 => new CompanionCard('Merveilleux', 1, new Effect([-3], [-22, 108]), 1),
       107 => new CompanionCard('Marty', 7, null), // TODO
       108 => new CompanionCard('Torpadgrue', 4, new Effect([5, 5], [37, 103])),
     ],
@@ -145,8 +145,8 @@ $this->COMPANIONS_EXPANSION1_SETS = [
       203 => new CompanionCard('Aou', 0, new Effect([4], [301])),
       204 => new CompanionCard('Sir Wapo', 0, new Effect([2, 1], [302])),
       // B
-      205 => new CompanionCard('Graou', 3, new Effect([3], [-30, 300]), false, 1),
-      206 => new CompanionCard('Maisonnette', 0, new Effect([-2], [-30, 300]), 0, 2), // TODO TEST 300
+      205 => new CompanionCard('Graou', 3, new Effect([3], [-41, 300]), false, 1),
+      206 => new CompanionCard('Maisonnette', 0, new Effect([-2], [-41, 300]), 0, 2), // TODO TEST 300
       207 => new CompanionCard('Wabala', 2, new Effect([5, 4], [-301, 104])), // TODO TEST -301
       208 => new CompanionCard('MrPulpe', 2, new Effect([1, -4], [302, 21])),
     ],
@@ -163,13 +163,13 @@ $this->COMPANIONS_EXPANSION1_SETS = [
       // A
       301 => new CompanionCard('Lovd', -3, new Effect([3, 4], [103, 12])),
       302 => new CompanionCard('Zzibela', 0, new Effect([1, -3], [102, 21]), 2),
-      303 => new CompanionCard('Biki', 6, new Effect([-5], [33, -30, -30])),
-      304 => new CompanionCard('Gok\'Xar', 0, new Effect([3, 5], [30, 21])),
+      303 => new CompanionCard('Biki', 6, new Effect([-5], [33, -42])),
+      304 => new CompanionCard('Gok\'Xar', 0, new Effect([3, 5], [41, 21])),
       // B
       305 => new CompanionCard('Baby Snarexe', 0, new Effect([3, 1], [33, 108])),
-      306 => new CompanionCard('Snako', 3, new Effect([5, 2], [11, 30]), 1),
-      307 => new CompanionCard('Lilipili', 1, new Effect([1, 1], [30, 30]), 0, 1),
-      308 => new CompanionCard('Pervi', 3, new Effect([2, 2], [22, -30, -30])), // TODO test double -30
+      306 => new CompanionCard('Snako', 3, new Effect([5, 2], [11, 41]), 1),
+      307 => new CompanionCard('Lilipili', 1, new Effect([1, 1], [42]), 0, 1),
+      308 => new CompanionCard('Pervi', 3, new Effect([2, 2], [22, -42])),
     ],
     'removes' => [
       // A
@@ -268,7 +268,7 @@ $this->MAP1 = [
   ]),
   new MapSpot1(19, [3], [
     new MapRoute(20),
-    new MapRoute(26, [30]),
+    new MapRoute(26, [41]),
   ]),
   new MapSpot1(20, [3], [
     new MapRoute(21),
@@ -277,7 +277,7 @@ $this->MAP1 = [
     new MapRoute(22),
   ]),
   new MapSpot1(22, [-1], [
-    new MapRoute(23, [30]),
+    new MapRoute(23, [41]),
   ]),
   new MapSpot1(23, [5], [
     new MapRoute(24),
@@ -328,7 +328,7 @@ $this->MAP1 = [
   new MapSpot1(37, [-5], [
     new MapRoute(38),
   ]),
-  new MapSpot1(38, [30, -21], [
+  new MapSpot1(38, [41, -21], [
     new MapRoute(39),
     new MapRoute(40),
   ], 10, true),
@@ -389,7 +389,7 @@ $this->MAP1 = [
   new MapSpot1(58, [-3], [
     new MapRoute(59),
   ]),
-  new MapSpot1(59, [-21, 30], [
+  new MapSpot1(59, [-21, 41], [
     new MapRoute(60),
   ], 3, true),
   new MapSpot1(60, [3], []),
@@ -417,10 +417,10 @@ $this->MAP2 = [
   new MapSpot2(5, [], [
     new MapRoute(6, [-21], 5),
   ], 4, 2),
-  new MapSpot2(6, [30], [
+  new MapSpot2(6, [41], [
     new MapRoute(7, [], 4),
   ], 2, 1),
-  new MapSpot2(7, [30], [
+  new MapSpot2(7, [41], [
     new MapRoute(8, [], 4),
   ], 2, 2),
   new MapSpot2(8, [], [
@@ -429,7 +429,7 @@ $this->MAP2 = [
   new MapSpot2(9, [], [
     new MapRoute(10, [-21], 1, 2),
   ], 8, 2),
-  new MapSpot2(10, [30], [
+  new MapSpot2(10, [41], [
     new MapRoute(11, [], 5),
   ], 0, 1),
   new MapSpot2(11, [37], [
