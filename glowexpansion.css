@@ -1,5 +1,186 @@
 @charset "UTF-8";
-@import url(../../../css/csslayer.css);
+body > .card {
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+}
+
+.card {
+  flex-shrink: 0;
+}
+
+.card[data-side=back] .card-sides {
+  transform: rotateY(180deg);
+}
+
+.card .card-sides {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transform-style: preserve-3d;
+  transition: transform 0.5s;
+}
+
+.card .card-sides .card-side {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transform-style: preserve-3d;
+  -webkit-backface-visibility: hidden;
+  /* Safari */
+  backface-visibility: hidden;
+  transform-origin: center center;
+  box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.card .card-sides .card-side.front > * {
+  pointer-events: none;
+  user-select: none;
+}
+
+.card .card-sides .card-side.back {
+  transform: rotateY(180deg);
+}
+
+.card .card-sides .card-side.back > * {
+  pointer-events: none;
+  user-select: none;
+}
+
+.card-stock.selectable .card:not(.disabled) {
+  cursor: pointer;
+}
+
+.card-stock .card.selectable:not(.disabled) {
+  cursor: pointer;
+}
+
+.card-stock.line-stock {
+  display: flex;
+  gap: var(--gap);
+  flex-wrap: var(--wrap);
+  flex-direction: var(--direction);
+}
+
+.card-stock.line-stock[data-center=true] {
+  justify-content: center;
+}
+
+.card-stock.slot-stock {
+  display: flex;
+  gap: var(--gap);
+  flex-wrap: var(--wrap);
+  flex-direction: var(--direction);
+}
+
+.card-stock.slot-stock[data-center=true] {
+  justify-content: center;
+}
+
+.card-stock.scrollable-stock {
+  display: flex;
+  gap: var(--button-gap);
+}
+
+.card-stock.scrollable-stock[data-scrollbar-visible=false] {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.card-stock.scrollable-stock[data-scrollbar-visible=false]::-webkit-scrollbar {
+  display: none;
+}
+
+.card-stock.scrollable-stock .scrollable-stock-inner {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: var(--gap);
+}
+
+.card-stock.scrollable-stock .scrollable-stock-inner[data-center=true] {
+  justify-content: center;
+}
+
+.card-stock.hand-stock {
+  display: flex;
+  justify-content: center;
+}
+
+.card-stock.hand-stock .card {
+  transform: translateY(calc(var(--card-shift) * var(--hand-stock-middle-index-abs))) rotate(calc(var(--hand-stock-middle-index) * var(--card-inclination)));
+}
+
+.card-stock.hand-stock .card:not(:first-child) {
+  margin-left: calc(-1 * var(--card-overlap));
+}
+
+.card-stock.manual-position-stock {
+  position: relative;
+}
+
+.card-stock.manual-position-stock .card {
+  position: absolute;
+}
+
+.card-stock.void-stock {
+  position: relative;
+}
+
+.card-stock.void-stock .card {
+  position: absolute;
+}
+
+.card-stock.deck {
+  position: relative;
+  width: var(--width);
+  height: var(--height);
+}
+
+.card-stock.deck > .card {
+  position: absolute;
+  top: calc(var(--thickness) * var(--xShadowShift) * -1);
+  left: calc(var(--thickness) * var(--yShadowShift) * -1);
+}
+
+.card-stock.deck > .card:first-child {
+  box-shadow: calc(var(--thickness) * var(--xShadowShift)) calc(var(--thickness) * var(--yShadowShift)) 0px 0px #111, calc(var(--thickness) * var(--xShadowShift)) calc(var(--thickness) * var(--yShadowShift)) 2px 1px rgba(0, 0, 0, 0.5);
+}
+
+.card-stock.deck[data-empty=true] > .card {
+  visibility: hidden;
+}
+
+.card-stock.all-visible-deck {
+  position: absolute;
+  --tile-count: 1;
+  width: calc(var(--width) + var(--tile-count) * var(--shift));
+  transition: height 0.5s ease-in-out, background-color 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
+  opacity: var(--tile-count);
+}
+
+.card-stock.all-visible-deck > * {
+  position: absolute;
+  margin: 0;
+  transition: left 0.5s ease-in-out, top 0.5s ease-in-out;
+  top: calc(var(--shift) * var(--order));
+  left: calc(var(--shift) * var(--order));
+}
+
+.card-stock.all-visible-deck:hover, .card-stock.all-visible-deck:active, .card-stock.all-visible-deck.opened {
+  height: calc((var(--height) + var(--shift)) * var(--tile-count) - var(--shift));
+  z-index: 1;
+}
+
+.card-stock.all-visible-deck:hover > *, .card-stock.all-visible-deck:active > *, .card-stock.all-visible-deck.opened > * {
+  top: calc((var(--height) + var(--shift)) * var(--order));
+}
+
 .die {
   display: inline-block;
   position: relative;
@@ -416,6 +597,74 @@
   height: 36px;
 }
 
+.module-token {
+  display: inline-block;
+  position: relative;
+  width: 41px;
+  height: 49px;
+  border-radius: 50%;
+}
+.module-token.disabled {
+  cursor: not-allowed;
+  filter: contrast(0.6);
+}
+.module-token .card-sides .card-side {
+  background-size: auto 100%;
+  background-image: url("img/module-tokens.png");
+  border-radius: 50%;
+}
+.module-token .card-sides .card-side > * {
+  pointer-events: none;
+  user-select: none;
+}
+.module-token.selectable:not(.disabled) {
+  cursor: pointer;
+}
+.module-token.selectable:not(.disabled):not(.selected) {
+  animation: selectable-card-animation 1s alternate infinite ease-in-out;
+}
+.module-token.selectable:not(.disabled) .card-side {
+  box-shadow: unset;
+}
+.module-token[data-type="1"][data-type-arg="1"] .front {
+  background-position-x: 0%;
+}
+.module-token[data-type="1"][data-type-arg="2"] .front {
+  background-position-x: 11.1111111111%;
+}
+.module-token[data-type="1"][data-type-arg="3"] .front {
+  background-position-x: 22.2222222222%;
+}
+.module-token[data-type="1"][data-type-arg="4"] .front {
+  background-position-x: 33.3333333333%;
+}
+.module-token[data-type="1"][data-type-arg="5"] .front {
+  background-position-x: 44.4444444444%;
+}
+.module-token[data-type="2"][data-type-arg="41"] .front {
+  background-position-x: 55.5555555556%;
+}
+.module-token[data-type="2"][data-type-arg="21"] .front {
+  background-position-x: 66.6666666667%;
+}
+.module-token[data-type="2"][data-type-arg="12"] .front {
+  background-position-x: 77.7777777778%;
+}
+.module-token[data-type="3"][data-type-arg="37"] .front {
+  background-position-x: 88.8888888889%;
+}
+.module-token[data-type="3"][data-type-arg="0"] .front {
+  background-position-x: 100%;
+}
+
+@keyframes selectable-card-animation {
+  0% {
+    box-shadow: 0 0 3px 2px #FFFFFF;
+  }
+  100% {
+    box-shadow: 0 0 5px 3px #FFFFFF;
+  }
+}
 #board {
   position: relative;
   width: 916px;

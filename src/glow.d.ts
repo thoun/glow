@@ -47,6 +47,12 @@ interface SoloTile extends SoloTileCard {
     location_arg: number;
 }
 
+interface Token {
+    id: number;
+    type: number;
+    typeArg: number;
+}
+
 interface Die {
     id: number;
     location: string;
@@ -93,6 +99,7 @@ interface GlowPlayer extends Player {
     fireflies: number;
     smallBoard: boolean;
     company?: number; // tom company score
+    tokens?: Token[];
 }
 
 /**
@@ -134,9 +141,11 @@ interface GlowGamedatas {
     SOLO_TILES: SoloTileCard[];
 
     expansion: boolean;
+    tokensActivated: boolean;
 }
 
 interface GlowGame extends Game {
+    animationManager: AnimationManager;
     adventurersStock: Stock;
     
     getPlayerId(): number;
@@ -334,4 +343,9 @@ interface NotifUpdateSoloTilesArgs {
 interface NotifScorePointArgs {
     playerId: number;
     points: number;
+}
+
+interface NotifDiceUpdateArgs {
+    playerId: number;
+    tokens: Token[];
 }

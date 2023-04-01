@@ -1,0 +1,75 @@
+
+.module-token {
+    display: inline-block;
+    position: relative;
+    width: 41px;
+    height: 49px;
+    //margin: 5px;
+    border-radius: 50%;
+
+    &.disabled {
+      cursor: not-allowed;
+      filter: contrast(0.6);
+    }
+
+    .card-sides {
+        .card-side {
+            background-size: auto 100%;
+            background-image: url('img/module-tokens.png');
+            border-radius: 50%;
+
+            &>* {
+                pointer-events: none;
+                user-select: none;
+            }
+
+            &.front {
+            }
+        }
+    }    
+
+    &.selectable:not(.disabled) {
+        cursor: pointer;
+        &:not(.selected) {
+            animation: selectable-card-animation 1s alternate infinite ease-in-out;
+        }
+
+        .card-side {
+            box-shadow: unset;
+        }
+    }
+
+    &[data-type="1"] {
+        @for $color from 1 through 5 {
+            &[data-type-arg="#{$color}"] .front {
+                background-position-x: #{($color - 1) * 100% / 9};
+            }
+        }
+    }
+    &[data-type="2"][data-type-arg="41"] .front {
+        background-position-x: #{5 * 100% / 9};
+    }
+    &[data-type="2"][data-type-arg="21"] .front {
+        background-position-x: #{6 * 100% / 9};
+    }
+    &[data-type="2"][data-type-arg="12"] .front {
+        background-position-x: #{7 * 100% / 9};
+    }
+    &[data-type="3"][data-type-arg="37"] .front {
+        background-position-x: #{8 * 100% / 9};
+    }
+    &[data-type="3"][data-type-arg="0"] .front {
+        background-position-x: #{9 * 100% / 9};
+    }
+}
+
+@keyframes selectable-card-animation {
+    0% { 
+      //background: var(--background-lighter);
+      box-shadow: 0 0 3px 2px #FFFFFF;
+    }
+    100% { 
+      //background: var(--background-darker);
+      box-shadow: 0 0 5px 3px #FFFFFF;
+    }
+}

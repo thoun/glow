@@ -76,6 +76,9 @@ class GlowExpansion extends Table {
 		
         $this->soloTiles = $this->getNew("module.common.deck");
         $this->soloTiles->init("solotiles");
+		
+        $this->tokens = $this->getNew("module.common.deck");
+        $this->tokens->init("token");
 	}
 	
     protected function getGameName() {
@@ -172,6 +175,11 @@ class GlowExpansion extends Table {
         } else {
             $this->createSpells();
         }
+        if ($this->tokensActivated()) {
+            $this->initStat('player', 'endTokenPoints', 0);
+            
+            $this->createTokens();
+        }
 
         // TODO TEMP card to test
         $this->debugSetup();
@@ -195,12 +203,13 @@ class GlowExpansion extends Table {
     */
     protected function getAllDatas() {
         $isExpansion = $this->isExpansion();
+        $tokensActivated = $this->tokensActivated();
         
         $result = [];
     
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = "SELECT player_id id, player_score score, player_no playerNo, player_rerolls rerolls, player_footprints footprints, player_fireflies fireflies, player_score_before_end scoreBeforeEnd, player_score_cards scoreCards, player_score_board scoreBoard, player_score_after_end scoreAfterEnd, player_small_board smallBoard FROM player ";
+        $sql = "SELECT player_id id, player_score score, player_no playerNo, player_rerolls rerolls, player_footprints footprints, player_fireflies fireflies, player_score_before_end scoreBeforeEnd, player_score_cards scoreCards, player_score_board scoreBoard, player_score_tokens scoreTokens, player_score_after_end scoreAfterEnd, player_small_board smallBoard FROM player ";
         $result['players'] = $this->getCollectionFromDb($sql);
 
         $solo = count($result['players']) == 1;
@@ -247,6 +256,9 @@ class GlowExpansion extends Table {
             $player['footprints'] = intval($player['footprints']);
             $player['fireflies'] = intval($player['fireflies']);
             $player['smallBoard'] = boolval($player['smallBoard']);
+            if ($tokensActivated) {
+                $player['tokens'] = $this->getPlayerTokens($playerId);
+            }
         }
 
         if ($solo) {
@@ -261,6 +273,7 @@ class GlowExpansion extends Table {
         $result['SOLO_TILES'] = $this->SOLO_TILES;
 
         $result['expansion'] = $isExpansion;
+        $result['tokensActivated'] = $tokensActivated;
   
         return $result;
     }

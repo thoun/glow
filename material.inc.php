@@ -140,15 +140,15 @@ $this->COMPANIONS_EXPANSION1_SETS = [
   2 => [
     'adds' => [
       // A
-      201 => new CompanionCard('Raykil', -3, new Effect([5, 2], [302, 21])), // TODO TEST 302
-      202 => new CompanionCard('Croa', 0, new Effect([1, 3], [301, 11]), false, 2),
-      203 => new CompanionCard('Aou', 0, new Effect([4], [301])),
-      204 => new CompanionCard('Sir Wapo', 0, new Effect([2, 1], [302])),
+      201 => new CompanionCard('Raykil', -3, new Effect([5, 2], [52, 21])), // TODO TEST 52
+      202 => new CompanionCard('Croa', 0, new Effect([1, 3], [51, 11]), false, 2),
+      203 => new CompanionCard('Aou', 0, new Effect([4], [51])),
+      204 => new CompanionCard('Sir Wapo', 0, new Effect([2, 1], [52])),
       // B
-      205 => new CompanionCard('Graou', 3, new Effect([3], [-41, 300]), false, 1),
-      206 => new CompanionCard('Maisonnette', 0, new Effect([-2], [-41, 300]), 0, 2), // TODO TEST 300
-      207 => new CompanionCard('Wabala', 2, new Effect([5, 4], [-301, 104])), // TODO TEST -301
-      208 => new CompanionCard('MrPulpe', 2, new Effect([1, -4], [302, 21])),
+      205 => new CompanionCard('Graou', 3, new Effect([3], [-41, 50]), false, 1),
+      206 => new CompanionCard('Maisonnette', 0, new Effect([-2], [-41, 50]), 0, 2), // TODO TEST 50
+      207 => new CompanionCard('Wabala', 2, new Effect([5, 4], [-51, 104])), // TODO TEST -51
+      208 => new CompanionCard('MrPulpe', 2, new Effect([1, -4], [52, 21])),
     ],
     'removes' => [
       // A
@@ -472,3 +472,5 @@ $this->SMALL_BOARD_COLOR = [
     5 => 6,
   ],
 ];
+
+$this->POINTS_FOR_COLOR_TOKENS = [0, 1, 3, 6, 10, 15, 21];

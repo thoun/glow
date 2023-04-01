@@ -4,6 +4,7 @@ require_once(__DIR__.'/objects/effect.php');
 require_once(__DIR__.'/objects/adventurer.php');
 require_once(__DIR__.'/objects/companion.php');
 require_once(__DIR__.'/objects/spell.php');
+require_once(__DIR__.'/objects/token.php');
 require_once(__DIR__.'/objects/solo-tile.php');
 require_once(__DIR__.'/objects/dice.php');
 require_once(__DIR__.'/objects/meeple.php');
@@ -206,6 +207,17 @@ trait UtilTrait {
 
     function getSoloTilesFromDb(array $dbObjects) {
         return array_map(fn($dbObject) => $this->getSoloTileFromDb($dbObject), array_values($dbObjects));
+    }
+
+    function getTokenFromDb($dbObject) {
+        if (!$dbObject || !array_key_exists('id', $dbObject)) {
+            throw new BgaSystemException("Token doesn't exists ".json_encode($dbObject));
+        }
+        return new Token($dbObject);
+    }
+
+    function getTokensFromDb(array $dbObjects) {
+        return array_map(fn($dbObject) => $this->getTokenFromDb($dbObject), array_values($dbObjects));
     }
     
     function getSmallDice(bool $ignoreBlack, string $location) {
@@ -492,6 +504,8 @@ trait UtilTrait {
     }
 
     function createSpells() {
+        $spells = [];
+
         foreach($this->SPELLS as $type => $spellCard) {
             $spells[] = [ 'type' => $type, 'type_arg' => 0, 'nbr' => $spellCard->number];
         }
@@ -500,11 +514,33 @@ trait UtilTrait {
     }
 
     function createSoloTiles() {
+        $soloTiles = [];
+
         foreach($this->SOLO_TILES as $type => $tile) {
             $soloTiles[] = [ 'type' => $type, 'type_arg' => 0, 'nbr' => 1];
         }
         $this->soloTiles->createCards($soloTiles, 'deck');
         $this->soloTiles->shuffle('deck');
+    }
+
+    function createTokens() {
+        $tokens = [
+            [ 'type' => 2, 'type_arg' => 41, 'nbr' => 3],
+            [ 'type' => 2, 'type_arg' => 21, 'nbr' => 2],
+            [ 'type' => 2, 'type_arg' => 12, 'nbr' => 1],
+            [ 'type' => 3, 'type_arg' => 37, 'nbr' => 1],
+            [ 'type' => 3, 'type_arg' => 0, 'nbr' => 2],
+        ];
+        
+        for($color = 1; $color <= 5; $color++) { // TODO color number ?
+            $tokens[] = [ 'type' => 1, 'type_arg' => $color, 'nbr' => 6];
+        }
+        $this->tokens->createCards($tokens, 'bag');
+        $this->tokens->shuffle('bag');
+    }
+
+    function tokensActivated() {
+        return intval($this->getGameStateValue(OPTION_EXPANSION + 2)) == 2;
     }
 
     function getMeetingTrackFootprints(int $spot) {
@@ -977,7 +1013,7 @@ trait UtilTrait {
     // 2 spell
     // 3 dice
     // 4 route
-    function applyEffect(int $playerId, int $effect, int $cardType, /*object|null*/ $card, /*int*/ $dieId = 0) {
+    function applyEffect(int $playerId, int $effect, int $cardType, /*object|null*/ $card = null, /*int*/ $dieId = 0) {
 
         $args = [];
         switch ($cardType) {
@@ -999,6 +1035,9 @@ trait UtilTrait {
                 break;
             case 4:
                 $effectOrigin = _('route');
+                break;
+            case 5:
+                $effectOrigin = _('token');
                 break;
         }
         $args['effectOrigin'] = $effectOrigin;
@@ -1023,6 +1062,15 @@ trait UtilTrait {
             $this->addPlayerRerolls($playerId, $effect - 40, clienttranslate('${player_name} ${gainsloses} ${absrerolls} rerolls with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
         } else if ($effect < -40 && $effect > -50) {
             $this->removePlayerRerolls($playerId, -($effect + 40), clienttranslate('${player_name} ${gainsloses} ${absrerolls} rerolls with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
+        }
+
+        if ($effect == 50) {
+            $this->addPlayerTokens($playerId, 1, clienttranslate('${player_name} ${gainsloses} ${abstokens} tokens with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
+            // TODO $this->removePlayerTokens($playerId, 1, clienttranslate('${player_name} ${gainsloses} ${abstokens} tokens with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
+        } else if ($effect > 50 && $effect < 60) {
+            $this->addPlayerTokens($playerId, $effect - 50, clienttranslate('${player_name} ${gainsloses} ${abstokens} tokens with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
+        } else if ($effect < -50 && $effect > -60) {
+            // TODO $this->removePlayerTokens($playerId, -($effect + 50), clienttranslate('${player_name} ${gainsloses} ${abstokens} tokens with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
         }
 
         else if ($effect === 33) { // skull
@@ -1323,4 +1371,45 @@ trait UtilTrait {
 
         return [$addedCompanions, $removedCompanions];
     }
+
+    function getPlayerTokens(int $playerId, bool $colorOnly = false) {
+        $tokens = $this->getTokensFromDb($this->tokens->getCardsInLocation('player', $playerId));
+        if ($colorOnly) {
+            $tokens = array_values(array_filter($tokens, fn($token) => $token->type == 1));
+        }
+        return $tokens;
+    }
+
+    function addPlayerTokens(int $playerId, int $inc, $message = '', $params = []) {
+        $tokens = $this->getTokensFromDb($this->tokens->pickCardsForLocation($inc, 'bag', 'player', $playerId));
+
+        $this->notifyAllPlayers('getTokens', $message, $params + [
+            'playerId' => $playerId,
+            'player_name' => $this->getPlayerName($playerId),
+            'tokens' => $tokens,
+            'abstokens' => count($tokens),
+        ]);
+
+        foreach ($tokens as $token) {
+            if ($token->type == 2) {
+                $effect = $token->typeArg;
+                $this->applyEffect($playerId, $effect, 5);
+                $this->tokens->moveCard($token->id, 'front');
+            }
+        }
+    }
+
+    /* TODO function removePlayerTokens(int $playerId, int $dec, $message = '', $params = []) { // TODO
+        $newValue = max(0, $this->getPlayerRerolls($playerId) - $dec);
+        $this->DbQuery("UPDATE player SET `player_rerolls` = $newValue WHERE player_id = $playerId");
+
+        $this->notifyAllPlayers('tokens', $message, $params + [
+            'playerId' => $playerId,
+            'player_name' => $this->getPlayerName($playerId),
+            'tokens' => -$dec,
+            'abstokens' => $dec,
+        ]);
+
+        return $newValue;
+    }*/
 }

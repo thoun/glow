@@ -156,5 +156,10 @@ $stats_type = [
             "name" => totranslate("Points gained with footprints"),
             "type" => "int"
         ],
+        "endTokenPoints" => [
+            "id" => 26,
+            "name" => totranslate("Points gained with tokens"),
+            "type" => "int"
+        ],
     ]
 ];

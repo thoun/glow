@@ -243,6 +243,11 @@ trait StateTrait {
         $this->placeCompanionsOnMeetingTrack();
         $this->addFootprintsOnMeetingTrack();
 
+        if ($this->tokensActivated()) {
+            $this->soloTiles->moveAllCardsInLocation('front', 'bag');
+            $this->tokens->shuffle('bag');
+        }
+
         $solo = $this->isSoloMode();
 
         if (!$solo) {
@@ -412,6 +417,39 @@ trait StateTrait {
 
             if ($playerId != 0) {
                 $this->setStat($points, 'endFootprintsCount', $playerId);
+            }
+        }
+
+        if ($this->tokensActivated()) {
+            foreach($playersIds as $playerId) {
+                $tokens = $this->getPlayerTokens($playerId, true);
+                $differentColors = 0;
+                $points = 0;
+                for($color = 1; $color <= 5; $color++) { // TODO color number ?
+                    $colorTokens = array_values(array_filter($tokens, fn($token) => $token->typeArg == $color));
+                    if (count($colorTokens)) {
+                        $differentColors++;
+
+                        $points += $this->POINTS_FOR_COLOR_TOKENS[count($colorTokens)];
+                    }
+                }
+
+                if ($differentColors >= 5) { // TODO color number ?
+                    $points += 10;
+                }
+
+                $this->DbQuery("UPDATE player SET player_score_tokens = $points WHERE player_id = $playerId");
+    
+                $this->notifyAllPlayers('scoreTokens', '', [
+                    'playerId' => $playerId,
+                    'points' => $points,
+                ]);
+    
+                $this->incPlayerScore($playerId, $points, clienttranslate('${player_name} gains ${points} bursts of light with colored tokens'));
+    
+                if ($playerId != 0) {
+                    $this->setStat($points, 'endTokenPoints', $playerId);
+                }
             }
         }
 

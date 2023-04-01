@@ -41,9 +41,14 @@ class Glow implements GlowGame {
 
     public adventurersStock: Stock;
     public cemetaryCompanionsStock: Stock;
+    public animationManager: AnimationManager;
+    public tokensManager: TokensManager;
     private board: Board;
     private meetingTrack: MeetingTrack;
     private playersTables: PlayerTable[] = [];
+    private playersTokens: LineStock<Token>[] = [];
+    
+    //private zoomManager: ZoomManager;
 
     public zoom: number = 1;
 
@@ -103,6 +108,8 @@ class Glow implements GlowGame {
         log('gamedatas', gamedatas);
 
         dojo.addClass('board', `side${gamedatas.side}`);
+        this.animationManager = new AnimationManager(this);
+        this.tokensManager = new TokensManager(this);
         this.createPlayerPanels(gamedatas);
         const players = Object.values(gamedatas.players);
         if (players.length == 1) {
@@ -523,15 +530,22 @@ class Glow implements GlowGame {
 
         const headers = document.getElementById('scoretr');
         if (!headers.childElementCount) {
-            dojo.place(`
+            let html = `
                 <th></th>
                 <th id="th-before-end-score" class="before-end-score">${_("Score at last day")}</th>
                 <th id="th-cards-score" class="cards-score">${_("Adventurer and companions")}</th>
                 <th id="th-board-score" class="board-score">${_("Journey board")}</th>
                 <th id="th-fireflies-score" class="fireflies-score">${_("Fireflies")}</th>
-                <th id="th-footprints-score" class="footprints-score">${_("Footprint tokens")}</th>
+                <th id="th-footprints-score" class="footprints-score">${_("Footprint tokens")}</th>`;
+            if (this.gamedatas.tokensActivated) {
+                html += `
+                    <th id="th-tokens-score" class="tokens-score">${_("Tokens score")}</th>
+                `;
+            }
+            html += `
                 <th id="th-after-end-score" class="after-end-score">${_("Final score")}</th>
-            `, headers);
+            `;
+            dojo.place(html, headers);
         }
 
         const players = Object.values(this.gamedatas.players);
@@ -546,15 +560,22 @@ class Glow implements GlowGame {
             const firefliesScore = fromReload && Number(player.id) > 0 ? (this.fireflyCounters[player.id].getValue() >= this.companionCounters[player.id].getValue() ? 10 : 0) : undefined;
             const footprintsScore = fromReload ? this.footprintCounters[player.id].getValue() : undefined;
 
-            dojo.place(`<tr id="score${player.id}">
+            let html = `
+                <tr id="score${player.id}">
                 <td class="player-name" style="color: #${player.color}">${Number(player.id) == 0 ? 'Tom' : player.name}</td>
                 <td id="before-end-score${player.id}" class="score-number before-end-score">${playerScore?.scoreBeforeEnd !== undefined ? playerScore.scoreBeforeEnd : ''}</td>
                 <td id="cards-score${player.id}" class="score-number cards-score">${playerScore?.scoreCards !== undefined ? playerScore.scoreCards : ''}</td>
                 <td id="board-score${player.id}" class="score-number board-score">${playerScore?.scoreBoard !== undefined ? playerScore.scoreBoard : ''}</td>
                 <td id="fireflies-score${player.id}" class="score-number fireflies-score">${firefliesScore !== undefined ? firefliesScore : ''}</td>
-                <td id="footprints-score${player.id}" class="score-number footprints-score">${footprintsScore !== undefined ? footprintsScore : ''}</td>
+                <td id="footprints-score${player.id}" class="score-number footprints-score">${footprintsScore !== undefined ? footprintsScore : ''}</td>`;
+            if (this.gamedatas.tokensActivated) {
+                html += `<td id="tokens-score${player.id}" class="score-number tokens-score">${playerScore?.scoreTokens !== undefined ? playerScore.scoreTokens : ''}</td>`;
+            }
+            html += `
                 <td id="after-end-score${player.id}" class="score-number after-end-score total">${playerScore?.scoreAfterEnd !== undefined ? playerScore.scoreAfterEnd : ''}</td>
-            </tr>`, 'score-table-body');
+            </tr>
+            `;
+            dojo.place(html, 'score-table-body');
         });
 
         (this as any).addTooltipHtmlToClass('before-end-score', _("Score before the final count."));
@@ -563,6 +584,9 @@ class Glow implements GlowGame {
             _("Number of bursts of light indicated on the village where encampment is situated.") :
             _("Number of bursts of light indicated on the islands on which players have placed their boats."));
         (this as any).addTooltipHtmlToClass('fireflies-score', _("Total number of fireflies in player possession, represented on companions and tokens. If there is many or more fireflies than companions, player score an additional 10 bursts of light."));
+        if (this.gamedatas.tokensActivated) {
+            (this as any).addTooltipHtmlToClass('tokens-score', _("Pour chaque série de couleur, le joueur gagne 1/3/6/10/15/21PV s’il possède 1/2/3/4/5/6 jetons identiques et un bonus de +10PV s’il en possède 1 de chaque couleur")); // TODO
+        }
         (this as any).addTooltipHtmlToClass('footprints-score', _("1 burst of light per footprint in player possession."));
     }
 
@@ -1003,6 +1027,7 @@ class Glow implements GlowGame {
                 <div id="firefly-counter-wrapper-${player.id}" class="firefly-counter">
                 </div>
             </div>
+            <div id="tokens-${player.id}"></div>
             `, `player_board_${player.id}`);
 
             const rerollCounter = new ebg.counter();
@@ -1014,6 +1039,14 @@ class Glow implements GlowGame {
             footprintCounter.create(`footprint-counter-${playerId}`);
             footprintCounter.setValue(player.footprints);
             this.footprintCounters[playerId] = footprintCounter;
+
+            if (gamedatas.tokensActivated) {
+                this.playersTokens[playerId] = new LineStock<Token>(this.tokensManager, document.getElementById(`tokens-${player.id}`), {
+                    center: false,
+                    gap: '0',
+                });
+                this.playersTokens[playerId].addCards(player.tokens);
+            }
 
             if (playerId != 0) {
                 dojo.place(`
@@ -1963,11 +1996,13 @@ class Glow implements GlowGame {
             ['newDay', 2500],
             ['setTomDice', 1],
             ['setTableDice', 1],
+            ['getTokens', 1],
             ['scoreBeforeEnd', SCORE_MS],
             ['scoreCards', SCORE_MS],
             ['scoreBoard', SCORE_MS],
             ['scoreFireflies', SCORE_MS],
             ['scoreFootprints', SCORE_MS],
+            ['scoreTokens', SCORE_MS],
             ['scoreAfterEnd', SCORE_MS],
         ];
 
@@ -2174,6 +2209,13 @@ class Glow implements GlowGame {
         )
     }
 
+    notif_getTokens(notif: Notif<NotifDiceUpdateArgs>) {
+        this.playersTokens[notif.args.playerId].addCards(notif.args.tokens);
+        notif.args.tokens.filter(token => token.type == 2).forEach(token => 
+            setTimeout(() => this.playersTokens[notif.args.playerId].removeCard(token), 500)
+        );
+    }
+
     notif_lastTurn() {
         if (document.getElementById('last-round')) {
             return;
@@ -2214,9 +2256,14 @@ class Glow implements GlowGame {
         this.setScore(notif.args.playerId, 5, notif.args.points);
     }
 
+    notif_scoreTokens(notif: Notif<NotifScorePointArgs>) {
+        log('notif_scoreTokens', notif.args);
+        this.setScore(notif.args.playerId, 6, notif.args.points);
+    }
+
     notif_scoreAfterEnd(notif: Notif<NotifScorePointArgs>) {
         log('notif_scoreAfterEnd', notif.args);
-        this.setScore(notif.args.playerId, 6, notif.args.points);
+        this.setScore(notif.args.playerId, this.gamedatas.tokensActivated ? 7 : 6, notif.args.points);
     }
 
     private getColor(color: number) {
