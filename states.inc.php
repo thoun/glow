@@ -435,6 +435,40 @@ $playerActionsGameStates = [
         ],
     ],
 
+    ST_PRIVATE_KILL_TOKEN => [
+        "name" => "privateKillToken",
+        "descriptionmyturn" => clienttranslate('${you} must choose a companion or spell to discard'),
+        "type" => "private",
+        "args" => "argKillToken",
+        "possibleactions" => [ 
+            "killToken", 
+            "cancelToken",
+        ],
+        "transitions" => [
+            "roll" => ST_PRIVATE_SELECT_DICE_ACTION,
+            "resolve" => ST_PRIVATE_RESOLVE_CARDS,
+            "move" => ST_PRIVATE_MOVE,
+            "zombiePass" => ST_END_ROUND,
+        ],
+    ],
+
+    ST_PRIVATE_DISABLE_TOKEN => [
+        "name" => "privateDisableToken",
+        "descriptionmyturn" => clienttranslate('${you} must choose a symbol to ignore'),
+        "type" => "private",
+        "args" => "argDisableToken",
+        "possibleactions" => [ 
+            "disableToken", 
+            "cancelToken",
+        ],
+        "transitions" => [
+            "roll" => ST_PRIVATE_SELECT_DICE_ACTION,
+            "resolve" => ST_PRIVATE_RESOLVE_CARDS,
+            "move" => ST_PRIVATE_MOVE,
+            "zombiePass" => ST_END_ROUND,
+        ],
+    ],
+
     ST_MULTIPLAYER_PRIVATE_MOVE => [
         "name" => "multiMove",
         "description" => clienttranslate('Players can move their company'),

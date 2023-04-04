@@ -3020,6 +3020,19 @@ var Glow = /** @class */ (function () {
                     this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
                     this.onEnteringStatePrivateMove(args);
                     break;
+                case 'privateKillToken':
+                    this.addActionButton("cancel-button", _("Cancel"), function () { return _this.cancelToken(); }, null, null, 'gray');
+                    break;
+                case 'privateDisableToken':
+                    var _loop_7 = function (i) {
+                        this_4.addActionButton("disableSymbol" + i + "-button", formatTextIcons("[symbol" + i + "]"), function () { return _this.disableToken(i); }, null, null, 'gray');
+                    };
+                    var this_4 = this;
+                    for (var i = 1; i <= 5; i++) {
+                        _loop_7(i);
+                    }
+                    this.addActionButton("cancel-button", _("Cancel"), function () { return _this.cancelToken(); }, null, null, 'gray');
+                    break;
             }
         }
         else {
@@ -3035,6 +3048,16 @@ var Glow = /** @class */ (function () {
                 break;
             case 'resurrect':
                 this.onEnteringResurrect(args);
+                break;
+            case 'privateResolveCards':
+            case 'privateMove':
+                var tokenArgs_1 = args;
+                if (tokenArgs_1.killTokenId) {
+                    this.addActionButton("useKillToken-button", _("Use ${token}").replace('${token}', "<div class=\"module-token\" data-type-arg=\"37\"></div>"), function () { return _this.activateToken(tokenArgs_1.killTokenId); }, null, null, 'gray');
+                }
+                if (tokenArgs_1.disableTokenId) {
+                    this.addActionButton("useDisableToken-button", _("Use ${token}").replace('${token}', "<div class=\"module-token\" data-type-arg=\"0\"></div>"), function () { return _this.activateToken(tokenArgs_1.disableTokenId); }, null, null, 'gray');
+                }
                 break;
         }
     };
@@ -3227,7 +3250,16 @@ var Glow = /** @class */ (function () {
                     center: false,
                     gap: '0',
                 });
-                _this.playersTokens[playerId].onCardClick = function (card) { return _this.removeToken(card.id); };
+                _this.playersTokens[playerId].onCardClick = function (card) {
+                    var _a;
+                    if (((_a = _this.gamedatas.gamestate.private_state) === null || _a === void 0 ? void 0 : _a.name) == 'removeToken') {
+                        ;
+                        _this.removeToken(card.id);
+                    }
+                    else if (card.type == 3) {
+                        _this.activateToken(card.id);
+                    }
+                };
                 _this.playersTokens[playerId].addCards(player.tokens);
             }
             if (playerId != 0) {
@@ -3403,7 +3435,7 @@ var Glow = /** @class */ (function () {
         ];
         [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]].forEach(function (orderArray) {
             var remainingCost = costNumber;
-            var _loop_7 = function (i) {
+            var _loop_8 = function (i) {
                 var possibleCost = [0, 0, 0];
                 orderArray.forEach(function (order, orderIndex) {
                     if (remainingCost > 0 && canUse[order] > 0) {
@@ -3420,7 +3452,7 @@ var Glow = /** @class */ (function () {
                 }
             };
             for (var i = 1; i <= costNumber; i++) {
-                _loop_7(i);
+                _loop_8(i);
             }
         });
         return possibleCosts;
@@ -3567,9 +3599,9 @@ var Glow = /** @class */ (function () {
                 var die = this.selectedDice[0];
                 var faces = die.color <= 5 || die.color == 80 ? 5 : 6;
                 var facesButtons = document.getElementById('change-die-faces-buttons');
-                var _loop_8 = function (i) {
+                var _loop_9 = function (i) {
                     var html = "<div class=\"die-item color" + die.color + " side" + i + "\"></div>";
-                    this_4.addActionButton("changeDie" + i + "-button", html, function () {
+                    this_5.addActionButton("changeDie" + i + "-button", html, function () {
                         if (_this.selectedDieFace !== null) {
                             dojo.removeClass("changeDie" + _this.selectedDieFace + "-button", 'bgabutton_blue');
                             dojo.addClass("changeDie" + _this.selectedDieFace + "-button", 'bgabutton_gray');
@@ -3584,9 +3616,9 @@ var Glow = /** @class */ (function () {
                     }, null, null, 'gray');
                     facesButtons.appendChild(document.getElementById("changeDie" + i + "-button"));
                 };
-                var this_4 = this;
+                var this_5 = this;
                 for (var i = 1; i <= faces; i++) {
-                    _loop_8(i);
+                    _loop_9(i);
                 }
             }
             else {
@@ -3900,6 +3932,37 @@ var Glow = /** @class */ (function () {
         this.takeAction('removeToken', {
             id: id,
         });
+    };
+    Glow.prototype.activateToken = function (id) {
+        /*if(!(this as any).checkAction('removeToken')) {
+            return;
+        }*/
+        this.takeAction('activateToken', {
+            id: id,
+        });
+    };
+    Glow.prototype.killToken = function (type, id) {
+        if (!this.checkAction('killToken')) {
+            return;
+        }
+        this.takeAction('killToken', {
+            type: type,
+            id: id,
+        });
+    };
+    Glow.prototype.disableToken = function (symbol) {
+        if (!this.checkAction('disableToken')) {
+            return;
+        }
+        this.takeAction('disableToken', {
+            symbol: symbol,
+        });
+    };
+    Glow.prototype.cancelToken = function () {
+        if (!this.checkAction('cancelToken')) {
+            return;
+        }
+        this.takeAction('cancelToken');
     };
     Glow.prototype.move = function (destination, from, type, id) {
         if (!this.checkAction('move')) {

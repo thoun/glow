@@ -73,3 +73,25 @@
       box-shadow: 0 0 5px 3px #FFFFFF;
     }
 }
+
+
+.action-button {
+    .module-token {
+        display: inline-block;
+        position: relative;
+        width: 41px;
+        height: 49px;
+        //margin: 5px;
+        border-radius: 50%;
+        vertical-align: middle;        
+        background-size: auto 100%;
+        background-image: url('img/module-tokens.png');
+    
+        &[data-type-arg="37"] {
+            background-position-x: #{9 * 100% / 10};
+        }
+        &[data-type-arg="0"] {
+            background-position-x: #{10 * 100% / 10};
+        }
+    }
+  }

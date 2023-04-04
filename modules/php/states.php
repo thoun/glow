@@ -239,6 +239,7 @@ trait StateTrait {
     function stEndRound() {
         // reset dice use        
         $this->DbQuery("UPDATE dice SET `used` = false");
+        $this->DbQuery("UPDATE player SET `player_disabled_symbols` = '[]'");
 
         $this->placeCompanionsOnMeetingTrack();
         $this->addFootprintsOnMeetingTrack();

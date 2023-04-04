@@ -44,6 +44,10 @@ define('ST_PRIVATE_REMOVE_TOKEN', 44);
 define('ST_MULTIPLAYER_PRIVATE_MOVE', 51);
 define('ST_PRIVATE_MOVE', 52);
 
+// tokens
+define('ST_PRIVATE_KILL_TOKEN', 71);
+define('ST_PRIVATE_DISABLE_TOKEN', 72);
+
 //Evening
 define('ST_END_ROUND', 80);
 define('ST_END_SCORE', 90);

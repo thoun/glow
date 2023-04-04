@@ -103,6 +103,7 @@ ALTER TABLE `player` ADD `player_score_tokens` int(10) NOT NULL DEFAULT '0';
 ALTER TABLE `player` ADD `player_score_after_end` int(10) NOT NULL DEFAULT '0';
 ALTER TABLE `player` ADD `player_small_board` TINYINT UNSIGNED NOT NULL DEFAULT '0';
 ALTER TABLE `player` ADD `player_selected_companion` int(10) NULL;
+ALTER TABLE `player` ADD `player_disabled_symbols` json;
 
 CREATE TABLE IF NOT EXISTS `global_variables` (
   `name` varchar(50) NOT NULL,

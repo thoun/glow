@@ -930,10 +930,15 @@ trait UtilTrait {
         $dice = $this->getDiceByLocation('player', $playerId, $used);
         $blackDie = $this->array_find($dice, fn($die) => $die->color == 8);
         if ($blackDie != null) { // got black Die
-            return array_values(array_filter($dice, fn($die) => $die->value != $blackDie->value));
-        } else {
-            return $dice;
+            $dice = array_values(array_filter($dice, fn($die) => $die->value != $blackDie->value));
         }
+
+        $disabledSymbols = $this->getDisabledSymbol($playerId);
+        if (count($disabledSymbols) > 0) {
+            $dice = array_values(array_filter($dice, fn($die) => !in_array($die->value, $disabledSymbols)));
+        }
+
+        return $dice;
     }
 
     private function mustSelectDiscardDie(int $playerId, object $companion) {
@@ -1449,5 +1454,17 @@ trait UtilTrait {
 
     function setSelectedCompanion(int $playerId, /*int|null*/ $companionId) {
         $this->DbQuery("UPDATE player SET player_selected_companion = ".($companionId !== null ? $companionId : 'NULL')." WHERE player_id = $playerId");
+    }
+
+    function getDisabledSymbol(int $playerId) {
+        return json_decode($this->getUniqueValueFromDB("SELECT player_disabled_symbols FROM player where `player_id` = $playerId") ?? '[]');
+    }
+
+    function addDisabledSymbol(int $playerId, int $symbol) {
+        $symbols = $this->getDisabledSymbol($playerId);
+        if (!in_array($symbol, $symbols)) {
+            $symbols[] = $symbol;
+            $this->DbQuery("UPDATE player SET player_disabled_symbols = '".json_encode($symbols)."' WHERE player_id = $playerId");
+        }
     }
 }

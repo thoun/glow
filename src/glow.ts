@@ -703,6 +703,7 @@ class Glow implements GlowGame {
     //                        action status bar (ie: the HTML links in the status bar).
     //
     public onUpdateActionButtons(stateName: string, args: any) {
+
         if ((this as any).isCurrentPlayerActive()) {
             switch (stateName) {
                 case 'chooseTomDice':
@@ -766,7 +767,7 @@ class Glow implements GlowGame {
                 case 'resolveCards':
                     this.setActionBarResolve(false);
                     break;
-                case 'privateResolveCards':                    
+                case 'privateResolveCards':
                     // make cards unselectable
                     this.onLeavingResolveCards();
                     this.onEnteringStatePrivateResolveCards(args);
@@ -782,7 +783,16 @@ class Glow implements GlowGame {
                     this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
                     this.onEnteringStatePrivateMove(args);
                     break;
-                
+    
+                case 'privateKillToken':
+                    (this as any).addActionButton(`cancel-button`, _("Cancel"), () => this.cancelToken(), null, null, 'gray');
+                    break;   
+                case 'privateDisableToken':
+                    for (let i=1; i<=5; i++) {
+                        (this as any).addActionButton(`disableSymbol${i}-button`, formatTextIcons(`[symbol${i}]`), () => this.disableToken(i), null, null, 'gray');
+                    }                 
+                    (this as any).addActionButton(`cancel-button`, _("Cancel"), () => this.cancelToken(), null, null, 'gray');
+                    break;                
             }
         } else {
             switch (stateName) {
@@ -799,6 +809,16 @@ class Glow implements GlowGame {
                 break;
             case 'resurrect':
                 this.onEnteringResurrect(args as EnteringResurrectArgs);
+                break;
+            case 'privateResolveCards':
+            case 'privateMove':
+                const tokenArgs = args as EnteringMoveForPlayer;
+                if (tokenArgs.killTokenId) {
+                    (this as any).addActionButton(`useKillToken-button`, _("Use ${token}").replace('${token}', `<div class="module-token" data-type-arg="37"></div>`), () => this.activateToken(tokenArgs.killTokenId), null, null, 'gray');
+                }
+                if (tokenArgs.disableTokenId) {
+                    (this as any).addActionButton(`useDisableToken-button`, _("Use ${token}").replace('${token}', `<div class="module-token" data-type-arg="0"></div>`), () => this.activateToken(tokenArgs.disableTokenId), null, null, 'gray');
+                }
                 break;
         }
     }  
@@ -1059,7 +1079,13 @@ class Glow implements GlowGame {
                     center: false,
                     gap: '0',
                 });
-                this.playersTokens[playerId].onCardClick = card => this.removeToken(card.id);
+                this.playersTokens[playerId].onCardClick = card => {
+                    if (this.gamedatas.gamestate.private_state?.name == 'removeToken') {;
+                    this.removeToken(card.id);
+                    } else if (card.type == 3) {
+                        this.activateToken(card.id);
+                    }
+                }
                 this.playersTokens[playerId].addCards(player.tokens);
             }
 
@@ -1836,6 +1862,46 @@ class Glow implements GlowGame {
         this.takeAction('removeToken', {
             id,
         });
+    }
+
+    public activateToken(id: number) {
+        /*if(!(this as any).checkAction('removeToken')) {
+            return;
+        }*/
+
+        this.takeAction('activateToken', {
+            id,
+        });
+    }
+    
+
+    public killToken(type: number, id: number) {
+        if(!(this as any).checkAction('killToken')) {
+            return;
+        }
+
+        this.takeAction('killToken', {
+            type,
+            id,
+        });
+    }
+
+    public disableToken(symbol: number) {
+        if(!(this as any).checkAction('disableToken')) {
+            return;
+        }
+
+        this.takeAction('disableToken', {
+            symbol,
+        });
+    }
+
+    public cancelToken() {
+        if(!(this as any).checkAction('cancelToken')) {
+            return;
+        }
+
+        this.takeAction('cancelToken');
     }
 
     public move(destination: number, from?: number, type?: number, id?: number) {

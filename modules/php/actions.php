@@ -649,6 +649,8 @@ trait ActionTrait {
         if (count($this->getRemainingEffects($playerId)) == 0) {
             $this->gamestate->setPlayerNonMultiactive($playerId, 'move');
             $this->giveExtraTime($playerId);
+        } else {
+            $this->gamestate->nextPrivateState($playerId, 'resolve');
         }
     }
 
@@ -667,6 +669,69 @@ trait ActionTrait {
         $this->applyResolveCard($playerId, 1, $companionId, 0, $tokenId);
         
         $this->checkResolveCardEnd($playerId);
+    }
+
+    public function activateToken(int $tokenId) {
+        $playerId = intval($this->getCurrentPlayerId());
+        $token = $this->getTokenFromDb($this->tokens->getCard($tokenId));
+
+        if ($token->type == 3 && $token->typeArg == 37) {
+            $this->gamestate->setPrivateState($playerId, ST_PRIVATE_KILL_TOKEN);
+            // TODO check if need to activate player in case of inactive player
+        }
+
+        if ($token->type == 3 && $token->typeArg == 0) {
+            $this->gamestate->setPrivateState($playerId, ST_PRIVATE_DISABLE_TOKEN);
+            // TODO check if need to activate player in case of inactive player
+        }
+    }
+
+    public function killToken(int $type, int $id) {
+        $this->checkAction('killToken');
+
+        $playerId = intval($this->getCurrentPlayerId());
+
+        // TODO
+        
+        $this->checkActivateTokenEnd();
+    }
+
+    public function disableToken(int $symbol) {
+        $this->checkAction('disableToken');
+
+        $playerId = intval($this->getCurrentPlayerId());
+
+        $this->addDisabledSymbol($playerId, $symbol);
+        $args = new stdClass();
+        $this->addActivableTokens($playerId, $args);
+        $this->removePlayerToken($playerId, $args->disableTokenId);
+
+        $this->notifyAllPlayers('symbolDisabled', clienttranslate('${player_name} disable symbol ${disabledSymbol} on its dice until the end of the round'), [
+            'playerId' => $playerId,
+            'player_name' => $this->getPlayerName($playerId),
+            'symbol' => $symbol,
+            'disabledSymbol' => "[symbol$symbol]", // for log
+        ]);
+        
+        $this->checkActivateTokenEnd();
+    }
+
+    public function cancelToken() {
+        $this->checkAction('cancelToken');
+        $this->checkActivateTokenEnd();
+    }
+
+    public function checkActivateTokenEnd() {
+        $playerId = intval($this->getCurrentPlayerId());
+
+        $currentState = intval($this->gamestate->state_id());
+        if ($currentState == ST_MULTIPLAYER_CHANGE_DICE) {
+            $this->gamestate->nextPrivateState($playerId, 'roll');
+        } else if ($currentState == ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS) {
+            $this->checkResolveCardEnd($playerId);
+        } else if ($currentState == ST_MULTIPLAYER_PRIVATE_MOVE) {
+            $this->checkMoveEnd($playerId);
+        }
     }
 
     public function resolveAll() {
@@ -734,6 +799,17 @@ trait ActionTrait {
 
         $this->incStat(1, 'moves');
         $this->incStat(1, 'moves', $playerId);
+    }
+
+    function checkMoveEnd(int $playerId) {     
+        $args = $this->argMoveForPlayer($playerId);   
+
+        if (count($args->possibleRoutes) == 0 && !$args->canSettle) {
+            $this->gamestate->setPlayerNonMultiactive($playerId, 'endRound');
+            $this->giveExtraTime($playerId);
+        } else {
+            $this->gamestate->nextPrivateState($playerId, 'move');
+        }
     }
 
     public function move(int $destination, $from = null, $type = null, $id = null) {

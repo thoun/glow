@@ -214,6 +214,8 @@ interface EnteringResurrectArgs {
 
 interface ResolveCardsForPlayer {
     remainingEffects: number[][];
+    killTokenId?: number;
+    disableTokenId?: number;
 }
 
 interface EnteringResolveCardsArgs {
@@ -223,6 +225,8 @@ interface EnteringResolveCardsArgs {
 interface EnteringMoveForPlayer {
     possibleRoutes: Route[];
     canSettle?: boolean;
+    killTokenId?: number;
+    disableTokenId?: number;
 }
 
 interface EnteringMoveArgs {

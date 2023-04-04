@@ -239,6 +239,45 @@
         $this->ajaxResponse();
     }
 
+    public function activateToken() {
+        $this->setAjaxMode();
+
+        $id = $this->getArg('id', AT_posint, true);
+
+        $this->game->activateToken($id);
+
+        $this->ajaxResponse();
+    }
+
+    public function killToken() {
+        $this->setAjaxMode();
+
+        $type = $this->getArg('type', AT_posint, false);
+        $id = $this->getArg('id', AT_posint, true);
+
+        $this->game->killToken($type, $id);
+
+        $this->ajaxResponse();
+    }
+
+    public function disableToken() {
+        $this->setAjaxMode();
+
+        $symbol = $this->getArg('symbol', AT_posint, true);
+
+        $this->game->disableToken($symbol);
+
+        $this->ajaxResponse();
+    }
+
+    public function cancelToken() {
+        $this->setAjaxMode();
+
+        $this->game->cancelToken();
+
+        $this->ajaxResponse();
+    }
+
     public function resolveAll() {
         $this->setAjaxMode();
 

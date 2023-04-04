@@ -135,9 +135,44 @@ trait ArgsTrait {
         ];
     }
 
+    function addActivableTokens(int $playerId, Object &$args) {
+        if (!$this->tokensActivated()) {
+            return;
+        }
+
+        $tokens = $this->getPlayerTokens($playerId);
+        $args->killTokenId = 0;
+        $args->disableTokenId = 0;        
+
+        foreach ($tokens as $token) {
+            if ($token->type == 3) {
+                $effect = $token->typeArg;
+                if ($effect == 37) {
+                    $args->killTokenId = $token->id;
+                } else if ($effect == 0) {
+                    $args->disableTokenId = $token->id;
+                }
+            }
+        }
+    }
+
+    function argKillToken(int $playerId) {
+        return [
+            'companions' => $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId), null, 'location_arg'),
+            'spells' => $this->getSpellsFromDb($this->spells->getCardsInLocation('player', $playerId)),
+        ];
+    }
+
+    function argDisableToken(int $playerId) {
+        return [
+            'symbols' => [1,2,3,4,5],
+        ];
+    }
+
     function argResolveCardsForPlayer(int $playerId) {
         $resolveCardsForPlayer = new stdClass();
         $resolveCardsForPlayer->remainingEffects = $this->getRemainingEffects($playerId);
+        $this->addActivableTokens($playerId, $resolveCardsForPlayer);
         return $resolveCardsForPlayer;
     }
 
@@ -177,6 +212,7 @@ trait ArgsTrait {
         $args = new stdClass();
         $args->possibleRoutes = $this->getPossibleRoutes($playerId);
         $args->canSettle = $side == 1 ? $this->canSettle($playerId) : null;
+        $this->addActivableTokens($playerId, $args);
 
         return $args;
     }
