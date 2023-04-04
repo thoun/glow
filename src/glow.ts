@@ -115,7 +115,7 @@ class Glow implements GlowGame {
         if (players.length == 1) {
             players.push(gamedatas.tom);
         }
-        this.board = new Board(this, players, gamedatas.tableDice);
+        this.board = new Board(this, players, gamedatas.tableDice, gamedatas.martyPosition);
         this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack, gamedatas.topDeckType, gamedatas.topDeckBType, gamedatas.topCemeteryType, gamedatas.discardedSoloTiles, playerCount);
         this.createPlayerTables(gamedatas);
         if (gamedatas.day > 0) {
@@ -1997,6 +1997,7 @@ class Glow implements GlowGame {
             ['setTomDice', 1],
             ['setTableDice', 1],
             ['getTokens', 1],
+            ['placeMartyToken', 1],
             ['scoreBeforeEnd', SCORE_MS],
             ['scoreCards', SCORE_MS],
             ['scoreBoard', SCORE_MS],
@@ -2214,6 +2215,10 @@ class Glow implements GlowGame {
         notif.args.tokens.filter(token => token.type == 2).forEach(token => 
             setTimeout(() => this.playersTokens[notif.args.playerId].removeCard(token), 500)
         );
+    }
+
+    notif_placeMartyToken(notif: Notif<NotifPlaceMartyTokenArgs>) {
+        this.board.addMartyPosition(notif.args.position);
     }
 
     notif_lastTurn() {

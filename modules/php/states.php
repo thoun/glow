@@ -327,7 +327,11 @@ trait StateTrait {
                 }
                 $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId, null, 'location_arg'));
                 foreach($companions as $companion) {
-                    $points += $companion->points;
+                    if ($companion->subType == MARTY) {
+                        $points += $this->getMartyPosition();
+                    } else {
+                        $points += $companion->points;
+                    }
                 }
 
                 $this->DbQuery("UPDATE player SET player_score_cards = $points WHERE player_id = $playerId");

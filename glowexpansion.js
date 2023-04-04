@@ -1321,7 +1321,7 @@ COMPANION_POINTS[102] = -1;
 COMPANION_POINTS[103] = -1;
 COMPANION_POINTS[104] = -1;
 COMPANION_POINTS[106] = 1;
-COMPANION_POINTS[107] = 7;
+COMPANION_POINTS[107] = '?';
 COMPANION_POINTS[108] = 4;
 COMPANION_POINTS[201] = -3;
 COMPANION_POINTS[205] = 3;
@@ -1642,7 +1642,7 @@ var MAP2_POINT = [
 ];
 var MAPS_POINT = [null, MAP1_POINT, MAP2_POINT];
 var Board = /** @class */ (function () {
-    function Board(game, players, tableDice) {
+    function Board(game, players, tableDice, martyPosition) {
         var _this = this;
         this.game = game;
         this.players = players;
@@ -1696,7 +1696,17 @@ var Board = /** @class */ (function () {
                 _this.tokensOpacityTimeout = null;
             }
         });
+        if (martyPosition !== null) {
+            this.addMartyPosition(martyPosition);
+        }
     }
+    Board.prototype.addMartyPosition = function (martyPosition) {
+        if (martyPosition !== null) {
+            dojo.place("<div id=\"player--1-point-marker\" class=\"point-marker\" data-player-no=\"-1\" style=\"background: white;\"></div>", 'board');
+            this.points.set(-1, martyPosition);
+            this.movePoints();
+        }
+    };
     Board.prototype.hideTokens = function (boardDiv, event) {
         var _this = this;
         var x = event.offsetX;
@@ -2439,7 +2449,7 @@ var Glow = /** @class */ (function () {
         if (players.length == 1) {
             players.push(gamedatas.tom);
         }
-        this.board = new Board(this, players, gamedatas.tableDice);
+        this.board = new Board(this, players, gamedatas.tableDice, gamedatas.martyPosition);
         this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack, gamedatas.topDeckType, gamedatas.topDeckBType, gamedatas.topCemeteryType, gamedatas.discardedSoloTiles, playerCount);
         this.createPlayerTables(gamedatas);
         if (gamedatas.day > 0) {
@@ -4016,6 +4026,7 @@ var Glow = /** @class */ (function () {
             ['setTomDice', 1],
             ['setTableDice', 1],
             ['getTokens', 1],
+            ['placeMartyToken', 1],
             ['scoreBeforeEnd', SCORE_MS],
             ['scoreCards', SCORE_MS],
             ['scoreBoard', SCORE_MS],
@@ -4210,6 +4221,9 @@ var Glow = /** @class */ (function () {
         notif.args.tokens.filter(function (token) { return token.type == 2; }).forEach(function (token) {
             return setTimeout(function () { return _this.playersTokens[notif.args.playerId].removeCard(token); }, 500);
         });
+    };
+    Glow.prototype.notif_placeMartyToken = function (notif) {
+        this.board.addMartyPosition(notif.args.position);
     };
     Glow.prototype.notif_lastTurn = function () {
         if (document.getElementById('last-round')) {

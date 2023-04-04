@@ -11,21 +11,23 @@ trait DebugUtilTrait {
             return;
         }
 
-        //$this->DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (44, 13, 14, 15, 16, 17)"); // Sketals
-        //$this->DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (10)"); // Xar'gok
-        $this->DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (41)"); // Cromaug
-        $this->DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (20)"); // Kaar
+        //$this->DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 5000 where `card_type_arg` in (44, 13, 14, 15, 16, 17)"); // Sketals
+        //$this->DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 5000 where `card_type_arg` in (10)"); // Xar'gok
+        //$this->DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 5000 where `card_type_arg` in (41)"); // Cromaug
+        //$this->DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 5000 where `card_type_arg` in (20)"); // Kaar
+        $this->DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 5000 where `card_type_arg` in (107)"); // Marty
         //$this->DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (10, 20, 41, 44)");
         //$this->DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (37)");
-        $this->DbQuery("UPDATE companion SET `card_location` = 'cemetery' where `card_type_arg` in (44, 13, 14, 15, 16, 17)");
+        //$this->DbQuery("UPDATE companion SET `card_location` = 'cemetery' where `card_type_arg` in (44, 13, 14, 15, 16, 17)");
         //$this->DbQuery("UPDATE companion SET `card_location` = 'cemetery' where `card_type_arg` in (17)");
-        $this->debugSetCompanionForPlayer(2343492, 201);
-        $this->debugSetCompanionForPlayer(2343492, 202);
-        $this->debugSetCompanionForPlayer(2343492, 203);
-        $this->debugSetCompanionForPlayer(2343492, 204);
+        //$this->debugSetCompanionForPlayer(2343492, 201);
+        //$this->debugSetCompanionForPlayer(2343492, 202);
+        //$this->debugSetCompanionForPlayer(2343492, 203);
+        //$this->debugSetCompanionForPlayer(2343492, 204);
         //$this->debugSetPoints(19);
         $this->debugSetFootprints(30);
         $this->debugSetRerolls(30);
+        $this->debugSetScore(45);
         //$this->debugSkipAdventurers();
 
         //$this->debugMoveMeeple(2343492, 15, 0);
@@ -66,6 +68,14 @@ trait DebugUtilTrait {
 
     function debugSetRerolls($number) {
         $this->DbQuery("UPDATE player SET `player_rerolls` = $number");
+    }
+
+    function debugSetScore($number) {
+        $this->DbQuery("UPDATE player SET `player_score` = $number");
+    }
+
+    function debugLastDay() {
+        $this->setGameStateValue(DAY, 8);
     }
 
     function debug($debugData) {

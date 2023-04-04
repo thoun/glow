@@ -1412,4 +1412,29 @@ trait UtilTrait {
 
         return $newValue;
     }*/
+
+    function getMartyPosition() {
+        $val = intval($this->getGameStateValue(MARTY_POSITION));
+        return $val === -1 ? null : $val;
+    }
+
+    function setPlayerMarty(int $playerId) {
+        $martyPosition = $this->getPlayerScore($playerId) - 10;
+        $this->setGameStateValue(MARTY_POSITION, $martyPosition);
+
+        $this->notifyAllPlayers('placeMartyToken', clienttranslate('${player_name} places Marty token on position ${martyPosition}'), [
+            'playerId' => $playerId,
+            'player_name' => $this->getPlayerName($playerId),
+            'martyPosition' => $martyPosition, // for logs
+            'position' => $martyPosition,
+        ]);
+
+        $this->DbQuery("UPDATE player SET player_score = 10 WHERE player_id = $playerId");
+
+        $this->notifyAllPlayers('points', clienttranslate('${player_name} goes back to 10 bursts of light with Marty power'), [
+            'playerId' => $playerId,
+            'player_name' => $this->getPlayerName($playerId),
+            'newScore' => 10,
+        ]);
+    }
 }

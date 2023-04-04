@@ -56,6 +56,7 @@ define('END_SCORE', 100);
 define('DAY', 'DAY');
 define('FIRST_PLAYER', 'FIRST_PLAYER');
 define('SOLO_DECK', 'SOLO_DECK');
+define('MARTY_POSITION', 'MARTY_POSITION');
 
 /*
  * Global Variables
@@ -78,6 +79,7 @@ define('OPTION_EXPANSION_MODULE3', 113);
  */
 define('KAAR', 20);
 define('XARGOK', 10);
+define('MARTY', 107);
 define('COMPANION_SPELL', 3);
 
 ?>

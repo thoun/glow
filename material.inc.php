@@ -126,7 +126,7 @@ $this->COMPANIONS_EXPANSION1_SETS = [
       // B
       105 => new CompanionCard('Oapak', 0, new Effect([203, 203], [103, 12])),
       106 => new CompanionCard('Merveilleux', 1, new Effect([-3], [-22, 108]), 1),
-      107 => new CompanionCard('Marty', 7, null), // TODO
+      107 => new CompanionCard('Marty', 0, null),
       108 => new CompanionCard('Torpadgrue', 4, new Effect([5, 5], [37, 103])),
     ],
     'removes' => [

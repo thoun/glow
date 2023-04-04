@@ -56,6 +56,7 @@ class GlowExpansion extends Table {
             DAY => 10,
             FIRST_PLAYER => 11,
             SOLO_DECK => 12,
+            MARTY_POSITION => 13,
             
             BOARD_SIDE => 100,
             RANDOM_ADVENTURERS => 101,
@@ -128,8 +129,9 @@ class GlowExpansion extends Table {
         }
 
         // Init global values with their initial values
-        $this->setGameStateInitialValue('DAY', 0);
-        $this->setGameStateInitialValue('SOLO_DECK', 1);
+        $this->setGameStateInitialValue(DAY, 0);
+        $this->setGameStateInitialValue(SOLO_DECK, 1);
+        $this->setGameStateInitialValue(MARTY_POSITION, -1);
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -274,6 +276,7 @@ class GlowExpansion extends Table {
 
         $result['expansion'] = $isExpansion;
         $result['tokensActivated'] = $tokensActivated;
+        $result['martyPosition'] = $this->getMartyPosition();
   
         return $result;
     }

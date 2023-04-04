@@ -111,6 +111,7 @@ class Board {
         private game: GlowGame, 
         private players: GlowPlayer[],
         tableDice: Die[],
+        martyPosition: number | null,
     ) {
         let html = '';
 
@@ -134,6 +135,7 @@ class Board {
                 dojo.place(`<div id="meeple0" class="token meeple1 ${this.game.isColorBlindMode() ? 'color-blind' : ''} meeple-player-0" style="background-color: black; transform: ${transform}"></div>`, 'board');
             }
         });
+        
         this.movePoints();
 
         players.forEach(player => this.placeMeeples(player));
@@ -168,6 +170,18 @@ class Board {
                 this.tokensOpacityTimeout = null;
             }
         });
+
+        if (martyPosition !== null) {
+            this.addMartyPosition(martyPosition);
+        }
+    }
+
+    public addMartyPosition(martyPosition: number) {        
+        if (martyPosition !== null) {
+            dojo.place(`<div id="player--1-point-marker" class="point-marker" data-player-no="-1" style="background: white;"></div>`, 'board');
+            this.points.set(-1, martyPosition);
+            this.movePoints();
+        }
     }
 
     private hideTokens(boardDiv: HTMLElement, event: MouseEvent) {
