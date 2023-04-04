@@ -691,7 +691,10 @@ trait ActionTrait {
 
         $playerId = intval($this->getCurrentPlayerId());
 
-        // TODO
+        $this->applyDiscardCompanionSpell($playerId, $type, $id);
+        $args = new stdClass();
+        $this->addActivableTokens($playerId, $args);
+        $this->removePlayerToken($playerId, $args->killTokenId);
         
         $this->checkActivateTokenEnd();
     }
@@ -812,7 +815,11 @@ trait ActionTrait {
         }
     }
 
-    public function move(int $destination, $from = null, $type = null, $id = null) {
+    private function canDiscardCompanionSpell(int $playerId) {
+        return count($this->companions->getCardsInLocation('player'.$playerId)) > 0 || count($this->spells->getCardsInLocation('player', $playerId)) > 0;
+    }
+
+    public function move(int $destination, $from = null) {
         // TODO add die id for companion
         $this->checkAction('move');
 
@@ -824,35 +831,67 @@ trait ActionTrait {
             throw new BgaUserException("Impossible to move here");
         }
 
-        // if we pass a discard companion/spell
-        if ($type != null && $id != null) {
-            if ($type == 1) {
-                $companion = $this->getCompanionFromDb($this->companions->getCard($id));
-
-                if ($companion->location != 'player'.$playerId) {
-                    throw new BgaUserException("Player doesn't have selected companion");
-                }
-
-                $this->sendToCemetery($playerId, $companion->id);
-
-                $this->notifyAllPlayers('removeCompanion', clienttranslate('${player_name} removes companion ${companionName}'), [
-                    'playerId' => $playerId,
-                    'player_name' => $this->getPlayerName($playerId),
-                    'companion' => $companion,
-                    'companionName' => $companion->name,
-                ]);
-            } else if ($type == 2) {
-                $spell = $this->getSpellFromDb($this->spells->getCard($id));
-
-                if ($spell->location != 'player' || $spell->location_arg != $playerId) {
-                    throw new BgaUserException("Player doesn't have selected spell");
-                }
-
-                $this->discardSpell($playerId, $spell);
-            }
+        if (in_array(37, $route->effects) && $this->canDiscardCompanionSpell($playerId)) {
+            $this->DbQuery("UPDATE player SET player_selected_destination = '".json_encode([$from !== null ? intval($from) : null, $destination])."' WHERE player_id = $playerId");
+            $this->gamestate->nextPrivateState($playerId, 'discard');
+            return;
         }
 
         $this->applyMove($playerId, $route);
+    }
+
+    private function applyDiscardCompanionSpell(int $playerId, int $type, int $id) {
+
+        if ($type == 1) {
+            $companion = $this->getCompanionFromDb($this->companions->getCard($id));
+
+            if ($companion->location != 'player'.$playerId) {
+                throw new BgaUserException("Player doesn't have selected companion");
+            }
+
+            $this->sendToCemetery($playerId, $companion->id);
+
+            $this->notifyAllPlayers('removeCompanion', clienttranslate('${player_name} removes companion ${companionName}'), [
+                'playerId' => $playerId,
+                'player_name' => $this->getPlayerName($playerId),
+                'companion' => $companion,
+                'companionName' => $companion->name,
+            ]);
+        } else if ($type == 2) {
+            $spell = $this->getSpellFromDb($this->spells->getCard($id));
+
+            if ($spell->location != 'player' || $spell->location_arg != $playerId) {
+                throw new BgaUserException("Player doesn't have selected spell");
+            }
+
+            $this->discardSpell($playerId, $spell);
+        }
+    }
+
+    public function discardCompanionSpell(int $type, int $id) {
+        $this->checkAction('discardCompanionSpell');
+
+        $playerId = intval($this->getCurrentPlayerId());
+
+        $this->applyDiscardCompanionSpell($playerId, $type, $id);
+
+        $routeParams = json_decode($this->getUniqueValueFromDB("SELECT player_selected_destination FROM player where `player_id` = $playerId") ?? '[]');
+        $from = $routeParams[0];
+        $destination = $routeParams[1];
+        $possibleRoutes = $this->getPossibleRoutes($playerId);
+        $route = $this->array_find($possibleRoutes, fn($possibleRoute) => $possibleRoute->destination == $destination && ($from == null || $possibleRoute->from == $from));
+
+        $this->applyMove($playerId, $route);
+
+        $this->gamestate->nextPrivateState($playerId, 'move');
+    }
+
+    public function cancelDiscardCompanionSpell() {
+        $this->checkAction('cancelDiscardCompanionSpell');
+
+        $playerId = intval($this->getCurrentPlayerId());
+
+        $this->gamestate->nextPrivateState($playerId, 'move');
     }
 
     private function applyEndTurn(int $playerId) {

@@ -202,7 +202,12 @@ class Glow implements GlowGame {
             case 'privateMove':
                 this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
                 this.onEnteringStatePrivateMove(args.args);
-                break;
+                break;                
+    
+            case 'discardCompanionSpell':
+            case 'privateKillToken':
+                this.onEnteringStateDiscardCompanionSpell();
+                break;   
 
             case 'endRound':
                 const playerTable = this.getPlayerTable(this.getPlayerId());
@@ -487,22 +492,21 @@ class Glow implements GlowGame {
         document.getElementById(`resolveAll-button`).classList.toggle('disabled', resolveArgs.remainingEffects.some(remainingEffect => remainingEffect[2]));
     }
 
-    private onEnteringStateMove() {
-        const moveArgs = this.getMoveArgs();
-        this.board.createDestinationZones(moveArgs.possibleRoutes?.map(route => route));
+    private onEnteringStateMove(args: EnteringMoveForPlayer) {
+        this.board.createDestinationZones(args.possibleRoutes?.map(route => route));
         
         if (this.gamedatas.side === 1) {
             if (!document.getElementById(`placeEncampment-button`)) {
                 (this as any).addActionButton(`placeEncampment-button`, _("Place encampment"), () => this.placeEncampment());
             }
-            dojo.toggleClass(`placeEncampment-button`, 'disabled', !moveArgs.canSettle);
+            dojo.toggleClass(`placeEncampment-button`, 'disabled', !args.canSettle);
         }
 
         if (!document.getElementById(`endTurn-button`)) {
             (this as any).addActionButton(`endTurn-button`, _("End turn"), () => this.endTurn(), null, null, 'red');
         }
 
-        if (moveArgs.possibleRoutes && !moveArgs.possibleRoutes.length && !moveArgs.canSettle) {
+        if (args.possibleRoutes && !args.possibleRoutes.length && !args.canSettle) {
             this.startActionTimer('endTurn-button', 10);
         }
     }
@@ -525,6 +529,17 @@ class Glow implements GlowGame {
         if (moveArgs.possibleRoutes && !moveArgs.possibleRoutes.length && !moveArgs.canSettle) {
             this.startActionTimer('endTurn-button', 10);
         }
+    }
+
+    private onEnteringStateDiscardCompanionSpell() {
+        // make cards selectable
+        const playerTable = this.getCurrentPlayerTable();
+        playerTable.companionsStock?.setSelectionMode(1);
+        playerTable.companionsStock?.items.forEach(item => dojo.addClass(`${playerTable.companionsStock.container_div.id}_item_${item.id}`, 'selectable'));
+        playerTable.spellsStock?.setSelectionMode(1);
+        playerTable.spellsStock?.items.forEach(item => dojo.addClass(`${playerTable.spellsStock.container_div.id}_item_${item.id}`, 'selectable'));
+        playerTable.companionSpellStock?.setSelectionMode(1);
+        playerTable.companionSpellStock?.items.forEach(item => dojo.addClass(`${playerTable.companionSpellStock.container_div.id}_item_${item.id}`, 'selectable'));
     }
 
     onEnteringShowScore(fromReload: boolean = false) {
@@ -642,6 +657,11 @@ class Glow implements GlowGame {
                 break;
             case 'multiMove':
                 this.board.createDestinationZones(null);
+                break;
+
+            case 'discardCompanionSpell':
+            case 'privateKillToken':
+                this.onLeavingResolveCards();
                 break;
         }
     }
@@ -773,7 +793,7 @@ class Glow implements GlowGame {
                     this.onEnteringStatePrivateResolveCards(args);
                     break;
                 case 'move':
-                    this.setActionBarMove(false);
+                    this.onEnteringStateMove(args);
                     break;
 
                 case 'multiMove':
@@ -784,8 +804,9 @@ class Glow implements GlowGame {
                     this.onEnteringStatePrivateMove(args);
                     break;
     
+                case 'discardCompanionSpell':
                 case 'privateKillToken':
-                    (this as any).addActionButton(`cancel-button`, _("Cancel"), () => this.cancelToken(), null, null, 'gray');
+                    (this as any).addActionButton(`cancel-button`, _("Cancel"), () => stateName == 'privateKillToken' ? this.cancelToken() : this.cancelDiscardCompanionSpell(), null, null, 'gray');
                     break;   
                 case 'privateDisableToken':
                     for (let i=1; i<=5; i++) {
@@ -1416,36 +1437,6 @@ class Glow implements GlowGame {
             _(originalState['description' + property]) : 
             this.originalTextMove;
     }
-    
-    private setActionBarMove(fromCancel: boolean) {
-        //console.log('setActionBarMove', fromCancel);
-        this.removeMoveActionButtons();
-        if (fromCancel) {
-            this.setMoveGamestateDescription();
-        }            
-        // make cards unselectable
-        this.onLeavingResolveCards();
-        
-        this.onEnteringStateMove();
-    }
-    
-
-    private setActionBarMoveDiscardCampanionOrSpell() {
-        this.removeMoveActionButtons();
-        this.board.createDestinationZones(null);
-        this.setMoveGamestateDescription(`discard`);
-
-        (this as any).addActionButton(`cancelMoveDiscardCampanionOrSpell-button`, _("Cancel"), () => this.setActionBarMove(true));
-
-        // make cards selectable
-        const playerTable = this.getPlayerTable(this.getPlayerId());
-        playerTable.companionsStock?.setSelectionMode(1);
-        playerTable.companionsStock?.items.forEach(item => dojo.addClass(`${playerTable.companionsStock.container_div.id}_item_${item.id}`, 'selectable'));
-        playerTable.spellsStock?.setSelectionMode(1);
-        playerTable.spellsStock?.items.forEach(item => dojo.addClass(`${playerTable.spellsStock.container_div.id}_item_${item.id}`, 'selectable'));
-        playerTable.companionSpellStock?.setSelectionMode(1);
-        playerTable.companionSpellStock?.items.forEach(item => dojo.addClass(`${playerTable.companionSpellStock.container_div.id}_item_${item.id}`, 'selectable'));
-    }
 
     private setTomDice(dice: Die[]) {
         dice.forEach(die => this.createOrMoveDie({...die, id: 1000 + die.id}, `tomDiceWrapper`));
@@ -1563,22 +1554,7 @@ class Glow implements GlowGame {
     }
 
     public selectMove(possibleDestination: Route): void {
-        let mustDiscard = possibleDestination.costForPlayer.some(cost => cost == 37);
-        
-        if (mustDiscard) {
-            const playerTable = this.getPlayerTable(this.getPlayerId());
-            mustDiscard = !!(playerTable.companionsStock?.items.length || 
-                playerTable.spellsStock?.items.length || 
-                playerTable.companionSpellStock?.items.length);
-        }
-
-        if (mustDiscard) {
-            this.selectedRoute = possibleDestination;
-            
-            this.setActionBarMoveDiscardCampanionOrSpell();
-        } else {
-            this.move(possibleDestination.destination, possibleDestination.from);
-        }
+        this.move(possibleDestination.destination, possibleDestination.from);
     }
 
     public cardClick(type: number, id: number) {
@@ -1593,7 +1569,11 @@ class Glow implements GlowGame {
                 }
             }
         } else if (['move', 'multiMove', 'privateMove'].includes(this.gamedatas.gamestate.name)) {
-            this.move(this.selectedRoute.destination, this.selectedRoute.from, type, id);
+            if (this.gamedatas.gamestate.private_state?.name == 'privateKillToken') {
+                this.killToken(type, id);
+            } else {
+                this.discardCompanionSpell(type, id);
+            }
         } else if (['swap', 'swapMulti'].includes(this.gamedatas.gamestate.name)) {
             this.swap(id);
         } else {
@@ -1904,7 +1884,26 @@ class Glow implements GlowGame {
         this.takeAction('cancelToken');
     }
 
-    public move(destination: number, from?: number, type?: number, id?: number) {
+    public discardCompanionSpell(type: number, id: number) {
+        if(!(this as any).checkAction('discardCompanionSpell')) {
+            return;
+        }
+
+        this.takeAction('discardCompanionSpell', {
+            type,
+            id,
+        });
+    }
+
+    public cancelDiscardCompanionSpell() {
+        if(!(this as any).checkAction('cancelDiscardCompanionSpell')) {
+            return;
+        }
+
+        this.takeAction('cancelDiscardCompanionSpell');
+    }
+
+    public move(destination: number, from?: number) {
         if(!(this as any).checkAction('move')) {
             return;
         }
@@ -1912,8 +1911,6 @@ class Glow implements GlowGame {
         this.takeNoLockAction('move', {
             destination,
             from,
-            type,
-            id,
         });
     }
 
@@ -2077,7 +2074,6 @@ class Glow implements GlowGame {
             ['updateSoloTiles', ANIMATION_MS],
             ['resolveCardUpdate', 1],
             ['usedDice', 1],
-            ['moveUpdate', 1],
             ['points', 1],
             ['rerolls', 1],
             ['footprints', 1],
@@ -2249,12 +2245,6 @@ class Glow implements GlowGame {
     notif_usedDice(notif: Notif<NotifUsedDiceArgs>) {
         const playerTable = this.getPlayerTable(notif.args.playerId);
         playerTable.setUsedDie(notif.args.dieId);
-    }
-
-    notif_moveUpdate(notif: Notif<NotifMoveUpdateArgs>) {
-        //console.log('notif_moveUpdate');
-        this.gamedatas.gamestate.args[this.getPlayerId()] = notif.args.args;
-        this.setActionBarMove(true);
     }
 
     notif_meepleMoved(notif: Notif<NotifMeepleMovedArgs>) {

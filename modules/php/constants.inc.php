@@ -43,6 +43,7 @@ define('ST_PRIVATE_REMOVE_TOKEN', 44);
 // afternoon
 define('ST_MULTIPLAYER_PRIVATE_MOVE', 51);
 define('ST_PRIVATE_MOVE', 52);
+define('ST_PRIVATE_DISCARD_COMPANION_SPELL', 55);
 
 // tokens
 define('ST_PRIVATE_KILL_TOKEN', 71);

@@ -977,6 +977,7 @@ trait UtilTrait {
 
                 for ($i=0; $i<$count; $i++) {
                     $effectsCodes[] = [1, $companion->id, $discardDieSelection ?? ($exchangeToken ? 'exchangeToken' : ($removeToken ? 'removeToken' : null))];
+                    //$effectsCodes[] = [1, $companion->id, $discardDieSelection ? 'discard' : ($exchangeToken ? 'exchangeToken' : ($removeToken ? 'removeToken' : null))];
                 }
             }
         }

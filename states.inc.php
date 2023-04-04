@@ -439,7 +439,7 @@ $playerActionsGameStates = [
         "name" => "privateKillToken",
         "descriptionmyturn" => clienttranslate('${you} must choose a companion or spell to discard'),
         "type" => "private",
-        "args" => "argKillToken",
+        //"args" => "argKillToken",
         "possibleactions" => [ 
             "killToken", 
             "cancelToken",
@@ -456,7 +456,7 @@ $playerActionsGameStates = [
         "name" => "privateDisableToken",
         "descriptionmyturn" => clienttranslate('${you} must choose a symbol to ignore'),
         "type" => "private",
-        "args" => "argDisableToken",
+        //"args" => "argDisableToken",
         "possibleactions" => [ 
             "disableToken", 
             "cancelToken",
@@ -497,6 +497,22 @@ $playerActionsGameStates = [
             "move", 
             "placeEncampment",
             "endTurn",
+        ],
+        "transitions" => [
+            "move" => ST_PRIVATE_MOVE,
+            "discard" => ST_PRIVATE_DISCARD_COMPANION_SPELL,
+            "zombiePass" => ST_END_ROUND,
+        ],
+    ],
+
+    ST_PRIVATE_DISCARD_COMPANION_SPELL => [
+        "name" => "discardCompanionSpell",
+        "descriptionmyturn" => clienttranslate('${you} must choose a companion or spell to discard'),
+        "type" => "private",
+        //"args" => "argDiscardCompanionSpell",
+        "possibleactions" => [ 
+            "discardCompanionSpell", 
+            "cancelDiscardCompanionSpell",
         ],
         "transitions" => [
             "move" => ST_PRIVATE_MOVE,

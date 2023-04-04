@@ -295,10 +295,6 @@ interface NotifResolveCardUpdateArgs {
     resolveCardsForPlayer: ResolveCardsForPlayer;
 }
 
-interface NotifMoveUpdateArgs {
-    args: EnteringMoveForPlayer;
-}
-
 interface NotifMeepleMovedArgs {
     meeple: Meeple;
 }

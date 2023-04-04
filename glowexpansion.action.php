@@ -278,6 +278,25 @@
         $this->ajaxResponse();
     }
 
+    public function discardCompanionSpell() {
+        $this->setAjaxMode();
+
+        $type = $this->getArg('type', AT_posint, true);
+        $id = $this->getArg('id', AT_posint, true);
+
+        $this->game->discardCompanionSpell($type, $id);
+
+        $this->ajaxResponse();
+    }
+
+    public function cancelDiscardCompanionSpell() {
+        $this->setAjaxMode();
+
+        $this->game->cancelDiscardCompanionSpell();
+
+        $this->ajaxResponse();
+    }
+
     public function resolveAll() {
         $this->setAjaxMode();
 

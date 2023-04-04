@@ -147,7 +147,7 @@ trait ArgsTrait {
         foreach ($tokens as $token) {
             if ($token->type == 3) {
                 $effect = $token->typeArg;
-                if ($effect == 37) {
+                if ($effect == 37 && $this->canDiscardCompanionSpell($playerId)) {
                     $args->killTokenId = $token->id;
                 } else if ($effect == 0) {
                     $args->disableTokenId = $token->id;
@@ -158,14 +158,14 @@ trait ArgsTrait {
 
     function argKillToken(int $playerId) {
         return [
-            'companions' => $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId), null, 'location_arg'),
-            'spells' => $this->getSpellsFromDb($this->spells->getCardsInLocation('player', $playerId)),
+            //'companions' => $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId), null, 'location_arg'),
+            //'spells' => $this->getSpellsFromDb($this->spells->getCardsInLocation('player', $playerId)),
         ];
     }
 
     function argDisableToken(int $playerId) {
         return [
-            'symbols' => [1,2,3,4,5],
+            //'symbols' => [1,2,3,4,5],
         ];
     }
 

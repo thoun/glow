@@ -2527,6 +2527,10 @@ var Glow = /** @class */ (function () {
                 this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
                 this.onEnteringStatePrivateMove(args.args);
                 break;
+            case 'discardCompanionSpell':
+            case 'privateKillToken':
+                this.onEnteringStateDiscardCompanionSpell();
+                break;
             case 'endRound':
                 var playerTable = this.getPlayerTable(this.getPlayerId());
                 playerTable === null || playerTable === void 0 ? void 0 : playerTable.clearUsedDice();
@@ -2772,21 +2776,20 @@ var Glow = /** @class */ (function () {
         }
         document.getElementById("resolveAll-button").classList.toggle('disabled', resolveArgs.remainingEffects.some(function (remainingEffect) { return remainingEffect[2]; }));
     };
-    Glow.prototype.onEnteringStateMove = function () {
+    Glow.prototype.onEnteringStateMove = function (args) {
         var _this = this;
         var _a;
-        var moveArgs = this.getMoveArgs();
-        this.board.createDestinationZones((_a = moveArgs.possibleRoutes) === null || _a === void 0 ? void 0 : _a.map(function (route) { return route; }));
+        this.board.createDestinationZones((_a = args.possibleRoutes) === null || _a === void 0 ? void 0 : _a.map(function (route) { return route; }));
         if (this.gamedatas.side === 1) {
             if (!document.getElementById("placeEncampment-button")) {
                 this.addActionButton("placeEncampment-button", _("Place encampment"), function () { return _this.placeEncampment(); });
             }
-            dojo.toggleClass("placeEncampment-button", 'disabled', !moveArgs.canSettle);
+            dojo.toggleClass("placeEncampment-button", 'disabled', !args.canSettle);
         }
         if (!document.getElementById("endTurn-button")) {
             this.addActionButton("endTurn-button", _("End turn"), function () { return _this.endTurn(); }, null, null, 'red');
         }
-        if (moveArgs.possibleRoutes && !moveArgs.possibleRoutes.length && !moveArgs.canSettle) {
+        if (args.possibleRoutes && !args.possibleRoutes.length && !args.canSettle) {
             this.startActionTimer('endTurn-button', 10);
         }
     };
@@ -2807,6 +2810,17 @@ var Glow = /** @class */ (function () {
         if (moveArgs.possibleRoutes && !moveArgs.possibleRoutes.length && !moveArgs.canSettle) {
             this.startActionTimer('endTurn-button', 10);
         }
+    };
+    Glow.prototype.onEnteringStateDiscardCompanionSpell = function () {
+        var _a, _b, _c, _d, _e, _f;
+        // make cards selectable
+        var playerTable = this.getCurrentPlayerTable();
+        (_a = playerTable.companionsStock) === null || _a === void 0 ? void 0 : _a.setSelectionMode(1);
+        (_b = playerTable.companionsStock) === null || _b === void 0 ? void 0 : _b.items.forEach(function (item) { return dojo.addClass(playerTable.companionsStock.container_div.id + "_item_" + item.id, 'selectable'); });
+        (_c = playerTable.spellsStock) === null || _c === void 0 ? void 0 : _c.setSelectionMode(1);
+        (_d = playerTable.spellsStock) === null || _d === void 0 ? void 0 : _d.items.forEach(function (item) { return dojo.addClass(playerTable.spellsStock.container_div.id + "_item_" + item.id, 'selectable'); });
+        (_e = playerTable.companionSpellStock) === null || _e === void 0 ? void 0 : _e.setSelectionMode(1);
+        (_f = playerTable.companionSpellStock) === null || _f === void 0 ? void 0 : _f.items.forEach(function (item) { return dojo.addClass(playerTable.companionSpellStock.container_div.id + "_item_" + item.id, 'selectable'); });
     };
     Glow.prototype.onEnteringShowScore = function (fromReload) {
         var _this = this;
@@ -2896,6 +2910,10 @@ var Glow = /** @class */ (function () {
                 break;
             case 'multiMove':
                 this.board.createDestinationZones(null);
+                break;
+            case 'discardCompanionSpell':
+            case 'privateKillToken':
+                this.onLeavingResolveCards();
                 break;
         }
     };
@@ -3011,7 +3029,7 @@ var Glow = /** @class */ (function () {
                     this.onEnteringStatePrivateResolveCards(args);
                     break;
                 case 'move':
-                    this.setActionBarMove(false);
+                    this.onEnteringStateMove(args);
                     break;
                 case 'multiMove':
                     this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
@@ -3020,8 +3038,9 @@ var Glow = /** @class */ (function () {
                     this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
                     this.onEnteringStatePrivateMove(args);
                     break;
+                case 'discardCompanionSpell':
                 case 'privateKillToken':
-                    this.addActionButton("cancel-button", _("Cancel"), function () { return _this.cancelToken(); }, null, null, 'gray');
+                    this.addActionButton("cancel-button", _("Cancel"), function () { return stateName == 'privateKillToken' ? _this.cancelToken() : _this.cancelDiscardCompanionSpell(); }, null, null, 'gray');
                     break;
                 case 'privateDisableToken':
                     var _loop_7 = function (i) {
@@ -3544,32 +3563,6 @@ var Glow = /** @class */ (function () {
             _(originalState['description' + property]) :
             this.originalTextMove;
     };
-    Glow.prototype.setActionBarMove = function (fromCancel) {
-        //console.log('setActionBarMove', fromCancel);
-        this.removeMoveActionButtons();
-        if (fromCancel) {
-            this.setMoveGamestateDescription();
-        }
-        // make cards unselectable
-        this.onLeavingResolveCards();
-        this.onEnteringStateMove();
-    };
-    Glow.prototype.setActionBarMoveDiscardCampanionOrSpell = function () {
-        var _this = this;
-        var _a, _b, _c, _d, _e, _f;
-        this.removeMoveActionButtons();
-        this.board.createDestinationZones(null);
-        this.setMoveGamestateDescription("discard");
-        this.addActionButton("cancelMoveDiscardCampanionOrSpell-button", _("Cancel"), function () { return _this.setActionBarMove(true); });
-        // make cards selectable
-        var playerTable = this.getPlayerTable(this.getPlayerId());
-        (_a = playerTable.companionsStock) === null || _a === void 0 ? void 0 : _a.setSelectionMode(1);
-        (_b = playerTable.companionsStock) === null || _b === void 0 ? void 0 : _b.items.forEach(function (item) { return dojo.addClass(playerTable.companionsStock.container_div.id + "_item_" + item.id, 'selectable'); });
-        (_c = playerTable.spellsStock) === null || _c === void 0 ? void 0 : _c.setSelectionMode(1);
-        (_d = playerTable.spellsStock) === null || _d === void 0 ? void 0 : _d.items.forEach(function (item) { return dojo.addClass(playerTable.spellsStock.container_div.id + "_item_" + item.id, 'selectable'); });
-        (_e = playerTable.companionSpellStock) === null || _e === void 0 ? void 0 : _e.setSelectionMode(1);
-        (_f = playerTable.companionSpellStock) === null || _f === void 0 ? void 0 : _f.items.forEach(function (item) { return dojo.addClass(playerTable.companionSpellStock.container_div.id + "_item_" + item.id, 'selectable'); });
-    };
     Glow.prototype.setTomDice = function (dice) {
         var _this = this;
         dice.forEach(function (die) { return _this.createOrMoveDie(__assign(__assign({}, die), { id: 1000 + die.id }), "tomDiceWrapper"); });
@@ -3682,23 +3675,10 @@ var Glow = /** @class */ (function () {
         });
     };
     Glow.prototype.selectMove = function (possibleDestination) {
-        var _a, _b, _c;
-        var mustDiscard = possibleDestination.costForPlayer.some(function (cost) { return cost == 37; });
-        if (mustDiscard) {
-            var playerTable = this.getPlayerTable(this.getPlayerId());
-            mustDiscard = !!(((_a = playerTable.companionsStock) === null || _a === void 0 ? void 0 : _a.items.length) ||
-                ((_b = playerTable.spellsStock) === null || _b === void 0 ? void 0 : _b.items.length) ||
-                ((_c = playerTable.companionSpellStock) === null || _c === void 0 ? void 0 : _c.items.length));
-        }
-        if (mustDiscard) {
-            this.selectedRoute = possibleDestination;
-            this.setActionBarMoveDiscardCampanionOrSpell();
-        }
-        else {
-            this.move(possibleDestination.destination, possibleDestination.from);
-        }
+        this.move(possibleDestination.destination, possibleDestination.from);
     };
     Glow.prototype.cardClick = function (type, id) {
+        var _a;
         if (['resolveCards', 'multiResolveCards', 'privateResolveCards'].includes(this.gamedatas.gamestate.name)) {
             var args = this.getResolveArgs();
             var remainingEffect = args.remainingEffects.find(function (re) { return re[0] == type && re[1] == id; });
@@ -3712,7 +3692,12 @@ var Glow = /** @class */ (function () {
             }
         }
         else if (['move', 'multiMove', 'privateMove'].includes(this.gamedatas.gamestate.name)) {
-            this.move(this.selectedRoute.destination, this.selectedRoute.from, type, id);
+            if (((_a = this.gamedatas.gamestate.private_state) === null || _a === void 0 ? void 0 : _a.name) == 'privateKillToken') {
+                this.killToken(type, id);
+            }
+            else {
+                this.discardCompanionSpell(type, id);
+            }
         }
         else if (['swap', 'swapMulti'].includes(this.gamedatas.gamestate.name)) {
             this.swap(id);
@@ -3964,15 +3949,28 @@ var Glow = /** @class */ (function () {
         }
         this.takeAction('cancelToken');
     };
-    Glow.prototype.move = function (destination, from, type, id) {
+    Glow.prototype.discardCompanionSpell = function (type, id) {
+        if (!this.checkAction('discardCompanionSpell')) {
+            return;
+        }
+        this.takeAction('discardCompanionSpell', {
+            type: type,
+            id: id,
+        });
+    };
+    Glow.prototype.cancelDiscardCompanionSpell = function () {
+        if (!this.checkAction('cancelDiscardCompanionSpell')) {
+            return;
+        }
+        this.takeAction('cancelDiscardCompanionSpell');
+    };
+    Glow.prototype.move = function (destination, from) {
         if (!this.checkAction('move')) {
             return;
         }
         this.takeNoLockAction('move', {
             destination: destination,
             from: from,
-            type: type,
-            id: id,
         });
     };
     Glow.prototype.placeEncampment = function () {
@@ -4099,7 +4097,6 @@ var Glow = /** @class */ (function () {
             ['updateSoloTiles', ANIMATION_MS],
             ['resolveCardUpdate', 1],
             ['usedDice', 1],
-            ['moveUpdate', 1],
             ['points', 1],
             ['rerolls', 1],
             ['footprints', 1],
@@ -4255,11 +4252,6 @@ var Glow = /** @class */ (function () {
     Glow.prototype.notif_usedDice = function (notif) {
         var playerTable = this.getPlayerTable(notif.args.playerId);
         playerTable.setUsedDie(notif.args.dieId);
-    };
-    Glow.prototype.notif_moveUpdate = function (notif) {
-        //console.log('notif_moveUpdate');
-        this.gamedatas.gamestate.args[this.getPlayerId()] = notif.args.args;
-        this.setActionBarMove(true);
     };
     Glow.prototype.notif_meepleMoved = function (notif) {
         this.board.moveMeeple(notif.args.meeple);
