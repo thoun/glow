@@ -188,6 +188,9 @@ class Glow implements GlowGame {
             case 'privateRerollImmediate':
                 this.onEnteringStateRerollImmediate(args.args);
                 break;
+            case 'removeToken':
+                this.onEnteringRemoveToken();
+                break;
             case 'move':
                 this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
                 break;
@@ -413,6 +416,10 @@ class Glow implements GlowGame {
         this.tableHeightChange();        
     }
 
+    private onEnteringRemoveToken() {
+        document.getElementById(`tokens-${this.getPlayerId()}`).classList.add('selectable');
+    }
+
     private onEnteringStateResolveCards() {
         const resolveArgs = this.getResolveArgs();
 
@@ -626,6 +633,9 @@ class Glow implements GlowGame {
             case 'resurrect':
                 this.onLeavingResurrect();
                 break;
+            case 'removeToken':
+                this.onLeavingRemoveToken();
+                break;
             case 'resolveCards':
             case 'multiResolveCards':
                 this.onLeavingResolveCards();
@@ -678,6 +688,10 @@ class Glow implements GlowGame {
             this.cemetaryCompanionsStock = null;
             setTimeout(() => this.tableHeightChange(), 200);
         }
+    }
+
+    private onLeavingRemoveToken() {        
+        document.getElementById(`tokens-${this.getPlayerId()}`).classList.remove('selectable');
     }
 
     private onLeavingResolveCards() {
@@ -1027,7 +1041,7 @@ class Glow implements GlowGame {
                 <div id="firefly-counter-wrapper-${player.id}" class="firefly-counter">
                 </div>
             </div>
-            <div id="tokens-${player.id}"></div>
+            <div id="tokens-${player.id}" class="tokens-stock"></div>
             `, `player_board_${player.id}`);
 
             const rerollCounter = new ebg.counter();
@@ -1045,6 +1059,7 @@ class Glow implements GlowGame {
                     center: false,
                     gap: '0',
                 });
+                this.playersTokens[playerId].onCardClick = card => this.removeToken(card.id);
                 this.playersTokens[playerId].addCards(player.tokens);
             }
 
@@ -1545,7 +1560,7 @@ class Glow implements GlowGame {
             const args = this.getResolveArgs();
             const remainingEffect = args.remainingEffects.find(re => re[0] == type && re[1] == id);
             if (remainingEffect) {
-                if (remainingEffect[2]) {
+                if (remainingEffect[2] && typeof remainingEffect[2] !== 'string') {
                     this.setActionBarResolveDiscardDie(type, id, remainingEffect[2] as any as Die[]);
                 } else {
                     this.resolveCard(type, id);
@@ -1813,6 +1828,16 @@ class Glow implements GlowGame {
         this.takeNoLockAction('resolveAll');
     }
 
+    public removeToken(id: number) {
+        if(!(this as any).checkAction('removeToken')) {
+            return;
+        }
+
+        this.takeAction('removeToken', {
+            id,
+        });
+    }
+
     public move(destination: number, from?: number, type?: number, id?: number) {
         if(!(this as any).checkAction('move')) {
             return;
@@ -1996,7 +2021,8 @@ class Glow implements GlowGame {
             ['newDay', 2500],
             ['setTomDice', 1],
             ['setTableDice', 1],
-            ['getTokens', 1],
+            ['getTokens', ANIMATION_MS],
+            ['removeToken', ANIMATION_MS],
             ['placeMartyToken', 1],
             ['scoreBeforeEnd', SCORE_MS],
             ['scoreCards', SCORE_MS],
@@ -2210,11 +2236,15 @@ class Glow implements GlowGame {
         )
     }
 
-    notif_getTokens(notif: Notif<NotifDiceUpdateArgs>) {
+    notif_getTokens(notif: Notif<NotifGetTokensArgs>) {
         this.playersTokens[notif.args.playerId].addCards(notif.args.tokens);
         notif.args.tokens.filter(token => token.type == 2).forEach(token => 
             setTimeout(() => this.playersTokens[notif.args.playerId].removeCard(token), 500)
         );
+    }
+    
+    notif_removeToken(notif: Notif<NotifRemoveTokenArgs>) {
+        this.playersTokens[notif.args.playerId].removeCard({ id: notif.args.tokenId } as Token);
     }
 
     notif_placeMartyToken(notif: Notif<NotifPlaceMartyTokenArgs>) {

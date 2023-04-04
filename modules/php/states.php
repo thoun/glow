@@ -429,7 +429,7 @@ trait StateTrait {
                 $tokens = $this->getPlayerTokens($playerId, true);
                 $differentColors = 0;
                 $points = 0;
-                for($color = 1; $color <= 5; $color++) { // TODO color number ?
+                for($color = 1; $color <= 6; $color++) {
                     $colorTokens = array_values(array_filter($tokens, fn($token) => $token->typeArg == $color));
                     if (count($colorTokens)) {
                         $differentColors++;
@@ -438,7 +438,7 @@ trait StateTrait {
                     }
                 }
 
-                if ($differentColors >= 5) { // TODO color number ?
+                if ($differentColors >= 6) {
                     $points += 10;
                 }
 

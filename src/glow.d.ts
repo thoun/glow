@@ -346,9 +346,14 @@ interface NotifScorePointArgs {
     points: number;
 }
 
-interface NotifDiceUpdateArgs {
+interface NotifGetTokensArgs {
     playerId: number;
     tokens: Token[];
+}
+
+interface NotifRemoveTokenArgs {
+    playerId: number;
+    tokenId: number;
 }
 
 interface NotifPlaceMartyTokenArgs {

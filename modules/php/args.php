@@ -141,6 +141,12 @@ trait ArgsTrait {
         return $resolveCardsForPlayer;
     }
 
+    function argRemoveToken(int $playerId) {
+        return [
+            'tokens' => $this->getPlayerTokens($playerId),
+        ];
+    }
+
     function getPossibleRoutes(int $playerId) {
         $side = $this->getSide();
         $possibleRoutes = [];

@@ -229,6 +229,16 @@
         $this->ajaxResponse();
     }
 
+    public function removeToken() {
+        $this->setAjaxMode();
+
+        $id = $this->getArg('id', AT_posint, true);
+
+        $this->game->removeToken($id);
+
+        $this->ajaxResponse();
+    }
+
     public function resolveAll() {
         $this->setAjaxMode();
 

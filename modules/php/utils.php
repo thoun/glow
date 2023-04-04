@@ -532,7 +532,7 @@ trait UtilTrait {
             [ 'type' => 3, 'type_arg' => 0, 'nbr' => 2],
         ];
         
-        for($color = 1; $color <= 5; $color++) { // TODO color number ?
+        for($color = 1; $color <= 6; $color++) {
             $tokens[] = [ 'type' => 1, 'type_arg' => $color, 'nbr' => 6];
         }
         $this->tokens->createCards($tokens, 'bag');
@@ -967,8 +967,11 @@ trait UtilTrait {
             if ($companion->effect != null) {
                 $count = $this->isTriggeredEffectsForCard($playerId, $dice, $companion->effect);
                 $discardDieSelection = $this->mustSelectDiscardDie($playerId, $companion);
+                $exchangeToken = count(array_filter($companion->effect->effects, fn($effect) => $effect == 50)) > 0;
+                $removeToken = count(array_filter($companion->effect->effects, fn($effect) => $effect < -50 && $effect > -60)) > 0;
+
                 for ($i=0; $i<$count; $i++) {
-                    $effectsCodes[] = [1, $companion->id, $discardDieSelection];
+                    $effectsCodes[] = [1, $companion->id, $discardDieSelection ?? ($exchangeToken ? 'exchangeToken' : ($removeToken ? 'removeToken' : null))];
                 }
             }
         }
@@ -1019,7 +1022,7 @@ trait UtilTrait {
     // 2 spell
     // 3 dice
     // 4 route
-    function applyEffect(int $playerId, int $effect, int $cardType, /*object|null*/ $card = null, /*int*/ $dieId = 0) {
+    function applyEffect(int $playerId, int $effect, int $cardType, /*object|null*/ $card = null, /*int*/ $dieId = 0, /*int*/ $tokenId = 0) {
 
         $args = [];
         switch ($cardType) {
@@ -1065,18 +1068,18 @@ trait UtilTrait {
         }
 
         else if ($effect > 40 && $effect < 50) {
-            $this->addPlayerRerolls($playerId, $effect - 40, clienttranslate('${player_name} ${gainsloses} ${absrerolls} rerolls with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
+            $this->addPlayerRerolls($playerId, $effect - 40, clienttranslate('${player_name} ${gainsloses} ${absrerolls} rerolls with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('gains'), 'i18n' => ['gainsloses']]);
         } else if ($effect < -40 && $effect > -50) {
             $this->removePlayerRerolls($playerId, -($effect + 40), clienttranslate('${player_name} ${gainsloses} ${absrerolls} rerolls with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
         }
 
         if ($effect == 50) {
-            $this->addPlayerTokens($playerId, 1, clienttranslate('${player_name} ${gainsloses} ${abstokens} tokens with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
-            // TODO $this->removePlayerTokens($playerId, 1, clienttranslate('${player_name} ${gainsloses} ${abstokens} tokens with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
+            //$this->addPlayerTokens($playerId, 1, clienttranslate('${player_name} ${gainsloses} ${abstokens} tokens with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
+            $this->removePlayerToken($playerId, $tokenId, clienttranslate('${player_name} lose 1 token with ${effectOrigin} effect'), $args);
         } else if ($effect > 50 && $effect < 60) {
-            $this->addPlayerTokens($playerId, $effect - 50, clienttranslate('${player_name} ${gainsloses} ${abstokens} tokens with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
+            $this->addPlayerTokens($playerId, $effect - 50, clienttranslate('${player_name} ${gainsloses} ${abstokens} tokens with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('gains'), 'i18n' => ['gainsloses']]);
         } else if ($effect < -50 && $effect > -60) {
-            // TODO $this->removePlayerTokens($playerId, -($effect + 50), clienttranslate('${player_name} ${gainsloses} ${abstokens} tokens with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
+            $this->removePlayerToken($playerId, $tokenId, clienttranslate('${player_name} lose 1 token with ${effectOrigin} effect'), $args);
         }
 
         else if ($effect === 33) { // skull
@@ -1094,7 +1097,7 @@ trait UtilTrait {
         }
     }
 
-    function applyCardEffect(int $playerId, int $cardType, int $id, $dieId = 0) {
+    function applyCardEffect(int $playerId, int $cardType, int $id, $dieId = 0, $tokenId = 0) {
 
         $card = null;
         $cardEffect = null;
@@ -1172,7 +1175,7 @@ trait UtilTrait {
                     $this->spells->moveCard($spell->id, 'discard');
                 }
             } else {
-                $this->applyEffect($playerId, $effect, $cardType, $card, $dieId);
+                $this->applyEffect($playerId, $effect, $cardType, $card, $dieId, $tokenId);
             }
         }
 
@@ -1405,19 +1408,15 @@ trait UtilTrait {
         }
     }
 
-    /* TODO function removePlayerTokens(int $playerId, int $dec, $message = '', $params = []) { // TODO
-        $newValue = max(0, $this->getPlayerRerolls($playerId) - $dec);
-        $this->DbQuery("UPDATE player SET `player_rerolls` = $newValue WHERE player_id = $playerId");
+    function removePlayerToken(int $playerId, int $tokenId, $message = '', $params = []) {
+        $this->tokens->moveCard($tokenId, 'front');
 
-        $this->notifyAllPlayers('tokens', $message, $params + [
+        $this->notifyAllPlayers('removeToken', $message, $params + [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
-            'tokens' => -$dec,
-            'abstokens' => $dec,
+            'tokenId' => $tokenId,
         ]);
-
-        return $newValue;
-    }*/
+    }
 
     function getMartyPosition() {
         $val = intval($this->getGameStateValue(MARTY_POSITION));
@@ -1442,5 +1441,13 @@ trait UtilTrait {
             'player_name' => $this->getPlayerName($playerId),
             'newScore' => 10,
         ]);
+    }
+
+    function getSelectedCompanion(int $playerId) {
+        return intval($this->getUniqueValueFromDB("SELECT player_selected_companion FROM player where `player_id` = $playerId"));
+    }
+
+    function setSelectedCompanion(int $playerId, /*int|null*/ $companionId) {
+        $this->DbQuery("UPDATE player SET player_selected_companion = ".($companionId !== null ? $companionId : 'NULL')." WHERE player_id = $playerId");
     }
 }

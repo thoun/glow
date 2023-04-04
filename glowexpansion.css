@@ -630,28 +630,31 @@ body > .card {
   background-position-x: 0%;
 }
 .module-token[data-type="1"][data-type-arg="2"] .front {
-  background-position-x: 11.1111111111%;
+  background-position-x: 10%;
 }
 .module-token[data-type="1"][data-type-arg="3"] .front {
-  background-position-x: 22.2222222222%;
+  background-position-x: 20%;
 }
 .module-token[data-type="1"][data-type-arg="4"] .front {
-  background-position-x: 33.3333333333%;
+  background-position-x: 30%;
 }
 .module-token[data-type="1"][data-type-arg="5"] .front {
-  background-position-x: 44.4444444444%;
+  background-position-x: 40%;
+}
+.module-token[data-type="1"][data-type-arg="6"] .front {
+  background-position-x: 50%;
 }
 .module-token[data-type="2"][data-type-arg="41"] .front {
-  background-position-x: 55.5555555556%;
+  background-position-x: 60%;
 }
 .module-token[data-type="2"][data-type-arg="21"] .front {
-  background-position-x: 66.6666666667%;
+  background-position-x: 70%;
 }
 .module-token[data-type="2"][data-type-arg="12"] .front {
-  background-position-x: 77.7777777778%;
+  background-position-x: 80%;
 }
 .module-token[data-type="3"][data-type-arg="37"] .front {
-  background-position-x: 88.8888888889%;
+  background-position-x: 90%;
 }
 .module-token[data-type="3"][data-type-arg="0"] .front {
   background-position-x: 100%;
@@ -1172,6 +1175,17 @@ ol.help-list {
 }
 .meeting-track-icon[data-players="6"] {
   background-image: url("img/meeting-track-little-board-6p.png");
+}
+
+.tokens-stock {
+  border-radius: 8px;
+  margin: 4px;
+}
+.tokens-stock.selectable {
+  box-shadow: 0 0 4px 4px red;
+}
+.tokens-stock .module-token {
+  cursor: pointer;
 }
 
 html {

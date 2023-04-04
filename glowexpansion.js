@@ -2513,6 +2513,9 @@ var Glow = /** @class */ (function () {
             case 'privateRerollImmediate':
                 this.onEnteringStateRerollImmediate(args.args);
                 break;
+            case 'removeToken':
+                this.onEnteringRemoveToken();
+                break;
             case 'move':
                 this.setGamestateDescription(this.gamedatas.side === 2 ? 'boat' : '');
                 break;
@@ -2701,6 +2704,9 @@ var Glow = /** @class */ (function () {
         }
         this.tableHeightChange();
     };
+    Glow.prototype.onEnteringRemoveToken = function () {
+        document.getElementById("tokens-" + this.getPlayerId()).classList.add('selectable');
+    };
     Glow.prototype.onEnteringStateResolveCards = function () {
         var _this = this;
         var resolveArgs = this.getResolveArgs();
@@ -2881,6 +2887,9 @@ var Glow = /** @class */ (function () {
             case 'resurrect':
                 this.onLeavingResurrect();
                 break;
+            case 'removeToken':
+                this.onLeavingRemoveToken();
+                break;
             case 'resolveCards':
             case 'multiResolveCards':
                 this.onLeavingResolveCards();
@@ -2929,6 +2938,9 @@ var Glow = /** @class */ (function () {
             this.cemetaryCompanionsStock = null;
             setTimeout(function () { return _this.tableHeightChange(); }, 200);
         }
+    };
+    Glow.prototype.onLeavingRemoveToken = function () {
+        document.getElementById("tokens-" + this.getPlayerId()).classList.remove('selectable');
     };
     Glow.prototype.onLeavingResolveCards = function () {
         Array.from(document.getElementsByClassName('selectable')).forEach(function (node) { return dojo.removeClass(node, 'selectable'); });
@@ -3201,7 +3213,7 @@ var Glow = /** @class */ (function () {
         (solo ? __spreadArray(__spreadArray([], players), [gamedatas.tom]) : players).forEach(function (player) {
             var playerId = Number(player.id);
             // counters
-            dojo.place("\n            <div class=\"counters\">\n                <div id=\"reroll-counter-wrapper-" + player.id + "\" class=\"reroll-counter\">\n                    <div class=\"icon reroll\"></div> \n                    <span id=\"reroll-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"footprint-counter-wrapper-" + player.id + "\" class=\"footprint-counter\">\n                    <div class=\"icon footprint\"></div> \n                    <span id=\"footprint-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"firefly-counter-wrapper-" + player.id + "\" class=\"firefly-counter\">\n                </div>\n            </div>\n            <div id=\"tokens-" + player.id + "\"></div>\n            ", "player_board_" + player.id);
+            dojo.place("\n            <div class=\"counters\">\n                <div id=\"reroll-counter-wrapper-" + player.id + "\" class=\"reroll-counter\">\n                    <div class=\"icon reroll\"></div> \n                    <span id=\"reroll-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"footprint-counter-wrapper-" + player.id + "\" class=\"footprint-counter\">\n                    <div class=\"icon footprint\"></div> \n                    <span id=\"footprint-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"firefly-counter-wrapper-" + player.id + "\" class=\"firefly-counter\">\n                </div>\n            </div>\n            <div id=\"tokens-" + player.id + "\" class=\"tokens-stock\"></div>\n            ", "player_board_" + player.id);
             var rerollCounter = new ebg.counter();
             rerollCounter.create("reroll-counter-" + playerId);
             rerollCounter.setValue(player.rerolls);
@@ -3215,6 +3227,7 @@ var Glow = /** @class */ (function () {
                     center: false,
                     gap: '0',
                 });
+                _this.playersTokens[playerId].onCardClick = function (card) { return _this.removeToken(card.id); };
                 _this.playersTokens[playerId].addCards(player.tokens);
             }
             if (playerId != 0) {
@@ -3658,7 +3671,7 @@ var Glow = /** @class */ (function () {
             var args = this.getResolveArgs();
             var remainingEffect = args.remainingEffects.find(function (re) { return re[0] == type && re[1] == id; });
             if (remainingEffect) {
-                if (remainingEffect[2]) {
+                if (remainingEffect[2] && typeof remainingEffect[2] !== 'string') {
                     this.setActionBarResolveDiscardDie(type, id, remainingEffect[2]);
                 }
                 else {
@@ -3880,6 +3893,14 @@ var Glow = /** @class */ (function () {
         }
         this.takeNoLockAction('resolveAll');
     };
+    Glow.prototype.removeToken = function (id) {
+        if (!this.checkAction('removeToken')) {
+            return;
+        }
+        this.takeAction('removeToken', {
+            id: id,
+        });
+    };
     Glow.prototype.move = function (destination, from, type, id) {
         if (!this.checkAction('move')) {
             return;
@@ -4025,7 +4046,8 @@ var Glow = /** @class */ (function () {
             ['newDay', 2500],
             ['setTomDice', 1],
             ['setTableDice', 1],
-            ['getTokens', 1],
+            ['getTokens', ANIMATION_MS],
+            ['removeToken', ANIMATION_MS],
             ['placeMartyToken', 1],
             ['scoreBeforeEnd', SCORE_MS],
             ['scoreCards', SCORE_MS],
@@ -4221,6 +4243,9 @@ var Glow = /** @class */ (function () {
         notif.args.tokens.filter(function (token) { return token.type == 2; }).forEach(function (token) {
             return setTimeout(function () { return _this.playersTokens[notif.args.playerId].removeCard(token); }, 500);
         });
+    };
+    Glow.prototype.notif_removeToken = function (notif) {
+        this.playersTokens[notif.args.playerId].removeCard({ id: notif.args.tokenId });
     };
     Glow.prototype.notif_placeMartyToken = function (notif) {
         this.board.addMartyPosition(notif.args.position);

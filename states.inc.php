@@ -416,6 +416,21 @@ $playerActionsGameStates = [
         ],
         "transitions" => [
             "resolve" => ST_PRIVATE_RESOLVE_CARDS,
+            "removeToken" => ST_PRIVATE_REMOVE_TOKEN,
+            "zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
+        ],
+    ],
+
+    ST_PRIVATE_REMOVE_TOKEN => [
+        "name" => "removeToken",
+        "descriptionmyturn" => clienttranslate('${you} must remove one of your tokens (click the token to remove)'),
+        "type" => "private",
+        "args" => "argRemoveToken",
+        "possibleactions" => [ 
+            "removeToken", 
+        ],
+        "transitions" => [
+            "resolve" => ST_PRIVATE_RESOLVE_CARDS,
             "zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
         ],
     ],

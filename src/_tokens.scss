@@ -40,26 +40,26 @@
     }
 
     &[data-type="1"] {
-        @for $color from 1 through 5 {
+        @for $color from 1 through 6 {
             &[data-type-arg="#{$color}"] .front {
-                background-position-x: #{($color - 1) * 100% / 9};
+                background-position-x: #{($color - 1) * 100% / 10};
             }
         }
     }
     &[data-type="2"][data-type-arg="41"] .front {
-        background-position-x: #{5 * 100% / 9};
+        background-position-x: #{6 * 100% / 10};
     }
     &[data-type="2"][data-type-arg="21"] .front {
-        background-position-x: #{6 * 100% / 9};
+        background-position-x: #{7 * 100% / 10};
     }
     &[data-type="2"][data-type-arg="12"] .front {
-        background-position-x: #{7 * 100% / 9};
+        background-position-x: #{8 * 100% / 10};
     }
     &[data-type="3"][data-type-arg="37"] .front {
-        background-position-x: #{8 * 100% / 9};
+        background-position-x: #{9 * 100% / 10};
     }
     &[data-type="3"][data-type-arg="0"] .front {
-        background-position-x: #{9 * 100% / 9};
+        background-position-x: #{10 * 100% / 10};
     }
 }
 

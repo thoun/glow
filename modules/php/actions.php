@@ -602,8 +602,8 @@ trait ActionTrait {
         $this->gamestate->setPlayerNonMultiactive($playerId, 'next');
     }
 
-    public function applyResolveCard(int $playerId, int $cardType, int $id, $dieId = 0) {
-        $this->applyCardEffect($playerId, $cardType, $id, $dieId);
+    public function applyResolveCard(int $playerId, int $cardType, int $id, $dieId = 0, $tokenId = 0) {
+        $this->applyCardEffect($playerId, $cardType, $id, $dieId, $tokenId);
 
         $resolveCardsForPlayer = $this->argResolveCardsForPlayer($playerId);
      
@@ -621,16 +621,52 @@ trait ActionTrait {
         $playerId = intval($this->getCurrentPlayerId());
         
         $resolveCardsForPlayer = $this->argResolveCardsForPlayer($playerId);
-        if (!$this->array_some($resolveCardsForPlayer->remainingEffects, fn($remainingEffect) => $remainingEffect[0] == $cardType && $remainingEffect[1] == $id)) {
+        $remainingEffect = $this->array_find($resolveCardsForPlayer->remainingEffects, fn($remainingEffect) => $remainingEffect[0] == $cardType && $remainingEffect[1] == $id);
+        if ($remainingEffect == null) {
             throw new BgaUserException("You can't apply that effect");
         }
 
-        $resolveCardsForPlayer = $this->applyResolveCard($playerId, $cardType, $id, $dieId);
+        if ($remainingEffect[0] == 1 && gettype($remainingEffect[2]) == 'string') {
+            $redirect = $remainingEffect[2];
+            if ($redirect == 'exchangeToken') {
+                $this->addPlayerTokens($playerId, 1, clienttranslate('${player_name} ${gainsloses} ${abstokens} tokens with ${effectOrigin} effect'), ['effectOrigin' => 'companion', 'gainsloses' => clienttranslate('gains'), 'i18n' => ['gainsloses']]);
+                $redirect = count($this->getPlayerTokens($playerId)) > 0 ? 'removeToken' : null;
+            }
+            
+            if ($redirect != null) {
+                $this->setSelectedCompanion($playerId, $remainingEffect[1]);
+                $this->gamestate->nextPrivateState($playerId, $redirect);
+                return;
+            }
+        }
+
+        $this->applyResolveCard($playerId, $cardType, $id, $dieId);
         
-        if (count($resolveCardsForPlayer->remainingEffects) === 0) {
+        $this->checkResolveCardEnd($playerId);
+    }
+
+    function checkResolveCardEnd(int $playerId) {        
+        if (count($this->getRemainingEffects($playerId)) == 0) {
             $this->gamestate->setPlayerNonMultiactive($playerId, 'move');
             $this->giveExtraTime($playerId);
         }
+    }
+
+    public function removeToken(int $tokenId) {
+        $this->checkAction('removeToken');
+
+        $playerId = intval($this->getCurrentPlayerId());
+        $companionId = $this->getSelectedCompanion($playerId);
+        
+        $resolveCardsForPlayer = $this->argResolveCardsForPlayer($playerId);
+        $remainingEffect = $this->array_find($resolveCardsForPlayer->remainingEffects, fn($remainingEffect) => $remainingEffect[0] == 1 && $remainingEffect[1] == $companionId);
+        if ($remainingEffect == null) {
+            throw new BgaUserException("You can't apply that effect");
+        }
+
+        $this->applyResolveCard($playerId, 1, $companionId, 0, $tokenId);
+        
+        $this->checkResolveCardEnd($playerId);
     }
 
     public function resolveAll() {
