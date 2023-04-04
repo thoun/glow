@@ -887,6 +887,12 @@ trait UtilTrait {
             return false;
         }
 
+        $negativeTokensEffects = array_filter($allEffectsOnCard, fn($effect) => $effect < -50 && $effect > -60);
+        $negativeTokens = array_reduce(array_map(fn($effect) => -$effect -50, $negativeTokensEffects), fn($a, $b) => $a + $b, 0);
+        if ($negativeTokens > 0 && count($this->getPlayerTokens($playerId)) < $negativeTokens) {
+            return false;
+        }
+
         if ($this->array_every($effect->conditions, fn($condition) => $condition > 200)) { // number of colors
             $colors = $this->getDiceDifferentColors($dice);
 
