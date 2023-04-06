@@ -117,6 +117,7 @@ trait StateTrait {
 
         if ($args['selectedDie'] !== null) {
             $this->gamestate->nextPrivateState($playerId, 'rerollImmediate');
+            //$this->gamestate->setPrivateState($playerId, ST_PRIVATE_REROLL_IMMEDIATE);
         }
     }
 

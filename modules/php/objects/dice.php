@@ -22,6 +22,7 @@ class Dice {
 
     public function roll() {
         $this->setFace(bga_rand(1, 6));
+        //$this->setFace(bga_rand(6, 6));
     }
 
     public function setFace($face) {

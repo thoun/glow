@@ -125,7 +125,7 @@ $this->COMPANIONS_EXPANSION1_SETS = [
       104 => new CompanionCard('Sketal', -1, new Effect([-1, -2], [33, 12]), 0, 0, true, 6),
       // B
       105 => new CompanionCard('Oapak', 0, new Effect([203, 203], [103, 12])),
-      106 => new CompanionCard('Merveilleux', 1, new Effect([-3], [-22, 108]), 1),
+      106 => new CompanionCard('Merveilleux', 1, new Effect([-3], [-22, 108])),
       107 => new CompanionCard('Marty', 0, null),
       108 => new CompanionCard('Torpadgrue', 4, new Effect([5, 5], [37, 103])),
     ],
@@ -141,13 +141,13 @@ $this->COMPANIONS_EXPANSION1_SETS = [
     'adds' => [
       // A
       201 => new CompanionCard('Raykil', -3, new Effect([5, 2], [52, 21])),
-      202 => new CompanionCard('Croa', 0, new Effect([1, 3], [51, 11]), false, 2),
+      202 => new CompanionCard('Croa', 0, new Effect([1, 3], [51, 11]), 2),
       203 => new CompanionCard('Aou', 0, new Effect([4], [51])),
       204 => new CompanionCard('Sir Wapo', 0, new Effect([2, 1], [52])),
       // B
-      205 => new CompanionCard('Graou', 3, new Effect([3], [-41, 50]), false, 1),
+      205 => new CompanionCard('Graou', 3, new Effect([3], [-41, 50]), 1),
       206 => new CompanionCard('Maisonnette', 0, new Effect([-2], [-41, 50]), 0, 2),
-      207 => new CompanionCard('Wabala', 2, new Effect([5, 4], [-51, 104])),
+      207 => new CompanionCard('Wabala', 2, new Effect([5, 4], [-51, 104]), 1),
       208 => new CompanionCard('MrPulpe', 2, new Effect([1, -4], [52, 21])),
     ],
     'removes' => [
