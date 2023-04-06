@@ -37,6 +37,7 @@ trait DebugUtilTrait {
         //$this->debugMoveMeeple(2343493, 40, 0);
 
         //$this->debugAddSpell(2343492, 1);
+        //$this->debugLastDay();
 
         // Activate first player must be commented in setup if this is used
         //$this->gamestate->changeActivePlayer(2343492);

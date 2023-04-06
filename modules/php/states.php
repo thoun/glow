@@ -428,19 +428,25 @@ trait StateTrait {
         if ($this->tokensActivated()) {
             foreach($playersIds as $playerId) {
                 $tokens = $this->getPlayerTokens($playerId, true);
-                $differentColors = 0;
                 $points = 0;
-                for($color = 1; $color <= 6; $color++) {
-                    $colorTokens = array_values(array_filter($tokens, fn($token) => $token->typeArg == $color));
-                    if (count($colorTokens)) {
-                        $differentColors++;
-
-                        $points += $this->POINTS_FOR_COLOR_TOKENS[count($colorTokens)];
+                $tokensByColor = [];
+                foreach($tokens as $token) {
+                    if (!array_key_exists($token->typeArg, $tokensByColor)) {
+                        $tokensByColor[$token->typeArg] = 1;
+                    } else {
+                        $tokensByColor[$token->typeArg]++;
                     }
                 }
 
-                if ($differentColors >= 6) {
-                    $points += 10;
+                for($color = 1; $color <= 6; $color++) {
+                    $colorTokens = array_values(array_filter($tokens, fn($token) => $token->typeArg == $color));
+                    if (count($colorTokens)) {
+                        $points += $this->POINTS_FOR_COLOR_TOKENS[$tokensByColor[$color] ?? 0];
+                    }
+                }
+
+                if (count($tokensByColor) >= 6) {
+                    $points += 10 * min($tokensByColor);
                 }
 
                 $this->DbQuery("UPDATE player SET player_score_tokens = $points WHERE player_id = $playerId");
