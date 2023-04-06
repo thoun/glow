@@ -252,7 +252,6 @@ $playerActionsGameStates = [
         "descriptionmyturn" => clienttranslate('${you} can reroll or change your dice'),
         "type" => "private",
         "args" => "argRollDiceForPlayer",
-        "action" => "stSelectDiceAction",
         "possibleactions" => [ 
             "selectDiceToRoll", 
             "selectDieToChange", 

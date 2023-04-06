@@ -109,15 +109,28 @@ trait StateTrait {
     
     function stChangeDice() { 
         $this->gamestate->setAllPlayersMultiactive();
-        $this->gamestate->initializePrivateStateForAllActivePlayers(); 
-    }
+        
+        $playersIdsToSelectDiceAction = [];
+        $playersIdsToRerollImmediate = [];
 
-    function stSelectDiceAction(int $playerId) {
-        $args = $this->argRerollImmediate($playerId);
 
-        if ($args['selectedDie'] !== null) {
-            $this->gamestate->nextPrivateState($playerId, 'rerollImmediate');
-            //$this->gamestate->setPrivateState($playerId, ST_PRIVATE_REROLL_IMMEDIATE);
+        $playersIds = $this->getPlayersIds();      
+        foreach($playersIds as $playerId) {
+            $args = $this->argRerollImmediate($playerId);
+            if ($args['selectedDie'] !== null) {
+                $playersIdsToRerollImmediate[] = $playerId;
+            } else {
+                $playersIdsToSelectDiceAction[] = $playerId;
+            }
+        }
+
+        if (count($playersIdsToRerollImmediate) == 0) {
+            $this->gamestate->initializePrivateStateForAllActivePlayers(); 
+        } else {
+            $this->gamestate->initializePrivateStateForPlayers($playersIdsToSelectDiceAction);
+            foreach ($playersIdsToRerollImmediate as $pId) {
+                $this->gamestate->setPrivateState($pId, ST_PRIVATE_REROLL_IMMEDIATE);
+            }
         }
     }
 
