@@ -142,7 +142,7 @@ trait ArgsTrait {
 
         $tokens = $this->getPlayerTokens($playerId);
         $args->killTokenId = 0;
-        $args->disableTokenId = 0;        
+        $args->disableTokenId = 0;
 
         foreach ($tokens as $token) {
             if ($token->type == 3) {

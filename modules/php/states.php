@@ -199,8 +199,8 @@ trait StateTrait {
                 }
             }
 
-
-            if (count($this->getRemainingEffects($playerId)) > 0) {
+            $args = $this->argResolveCardsForPlayer($playerId);
+            if (count($args->remainingEffects) > 0 || $args->killTokenId > 0 || $args->disableTokenId > 0) {
                 $playerWithEffects[] = $playerId;
             }
         }
@@ -221,7 +221,8 @@ trait StateTrait {
         $autoSkipImpossibleActions = $this->autoSkipImpossibleActions();
 
         foreach($playersIds as $playerId) {
-            if (!$autoSkipImpossibleActions || count($this->getPossibleRoutes($playerId)) > 0) {
+            $args = $this->argMoveForPlayer($playerId);
+            if (!$autoSkipImpossibleActions || count($args->possibleRoutes) > 0 || $args->canSettle || $args->killTokenId > 0 || $args->disableTokenId > 0) {
                 $playerWithRoutes[] = $playerId;
             } else {
                 // player finishes its turn, replace die

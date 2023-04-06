@@ -645,12 +645,13 @@ trait ActionTrait {
         $this->checkResolveCardEnd($playerId);
     }
 
-    function checkResolveCardEnd(int $playerId) {        
-        if (count($this->getRemainingEffects($playerId)) == 0) {
+    function checkResolveCardEnd(int $playerId) {
+        $args = $this->argResolveCardsForPlayer($playerId);
+        if (count($args->remainingEffects) > 0 || $args->killTokenId > 0 || $args->disableTokenId > 0) {
+            $this->gamestate->nextPrivateState($playerId, 'resolve');
+        } else {
             $this->gamestate->setPlayerNonMultiactive($playerId, 'move');
             $this->giveExtraTime($playerId);
-        } else {
-            $this->gamestate->nextPrivateState($playerId, 'resolve');
         }
     }
 
@@ -674,6 +675,11 @@ trait ActionTrait {
     public function activateToken(int $tokenId) {
         $playerId = intval($this->getCurrentPlayerId());
         $token = $this->getTokenFromDb($this->tokens->getCard($tokenId));
+        
+        $currentState = intval($this->gamestate->state_id());
+        if (!in_array($currentState, [ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS, ST_MULTIPLAYER_PRIVATE_MOVE])) {
+            throw new BgaUserException("You can use this token only during the resolve card phase or the move phase.");
+        }
 
         if ($token->type == 3 && $token->typeArg == 37) {
             $this->gamestate->setPrivateState($playerId, ST_PRIVATE_KILL_TOKEN);
@@ -787,31 +793,23 @@ trait ActionTrait {
 
         if ($side === 1) {
             $this->movePlayerCompany($playerId, $route->destination, $route->from);
-
-            $args = $this->argMoveForPlayer($playerId);
-            if (count($args->possibleRoutes) == 0 && $args->canSettle != true) {
-                $this->applyEndTurn($playerId);
-            } else {         
-                $this->gamestate->nextPrivateState($playerId, 'move');
-            }
         } else if ($side === 2) {
             $this->movePlayerBoat($playerId, $route->destination, $route->from);
-
-            $this->applyEndTurn($playerId);
         }
 
         $this->incStat(1, 'moves');
         $this->incStat(1, 'moves', $playerId);
+
+        $this->checkMoveEnd($playerId);
     }
 
-    function checkMoveEnd(int $playerId) {     
-        $args = $this->argMoveForPlayer($playerId);   
-
-        if (count($args->possibleRoutes) == 0 && !$args->canSettle) {
+    function checkMoveEnd(int $playerId) {    
+        $args = $this->argMoveForPlayer($playerId);
+        if (count($args->possibleRoutes) > 0 || $args->canSettle || $args->killTokenId > 0 || $args->disableTokenId > 0) {
+            $this->gamestate->nextPrivateState($playerId, 'move');
+        } else {
             $this->gamestate->setPlayerNonMultiactive($playerId, 'endRound');
             $this->giveExtraTime($playerId);
-        } else {
-            $this->gamestate->nextPrivateState($playerId, 'move');
         }
     }
 

@@ -2740,7 +2740,7 @@ var Glow = /** @class */ (function () {
             }
         });
         if (!document.getElementById("resolveAll-button")) {
-            this.addActionButton("resolveAll-button", _("Resolve all"), function () { return _this.resolveAll(); }, null, null, 'red');
+            this.addActionButton("resolveAll-button", resolveArgs.remainingEffects.length ? _("Resolve all") : _("Pass"), function () { return _this.resolveAll(); }, null, null, 'red');
         }
         document.getElementById("resolveAll-button").classList.toggle('disabled', resolveArgs.remainingEffects.some(function (remainingEffect) { return remainingEffect[2]; }));
     };
@@ -2772,7 +2772,7 @@ var Glow = /** @class */ (function () {
             }
         });
         if (!document.getElementById("resolveAll-button")) {
-            this.addActionButton("resolveAll-button", _("Resolve all"), function () { return _this.resolveAll(); }, null, null, 'red');
+            this.addActionButton("resolveAll-button", resolveArgs.remainingEffects.length ? _("Resolve all") : _("Pass"), function () { return _this.resolveAll(); }, null, null, 'red');
         }
         document.getElementById("resolveAll-button").classList.toggle('disabled', resolveArgs.remainingEffects.some(function (remainingEffect) { return remainingEffect[2]; }));
     };
@@ -2789,7 +2789,7 @@ var Glow = /** @class */ (function () {
         if (!document.getElementById("endTurn-button")) {
             this.addActionButton("endTurn-button", _("End turn"), function () { return _this.endTurn(); }, null, null, 'red');
         }
-        if (args.possibleRoutes && !args.possibleRoutes.length && !args.canSettle) {
+        if (args.possibleRoutes && !args.possibleRoutes.length && !args.canSettle && !args.killTokenId && !args.disableTokenId) {
             this.startActionTimer('endTurn-button', 10);
         }
     };
@@ -2807,7 +2807,7 @@ var Glow = /** @class */ (function () {
         if (!document.getElementById("endTurn-button")) {
             this.addActionButton("endTurn-button", _("End turn"), function () { return _this.endTurn(); }, null, null, 'red');
         }
-        if (moveArgs.possibleRoutes && !moveArgs.possibleRoutes.length && !moveArgs.canSettle) {
+        if (moveArgs.possibleRoutes && !moveArgs.possibleRoutes.length && !moveArgs.canSettle && !moveArgs.killTokenId && !moveArgs.disableTokenId) {
             this.startActionTimer('endTurn-button', 10);
         }
     };

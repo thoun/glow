@@ -454,7 +454,7 @@ class Glow implements GlowGame {
         });
         
         if (!document.getElementById(`resolveAll-button`)) {
-            (this as any).addActionButton(`resolveAll-button`, _("Resolve all"), () => this.resolveAll(), null, null, 'red');
+            (this as any).addActionButton(`resolveAll-button`, resolveArgs.remainingEffects.length ? _("Resolve all") : _("Pass"), () => this.resolveAll(), null, null, 'red');
         }
         document.getElementById(`resolveAll-button`).classList.toggle('disabled', resolveArgs.remainingEffects.some(remainingEffect => remainingEffect[2]));
     }
@@ -487,7 +487,7 @@ class Glow implements GlowGame {
         });
         
         if (!document.getElementById(`resolveAll-button`)) {
-            (this as any).addActionButton(`resolveAll-button`, _("Resolve all"), () => this.resolveAll(), null, null, 'red');
+            (this as any).addActionButton(`resolveAll-button`, resolveArgs.remainingEffects.length ? _("Resolve all") : _("Pass"), () => this.resolveAll(), null, null, 'red');
         }
         document.getElementById(`resolveAll-button`).classList.toggle('disabled', resolveArgs.remainingEffects.some(remainingEffect => remainingEffect[2]));
     }
@@ -506,7 +506,7 @@ class Glow implements GlowGame {
             (this as any).addActionButton(`endTurn-button`, _("End turn"), () => this.endTurn(), null, null, 'red');
         }
 
-        if (args.possibleRoutes && !args.possibleRoutes.length && !args.canSettle) {
+        if (args.possibleRoutes && !args.possibleRoutes.length && !args.canSettle && !args.killTokenId && !args.disableTokenId) {
             this.startActionTimer('endTurn-button', 10);
         }
     }
@@ -526,7 +526,7 @@ class Glow implements GlowGame {
             (this as any).addActionButton(`endTurn-button`, _("End turn"), () => this.endTurn(), null, null, 'red');
         }
 
-        if (moveArgs.possibleRoutes && !moveArgs.possibleRoutes.length && !moveArgs.canSettle) {
+        if (moveArgs.possibleRoutes && !moveArgs.possibleRoutes.length && !moveArgs.canSettle && !moveArgs.killTokenId && !moveArgs.disableTokenId) {
             this.startActionTimer('endTurn-button', 10);
         }
     }
