@@ -575,8 +575,9 @@ trait UtilTrait {
         }
     }
     
-    function setDiceOnTable(bool $solo) {
-        for ($i=1; $i<=5; $i++) {
+    function setDiceOnTable(bool $solo, bool $isExpansion) {
+        $max = $isExpansion ? 6 : 5;
+        for ($i=1; $i<= $max; $i++) {
             $bigDie = $this->getBigDiceByColor($i, 1)[0];            
             $this->moveDice([$bigDie], 'table');
         }

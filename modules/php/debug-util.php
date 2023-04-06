@@ -25,12 +25,13 @@ trait DebugUtilTrait {
         //$this->debugSetCompanionForPlayer(2343492, 202);
         //$this->debugSetCompanionForPlayer(2343492, 203);
         //$this->debugSetCompanionForPlayer(2343492, 204);
+        $this->debugSetCompanionForPlayer(2343492, 304);
         //$this->debugSetPoints(19);
-        $this->debugSetFootprints(30);
-        $this->debugSetRerolls(30);
-        $this->debugSetScore(45);
-        $this->addPlayerTokens(2343492, 20);
-        $this->addPlayerTokens(2343493, 20);
+        //$this->debugSetFootprints(30);
+        //$this->debugSetRerolls(30);
+        //$this->debugSetScore(45);
+        //$this->addPlayerTokens(2343492, 20);
+        //$this->addPlayerTokens(2343493, 20);
         //$this->debugSkipAdventurers();
 
         //$this->debugMoveMeeple(2343492, 15, 0);
@@ -43,25 +44,25 @@ trait DebugUtilTrait {
         //$this->gamestate->changeActivePlayer(2343492);
     }
 
-    private function debugSkipAdventurers() {
+    function debugSkipAdventurers() {
         foreach(array_keys($this->loadPlayersBasicInfos()) as $playerId) {
             $this->adventurers->pickCardForLocation('deck', 'player', $playerId);
         }
         //$this->gamestate->jumpToState(ST_START_ROUND);
     }
 
-    private function debugSetCompanionForPlayer($playerId, $subType) {
+    function debugSetCompanionForPlayer($playerId, $subType) {
         $type = ($subType > 100 ? ($subType % 100 <= 4) : $subType <= 23) ? 1 : 2;
         $card = $this->getCompanionsFromDb($this->companions->getCardsOfType($type, $subType))[0];
         $this->companions->moveCard($card->id, 'player'.$playerId, 0);
     }
 
-    private function debugAddSpell($playerId, $type) {
+    function debugAddSpell($playerId, $type) {
         $card = $this->getSpellsFromDb($this->spells->getCardsOfType($type))[0];
         $this->spells->moveCard($card->id, 'player', $playerId);
     }
 
-    private function debugMoveMeeple($playerId, $spot, $index) {
+    function debugMoveMeeple($playerId, $spot, $index) {
         $meepleId = intval($this->getUniqueValueFromDB("SELECT id from meeple WHERE `player_id` = $playerId LIMIT 1 OFFSET $index"));
         $this->DbQuery("UPDATE meeple SET `position` = $spot where `id` = $meepleId");
     }

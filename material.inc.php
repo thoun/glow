@@ -35,6 +35,7 @@ $this->DICES = [
 
 $this->DICES_EXPANSION1 = [
   // color is the key, then large number and small number
+  6 => [3, 1], // purple
   7 => [3, 0], // yellow
   8 => [1, 1], // black
   80 => [2, 0], // black/gray/multi
@@ -164,7 +165,7 @@ $this->COMPANIONS_EXPANSION1_SETS = [
       301 => new CompanionCard('Lovd', -3, new Effect([3, 4], [103, 12])),
       302 => new CompanionCard('Zzibela', 0, new Effect([1, -3], [22]), 1),
       303 => new CompanionCard('Biki', 6, new Effect([-5], [33, -42])),
-      304 => new CompanionCard('Gok\'Xar', 0, new Effect([3, 5], [-21, 104])),
+      304 => new CompanionCard('Gok\'Xar', 0, new Effect([1, 5], [-21, 104])),
       // B
       305 => new CompanionCard('Baby Snarexe', 0, new Effect([3, 1], [-12, 33, 107])),
       306 => new CompanionCard('Snako', 2, new Effect([5, 4], [-41, 12]), 3),

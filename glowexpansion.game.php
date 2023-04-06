@@ -186,7 +186,7 @@ class GlowExpansion extends Table {
         // TODO TEMP card to test
         $this->debugSetup();
 
-        $this->setDiceOnTable($solo);
+        $this->setDiceOnTable($solo, $isExpansion);
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
