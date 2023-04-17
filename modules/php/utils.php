@@ -1397,21 +1397,29 @@ trait UtilTrait {
     }
 
     function addPlayerTokens(int $playerId, int $inc, $message = '', $params = []) {
-        $tokens = $this->getTokensFromDb($this->tokens->pickCardsForLocation($inc, 'bag', 'player', $playerId));
+        $available = intval($this->tokens->countCardInLocation('bag'));
 
-        $this->notifyAllPlayers('getTokens', $message, $params + [
-            'playerId' => $playerId,
-            'player_name' => $this->getPlayerName($playerId),
-            'tokens' => $tokens,
-            'abstokens' => count($tokens),
-        ]);
+        if ($available > 0) {
+            $tokens = $this->getTokensFromDb($this->tokens->pickCardsForLocation(min($available, $inc), 'bag', 'player', $playerId));
 
-        foreach ($tokens as $token) {
-            if ($token->type == 2) {
-                $effect = $token->typeArg;
-                $this->applyEffect($playerId, $effect, 5);
-                $this->tokens->moveCard($token->id, 'front');
+            $this->notifyAllPlayers('getTokens', $message, $params + [
+                'playerId' => $playerId,
+                'player_name' => $this->getPlayerName($playerId),
+                'tokens' => $tokens,
+                'abstokens' => count($tokens),
+            ]);
+
+            foreach ($tokens as $token) {
+                if ($token->type == 2) {
+                    $effect = $token->typeArg;
+                    $this->applyEffect($playerId, $effect, 5);
+                    $this->tokens->moveCard($token->id, 'front');
+                }
             }
+        }
+
+        if ($available < $inc) {
+            $this->incPlayerScore($playerId, $inc - $available, clienttranslate('${player_name} gains ${abspoints} burst of light instead of ${abspoints} token(s) because the bag is empty'));
         }
     }
 
