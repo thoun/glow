@@ -1402,6 +1402,10 @@ trait UtilTrait {
         if ($available > 0) {
             $tokens = $this->getTokensFromDb($this->tokens->pickCardsForLocation(min($available, $inc), 'bag', 'player', $playerId));
 
+            if (intval($this->tokens->countCardInLocation('bag')) == 0) {
+                $this->setStat(1, 'tokenBagEmptied');
+            }
+
             $this->notifyAllPlayers('getTokens', $message, $params + [
                 'playerId' => $playerId,
                 'player_name' => $this->getPlayerName($playerId),

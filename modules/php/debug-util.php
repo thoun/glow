@@ -30,8 +30,8 @@ trait DebugUtilTrait {
         //$this->debugSetFootprints(30);
         //$this->debugSetRerolls(30);
         //$this->debugSetScore(45);
-        //$this->addPlayerTokens(2343492, 20);
-        //$this->addPlayerTokens(2343493, 20);
+        $this->addPlayerTokens(2343492, 22);
+        $this->addPlayerTokens(2343493, 22);
         //$this->debugSkipAdventurers();
 
         //$this->debugMoveMeeple(2343492, 15, 0);

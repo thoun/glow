@@ -152,10 +152,11 @@ class GlowExpansion extends Table {
         $this->initStat('player', 'moves', 0);
         $this->initStat('table', 'footprintsAsJokers', 0);
         $this->initStat('player', 'footprintsAsJokers', 0);
-        foreach($this->ADVENTURERS as $adventurer) {            
+        foreach($this->ADVENTURERS as $adventurer) {
             $this->initStat('table', $adventurer->name, 0);
             $this->initStat('player', $adventurer->name, 0);
         }
+        $this->initStat('player', 'points', 0);
 
         $playerCount = count($players);
         $solo = $playerCount == 1;
@@ -179,6 +180,8 @@ class GlowExpansion extends Table {
         }
         if ($this->tokensActivated()) {
             $this->initStat('player', 'endTokenPoints', 0);
+            $this->initStat('player', 'tokensCount', 0);
+            $this->initStat('table', 'tokenBagEmptied', 0);
             
             $this->createTokens();
         }

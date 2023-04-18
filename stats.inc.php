@@ -111,6 +111,11 @@ foreach($ADVENTURERS as $id => $adventurer) {
         "name" => $adventurer,
         "type" => "bool"
     ];
+    $commonStats[$adventurer.'Points'] = [
+        "id" => 150+$id,
+        "name" => $adventurer. ' points',
+        "type" => "int"
+    ];
 }
 
 $stats_type = [
@@ -122,6 +127,12 @@ $stats_type = [
             "name" => totranslate("Days"),
             "type" => "int"
         ], 
+        
+        "tokenBagEmptied" => [
+            "id" => 104,
+            "name" => totranslate("Bag emptied"),
+            "type" => "bool"
+        ],
     ],
     
     // Statistics existing for each player
@@ -161,5 +172,21 @@ $stats_type = [
             "name" => totranslate("Points gained with tokens"),
             "type" => "int"
         ],
-    ]
+        
+        "points" => [
+            "id" => 101,
+            "name" => totranslate("Points"),
+            "type" => "int"
+        ],
+        "coloredTokensCount" => [
+            "id" => 102,
+            "name" => totranslate("Colored token count"),
+            "type" => "int"
+        ],
+        "tokensCount" => [
+            "id" => 103,
+            "name" => totranslate("Token count"),
+            "type" => "int"
+        ],
+    ],
 ];

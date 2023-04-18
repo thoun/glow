@@ -475,6 +475,8 @@ trait StateTrait {
     
                 if ($playerId != 0) {
                     $this->setStat($points, 'endTokenPoints', $playerId);
+                    $this->setStat(count($tokens), 'coloredTokensCount', $playerId);
+                    $this->setStat(count($this->getPlayerTokens($playerId, false)), 'tokensCount', $playerId);
                 }
             }
         }
@@ -495,6 +497,16 @@ trait StateTrait {
                 'playerId' => $playerId,
                 'points' => $score,
             ]);
+
+            $this->setStat($score, 'points', $playerId);
+            $this->setStat($score, 'points', $playerId);
+            
+            $adventurers = $this->getAdventurersFromDb($this->adventurers->getCardsInLocation('player', $playerId));
+            if (count($adventurers) > 0) {
+                $adventurer = $adventurers[0];
+                $this->setStat($score, $adventurer->name.'Points');
+                $this->setStat($score, $adventurer->name.'Points', $playerId);
+            }
         }
         
         if ($solo) { // solo mode
