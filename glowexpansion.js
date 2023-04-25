@@ -1850,7 +1850,6 @@ var MEETING_SPOT_BY_COLOR = [
 var MeetingTrack = /** @class */ (function () {
     function MeetingTrack(game, meetingTrackSpot, topDeckType, topDeckBType, topCemeteryType, discardedSoloTiles, playerCount) {
         var _this = this;
-        var _a;
         this.game = game;
         this.companionsStocks = [];
         this.soloTilesStocks = [];
@@ -1888,8 +1887,6 @@ var MeetingTrack = /** @class */ (function () {
             setupCompanionCards(this_1.companionsStocks[i]);
             if (spot.companion) {
                 this_1.companionsStocks[i].addToStockWithId(spot.companion.subType, '' + spot.companion.id);
-                // TODO TEMP for expansion
-                (_a = document.getElementById("meeting-track-companion-" + i + "_item_" + spot.companion.id)) === null || _a === void 0 ? void 0 : _a.classList.add("expansion-set-" + Math.floor(spot.companion.subType / 100));
             }
             // footprints
             this_1.setFootprintTokens(i, spot.footprints);
@@ -1935,7 +1932,7 @@ var MeetingTrack = /** @class */ (function () {
         }
     }
     MeetingTrack.prototype.setCompanion = function (companion, spot) {
-        var _a, _b;
+        var _a;
         if (!companion) {
             this.companionsStocks[spot].removeAllTo(CEMETERY);
             return;
@@ -1948,8 +1945,6 @@ var MeetingTrack = /** @class */ (function () {
             this.companionsStocks[spot].removeAllTo(CEMETERY);
         }
         this.companionsStocks[spot].addToStockWithId(companion.subType, '' + companion.id, DECK);
-        // TODO TEMP for expansion
-        (_b = document.getElementById("meeting-track-companion-" + spot + "_item_" + companion.id)) === null || _b === void 0 ? void 0 : _b.classList.add("expansion-set-" + Math.floor(companion.subType / 100));
     };
     MeetingTrack.prototype.setSoloTile = function (meetingTrackSpot, spot) {
         var _a;
@@ -2098,11 +2093,8 @@ var PlayerTable = /** @class */ (function () {
         player.companions.forEach(function (card) { return newWeights[card.subType] = card.location_arg; });
         this.companionsStock.changeItemsWeight(newWeights);
         player.companions.forEach(function (companion) {
-            var _a;
             _this.companionsStock.addToStockWithId(companion.subType, '' + companion.id);
             _this.addMouseEvents(_this.companionsStock, companion);
-            // TODO TEMP for expansion
-            (_a = document.getElementById("player-table-" + _this.playerId + "-companions_item_" + companion.id)) === null || _a === void 0 ? void 0 : _a.classList.add("expansion-set-" + Math.floor(companion.subType / 100));
         });
         // spells
         this.spellsStock = new ebg.stock();
@@ -2187,7 +2179,6 @@ var PlayerTable = /** @class */ (function () {
         this.addMouseEvents(this.adventurerStock, adventurer);
     };
     PlayerTable.prototype.addCompanion = function (companion, from) {
-        var _a;
         var newWeights = {};
         newWeights[companion.subType] = companion.location_arg;
         this.companionsStock.changeItemsWeight(newWeights);
@@ -2197,8 +2188,6 @@ var PlayerTable = /** @class */ (function () {
         else {
             this.companionsStock.addToStockWithId(companion.subType, '' + companion.id);
         }
-        // TODO TEMP for expansion
-        (_a = document.getElementById("player-table-" + this.playerId + "-companions_item_" + companion.id)) === null || _a === void 0 ? void 0 : _a.classList.add("expansion-set-" + Math.floor(companion.subType / 100));
         this.moveCompanionSpellStock();
         this.addMouseEvents(this.companionsStock, companion);
         this.game.tableHeightChange();
