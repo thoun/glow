@@ -808,8 +808,7 @@ trait ActionTrait {
         if (count($args->possibleRoutes) > 0 || $args->canSettle || $args->killTokenId > 0 || $args->disableTokenId > 0) {
             $this->gamestate->nextPrivateState($playerId, 'move');
         } else {
-            $this->gamestate->setPlayerNonMultiactive($playerId, 'endRound');
-            $this->giveExtraTime($playerId);
+            $this->applyEndTurn($playerId);
         }
     }
 
