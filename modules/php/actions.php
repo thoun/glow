@@ -525,14 +525,16 @@ trait ActionTrait {
             throw new BgaUserException("Companion not available");
         }
 
-        $this->applyRecruitCompanion($playerId, $companion);
-
         $this->DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 1 where `card_location` = 'malach'");
-        $this->companions->moveCard($replaced->id, 'malach', 0);        
+        $this->companions->moveCard($replaced->id, 'malach', 0); 
+        $this->afterDiscardCompanion($playerId, $replaced);   
+
         $this->notifyAllPlayers('removeCompanion', '', [
             'playerId' => $playerId,
             'companion' => $replaced,
         ]);
+
+        $this->applyRecruitCompanion($playerId, $companion);
 
         $dice = $this->getEffectiveDice($playerId);
         $unusedMalachDice = array_values(array_filter($dice, fn($die) => $die->color == 9 && $die->value == 9 && !$die->used));

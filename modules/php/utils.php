@@ -694,10 +694,7 @@ trait UtilTrait {
         ] + $params);
     }
 
-    function sendToCemetery(int $playerId, int $companionId, /*int*/ $dieId = 0) {
-        $this->companions->moveCard($companionId, 'cemetery', intval($this->companions->countCardInLocation('cemetery')));
-
-        $companion = $this->getCompanionFromDb($this->companions->getCard($companionId));
+    function afterDiscardCompanion(int $playerId, /*Companion*/ $companion, /*int*/ $dieId = 0) {
         if ($companion->die) {
             $removedDieId = $dieId > 0 ? $dieId : intval($this->getUniqueValueFromDB("SELECT `die_id` FROM companion WHERE `card_id` = $companion->id"));
             
@@ -728,6 +725,12 @@ trait UtilTrait {
                 }
             }
         }
+    }
+
+    function sendToCemetery(int $playerId, int $companionId, /*int*/ $dieId = 0) {
+        $this->companions->moveCard($companionId, 'cemetery', intval($this->companions->countCardInLocation('cemetery')));
+        $companion = $this->getCompanionFromDb($this->companions->getCard($companionId));
+        $this->afterDiscardCompanion($playerId, $companion, $dieId);
 
         if ($playerId > 0) {
             $this->incStat(1, 'discardedCompanions');
