@@ -52,8 +52,8 @@ $this->ADVENTURERS = [ // (string $name, int $points, int $dice, $effect)
   6 => new AdventurerCard('Noctiluca', 0, 2, new Effect([0, 0, 0], [105])),
   7 => new AdventurerCard('Orium', 0, 2, new Effect([0, 0], [101])),
   // expansion 1
-  8 => new AdventurerCard('Richard', 0, 3, new Effect([201, 202], [41, 103])),
-  9 => new AdventurerCard('Malac\'h', 4, 2, new Effect([203, 203], [21, 11])),
+  8 => new AdventurerCard('Richard', 0, 3, new Effect([201, 202], [21, 103])),
+  9 => new AdventurerCard('Malac\'h', 3, 2, new Effect([203, 203], [21, 41])),
   10 => new AdventurerCard('Kaploum', 0, 2, new Effect([204, 204], [107])),
   11 => new AdventurerCard('Uriom', 0, 1, null),
 ];
@@ -122,7 +122,7 @@ $this->COMPANIONS_EXPANSION1_SETS = [
       // A
       101 => new CompanionCard('Drak', 0, new Effect([203, 203], [-41, 103]), 2),
       102 => new CompanionCard('Goerge', 3, new Effect([204, 204], [22])),
-      103 => new CompanionCard('Oreokappa', 0, new Effect([201, 202], [102, 42])),
+      103 => new CompanionCard('Oreokappa', 2, new Effect([201, 202], [42])),
       104 => new CompanionCard('Sketal', 0, new Effect([-3, -2], [33, 12]), 0, 0, true, 6),
       // B
       105 => new CompanionCard('Oapak', 0, new Effect([203, 203], [103, 12])),
@@ -141,10 +141,10 @@ $this->COMPANIONS_EXPANSION1_SETS = [
   2 => [
     'adds' => [
       // A
-      201 => new CompanionCard('Raykil', -3, new Effect([5, 1], [52, 21])),
-      202 => new CompanionCard('Croa', 0, new Effect([1, 3], [51, 11]), 2),
-      203 => new CompanionCard('Aou', 0, new Effect([4], [51])),
-      204 => new CompanionCard('Sir Wapo', 2, new Effect([5, 5], [52])),
+      201 => new CompanionCard('Raykil', -2, new Effect([5, 1], [51, 21]), 2),
+      202 => new CompanionCard('Croa', 0, new Effect([1, 3], [51, 41])),
+      203 => new CompanionCard('Aou', -1, new Effect([4], [51])),
+      204 => new CompanionCard('Sir Wapo', 1, new Effect([5, 5], [52])),
       // B
       205 => new CompanionCard('Graou', 4, new Effect([3], [-41, 50]), 1),
       206 => new CompanionCard('Maisonnette', 0, new Effect([-1], [-41, 50]), 0, 2),
@@ -164,8 +164,8 @@ $this->COMPANIONS_EXPANSION1_SETS = [
       // A
       301 => new CompanionCard('Lovd', -3, new Effect([3, 4], [103, 12])),
       302 => new CompanionCard('Zzibela', 0, new Effect([1, -3], [22]), 1),
-      303 => new CompanionCard('Biki', 6, new Effect([-2], [33, -42]), 1),
-      304 => new CompanionCard('Gok\'Xar', 0, new Effect([1, 5], [-21, 104])),
+      303 => new CompanionCard('Briki', 9, new Effect([1, 5], [33, -41]), 1),
+      304 => new CompanionCard('Gok\'Xar', 2, new Effect([-2], [-21, 104])),
       // B
       305 => new CompanionCard('Baby Snarexe', 0, new Effect([3, 1], [-12, 33, 107])),
       306 => new CompanionCard('Snako', 2, new Effect([5, 4], [-41, 12]), 3),

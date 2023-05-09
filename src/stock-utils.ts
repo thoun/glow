@@ -225,7 +225,7 @@ function getEffectTooltip(effect: Effect) {
 
 function getAdventurerTooltip(type: number) {
     switch (type) {
-        case 11: return `<p>` + _(`TODO special Uriom rules`) + `</p>`;
+        case 11: return `<p>${_(`Uriom has 2 special small yellow dice that are available only for Uriom`)}</p>`; // TODO
     }
     return null;
 }
@@ -262,6 +262,8 @@ function getCompanionTooltip(type: number) {
         case 41: return `<p>` + _(`If the player obtains an air symbol, they immediately discard Cromaug and can take another companion of their choice from the cemetery that they place in front of them. The chosen companion becomes the last companion to be recruited.`) + `</p>
         <p>` + _(`If it is a Sketal, they take the additional die indicated by its power, if it is available in the reserve pool, and can roll it from the next round. If it is Kaar, the black die comes into play.`) + `</p>
         <p>` + _(`If the previously obtained result of the dice allows it, they can immediately trigger the effect of this new companion.`) + `</p>`;
+
+        case 107: return `<p>` + _(`go back to 10VP (record how many VP you went back), play normally and retrieve your VPs at the end.`) + `</p>`; // TODO
     }
     return null;
 }

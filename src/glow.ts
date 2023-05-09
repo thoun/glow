@@ -941,7 +941,7 @@ class Glow implements GlowGame {
         switch (prefId) {
             // KEEP
             case 202: 
-                document.getElementById('full-table').dataset.highContrastPoints = '' + prefValue;
+                document.getElementById('full-table').dataset.highContrastPoints = 'false';// TODO set back for expansion release '' + prefValue;
                 break;
         }
     }

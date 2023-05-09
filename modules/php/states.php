@@ -461,7 +461,7 @@ trait StateTrait {
                 }
 
                 if (count($tokensByColor) >= 6) {
-                    $points += 10 * min($tokensByColor);
+                    $points += 10; // only once * min($tokensByColor);
                 }
 
                 $this->DbQuery("UPDATE player SET player_score_tokens = $points WHERE player_id = $playerId");
