@@ -110,7 +110,11 @@ trait ArgsTrait {
     }
 
     function argSwap() {
-        $companion = $this->getCompanionFromDb($this->companions->getCardOnTop('malach'));
+        $companion = null;
+        $dbCard = $this->companions->getCardOnTop('malach');
+        if ($dbCard) {
+            $companion = $this->getCompanionFromDb($dbCard);
+        }
 
         if ($companion && $companion->die) {
             $companion->noDieWarning = !$this->isBigDieAvailable($companion->dieColor);
