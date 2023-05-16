@@ -140,13 +140,14 @@ trait ArgsTrait {
     }
 
     function addActivableTokens(int $playerId, Object &$args) {
+        $args->killTokenId = 0;
+        $args->disableTokenId = 0;
+        
         if (!$this->tokensActivated()) {
             return;
         }
 
         $tokens = $this->getPlayerTokens($playerId);
-        $args->killTokenId = 0;
-        $args->disableTokenId = 0;
 
         foreach ($tokens as $token) {
             if ($token->type == 3) {

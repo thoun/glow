@@ -807,7 +807,8 @@ trait ActionTrait {
 
     function checkMoveEnd(int $playerId) {    
         $args = $this->argMoveForPlayer($playerId);
-        if (count($args->possibleRoutes) > 0 || $args->canSettle || $args->killTokenId > 0 || $args->disableTokenId > 0) {
+        $side = $this->getSide();
+        if ($side != 2 && (count($args->possibleRoutes) > 0 || $args->canSettle || $args->killTokenId > 0 || $args->disableTokenId > 0)) {
             $this->gamestate->nextPrivateState($playerId, 'move');
         } else {
             $this->applyEndTurn($playerId);
