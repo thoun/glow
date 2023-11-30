@@ -36,10 +36,10 @@ $this->DICES = [
 $this->DICES_EXPANSION1 = [
   // color is the key, then large number and small number
   6 => [3, 1], // purple
-  7 => [3, 0], // yellow
+  // TODOORIUM 7 => [3, 0], // yellow
   8 => [1, 1], // black
   80 => [2, 0], // black/gray/multi
-  9 => [2, 0], // brown
+  9 => [2, 0], // light green
   10 => [2, 0], // pink
 ];
 
