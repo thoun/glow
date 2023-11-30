@@ -2965,7 +2965,7 @@ var Glow = /** @class */ (function () {
                 case 'privateSelectDiceAction':
                     this.currentDieAction = null;
                     var rollDiceArgs = args;
-                    var possibleRerolls = rollDiceArgs.rerollCompanion + rollDiceArgs.rerollTokens + Object.values(rollDiceArgs.rerollScore).length;
+                    var possibleRerolls = rollDiceArgs.rerollCompanion + rollDiceArgs.rerollCrolos + rollDiceArgs.rerollTokens + Object.values(rollDiceArgs.rerollScore).length;
                     this.addActionButton("setRollDice-button", _("Reroll 1 or 2 dice") + formatTextIcons(' (1 [reroll] )'), function () { return _this.selectDiceToRoll(); });
                     this.addActionButton("setChangeDie-button", _("Change die face") + formatTextIcons(" (3 [reroll]" + (rollDiceArgs.grayMultiDice ? ' / ' + _('free for ${symbol}').replace('${symbol}', '[symbol0]') : '') + ")"), function () { return _this.selectDieToChange(); });
                     this.addActionButton("keepDice-button", _("Keep current dice") + (rollDiceArgs.grayMultiDice ? formatTextIcons(" (" + _('change ${symbol} face before').replace('${symbol}', '[symbol0]') + ")") : ''), function () { return _this.keepDice(); }, null, null, 'red');
@@ -3424,6 +3424,25 @@ var Glow = /** @class */ (function () {
         //console.log('getMoveArgs', this.gamedatas.gamestate);
         return ((_a = this.gamedatas.gamestate.args) === null || _a === void 0 ? void 0 : _a[this.getPlayerId()]) || this.gamedatas.gamestate.private_state.args;
     };
+    Glow.prototype.permute = function (permutation) {
+        var length = permutation.length, result = [permutation.slice()], c = new Array(length).fill(0), i = 1, k, p;
+        while (i < length) {
+            if (c[i] < i) {
+                k = i % 2 && c[i];
+                p = permutation[i];
+                permutation[i] = permutation[k];
+                permutation[k] = p;
+                ++c[i];
+                i = 1;
+                result.push(permutation.slice());
+            }
+            else {
+                c[i] = 0;
+                ++i;
+            }
+        }
+        return result;
+    };
     Glow.prototype.getPossibleCosts = function (costNumber) {
         var playerArgs = this.gamedatas.gamestate.private_state.args;
         var possibleCosts = [];
@@ -3431,29 +3450,43 @@ var Glow = /** @class */ (function () {
             playerArgs.rerollCompanion,
             playerArgs.rerollTokens,
             Object.values(playerArgs.rerollScore).length,
+            playerArgs.rerollCrolos,
         ];
-        [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]].forEach(function (orderArray) {
+        var permutations = this.permute([0, 1, 2, 3]);
+        permutations.forEach(function (orderArray) {
             var remainingCost = costNumber;
-            var _loop_8 = function (i) {
-                var possibleCost = [0, 0, 0];
+            var _loop_8 = function (i_1) {
+                var possibleCost = [0, 0, 0, 0];
                 orderArray.forEach(function (order, orderIndex) {
                     if (remainingCost > 0 && canUse[order] > 0) {
                         var min = Math.min(remainingCost, canUse[order]);
                         if (orderIndex === 0) {
-                            min = Math.min(min, i);
+                            min = Math.min(min, i_1);
                         }
                         remainingCost -= min;
                         possibleCost[order] += min;
                     }
                 });
-                if (possibleCost.reduce(function (a, b) { return a + b; }, 0) === costNumber && !possibleCosts.some(function (other) { return possibleCost[0] == other[0] && possibleCost[1] == other[1] && possibleCost[2] == other[2]; })) {
+                if (possibleCost.reduce(function (a, b) { return a + b; }, 0) === costNumber && !possibleCosts.some(function (other) { return possibleCost[0] == other[0] && possibleCost[1] == other[1] && possibleCost[2] == other[2] && possibleCost[3] == other[3]; })) {
                     possibleCosts.push(possibleCost);
                 }
             };
-            for (var i = 1; i <= costNumber; i++) {
-                _loop_8(i);
+            for (var i_1 = 1; i_1 <= costNumber; i_1++) {
+                _loop_8(i_1);
             }
         });
+        // remove "duplicates" if only negative points, and costs more or equal
+        var pointCosts = possibleCosts.map(function (possibleCost) { return possibleCost[0] > 0 || possibleCost[1] > 0 ? -1 : (possibleCost[2] ? playerArgs.rerollScore[possibleCost[2]] : 0) + possibleCost[3] * 2; });
+        var i = 0;
+        while (i < possibleCosts.length) {
+            if (pointCosts[i] > 0 && pointCosts.some(function (pointCost, index) { return pointCost < pointCosts[i] || (pointCost == pointCosts[i] && index < i); })) {
+                possibleCosts.splice(i, 1);
+                pointCosts.splice(i, 1);
+            }
+            else {
+                i++;
+            }
+        }
         return possibleCosts;
     };
     Glow.prototype.getRollDiceButtons = function () {
@@ -3559,6 +3592,8 @@ var Glow = /** @class */ (function () {
             case 2:
                 var playerArgs = this.gamedatas.gamestate.private_state.args;
                 return formatTextIcons("-" + playerArgs.rerollScore[cost] + " [point] ");
+            case 3:
+                return formatTextIcons("-" + cost * 2 + " [point] (Krolos)");
         }
     };
     Glow.prototype.onSelectedDiceChange = function () {

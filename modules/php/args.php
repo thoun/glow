@@ -83,16 +83,19 @@ trait ArgsTrait {
     }
 
     function argRollDiceForPlayer(int $playerId) {
+        $playerScore = $this->getPlayerScore($playerId);
 
         $rerollCompanion = $this->getPlayerCompanionRerolls($playerId);
+        $rerollCrolos = $this->getPlayerCrolosRerolls($playerId, $playerScore);
         $rerollTokens = $this->getPlayerRerolls($playerId);
-        $rerollScore = $this->getRerollScoreCost($this->getPlayerScore($playerId));
+        $rerollScore = $this->getRerollScoreCost($playerScore);
 
         $dice = $this->getEffectiveDice($playerId);
         $grayMultiDice = array_values(array_filter($dice, fn($die) => $die->color == 80 && $die->face == 6));
 
         return [
             'rerollCompanion' => $rerollCompanion,
+            'rerollCrolos' => $rerollCrolos,
             'rerollTokens' => $rerollTokens,
             'rerollScore' => $rerollScore,
             'grayMultiDice' => count($grayMultiDice) > 0,

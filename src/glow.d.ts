@@ -178,6 +178,7 @@ interface EnteringRecruitCompanionArgs {
 
 interface EnteringRollDiceForPlayer {
     rerollCompanion: number;
+    rerollCrolos: number;
     rerollTokens: number;
     rerollScore: { [rerolls: number]: number }; // number of rerolls -> cost
     grayMultiDice: boolean;

@@ -796,6 +796,19 @@ trait UtilTrait {
         return $rerolls;
     }
 
+    function getPlayerCrolosRerolls(int $playerId, int $score) {
+        $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId, null, 'location_arg'));
+
+        $rerolls = 0;
+        foreach($companions as $companion) {
+            if ($companion->subType == CROLOS) {
+                $rerolls += floor($score / 2);
+            }
+        }
+
+        return $rerolls;
+    }
+
     public function applyRollDieCost(int $playerId, int $costNumber, array $cost) {
         $costNumberSum = array_reduce($cost, fn($carry, $item) => $carry + $item, 0);
         if ($costNumberSum != $costNumber) {
@@ -840,6 +853,14 @@ trait UtilTrait {
             $this->incStat($cost[2], 'scoreBack', $playerId);
 
             $this->decPlayerScore($playerId, $args['rerollScore'][$cost[2]]);
+        } 
+
+        if ($cost[3] > 0) {
+            if ($args['rerollCrolos'] < $cost[3]) {
+                throw new BgaUserException('Not enough reroll available (Crolos)');
+            }
+
+            $this->decPlayerScore($playerId, $cost[3] * 2);
         }        
     }
 

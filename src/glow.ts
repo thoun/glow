@@ -740,7 +740,7 @@ class Glow implements GlowGame {
                     this.currentDieAction = null;
 
                     const rollDiceArgs = args as EnteringRollDiceForPlayer;
-                    const possibleRerolls = rollDiceArgs.rerollCompanion + rollDiceArgs.rerollTokens + Object.values(rollDiceArgs.rerollScore).length;
+                    const possibleRerolls = rollDiceArgs.rerollCompanion + rollDiceArgs.rerollCrolos + rollDiceArgs.rerollTokens + Object.values(rollDiceArgs.rerollScore).length;
             
                     (this as any).addActionButton(`setRollDice-button`, _("Reroll 1 or 2 dice") + formatTextIcons(' (1 [reroll] )'), () => this.selectDiceToRoll());
                     (this as any).addActionButton(`setChangeDie-button`, _("Change die face") + formatTextIcons(` (3 [reroll]${rollDiceArgs.grayMultiDice ? ' / ' + _('free for ${symbol}').replace('${symbol}', '[symbol0]') : ''})`), () => this.selectDieToChange());
@@ -1304,6 +1304,29 @@ class Glow implements GlowGame {
         //console.log('getMoveArgs', this.gamedatas.gamestate);
         return this.gamedatas.gamestate.args?.[this.getPlayerId()] || this.gamedatas.gamestate.private_state.args;
     }
+
+    private permute(permutation) {
+        var length = permutation.length,
+            result = [permutation.slice()],
+            c = new Array(length).fill(0),
+            i = 1, k, p;
+      
+        while (i < length) {
+          if (c[i] < i) {
+            k = i % 2 && c[i];
+            p = permutation[i];
+            permutation[i] = permutation[k];
+            permutation[k] = p;
+            ++c[i];
+            i = 1;
+            result.push(permutation.slice());
+          } else {
+            c[i] = 0;
+            ++i;
+          }
+        }
+        return result;
+    }
     
     private getPossibleCosts(costNumber: number) {
         const playerArgs: EnteringRollDiceForPlayer = this.gamedatas.gamestate.private_state.args;
@@ -1313,13 +1336,15 @@ class Glow implements GlowGame {
             playerArgs.rerollCompanion,
             playerArgs.rerollTokens,
             Object.values(playerArgs.rerollScore).length,
-        ];        
+            playerArgs.rerollCrolos,
+        ];   
         
-        [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]].forEach(orderArray => {
+        const permutations = this.permute([0, 1, 2, 3]);
+        permutations.forEach(orderArray => {
             let remainingCost = costNumber;
 
             for (let i = 1; i <= costNumber; i++) {
-                const possibleCost = [0, 0, 0];
+                const possibleCost = [0, 0, 0, 0];
                 orderArray.forEach((order, orderIndex) => {
                     if (remainingCost > 0 && canUse[order] > 0) {
                         let min = Math.min(remainingCost, canUse[order]);
@@ -1330,11 +1355,23 @@ class Glow implements GlowGame {
                         possibleCost[order] += min;
                     }
                 });
-                if (possibleCost.reduce((a, b) => a + b, 0) === costNumber && !possibleCosts.some(other => possibleCost[0] == other[0] && possibleCost[1] == other[1] && possibleCost[2] == other[2])) {
+                if (possibleCost.reduce((a, b) => a + b, 0) === costNumber && !possibleCosts.some(other => possibleCost[0] == other[0] && possibleCost[1] == other[1] && possibleCost[2] == other[2] && possibleCost[3] == other[3])) {
                     possibleCosts.push(possibleCost);
                 }
             }
         });
+
+        // remove "duplicates" if only negative points, and costs more or equal
+        const pointCosts = possibleCosts.map(possibleCost => possibleCost[0] > 0 || possibleCost[1] > 0 ? -1 : (possibleCost[2] ? playerArgs.rerollScore[possibleCost[2]] : 0) + possibleCost[3] * 2);
+        let i = 0;
+        while (i < possibleCosts.length) {
+            if (pointCosts[i] > 0 && pointCosts.some((pointCost, index) => pointCost < pointCosts[i] || (pointCost == pointCosts[i] && index < i))) {
+                possibleCosts.splice(i, 1);
+                pointCosts.splice(i, 1);
+            } else {
+                i++;
+            }
+        }
 
         return possibleCosts;
     }
@@ -1454,6 +1491,8 @@ class Glow implements GlowGame {
             case 2:
                 const playerArgs: EnteringRollDiceForPlayer = this.gamedatas.gamestate.private_state.args;
                 return formatTextIcons(`-${playerArgs.rerollScore[cost]} [point] `);
+            case 3:
+                return formatTextIcons(`-${cost * 2} [point] (Krolos)`);
         }
     }
 

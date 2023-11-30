@@ -148,7 +148,7 @@
 
         $id = $this->getArg('id', AT_posint, true);
         $value = $this->getArg('value', AT_posint, true);
-        $cost = explode(',', $this->getArg("cost", AT_numberlist, true)); // cost : [companion, tokens, score]
+        $cost = explode(',', $this->getArg("cost", AT_numberlist, true)); // cost : [companion, tokens, score, krolos]
         $this->game->changeDie($id, $value, $cost);
 
         $this->ajaxResponse();
