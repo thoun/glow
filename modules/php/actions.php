@@ -194,7 +194,7 @@ trait ActionTrait {
                 $bigBlackDice = array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices));
                 if (count($bigBlackDice) > 0) {
                     $bigBlackDie = $bigBlackDice[0];
-                    $this->moveDice([$bigBlackDie], 'richard');
+                    $this->moveDice([$bigBlackDie], 'zaydrel');
 
                     $this->notifyAllPlayers('removeSketalDie', clienttranslate('${player_name} loses the big black die'), [
                         'playerId' => $playerId,
@@ -516,15 +516,15 @@ trait ActionTrait {
 
         $playerId = intval($this->getCurrentPlayerId());
 
-        $companion = $this->getCompanionFromDb($this->companions->getCardOnTop('malach'));
+        $companion = $this->getCompanionFromDb($this->companions->getCardOnTop('hulios'));
         $replaced = $this->getCompanionFromDb($this->companions->getCard($id));
 
-        if ($companion->location != 'malach' || $replaced->location != 'player'.$playerId) {
+        if ($companion->location != 'hulios' || $replaced->location != 'player'.$playerId) {
             throw new BgaUserException("Companion not available");
         }
 
-        $this->DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 1 where `card_location` = 'malach'");
-        $this->companions->moveCard($replaced->id, 'malach', 0); 
+        $this->DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 1 where `card_location` = 'hulios'");
+        $this->companions->moveCard($replaced->id, 'hulios', 0); 
         $this->afterDiscardCompanion($playerId, $replaced);   
 
         $this->notifyAllPlayers('removeCompanion', '', [
@@ -535,15 +535,15 @@ trait ActionTrait {
         $this->applyRecruitCompanion($playerId, $companion);
 
         $dice = $this->getEffectiveDice($playerId);
-        $unusedMalachDice = array_values(array_filter($dice, fn($die) => $die->color == 9 && $die->value == 9 && !$die->used));
-        if (count($unusedMalachDice) > 0) {
-            $die = $unusedMalachDice[0];
+        $unusedHuliosDice = array_values(array_filter($dice, fn($die) => $die->color == 9 && $die->value == 9 && !$die->used));
+        if (count($unusedHuliosDice) > 0) {
+            $die = $unusedHuliosDice[0];
             $this->DbQuery("UPDATE dice SET `used` = true WHERE die_id = $die->id");
         }
 
         if ($companion->die && $companion->dieColor === 0 && $this->canChooseSketalDie()) {
             $this->gamestate->nextPrivateState($playerId, 'selectSketalDie'); // we don't disable player so he stays active for selectSketalDieMulti
-        } else if (count($unusedMalachDice) > 1) {
+        } else if (count($unusedHuliosDice) > 1) {
             $this->gamestate->nextPrivateState($playerId, 'stay');
         } else {
             $this->gamestate->setPlayerNonMultiactive($playerId, 'next');
@@ -554,20 +554,20 @@ trait ActionTrait {
         $this->checkAction('skipSwap');
 
         $playerId = intval($this->getCurrentPlayerId());
-        $companion = $this->getCompanionFromDb($this->companions->getCardOnTop('malach'));
+        $companion = $this->getCompanionFromDb($this->companions->getCardOnTop('hulios'));
 
         $dice = $this->getEffectiveDice($playerId);
-        $unusedMalachDice = array_values(array_filter($dice, fn($die) => $die->color == 9 && $die->value == 9 && !$die->used));
-        if (count($unusedMalachDice) > 0) {
-            $die = $unusedMalachDice[0];
+        $unusedHuliosDice = array_values(array_filter($dice, fn($die) => $die->color == 9 && $die->value == 9 && !$die->used));
+        if (count($unusedHuliosDice) > 0) {
+            $die = $unusedHuliosDice[0];
             $this->DbQuery("UPDATE dice SET `used` = true WHERE die_id = $die->id");
         }
 
         // put the card under the deck
-        $this->DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 1 where `card_location` = 'malach'");
+        $this->DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 1 where `card_location` = 'hulios'");
         $this->DbQuery("UPDATE companion SET `card_location_arg` = 0 where `card_id` = $companion->id");
 
-        if (count($unusedMalachDice) > 1) {            
+        if (count($unusedHuliosDice) > 1) {            
             $this->gamestate->nextPrivateState($playerId, 'stay');
         } else {
             $this->gamestate->setPlayerNonMultiactive($playerId, 'next');

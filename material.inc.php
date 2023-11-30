@@ -48,14 +48,14 @@ $this->ADVENTURERS = [ // (string $name, int $points, int $dice, $effect)
   2 => new AdventurerCard('Taetyss', 0, 2, new Effect([3, 2], [41, 103])),
   3 => new AdventurerCard('Eoles', 4, 2, new Effect([3, 5], [11, 102])),
   4 => new AdventurerCard('Pocana', 4, 3, null),
-  5 => new AdventurerCard('Moloc\'h', 3, 2, new Effect([5], [21])),
+  5 => new AdventurerCard("Moloc'h", 3, 2, new Effect([5], [21])),
   6 => new AdventurerCard('Noctiluca', 0, 2, new Effect([0, 0, 0], [105])),
   7 => new AdventurerCard('Orium', 0, 2, new Effect([0, 0], [101])),
   // expansion 1
-  8 => new AdventurerCard('Richard', 0, 3, new Effect([201, 202], [21, 103])),
-  9 => new AdventurerCard('Malac\'h', 3, 2, new Effect([203, 203], [21, 41])),
-  10 => new AdventurerCard('Kaploum', 0, 2, new Effect([204, 204], [107])),
-  11 => new AdventurerCard('Uriom', 0, 1, null),
+  8 => new AdventurerCard("Zay'Drel", 0, 3, new Effect([201, 202], [21, 102])),
+  9 => new AdventurerCard("Hulios", 3, 2, new Effect([203, 203], [21, 41])),
+  10 => new AdventurerCard('Elldir', 0, 2, new Effect([204, 204], [107])),
+  //11 => new AdventurerCard('Uriom', 0, 1, null),
 ];
 
 $this->COMPANIONS = [ // (string $name, int $points, $effect, bool $reroll, int $fireflies, bool $die, int $dieColor)
@@ -451,7 +451,7 @@ $this->ADVENTURERS_COLORS = [
   6 => '8a298a',
   7 => 'ffd503',
   8 => '939598',
-  9 => 'a97c50',
+  9 => 'a7ce39',
   10 => 'eca3c8',
   11 => 'ffd503',
 ];

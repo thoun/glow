@@ -451,9 +451,6 @@ trait UtilTrait {
     function createAdventurers(bool $expansion, bool $solo) {        
         foreach($this->ADVENTURERS as $type => $adventurer) {
             $create = $expansion || $type <= 7;
-            if ($solo && $type == 9) {
-                $create = false;
-            }
             if ($create) {
                 $adventurers[] = [ 'type' => $type, 'type_arg' => null, 'nbr' => 1];
             }
@@ -492,14 +489,35 @@ trait UtilTrait {
             $this->companions->shuffle('deckB');
         } 
 
-        if (!$solo) {
+        if ($solo) {
+            $companionsB = [];
+            $companions = [];
+            foreach ($this->COMPANIONS as $subType => $companion) {
+                if (!in_array($subType, $removedCompanions) && in_array($subType, $this->REMOVED_COMPANION_FOR_SOLO) && !in_array($subType, [XARGOK, KAAR, CROMAUG])) {
+                    $typeB = $subType > 23;
+                    $card = [ 'type' => $typeB ? 2 : 1, 'type_arg' => $subType, 'nbr' => 1];
+                    if ($typeB) {
+                        $companionsB[] = $card;
+                    } else {
+                        $companions[] = $card;
+                    }
+                }
+            }
+            $this->companions->createCards($companions, 'huliosA');
+            $this->companions->createCards($companionsB, 'huliosB');
+            $this->companions->shuffle('huliosA');
+            $this->companions->shuffle('huliosB');
+            $this->DbQuery("UPDATE companion SET `card_location_arg` = `card_location_arg` + 100 WHERE `card_location` = 'huliosB'");
+            $this->companions->moveAllCardsInLocationKeepOrder('huliosA', 'hulios');
+            $this->companions->moveAllCardsInLocationKeepOrder('huliosB', 'hulios');
+        } else {
             // remove 3 of each face
             for ($face=1; $face<=2; $face++) {
                 $removed = array_slice($this->getCompanionsFromDb($this->companions->getCardsOfTypeInLocation($face, null, 'deck')), 0, 3);
-                $this->companions->moveCards(array_map(fn($companion) => $companion->id, $removed), 'malach');
+                $this->companions->moveCards(array_map(fn($companion) => $companion->id, $removed), 'hulios');
             }
             // set face 1 (A) before face 2 (B)
-            $this->DbQuery("UPDATE companion SET `card_location_arg` = `card_location_arg` + (1000 * (2 - `card_type`)) WHERE `card_location` IN ('deck', 'malach') ");
+            $this->DbQuery("UPDATE companion SET `card_location_arg` = `card_location_arg` + (1000 * (2 - `card_type`)) WHERE `card_location` IN ('deck', 'hulios') ");
         }
     }
 
@@ -710,7 +728,7 @@ trait UtilTrait {
                 $adventurer = count($adventurers) > 0 ? $adventurers[0] : null;
                 // get back the big black die if Kaar is removed
                 if ($adventurer->color == 8) {
-                    $dbDices = $this->getCollectionFromDB("SELECT * FROM dice WHERE `location` = 'richard' AND `color` = 8 AND `small` = false");
+                    $dbDices = $this->getCollectionFromDB("SELECT * FROM dice WHERE `location` = 'zaydrel' AND `color` = 8 AND `small` = false");
                     $bigBlackDice = array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices));
                     if (count($bigBlackDice) > 0) {
                         $bigBlackDie = $bigBlackDice[0];

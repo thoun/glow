@@ -114,7 +114,7 @@ trait ArgsTrait {
 
     function argSwap() {
         $companion = null;
-        $dbCard = $this->companions->getCardOnTop('malach');
+        $dbCard = $this->companions->getCardOnTop('hulios');
         if ($dbCard) {
             $companion = $this->getCompanionFromDb($dbCard);
         }

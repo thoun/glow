@@ -214,8 +214,8 @@ $playerActionsGameStates = [
 
     ST_PLAYER_URIOM_RECRUIT_COMPANION => [
         "name" => "uriomRecruitCompanion",
-        "description" => clienttranslate('${actplayer} can recruit the selected companion (Uriom power)'),
-        "descriptionmyturn" => clienttranslate('${you} can recruit the selected companion (Uriom power)'),
+        "description" => /*clienttranslate TODOURIOM */('${actplayer} can recruit the selected companion (Uriom power)'),
+        "descriptionmyturn" => /*clienttranslate TODOURIOM */('${you} can recruit the selected companion (Uriom power)'),
         "type" => "activeplayer",
         "args" => "argUriomRecruitCompanion",
         "possibleactions" => [ 
@@ -315,7 +315,7 @@ $playerActionsGameStates = [
 
     ST_MULTIPLAYER_SWAP => [
         "name" => "swapMulti",
-        "description" => clienttranslate("Players with Malac'h can swap one companion with his special deck"),
+        "description" => clienttranslate("Players with Hulios can swap one companion with his special deck"),
         "descriptionmyturn" => clienttranslate('${you} can swap one of your companion with this card'),
         "type" => "multipleactiveplayer",
         "initialprivate" => ST_PRIVATE_SWAP,

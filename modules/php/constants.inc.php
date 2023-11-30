@@ -29,7 +29,7 @@ define('ST_PRIVATE_ROLL_DICE', 331);
 define('ST_PRIVATE_CHANGE_DIE', 332);
 define('ST_PRIVATE_REROLL_IMMEDIATE', 333);
 
-// just before noon (Malach & Cromaug)
+// just before noon (Hulios & Cromaug)
 define('ST_MULTIPLAYER_SWAP', 34);
 define('ST_PRIVATE_SWAP', 341);
 define('ST_MULTIPLAYER_RESURRECT', 35);
@@ -82,8 +82,9 @@ define('OPTION_EXPANSION_MODULE3', 113);
 /*
  * Cards
  */
-define('KAAR', 20);
 define('XARGOK', 10);
+define('KAAR', 20);
+define('CROMAUG', 41);
 define('CROLOS', 107);
 define('COMPANION_SPELL', 3);
 

@@ -1442,7 +1442,7 @@ function getEffectTooltip(effect) {
 }
 function getAdventurerTooltip(type) {
     switch (type) {
-        case 11: return "<p>" + _("Uriom has 2 special small yellow dice that are available only for Uriom") + "</p>"; // TODO
+        //case 11: return `<p>${_(`Uriom has 2 special small yellow dice that are available only for Uriom`)}</p>`; // TODO
     }
     return null;
 }

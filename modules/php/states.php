@@ -135,21 +135,21 @@ trait StateTrait {
     }
 
     function stSwap() {
-        $playerWithMalachDiceActivated = [];
+        $playerWithHuliosDiceActivated = [];
 
         $playersIds = $this->getPlayersIds();
 
         foreach($playersIds as $playerId) {
             $dice = $this->getEffectiveDice($playerId);
-            $unusedMalachDice = array_filter($dice, fn($die) => $die->color == 9 && $die->value == 9 && !$die->used);
+            $unusedHuliosDice = array_filter($dice, fn($die) => $die->color == 9 && $die->value == 9 && !$die->used);
 
-            if (count($unusedMalachDice) > 0) {
-                $playerWithMalachDiceActivated[] = $playerId;
+            if (count($unusedHuliosDice) > 0) {
+                $playerWithHuliosDiceActivated[] = $playerId;
             }
         }
 
-        if (count($playerWithMalachDiceActivated) > 0) {
-            $this->gamestate->setPlayersMultiactive($playerWithMalachDiceActivated, 'next', true);
+        if (count($playerWithHuliosDiceActivated) > 0) {
+            $this->gamestate->setPlayersMultiactive($playerWithHuliosDiceActivated, 'next', true);
             $this->gamestate->initializePrivateStateForAllActivePlayers(); 
         } else {
             $this->gamestate->nextState('next');
