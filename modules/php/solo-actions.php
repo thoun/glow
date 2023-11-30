@@ -14,7 +14,7 @@ trait SoloActionTrait {
     public function chooseTomDice(array $diceIds) {
         $dice = $this->getDiceByIds($diceIds);
 
-        $this->setTomDice($dice);
+        $tom = $this->setTomDice($dice);
 
         foreach($dice as &$idie) {
             $idie->roll();
@@ -24,6 +24,7 @@ trait SoloActionTrait {
 
         $this->notifyAllPlayers('setTomDice', '', [
             'dice' => $dice,
+            'newPlayerColor' => $tom->color,
         ]);
 
         $this->rollAndPlaceTomDice($dice);

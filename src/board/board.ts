@@ -131,7 +131,7 @@ class Board {
                 const left = coordinates[0];
                 const top = coordinates[1];
                 const transform = `translateX(${left}px) translateY(${top}px)`;
-                dojo.place(`<div id="meeple0" class="token meeple1 ${this.game.isColorBlindMode() ? 'color-blind' : ''} meeple-player-0" style="background-color: black; transform: ${transform}"></div>`, 'board');
+                dojo.place(`<div id="meeple0" class="token meeple1 ${this.game.isColorBlindMode() ? 'color-blind' : ''} meeple-player-0" style="background-color: #${player.color}; transform: ${transform}"></div>`, 'board');
             }
         });
         

@@ -1048,7 +1048,7 @@ class Glow implements GlowGame {
                         <div src="img/gear.png" alt="" class="avatar avatar_active" id="avatar_active_0"></div>
                     </div>
                                                
-                    <div class="player-name" id="player_name_0">
+                    <div class="player-name" id="player_name_0" style="color: #${gamedatas.tom.color}">
                         Tom
                     </div>
                     <div id="player_board_0" class="player_board_content">
@@ -2318,6 +2318,12 @@ class Glow implements GlowGame {
 
     notif_setTomDice(notif: Notif<NotifChosenAdventurerArgs>) {
         this.setTomDice(notif.args.dice);
+
+        
+        const newPlayerColor = notif.args.newPlayerColor;
+        document.getElementById(`player_name_0`).style.color = `#${newPlayerColor}`;
+        this.board.setColor(0, newPlayerColor);
+        this.gamedatas.tom.color = newPlayerColor;
     }
 
     notif_updateSoloTiles(notif: Notif<NotifUpdateSoloTilesArgs>) {

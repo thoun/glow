@@ -22,6 +22,7 @@ trait SoloUtilTrait {
         $tom->scoreBeforeEnd = 0;
         $tom->scoreBoard = 0;
         $tom->scoreAfterEnd = 0;
+        $tom->color = '000000';
 
         return $this->setTom($tom);
     }
@@ -38,8 +39,11 @@ trait SoloUtilTrait {
         $tom = $this->getTom();
 
         $tom->dice = $dice;
+        $tom->color = $this->ADVENTURERS_COLORS[$dice[0]->color];
 
         $this->setTom($tom);
+
+        return $tom;
     }
 
     function incTomCompany(int $incCompany) {

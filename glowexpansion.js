@@ -1666,7 +1666,7 @@ var Board = /** @class */ (function () {
                 var left = coordinates[0];
                 var top_1 = coordinates[1];
                 var transform = "translateX(" + left + "px) translateY(" + top_1 + "px)";
-                dojo.place("<div id=\"meeple0\" class=\"token meeple1 " + (_this.game.isColorBlindMode() ? 'color-blind' : '') + " meeple-player-0\" style=\"background-color: black; transform: " + transform + "\"></div>", 'board');
+                dojo.place("<div id=\"meeple0\" class=\"token meeple1 " + (_this.game.isColorBlindMode() ? 'color-blind' : '') + " meeple-player-0\" style=\"background-color: #" + player.color + "; transform: " + transform + "\"></div>", 'board');
             }
         });
         this.movePoints();
@@ -3226,7 +3226,7 @@ var Glow = /** @class */ (function () {
         var players = Object.values(gamedatas.players);
         var solo = players.length === 1;
         if (solo) {
-            dojo.place("\n            <div id=\"overall_player_board_0\" class=\"player-board current-player-board\">\t\t\t\t\t\n                <div class=\"player_board_inner\" id=\"player_board_inner_982fff\">\n                    \n                    <div class=\"emblemwrap\" id=\"avatar_active_wrap_0\">\n                        <div src=\"img/gear.png\" alt=\"\" class=\"avatar avatar_active\" id=\"avatar_active_0\"></div>\n                    </div>\n                                               \n                    <div class=\"player-name\" id=\"player_name_0\">\n                        Tom\n                    </div>\n                    <div id=\"player_board_0\" class=\"player_board_content\">\n                        <div class=\"player_score\">\n                            <span id=\"player_score_0\" class=\"player_score_value\">10</span> <i class=\"fa fa-star\" id=\"icon_point_0\"></i>           \n                        </div>\n                    </div>\n                </div>\n            </div>", "overall_player_board_" + players[0].id, 'after');
+            dojo.place("\n            <div id=\"overall_player_board_0\" class=\"player-board current-player-board\">\t\t\t\t\t\n                <div class=\"player_board_inner\" id=\"player_board_inner_982fff\">\n                    \n                    <div class=\"emblemwrap\" id=\"avatar_active_wrap_0\">\n                        <div src=\"img/gear.png\" alt=\"\" class=\"avatar avatar_active\" id=\"avatar_active_0\"></div>\n                    </div>\n                                               \n                    <div class=\"player-name\" id=\"player_name_0\" style=\"color: #" + gamedatas.tom.color + "\">\n                        Tom\n                    </div>\n                    <div id=\"player_board_0\" class=\"player_board_content\">\n                        <div class=\"player_score\">\n                            <span id=\"player_score_0\" class=\"player_score_value\">10</span> <i class=\"fa fa-star\" id=\"icon_point_0\"></i>           \n                        </div>\n                    </div>\n                </div>\n            </div>", "overall_player_board_" + players[0].id, 'after');
             var tomScoreCounter = new ebg.counter();
             tomScoreCounter.create("player_score_0");
             tomScoreCounter.setValue(gamedatas.tom.score);
@@ -4296,6 +4296,10 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.notif_setTomDice = function (notif) {
         this.setTomDice(notif.args.dice);
+        var newPlayerColor = notif.args.newPlayerColor;
+        document.getElementById("player_name_0").style.color = "#" + newPlayerColor;
+        this.board.setColor(0, newPlayerColor);
+        this.gamedatas.tom.color = newPlayerColor;
     };
     Glow.prototype.notif_updateSoloTiles = function (notif) {
         this.meetingTrack.updateSoloTiles(notif.args);
