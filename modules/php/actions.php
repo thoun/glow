@@ -204,8 +204,6 @@ trait ActionTrait {
                     ]);
                 }
             }
-        } else if ($companion->subType == MARTY) {
-            $this->setPlayerMarty($playerId);
         }
     }
 

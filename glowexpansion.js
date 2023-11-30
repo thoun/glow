@@ -1643,7 +1643,7 @@ var MAP2_POINT = [
 ];
 var MAPS_POINT = [null, MAP1_POINT, MAP2_POINT];
 var Board = /** @class */ (function () {
-    function Board(game, players, tableDice, martyPosition) {
+    function Board(game, players, tableDice) {
         var _this = this;
         this.game = game;
         this.players = players;
@@ -1697,17 +1697,7 @@ var Board = /** @class */ (function () {
                 _this.tokensOpacityTimeout = null;
             }
         });
-        if (martyPosition !== null) {
-            this.addMartyPosition(martyPosition);
-        }
     }
-    Board.prototype.addMartyPosition = function (martyPosition) {
-        if (martyPosition !== null) {
-            dojo.place("<div id=\"player--1-point-marker\" class=\"point-marker\" data-player-no=\"-1\" style=\"background: white;\"></div>", 'board');
-            this.points.set(-1, martyPosition);
-            this.movePoints();
-        }
-    };
     Board.prototype.hideTokens = function (boardDiv, event) {
         var _this = this;
         var x = event.offsetX;
@@ -2439,7 +2429,7 @@ var Glow = /** @class */ (function () {
         if (players.length == 1) {
             players.push(gamedatas.tom);
         }
-        this.board = new Board(this, players, gamedatas.tableDice, gamedatas.martyPosition);
+        this.board = new Board(this, players, gamedatas.tableDice);
         this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack, gamedatas.topDeckType, gamedatas.topDeckBType, gamedatas.topCemeteryType, gamedatas.discardedSoloTiles, playerCount);
         this.createPlayerTables(gamedatas);
         if (gamedatas.day > 0) {
@@ -4098,7 +4088,6 @@ var Glow = /** @class */ (function () {
             ['setTableDice', 1],
             ['getTokens', ANIMATION_MS],
             ['removeToken', ANIMATION_MS],
-            ['placeMartyToken', 1],
             ['scoreBeforeEnd', SCORE_MS],
             ['scoreCards', SCORE_MS],
             ['scoreBoard', SCORE_MS],
@@ -4291,9 +4280,6 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.notif_removeToken = function (notif) {
         this.playersTokens[notif.args.playerId].removeCard({ id: notif.args.tokenId });
-    };
-    Glow.prototype.notif_placeMartyToken = function (notif) {
-        this.board.addMartyPosition(notif.args.position);
     };
     Glow.prototype.notif_lastTurn = function () {
         if (document.getElementById('last-round')) {

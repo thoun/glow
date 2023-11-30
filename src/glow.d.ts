@@ -142,7 +142,6 @@ interface GlowGamedatas {
 
     expansion: boolean;
     tokensActivated: boolean;
-    martyPosition: number | null;
 }
 
 interface GlowGame extends Game {
@@ -354,8 +353,4 @@ interface NotifGetTokensArgs {
 interface NotifRemoveTokenArgs {
     playerId: number;
     tokenId: number;
-}
-
-interface NotifPlaceMartyTokenArgs {
-    position: number;
 }

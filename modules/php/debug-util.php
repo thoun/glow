@@ -15,7 +15,7 @@ trait DebugUtilTrait {
         //$this->DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 5000 where `card_type_arg` in (10)"); // Xar'gok
         //$this->DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 5000 where `card_type_arg` in (41)"); // Cromaug
         //$this->DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 5000 where `card_type_arg` in (20)"); // Kaar
-        //$this->DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 5000 where `card_type_arg` in (107)"); // Marty
+        $this->DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 5000 where `card_type_arg` in (107)"); // Crolos
         //$this->DbQuery("UPDATE companion SET `card_location` = 'deck', `card_location_arg` = card_location_arg + 5000 where `card_type_arg` in (206, 207)");
         //$this->DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (10, 20, 41, 44)");
         //$this->DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 500 where `card_type_arg` in (37)");

@@ -111,7 +111,6 @@ class Board {
         private game: GlowGame, 
         private players: GlowPlayer[],
         tableDice: Die[],
-        martyPosition: number | null,
     ) {
         let html = '';
 
@@ -170,18 +169,6 @@ class Board {
                 this.tokensOpacityTimeout = null;
             }
         });
-
-        if (martyPosition !== null) {
-            this.addMartyPosition(martyPosition);
-        }
-    }
-
-    public addMartyPosition(martyPosition: number) {        
-        if (martyPosition !== null) {
-            dojo.place(`<div id="player--1-point-marker" class="point-marker" data-player-no="-1" style="background: white;"></div>`, 'board');
-            this.points.set(-1, martyPosition);
-            this.movePoints();
-        }
     }
 
     private hideTokens(boardDiv: HTMLElement, event: MouseEvent) {
