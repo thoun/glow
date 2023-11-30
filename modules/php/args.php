@@ -192,12 +192,13 @@ trait ArgsTrait {
 
     function getPossibleRoutes(int $playerId) {
         $side = $this->getSide();
+        $solo = $this->isSoloMode();
         $possibleRoutes = [];
 
         $meeples = $this->getPlayerMeeples($playerId);
         foreach ($meeples as $meeple) {
             if ($meeple->type < 2) {
-                $possibleRoutesForMeeple = $this->getPossibleRoutesForPlayer($side, $meeple->position, $playerId);
+                $possibleRoutesForMeeple = $this->getPossibleRoutesForPlayer($side, $meeple->position, $playerId, $solo);
                 foreach($possibleRoutesForMeeple as &$possibleRoute) {
                     $possibleRoute->from = $meeple->position;
 
