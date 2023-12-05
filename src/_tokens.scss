@@ -2,8 +2,8 @@
 .module-token {
     display: inline-block;
     position: relative;
-    width: 41px;
-    height: 49px;
+    width: 64px;
+    height: 62px;
     //margin: 5px;
     border-radius: 50%;
 
@@ -16,14 +16,12 @@
         .card-side {
             background-size: auto 100%;
             background-image: url('img/module-tokens.png');
+            box-shadow: unset;
             border-radius: 50%;
 
             &>* {
                 pointer-events: none;
                 user-select: none;
-            }
-
-            &.front {
             }
         }
     }    
@@ -42,35 +40,35 @@
     &[data-type="1"] {
         @for $color from 1 through 6 {
             &[data-type-arg="#{$color}"] .front {
-                background-position-x: #{($color - 1) * 100% / 10};
+                background-position-x: #{($color) * 100% / 11};
             }
         }
     }
     &[data-type="2"][data-type-arg="41"] .front {
-        background-position-x: #{6 * 100% / 10};
+        background-position-x: #{7 * 100% / 11};
     }
     &[data-type="2"][data-type-arg="21"] .front {
-        background-position-x: #{7 * 100% / 10};
+        background-position-x: #{8 * 100% / 11};
     }
     &[data-type="2"][data-type-arg="12"] .front {
-        background-position-x: #{8 * 100% / 10};
+        background-position-x: #{9 * 100% / 11};
     }
     &[data-type="3"][data-type-arg="37"] .front {
-        background-position-x: #{9 * 100% / 10};
+        background-position-x: #{10 * 100% / 11};
     }
     &[data-type="3"][data-type-arg="0"] .front {
-        background-position-x: #{10 * 100% / 10};
+        background-position-x: #{11 * 100% / 11};
     }
 }
 
 @keyframes selectable-card-animation {
     0% { 
       //background: var(--background-lighter);
-      box-shadow: 0 0 3px 2px #FFFFFF;
+      box-shadow: 0 0 3px 2px gray;
     }
     100% { 
       //background: var(--background-darker);
-      box-shadow: 0 0 5px 3px #FFFFFF;
+      box-shadow: 0 0 5px 3px gray;
     }
 }
 
@@ -79,8 +77,8 @@
     .module-token {
         display: inline-block;
         position: relative;
-        width: 41px;
-        height: 49px;
+        width: 64px;
+        height: 62px;
         //margin: 5px;
         border-radius: 50%;
         vertical-align: middle;        
@@ -88,10 +86,10 @@
         background-image: url('img/module-tokens.png');
     
         &[data-type-arg="37"] {
-            background-position-x: #{9 * 100% / 10};
+            background-position-x: #{9 * 100% / 11};
         }
         &[data-type-arg="0"] {
-            background-position-x: #{10 * 100% / 10};
+            background-position-x: #{10 * 100% / 11};
         }
     }
   }
