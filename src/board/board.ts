@@ -111,8 +111,13 @@ class Board {
         private game: GlowGame, 
         private players: GlowPlayer[],
         tableDice: Die[],
+        solo: boolean,
     ) {
         let html = '';
+
+        if (solo && this.game.getBoardSide() == 2) {
+            html += `<div id="token-solo-board"></div>`;
+        }
 
         // score contrast
         MAPS_POINT[game.getBoardSide()].forEach(point => dojo.place(`<div class="score-contrast score-contrast-map" style="left: ${point[0]}px; top: ${point[1]}px;">${point[2]}</div>`, 'board'));

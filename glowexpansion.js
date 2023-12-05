@@ -1645,13 +1645,16 @@ var MAP2_POINT = [
 ];
 var MAPS_POINT = [null, MAP1_POINT, MAP2_POINT];
 var Board = /** @class */ (function () {
-    function Board(game, players, tableDice) {
+    function Board(game, players, tableDice, solo) {
         var _this = this;
         this.game = game;
         this.players = players;
         this.points = new Map();
         this.meeples = [];
         var html = '';
+        if (solo && this.game.getBoardSide() == 2) {
+            html += "<div id=\"token-solo-board\"></div>";
+        }
         // score contrast
         MAPS_POINT[game.getBoardSide()].forEach(function (point) { return dojo.place("<div class=\"score-contrast score-contrast-map\" style=\"left: " + point[0] + "px; top: " + point[1] + "px;\">" + point[2] + "</div>", 'board'); });
         // points
@@ -2428,10 +2431,11 @@ var Glow = /** @class */ (function () {
         this.tokensManager = new TokensManager(this);
         this.createPlayerPanels(gamedatas);
         var players = Object.values(gamedatas.players);
-        if (players.length == 1) {
+        var solo = players.length == 1;
+        if (solo) {
             players.push(gamedatas.tom);
         }
-        this.board = new Board(this, players, gamedatas.tableDice);
+        this.board = new Board(this, players, gamedatas.tableDice, solo);
         this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack, gamedatas.topDeckType, gamedatas.topDeckBType, gamedatas.topCemeteryType, gamedatas.discardedSoloTiles, playerCount);
         this.createPlayerTables(gamedatas);
         if (gamedatas.day > 0) {

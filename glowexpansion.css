@@ -697,6 +697,15 @@ body > .card {
 #board.side2.hd {
   background-image: url("img/side2-hd.png"), url("img/side2.png");
 }
+#board #token-solo-board {
+  position: absolute;
+  background-image: url("img/token-solo-board.png");
+  background-size: contain;
+  width: 40px;
+  height: 40px;
+  left: 565px;
+  top: 223px;
+}
 #board .point-marker {
   position: absolute;
   top: 0;

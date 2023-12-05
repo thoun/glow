@@ -112,10 +112,11 @@ class Glow implements GlowGame {
         this.tokensManager = new TokensManager(this);
         this.createPlayerPanels(gamedatas);
         const players = Object.values(gamedatas.players);
-        if (players.length == 1) {
+        const solo = players.length == 1;
+        if (solo) {
             players.push(gamedatas.tom);
         }
-        this.board = new Board(this, players, gamedatas.tableDice);
+        this.board = new Board(this, players, gamedatas.tableDice, solo);
         this.meetingTrack = new MeetingTrack(this, gamedatas.meetingTrack, gamedatas.topDeckType, gamedatas.topDeckBType, gamedatas.topCemeteryType, gamedatas.discardedSoloTiles, playerCount);
         this.createPlayerTables(gamedatas);
         if (gamedatas.day > 0) {
