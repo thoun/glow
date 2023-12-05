@@ -1275,6 +1275,7 @@ declare const g_gamethemeurl;
 declare const board: HTMLDivElement;*/
 var CARD_WIDTH = 129;
 var CARD_HEIGHT = 240;
+var SOLO_CARD_HEIGHT = 36;
 var SPELL_DIAMETER = 64;
 var CEMETERY = 'cemetery';
 var DECK = 'deck';
@@ -1364,7 +1365,7 @@ function setupSpellCards(spellsStock) {
 function setupSoloTileCards(soloTilesStock) {
     var cardsurl = g_gamethemeurl + "img/solo-tiles.png";
     for (var type = 1; type <= 8; type++) {
-        soloTilesStock.addItemType(type, type, cardsurl, type - 1);
+        soloTilesStock.addItemType(type, type, cardsurl, type);
     }
     soloTilesStock.addItemType(0, 0, cardsurl, 0);
 }
@@ -1886,7 +1887,7 @@ var MeetingTrack = /** @class */ (function () {
                 this_1.soloTilesStocks[i] = new ebg.stock();
                 this_1.soloTilesStocks[i].setSelectionAppearance('class');
                 this_1.soloTilesStocks[i].selectionClass = 'selected';
-                this_1.soloTilesStocks[i].create(this_1.game, $("meeting-track-soloTile-" + i), CARD_WIDTH, CARD_WIDTH);
+                this_1.soloTilesStocks[i].create(this_1.game, $("meeting-track-soloTile-" + i), CARD_WIDTH, SOLO_CARD_HEIGHT);
                 this_1.soloTilesStocks[i].setSelectionMode(0);
                 this_1.soloTilesStocks[i].onItemCreate = function (cardDiv, type) { return setupSoloTileCard(game, cardDiv, type); };
                 setupSoloTileCards(this_1.soloTilesStocks[i]);

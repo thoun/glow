@@ -9,6 +9,7 @@ declare const board: HTMLDivElement;*/
 
 const CARD_WIDTH = 129;
 const CARD_HEIGHT = 240;
+const SOLO_CARD_HEIGHT = 36;
 
 const SPELL_DIAMETER = 64;
 
@@ -137,7 +138,7 @@ function setupSoloTileCards(soloTilesStock: Stock) {
             type, 
             type, 
             cardsurl, 
-            type - 1
+            type,
         );
     }
 

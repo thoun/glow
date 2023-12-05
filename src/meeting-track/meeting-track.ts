@@ -85,7 +85,7 @@ class MeetingTrack {
                 this.soloTilesStocks[i] = new ebg.stock() as Stock;
                 this.soloTilesStocks[i].setSelectionAppearance('class');
                 this.soloTilesStocks[i].selectionClass = 'selected';
-                this.soloTilesStocks[i].create(this.game, $(`meeting-track-soloTile-${i}`), CARD_WIDTH, CARD_WIDTH);
+                this.soloTilesStocks[i].create(this.game, $(`meeting-track-soloTile-${i}`), CARD_WIDTH, SOLO_CARD_HEIGHT);
                 this.soloTilesStocks[i].setSelectionMode(0);
                 this.soloTilesStocks[i].onItemCreate = (cardDiv: HTMLDivElement, type: number) => setupSoloTileCard(game, cardDiv, type);
 

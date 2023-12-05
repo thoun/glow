@@ -70,7 +70,7 @@
 
   .meeting-track-solo-tile {
     position: absolute;
-    top: -135px;
+    top: -42px;
     height: 129px;
     width: 129px;
 
@@ -119,9 +119,9 @@
     }
 
     &.solo-tiles {
-      top: -135px;
-      height: 129px;
-      background: white;
+      top: -42px;
+      height: 36px;
+      background-image: url('img/solo-tiles.png');
       border: 1px solid gray;
 
       &.hidden {

@@ -847,7 +847,7 @@ body > .card {
 }
 #meeting-track .meeting-track-solo-tile {
   position: absolute;
-  top: -135px;
+  top: -42px;
   height: 129px;
   width: 129px;
 }
@@ -886,9 +886,9 @@ body > .card {
   background-position: 44.444% 50%;
 }
 #meeting-track .hidden-pile.solo-tiles {
-  top: -135px;
-  height: 129px;
-  background: white;
+  top: -42px;
+  height: 36px;
+  background-image: url("img/solo-tiles.png");
   border: 1px solid gray;
 }
 #meeting-track .hidden-pile.solo-tiles.hidden {
@@ -1372,7 +1372,7 @@ html {
   flex: 1;
 }
 #middle-band.solo {
-  padding-bottom: 139px;
+  padding-bottom: 46px;
 }
 #middle-band.solo #round-counter-wrapper-max-days {
   display: none;
