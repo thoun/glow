@@ -75,12 +75,13 @@ function setupAdventurersCards(adventurerStock: Stock) {
     const cardsurl = `${g_gamethemeurl}img/adventurers.png`;
     const cardsurlExpansion = `${g_gamethemeurl}img/adventurers-expansion1.png`;
 
-    for (let i=0; i<=11;i++) {
+    for (let i=0; i<=10;i++) {
+        const expansion1 = i > 7;
         adventurerStock.addItemType(
             i, 
             i, 
-            i > 7 ? cardsurlExpansion : cardsurl, 
-            i
+            expansion1 ? cardsurlExpansion : cardsurl, 
+            expansion1 ? i - 8 : i,
         );
     }
 }

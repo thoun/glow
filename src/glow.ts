@@ -95,7 +95,7 @@ class Glow implements GlowGame {
 
         log( "Starting game setup" );
 
-        [1, 2, 3, 4, 5, 6, 7, 8, 80, 9, 10, 11].forEach(color => {
+        [1, 2, 3, 4, 5, 6, 7, 8, 80, 9, 10].forEach(color => {
             let facesStr = '';
             for (let face=1; face<=6; face++) {
                 facesStr += `[die:${color}:${face}]`;

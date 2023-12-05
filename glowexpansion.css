@@ -304,9 +304,6 @@ body > .card {
 .die-item.color10 {
   background-image: url("img/die10.png");
 }
-.die-item.color11 {
-  background-image: url("img/die11.png");
-}
 .die-item.color80 {
   background-image: url("img/die80.png");
 }
@@ -339,9 +336,6 @@ body > .card {
 }
 .die-item.color10 {
   border-color: #eca3c8;
-}
-.die-item.color11 {
-  border-color: #ffd503;
 }
 .die-item.color80 {
   border-color: #888888;
@@ -1554,9 +1548,6 @@ html {
 }
 .die-icon[data-color="10"] {
   background-image: url("img/die10.png");
-}
-.die-icon[data-color="11"] {
-  background-image: url("img/die11.png");
 }
 .die-icon[data-color="80"] {
   background-image: url("img/die80.png");

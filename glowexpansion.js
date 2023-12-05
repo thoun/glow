@@ -1336,8 +1336,9 @@ COMPANION_POINTS[308] = 3;
 function setupAdventurersCards(adventurerStock) {
     var cardsurl = g_gamethemeurl + "img/adventurers.png";
     var cardsurlExpansion = g_gamethemeurl + "img/adventurers-expansion1.png";
-    for (var i = 0; i <= 11; i++) {
-        adventurerStock.addItemType(i, i, i > 7 ? cardsurlExpansion : cardsurl, i);
+    for (var i = 0; i <= 10; i++) {
+        var expansion1 = i > 7;
+        adventurerStock.addItemType(i, i, expansion1 ? cardsurlExpansion : cardsurl, expansion1 ? i - 8 : i);
     }
 }
 function setupCompanionCards(companionsStock) {
@@ -2413,7 +2414,7 @@ var Glow = /** @class */ (function () {
             this.dontPreloadImage('companions-expansion1-set3.png');
         }
         log("Starting game setup");
-        [1, 2, 3, 4, 5, 6, 7, 8, 80, 9, 10, 11].forEach(function (color) {
+        [1, 2, 3, 4, 5, 6, 7, 8, 80, 9, 10].forEach(function (color) {
             var facesStr = '';
             for (var face = 1; face <= 6; face++) {
                 facesStr += "[die:" + color + ":" + face + "]";
