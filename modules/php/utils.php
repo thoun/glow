@@ -1228,6 +1228,12 @@ trait UtilTrait {
             }
         }
 
+        foreach($cardEffect->conditions as $effect) {
+            if ($effect <= -10) {
+                $this->applyEffect($playerId, $effect, $cardType, $card, $dieId, $tokenId);
+            }
+        }
+
         if ($cardType == 2 && $spellCard->type != COMPANION_SPELL) { // spells are discarded after usage
             $this->discardSpell($playerId, $spellCard);
         }

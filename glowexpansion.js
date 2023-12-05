@@ -1409,37 +1409,40 @@ function getEffectTooltip(effect) {
     if (!effect) {
         return null;
     }
+    var effectConditions = effect.conditions.filter(function (condition) { return condition > -10; });
+    var remainingConditions = effect.conditions.filter(function (condition) { return condition <= -10; });
     var conditions = null;
-    if (effect.conditions.every(function (condition) { return condition > 200; }) && effect.conditions.length == 2) {
-        var message = effect.conditions[0] == effect.conditions[1] ?
+    if (effectConditions.every(function (condition) { return condition > 200; }) && effectConditions.length == 2) {
+        var message = effectConditions[0] == effectConditions[1] ?
             _("Exactly ${min} different element symbols on dice triggers the effect.") :
             _("Between ${min} and ${max} different element symbols on dice triggers the effect.");
         conditions = dojo.string.substitute(message, {
-            min: "<strong>" + (effect.conditions[0] - 200) + "</strong>",
-            max: "<strong>" + (effect.conditions[1] - 200) + "</strong>",
+            min: "<strong>" + (effectConditions[0] - 200) + "</strong>",
+            max: "<strong>" + (effectConditions[1] - 200) + "</strong>",
         });
     }
-    else if (effect.conditions.every(function (condition) { return condition > 0; })) {
+    else if (effectConditions.every(function (condition) { return condition > 0; })) {
         conditions = dojo.string.substitute(_("${symbols} triggers the effect."), {
-            symbols: formatTextIcons(effect.conditions.map(function (condition) { return "[symbol" + condition + "]"; }).join(''))
+            symbols: formatTextIcons(effectConditions.map(function (condition) { return "[symbol" + condition + "]"; }).join(''))
         });
     }
-    else if (effect.conditions.every(function (condition) { return condition == 0; })) {
-        conditions = dojo.string.substitute(formatTextIcons(effect.conditions.map(function (_) { return "[symbol0]"; }).join('')) + ' : ' + _("any ${number} identical symbols."), {
-            number: "<strong>" + effect.conditions.length + "</strong>"
+    else if (effectConditions.every(function (condition) { return condition == 0; })) {
+        conditions = dojo.string.substitute(formatTextIcons(effectConditions.map(function (_) { return "[symbol0]"; }).join('')) + ' : ' + _("any ${number} identical symbols."), {
+            number: "<strong>" + effectConditions.length + "</strong>"
         });
     }
-    else if (effect.conditions.every(function (condition) { return condition < 0; })) {
+    else if (effectConditions.every(function (condition) { return condition < 0; })) {
         conditions = dojo.string.substitute(_("If the symbols ${symbols} are not present on any of the dice, the effect is triggered."), {
-            symbols: formatTextIcons(effect.conditions.map(function (condition) { return "[symbol" + -condition + "]"; }).join(''))
+            symbols: formatTextIcons(effectConditions.map(function (condition) { return "[symbol" + -condition + "]"; }).join(''))
         });
     }
-    else if (effect.conditions.some(function (condition) { return condition > 0; }) && effect.conditions.some(function (condition) { return condition < 0; })) {
+    else if (effectConditions.some(function (condition) { return condition > 0; }) && effectConditions.some(function (condition) { return condition < 0; })) {
         conditions = dojo.string.substitute(_("If the symbols ${forbiddenSymbols} are not present on any of the dice, ${symbols} triggers the effect."), {
-            forbiddenSymbols: formatTextIcons(effect.conditions.filter(function (condition) { return condition < 0; }).map(function (condition) { return "[symbol" + -condition + "]"; }).join('')),
-            symbols: formatTextIcons(effect.conditions.filter(function (condition) { return condition > 0; }).map(function (condition) { return "[symbol" + condition + "]"; }).join('')),
+            forbiddenSymbols: formatTextIcons(effectConditions.filter(function (condition) { return condition < 0; }).map(function (condition) { return "[symbol" + -condition + "]"; }).join('')),
+            symbols: formatTextIcons(effectConditions.filter(function (condition) { return condition > 0; }).map(function (condition) { return "[symbol" + condition + "]"; }).join('')),
         });
     }
+    remainingConditions.forEach(function (effect) { return conditions += "<br>" + getEffectExplanation(effect); });
     return "\n    <div class=\"tooltip-effect-title\">" + _("Conditions") + "</div>\n    " + conditions + "\n    <hr>\n    <div class=\"tooltip-effect-title\">" + _("Effects") + "</div>\n    " + effect.effects.map(function (effect) { return getEffectExplanation(effect); }).join('<br>') + "\n    ";
 }
 function getAdventurerTooltip(type) {
@@ -1469,7 +1472,7 @@ function getCompanionTooltip(type) {
         case 10: return "<p>" + _("If the player obtains 2 fire symbols, Xar\u2019gok is sent to the cemetery and the spells are cast:") + "</p>\n        <ol class=\"help-list\"><li>" + _("1. The other players take a spell token that they place facedown in front of them.") + "</li>\n        <li>" + _("2. At the beginning of the next round, the spell tokens are revealed.") + "</li>\n        <li>" + _("3. When a player fulfils the condition indicated on their token, the spell is triggered: its effect is applied and the token is replaced in the box.") + "</li></ol>\n        <p>" + _("<b>A spell token works in exactly the same way as a card:</b> the player chooses the order in which they resolve their cards and their spell, the trigger conditions and the effects are the same as those of the cards.") + "</p>\n        <p><div class=\"help-special-spell\"></div>" + _("Only this spell token is played differently: it must always be placed on the last companion to be recruited. The player must move the spell token each time he recruits a new companion.") + "</p>\n        <p>" + _("When the spell is triggered, the companion on which it is placed is sent to the cemetery (without applying any effects, even if it has a skull) and the player replaces the token in the box. As the player can choose the order in which the cards and the spell are resolved, they can benefit from the targeted character\u2019s effect (if their dice allow them to) before it is sent to the cemetery.") + "</p>";
         case 20: return "<p>" + _("When a player takes Kaar, they take the small black die from the reserve pool, roll it and place it on the space of the meeting track indicated by the result of the die. If the result indicates an empty space, the player must reroll the die. If no player takes Kaar, the black die does not come into play.") + "</p>\n        <p>" + _("During the rest of the game, the player with Kaar is immunized against the curse of the black die. If the black die is placed in front of the companion they want to take, they can move it in front of another companion of their choice.") + "</p>\n        <p>" + _("<b>Curse of the black die:</b> In each round, the player who rolls the black die with their other dice must apply its result: according to the obtained symbol, every other die of the player with the same symbol is not counted in the final result. If the player obtains -2 bursts of light, they move back as many spaces on the score track.") + "</p>\n        <p style=\"color: #D4111F;\">" + _("<b>Important:</b> the black die remains in play until the end of the game, even if Kaar is sent to the cemetery.") + "</p>";
         case 41: return "<p>" + _("If the player obtains an air symbol, they immediately discard Cromaug and can take another companion of their choice from the cemetery that they place in front of them. The chosen companion becomes the last companion to be recruited.") + "</p>\n        <p>" + _("If it is a Sketal, they take the additional die indicated by its power, if it is available in the reserve pool, and can roll it from the next round. If it is Kaar, the black die comes into play.") + "</p>\n        <p>" + _("If the previously obtained result of the dice allows it, they can immediately trigger the effect of this new companion.") + "</p>";
-        case 107: return "<p>" + _("go back to 10VP (record how many VP you went back), play normally and retrieve your VPs at the end.") + "</p>"; // TODO
+        case 107: return "<p>" + _("TODO CRONOS") + "</p>"; // TODO
     }
     return null;
 }

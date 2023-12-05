@@ -187,34 +187,39 @@ function getEffectTooltip(effect: Effect) {
         return null;
     }
 
+    const effectConditions = effect.conditions.filter(condition => condition > -10);
+    const remainingConditions = effect.conditions.filter(condition => condition <= -10);
+
     let conditions = null;
-    if (effect.conditions.every(condition => condition > 200) && effect.conditions.length == 2) {
-        const message = effect.conditions[0] == effect.conditions[1] ?
+    if (effectConditions.every(condition => condition > 200) && effectConditions.length == 2) {
+        const message = effectConditions[0] == effectConditions[1] ?
             _("Exactly ${min} different element symbols on dice triggers the effect.") :
             _("Between ${min} and ${max} different element symbols on dice triggers the effect.");
 
         conditions = dojo.string.substitute(message, { 
-            min: `<strong>${effect.conditions[0] - 200}</strong>` ,
-            max: `<strong>${effect.conditions[1] - 200}</strong>` ,
+            min: `<strong>${effectConditions[0] - 200}</strong>` ,
+            max: `<strong>${effectConditions[1] - 200}</strong>` ,
         });
-    } else if (effect.conditions.every(condition => condition > 0)) {
+    } else if (effectConditions.every(condition => condition > 0)) {
         conditions = dojo.string.substitute(_("${symbols} triggers the effect."), { 
-            symbols: formatTextIcons(effect.conditions.map(condition => `[symbol${condition}]`).join('')) 
+            symbols: formatTextIcons(effectConditions.map(condition => `[symbol${condition}]`).join('')) 
         });
-    } else if (effect.conditions.every(condition => condition == 0)) {
-        conditions = dojo.string.substitute(formatTextIcons(effect.conditions.map(_ => `[symbol0]`).join('')) + ' : ' + _("any ${number} identical symbols."), { 
-            number: `<strong>${effect.conditions.length}</strong>` 
+    } else if (effectConditions.every(condition => condition == 0)) {
+        conditions = dojo.string.substitute(formatTextIcons(effectConditions.map(_ => `[symbol0]`).join('')) + ' : ' + _("any ${number} identical symbols."), { 
+            number: `<strong>${effectConditions.length}</strong>` 
         });
-    } else if (effect.conditions.every(condition => condition < 0)) {
+    } else if (effectConditions.every(condition => condition < 0)) {
         conditions = dojo.string.substitute(_("If the symbols ${symbols} are not present on any of the dice, the effect is triggered."), { 
-            symbols: formatTextIcons(effect.conditions.map(condition => `[symbol${-condition}]`).join('')) 
+            symbols: formatTextIcons(effectConditions.map(condition => `[symbol${-condition}]`).join('')) 
         });
-    } else if (effect.conditions.some(condition => condition > 0) && effect.conditions.some(condition => condition < 0)) {
+    } else if (effectConditions.some(condition => condition > 0) && effectConditions.some(condition => condition < 0)) {
         conditions = dojo.string.substitute(_("If the symbols ${forbiddenSymbols} are not present on any of the dice, ${symbols} triggers the effect."), { 
-            forbiddenSymbols: formatTextIcons(effect.conditions.filter(condition => condition < 0).map(condition => `[symbol${-condition}]`).join('')),  
-            symbols: formatTextIcons(effect.conditions.filter(condition => condition > 0).map(condition => `[symbol${condition}]`).join('')) ,
+            forbiddenSymbols: formatTextIcons(effectConditions.filter(condition => condition < 0).map(condition => `[symbol${-condition}]`).join('')),  
+            symbols: formatTextIcons(effectConditions.filter(condition => condition > 0).map(condition => `[symbol${condition}]`).join('')) ,
         });
     }
+
+    remainingConditions.forEach(effect => conditions += `<br>${getEffectExplanation(effect)}`);
     
     return `
     <div class="tooltip-effect-title">${_("Conditions")}</div>
@@ -265,7 +270,7 @@ function getCompanionTooltip(type: number) {
         <p>` + _(`If it is a Sketal, they take the additional die indicated by its power, if it is available in the reserve pool, and can roll it from the next round. If it is Kaar, the black die comes into play.`) + `</p>
         <p>` + _(`If the previously obtained result of the dice allows it, they can immediately trigger the effect of this new companion.`) + `</p>`;
 
-        case 107: return `<p>` + _(`go back to 10VP (record how many VP you went back), play normally and retrieve your VPs at the end.`) + `</p>`; // TODO
+        case 107: return `<p>` + _(`TODO CRONOS`) + `</p>`; // TODO
     }
     return null;
 }
