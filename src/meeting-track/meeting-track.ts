@@ -24,9 +24,7 @@ class MeetingTrack {
 
         if (playerCount >= 5) {
             document.getElementById(`meeting-track`).insertAdjacentHTML('afterbegin', `
-                <div id="meeting-track-expansion" data-players="${playerCount}">
-                    <div class="label">${_('${playerCount} players').replace('${playerCount}', playerCount)}</div>
-                </div>
+                <div id="meeting-track-expansion" data-players="${playerCount}"></div>
             `);
         }
 

@@ -1854,7 +1854,7 @@ var MeetingTrack = /** @class */ (function () {
         this.soloTilesStocks = [];
         var solo = playerCount == 1;
         if (playerCount >= 5) {
-            document.getElementById("meeting-track").insertAdjacentHTML('afterbegin', "\n                <div id=\"meeting-track-expansion\" data-players=\"" + playerCount + "\">\n                    <div class=\"label\">" + _('${playerCount} players').replace('${playerCount}', playerCount) + "</div>\n                </div>\n            ");
+            document.getElementById("meeting-track").insertAdjacentHTML('afterbegin', "\n                <div id=\"meeting-track-expansion\" data-players=\"" + playerCount + "\"></div>\n            ");
         }
         if (solo) {
             dojo.place("<div id=\"meeting-track-dice-0\" class=\"meeting-track-zone dice\" style=\"left: 57px;\"></div>", 'meeting-track');

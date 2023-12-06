@@ -797,27 +797,17 @@ body > .card {
 }
 #meeting-track #meeting-track-expansion {
   position: absolute;
-  width: 419px;
+  width: 422px;
   height: 163px;
   top: 0;
   left: 916px;
+  margin-left: 8px;
 }
 #meeting-track #meeting-track-expansion[data-players="5"] {
   background-image: url("img/meeting-track-little-board-5p.png");
 }
 #meeting-track #meeting-track-expansion[data-players="6"] {
   background-image: url("img/meeting-track-little-board-6p.png");
-}
-#meeting-track #meeting-track-expansion .label {
-  position: absolute;
-  width: 70px;
-  top: 2px;
-  right: 0;
-  color: white;
-  font-family: "glow";
-  text-align: center;
-  font-size: 16pt;
-  white-space: nowrap;
 }
 #meeting-track .meeting-track-zone {
   position: absolute;
