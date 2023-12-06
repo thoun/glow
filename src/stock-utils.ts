@@ -119,7 +119,7 @@ function setupCompanionCards(companionsStock: Stock) {
 function setupSpellCards(spellsStock: Stock) {
     const cardsurl = `${g_gamethemeurl}img/spells.png`;
 
-    for (let type=1; type<=7;type++) {
+    for (let type=1; type<=10;type++) {
         spellsStock.addItemType(
             type, 
             type, 

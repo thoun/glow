@@ -175,6 +175,10 @@ trait UtilTrait {
         return $COMPANIONS;
     }
 
+    function getAllSpells() {
+        return $this->SPELLS + $this->SPELLS_EXPANSION1;
+    }
+
     function getCompanionFromDb($dbObject) {
         if (!$dbObject || !array_key_exists('id', $dbObject)) {
             throw new BgaSystemException("Companion doesn't exists ".json_encode($dbObject));
@@ -191,7 +195,7 @@ trait UtilTrait {
         if (!$dbObject || !array_key_exists('id', $dbObject)) {
             throw new BgaSystemException("Spell doesn't exists ".json_encode($dbObject));
         }
-        return new Spell($dbObject, $this->SPELLS);
+        return new Spell($dbObject, $this->getAllSpells());
     }
 
     function getSpellsFromDb(array $dbObjects) {
@@ -448,6 +452,22 @@ trait UtilTrait {
         ]);
     }
 
+    function removePlayerFireflies(int $playerId, int $dec, $message = '', $params = []) {
+        if ($playerId != 0) {
+            $newValue = max(0, $this->getPlayerFireflies($playerId) - $dec);
+            $this->DbQuery("UPDATE player SET `player_fireflies` = $newValue WHERE player_id = $playerId");
+        }
+
+        $this->notifyAllPlayers('fireflies', $message, $params + [
+            'playerId' => $playerId,
+            'player_name' => $this->getPlayerName($playerId),
+            'fireflies' => -$dec,
+            'absfireflies' => $dec,
+        ]);
+
+        return $newValue;
+    }
+
     function createAdventurers(bool $expansion, bool $solo) {        
         foreach($this->ADVENTURERS as $type => $adventurer) {
             $create = $expansion || $type <= 7;
@@ -521,12 +541,18 @@ trait UtilTrait {
         }
     }
 
-    function createSpells() {
+    function createSpells(bool $isExpansion) {
         $spells = [];
 
         foreach($this->SPELLS as $type => $spellCard) {
             $spells[] = [ 'type' => $type, 'type_arg' => 0, 'nbr' => $spellCard->number];
         }
+        if ($isExpansion) {
+            foreach($this->SPELLS_EXPANSION1 as $type => $spellCard) {
+                $spells[] = [ 'type' => $type, 'type_arg' => 0, 'nbr' => $spellCard->number];
+            }
+        }
+
         $this->spells->createCards($spells, 'deck');
         $this->spells->shuffle('deck');
     }
@@ -917,26 +943,31 @@ trait UtilTrait {
         }
 
         // we check if card needs to remove tokens we don't have
-        $allEffectsOnCard = array_merge($effect->conditions, $effect->effects);
-        $negativeFootprintsEffects = array_filter($allEffectsOnCard, fn($effect) => $effect < -20 && $effect > -30);
+        $negativeFirefliesEffects = array_filter($effect->conditions, fn($effect) => $effect < -10 && $effect > -20);
+        $negativeFireflies = array_reduce(array_map(fn($effect) => -$effect -10, $negativeFirefliesEffects), fn($a, $b) => $a + $b, 0);
+        if ($negativeFireflies > 0 && $this->getPlayerFireflies($playerId) < $negativeFireflies) {
+            return false;
+        }
+
+        $negativeFootprintsEffects = array_filter($effect->conditions, fn($effect) => $effect < -20 && $effect > -30);
         $negativeFootprints = array_reduce(array_map(fn($effect) => -$effect -20, $negativeFootprintsEffects), fn($a, $b) => $a + $b, 0);
         if ($negativeFootprints > 0 && $this->getPlayerFootprints($playerId) < $negativeFootprints) {
             return false;
         }
         
-        $negativeRerollEffects = array_filter($allEffectsOnCard, fn($effect) => $effect < -40 && $effect > -50);
+        $negativeRerollEffects = array_filter($effect->conditions, fn($effect) => $effect < -40 && $effect > -50);
         $negativeRerolls = array_reduce(array_map(fn($effect) => -$effect -40, $negativeRerollEffects), fn($a, $b) => $a + $b, 0);
         if ($negativeRerolls > 0 && $this->getPlayerRerolls($playerId) < $negativeRerolls) {
             return false;
         }
 
-        $negativeTokensEffects = array_filter($allEffectsOnCard, fn($effect) => $effect < -50 && $effect > -60);
+        $negativeTokensEffects = array_filter($effect->conditions, fn($effect) => $effect < -50 && $effect > -60);
         $negativeTokens = array_reduce(array_map(fn($effect) => -$effect -50, $negativeTokensEffects), fn($a, $b) => $a + $b, 0);
         if ($negativeTokens > 0 && count($this->getPlayerTokens($playerId)) < $negativeTokens) {
             return false;
         }
 
-        if ($this->array_every($effect->conditions, fn($condition) => $condition > 200)) { // number of colors
+        if (count($effect->conditions) == 2 && $this->array_every($effect->conditions, fn($condition) => $condition > 200)) { // number of colors
             $colors = $this->getDiceDifferentColors($dice);
 
             $min = $effect->conditions[0] - 200;
@@ -1114,6 +1145,8 @@ trait UtilTrait {
 
         else if ($effect > 10 && $effect < 20) {
             $this->addPlayerFireflies($playerId, $effect - 10, clienttranslate('${player_name} gains ${fireflies} fireflies with ${effectOrigin} effect'), $args);
+        } else if ($effect < -10 && $effect > -20) {
+            $this->removePlayerFireflies($playerId, -($effect + 10), clienttranslate('${player_name} ${gainsloses} ${absfireflies} fireflies with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
         }
 
         else if ($effect > 40 && $effect < 50) {

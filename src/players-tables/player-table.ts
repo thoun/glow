@@ -288,7 +288,7 @@ class PlayerTable {
 
     public setTokens(type: 'reroll' | 'footprint' | 'firefly', number: number) {
         const zone = document.getElementById(`player-table-${this.playerId}-${type}-tokens`) as HTMLDivElement;
-        while (zone.childElementCount > number) {
+        while (zone.childElementCount > Math.max(0, number)) {
             zone.removeChild(zone.lastChild);
         }
         for (let i = zone.childElementCount; i<number; i++) {

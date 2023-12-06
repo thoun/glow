@@ -174,7 +174,7 @@ class GlowExpansion extends Table {
         if ($solo) {
             $this->createSoloTiles();
         } else {
-            $this->createSpells();
+            $this->createSpells($isExpansion);
         }
         if ($this->tokensActivated()) {
             $this->initStat('player', 'endTokenPoints', 0);
@@ -271,7 +271,7 @@ class GlowExpansion extends Table {
 
         $result['ADVENTURERS'] = $this->ADVENTURERS;
         $result['COMPANIONS'] = $this->getAllCompanions();
-        $result['SPELLS_EFFECTS'] = array_map(fn ($card) => $card->effect, $this->SPELLS);
+        $result['SPELLS_EFFECTS'] = array_map(fn ($card) => $card->effect, $this->getAllSpells());
         $result['SOLO_TILES'] = $this->SOLO_TILES;
 
         $result['expansion'] = $isExpansion;

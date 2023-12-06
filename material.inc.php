@@ -190,6 +190,14 @@ $this->SPELLS = [
   6 => new SpellCard(new Effect([0, 0, 0], [-107]), 2),
 ];
 
+
+$this->SPELLS_EXPANSION1 = [
+  7 => new SpellCard(new Effect([-5], [-104])),
+  8 => new SpellCard(new Effect([201, 202], [-104])),
+  9 => new SpellCard(new Effect([203, 203], [-13])),
+  10 => new SpellCard(new Effect([204, 204], [-107])),
+];
+
 $this->SOLO_TILES = [
   1 => new SoloTileCard(2),
   2 => new SoloTileCard(2, 0, 1),

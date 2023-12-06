@@ -1358,7 +1358,7 @@ function setupCompanionCards(companionsStock) {
 }
 function setupSpellCards(spellsStock) {
     var cardsurl = g_gamethemeurl + "img/spells.png";
-    for (var type = 1; type <= 7; type++) {
+    for (var type = 1; type <= 10; type++) {
         spellsStock.addItemType(type, type, cardsurl, type);
     }
     spellsStock.addItemType(0, 0, cardsurl, 0);
@@ -2258,7 +2258,7 @@ var PlayerTable = /** @class */ (function () {
     };
     PlayerTable.prototype.setTokens = function (type, number) {
         var zone = document.getElementById("player-table-" + this.playerId + "-" + type + "-tokens");
-        while (zone.childElementCount > number) {
+        while (zone.childElementCount > Math.max(0, number)) {
             zone.removeChild(zone.lastChild);
         }
         for (var i = zone.childElementCount; i < number; i++) {

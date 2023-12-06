@@ -27,7 +27,8 @@ trait DebugUtilTrait {
         //$this->debugSetCompanionForPlayer(2343492, 204);
         //$this->debugSetCompanionForPlayer(2343492, 304);
         //$this->debugSetPoints(19);
-        //$this->debugSetFootprints(30);
+        //$this->debugSetFootprints(2);
+        //$this->debugSetFireflies(2);
         //$this->debugSetRerolls(30);
         //$this->debugSetScore(45);
         //$this->addPlayerTokens(2343492, 22);
@@ -37,7 +38,9 @@ trait DebugUtilTrait {
         //$this->debugMoveMeeple(2343492, 15, 0);
         //$this->debugMoveMeeple(2343493, 40, 0);
 
-        //$this->debugAddSpell(2343492, 1);
+        //$this->debugAddSpell(2343492, 5);
+        //$this->debugAddSpell(2343492, 9);
+        //$this->debugAddSpell(2343492, 10);
         //$this->debugLastDay();
 
         // Activate first player must be commented in setup if this is used
@@ -73,6 +76,10 @@ trait DebugUtilTrait {
 
     function debugSetRerolls($number) {
         $this->DbQuery("UPDATE player SET `player_rerolls` = $number");
+    }
+
+    function debugSetFireflies($number) {
+        $this->DbQuery("UPDATE player SET `player_fireflies` = $number");
     }
 
     function debugSetScore($number) {
