@@ -4,6 +4,7 @@ declare const $;
 declare const dojo: Dojo;
 declare const _;
 declare const g_gamethemeurl;
+declare const bgaConfig;
 
 declare const board: HTMLDivElement;
 
@@ -2132,6 +2133,7 @@ class Glow implements GlowGame {
             ['scoreFootprints', SCORE_MS],
             ['scoreTokens', SCORE_MS],
             ['scoreAfterEnd', SCORE_MS],
+            ['loadBug', 1],
         ];
 
         notifs.forEach((notif) => {
@@ -2397,6 +2399,53 @@ class Glow implements GlowGame {
         log('notif_scoreAfterEnd', notif.args);
         this.setScore(notif.args.playerId, this.gamedatas.tokensActivated ? 7 : 6, notif.args.points);
     }
+    
+    /**
+    * Load production bug report handler
+    */
+   notif_loadBug({ args }) {
+     const that: any = this;
+     function fetchNextUrl() {
+       var url = args.urls.shift();
+       console.log('Fetching URL', url, '...');
+       // all the calls have to be made with ajaxcall in order to add the csrf token, otherwise you'll get "Invalid session information for this action. Please try reloading the page or logging in again"
+       that.ajaxcall(
+         url,
+         {
+           lock: true,
+         },
+         that,
+         function (success) {
+           console.log('=> Success ', success);
+
+           if (args.urls.length > 1) {
+             fetchNextUrl();
+           } else if (args.urls.length > 0) {
+             //except the last one, clearing php cache
+             url = args.urls.shift();
+             (dojo as any).xhrGet({
+               url: url,
+               headers: {
+                 'X-Request-Token': bgaConfig.requestToken,
+               },
+               load: success => {
+                 console.log('Success for URL', url, success);
+                 console.log('Done, reloading page');
+                 window.location.reload();
+               },
+               handleAs: 'text',
+               error: error => console.log('Error while loading : ', error),
+             });
+           }
+         },
+         error => {
+           if (error) console.log('=> Error ', error);
+         },
+       );
+     }
+     console.log('Notif: load bug', args);
+     fetchNextUrl();
+   }
 
     private getColor(color: number) {
         switch (color) {

@@ -674,10 +674,10 @@ body > .card {
   background-image: url("img/module-tokens.png");
 }
 .action-button .module-token[data-type-arg="37"] {
-  background-position-x: 81.8181818182%;
+  background-position-x: 90.9090909091%;
 }
 .action-button .module-token[data-type-arg="0"] {
-  background-position-x: 90.9090909091%;
+  background-position-x: 100%;
 }
 
 #board {
