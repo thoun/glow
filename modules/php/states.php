@@ -487,6 +487,7 @@ trait StateTrait {
             } else {
                 $this->DbQuery("UPDATE player SET player_score_after_end = player_score WHERE player_id = $playerId");
                 $score = intval($this->getUniqueValueFromDB("SELECT player_score_after_end FROM player where player_id = $playerId"));
+                $this->setStat($score, 'points', $playerId);
             }
 
             $this->notifyAllPlayers('scoreAfterEnd', '', [
@@ -494,8 +495,6 @@ trait StateTrait {
                 'points' => $score,
             ]);
 
-            $this->setStat($score, 'points', $playerId);
-            $this->setStat($score, 'points', $playerId);
             
             $adventurers = $this->getAdventurersFromDb($this->adventurers->getCardsInLocation('player', $playerId));
             if (count($adventurers) > 0) {
