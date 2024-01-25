@@ -967,11 +967,12 @@ trait UtilTrait {
             return false;
         }
 
-        if (count($effect->conditions) == 2 && $this->array_every($effect->conditions, fn($condition) => $condition > 200)) { // number of colors
+        if (count(array_filter($effect->conditions, fn($condition) => $condition > 200)) == 2) { // number of colors
+            $colorConditions = array_values(array_filter($effect->conditions, fn($condition) => $condition > 200));
             $colors = $this->getDiceDifferentColors($dice);
 
-            $min = $effect->conditions[0] - 200;
-            $max = $effect->conditions[1] - 200;
+            $min = $colorConditions[0] - 200;
+            $max = $colorConditions[1] - 200;
             
             return $colors >= $min && $colors <= $max ? 1 : 0;
         }

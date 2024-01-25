@@ -120,7 +120,7 @@ $this->COMPANIONS_EXPANSION1_SETS = [
   1 => [
     'adds' => [
       // A
-      101 => new CompanionCard("Li'Lan", 0, new Effect([203, 203], [-41, 105])),
+      101 => new CompanionCard("Li'Lan", 0, new Effect([203, 203, -41], [105])),
       102 => new CompanionCard('Phyrene', 2, new Effect([204, 204], [23])),
       103 => new CompanionCard('Celes', 2, new Effect([201, 202], [42])),
       104 => new CompanionCard('Sketal', 0, new Effect([-3, -2], [33, 12]), 0, 0, true, 6),
