@@ -3610,6 +3610,7 @@ var Glow = /** @class */ (function () {
         var count = this.selectedDice.length;
         this.getRollDiceButtons().forEach(function (button) { return dojo.toggleClass(button, 'disabled', count < 1 || count > 2); });
         if (this.currentDieAction == 'change') {
+            console.log(this.selectedDice);
             this.createChangeDieButtons(count === 1 && this.selectedDice[0].color == 80 && this.selectedDice[0].face == 6);
             if (count === 1) {
                 this.selectedDieFace = null;
@@ -3661,6 +3662,7 @@ var Glow = /** @class */ (function () {
             this.selectedDice.splice(index, 1);
         }
         else {
+            die.face = Number(document.getElementById("die" + die.id).dataset.dieFace);
             this.selectedDice.push(die);
         }
         dojo.toggleClass("die" + die.id, 'selected', !selected);
