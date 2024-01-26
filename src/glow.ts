@@ -1363,11 +1363,13 @@ class Glow implements GlowGame {
             }
         });
 
+        // costs : [companion, tokens, moves backwards, crolos]
+
         // remove "duplicates" if only negative points, and costs more or equal
         const pointCosts = possibleCosts.map(possibleCost => possibleCost[0] > 0 || possibleCost[1] > 0 ? -1 : (possibleCost[2] ? playerArgs.rerollScore[possibleCost[2]] : 0) + possibleCost[3] * 2);
         let i = 0;
         while (i < possibleCosts.length) {
-            if (pointCosts[i] > 0 && pointCosts.some((pointCost, index) => pointCost < pointCosts[i] || (pointCost == pointCosts[i] && index < i))) {
+            if (pointCosts[i] > 0 && pointCosts.some((pointCost, index) => pointCost !== -1 && (pointCost < pointCosts[i] || (pointCost == pointCosts[i] && index < i)))) {
                 possibleCosts.splice(i, 1);
                 pointCosts.splice(i, 1);
             } else {

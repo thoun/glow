@@ -122,6 +122,9 @@ trait DebugUtilTrait {
             // Emulates "clear PHP cache" in control panel
             // Needed at the end because BGA is caching player info
             "https://studio.boardgamearena.com/admin/studio/clearGameserverPhpCache.html?game=$game",
+  
+            // Emulates "save 1" at this table
+            //"https://studio.boardgamearena.com/table/table/debugSaveState.html?table=$tableId&state=1",
           ],
         ]
       );
