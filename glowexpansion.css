@@ -654,7 +654,18 @@ body > .card {
 .module-token[data-type="3"][data-type-arg="0"] .front {
   background-position-x: 100%;
 }
+.module-token.new-token .front {
+  animation: new-token-animation 8s 1 forwards ease-in-out;
+}
 
+@keyframes new-token-animation {
+  0% {
+    outline: 8px solid gold;
+  }
+  100% {
+    outline: 0px solid gold;
+  }
+}
 @keyframes selectable-card-animation {
   0% {
     box-shadow: 0 0 3px 2px gray;

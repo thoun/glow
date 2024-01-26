@@ -4327,9 +4327,11 @@ var Glow = /** @class */ (function () {
     };
     Glow.prototype.notif_getTokens = function (notif) {
         var _this = this;
-        this.playersTokens[notif.args.playerId].addCards(notif.args.tokens);
-        notif.args.tokens.filter(function (token) { return token.type == 2; }).forEach(function (token) {
-            return setTimeout(function () { return _this.playersTokens[notif.args.playerId].removeCard(token); }, 500);
+        var _a = notif.args, tokens = _a.tokens, playerId = _a.playerId;
+        this.playersTokens[playerId].addCards(tokens);
+        tokens.forEach(function (token) { var _a; return (_a = _this.tokensManager.getCardElement(token)) === null || _a === void 0 ? void 0 : _a.classList.add('new-token'); });
+        tokens.filter(function (token) { return token.type == 2; }).forEach(function (token) {
+            return setTimeout(function () { return _this.playersTokens[playerId].removeCard(token); }, 1500);
         });
     };
     Glow.prototype.notif_removeToken = function (notif) {

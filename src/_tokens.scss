@@ -59,7 +59,23 @@
     &[data-type="3"][data-type-arg="0"] .front {
         background-position-x: #{11 * 100% / 11};
     }
-}
+
+    &.new-token {
+      .front {
+        animation: new-token-animation 8s 1 forwards ease-in-out;
+      }
+    }
+  }
+  
+  @keyframes new-token-animation {
+    0% {
+      outline: 8px solid gold;
+    }
+    100% { 
+      outline: 0px solid gold;
+    }
+  }
+  
 
 @keyframes selectable-card-animation {
     0% { 

@@ -2346,9 +2346,11 @@ class Glow implements GlowGame {
     }
 
     notif_getTokens(notif: Notif<NotifGetTokensArgs>) {
-        this.playersTokens[notif.args.playerId].addCards(notif.args.tokens);
-        notif.args.tokens.filter(token => token.type == 2).forEach(token => 
-            setTimeout(() => this.playersTokens[notif.args.playerId].removeCard(token), 500)
+        const { tokens, playerId } = notif.args;
+        this.playersTokens[playerId].addCards(tokens);
+        tokens.forEach(token => this.tokensManager.getCardElement(token)?.classList.add('new-token'));
+        tokens.filter(token => token.type == 2).forEach(token => 
+            setTimeout(() => this.playersTokens[playerId].removeCard(token), 1500)
         );
     }
     
