@@ -160,6 +160,16 @@ $game_options = [
 ];
 
 $game_preferences = [
+    204 => [
+        'name' => totranslate('Table position'),
+        'needReload' => false,
+        'values' => [
+            1 => [ 'name' => totranslate('Before current player space')],
+            2 => [ 'name' => totranslate('After current player space')],
+        ],
+        'default' => 2
+    ],
+
     201 => [
         'name' => totranslate('Show color-blind indications'),
         'needReload' => true,
@@ -191,4 +201,5 @@ $game_preferences = [
         'default' => 1,
     ],
     
+    // 204 used
 ];

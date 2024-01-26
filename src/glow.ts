@@ -941,9 +941,11 @@ class Glow implements GlowGame {
       
     private onPreferenceChange(prefId: number, prefValue: number) {
         switch (prefId) {
-            // KEEP
             case 202: 
-                document.getElementById('full-table').dataset.highContrastPoints = 'false';// TODO set back for expansion release '' + prefValue;
+                document.getElementById('full-table').dataset.highContrastPoints = '' + prefValue;
+                break;
+            case 204: 
+                document.getElementById('full-table').insertAdjacentElement('afterbegin', document.getElementById(prefValue == 2 ? 'currentplayertable' : 'full-board-wrapper'));
                 break;
         }
     }
