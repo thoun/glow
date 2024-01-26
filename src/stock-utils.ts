@@ -270,7 +270,7 @@ function getCompanionTooltip(type: number) {
         <p>` + _(`If it is a Sketal, they take the additional die indicated by its power, if it is available in the reserve pool, and can roll it from the next round. If it is Kaar, the black die comes into play.`) + `</p>
         <p>` + _(`If the previously obtained result of the dice allows it, they can immediately trigger the effect of this new companion.`) + `</p>`;
 
-        case 107: return `<p>` + _(`TODO CRONOS`) + `</p>`; // TODO
+        case 107: return `<p>` + _(`The player who has recruited Crolos may decide to move 2 spaces back on the score track to obtain an immediate reroll. To apply this effect, they must be  able to move backwards. They may do this as many times as they like, as long as they do not go beyond space 0 on the score track.`) + `</p>`;
     }
     return null;
 }
