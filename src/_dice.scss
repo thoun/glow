@@ -230,6 +230,101 @@ $size: 0.25rem;
     transform: rotate3d(1, 0, 0, 180deg) translateZ(4*$size);
   }
 
+  // dirty patch for iOs 17 / macOS Safari
+  .dj_ios .die, .dj_safari .die {
+    [data-roll-type="even"][data-roll="1"] {
+      transform: rotateX(360.1deg) rotateY(720.1deg) rotateZ(360.1deg);
+    }
+    [data-roll-type="even"][data-roll="2"] {
+      transform: rotateX(450.1deg) rotateY(720.1deg) rotateZ(360.1deg);
+    }
+    [data-roll-type="even"][data-roll="3"] {
+      transform: rotateX(360.1deg) rotateY(630.1deg) rotateZ(360.1deg);
+    }
+    [data-roll-type="even"][data-roll="4"] {
+      transform: rotateX(360.1deg) rotateY(810.1deg) rotateZ(360.1deg);
+    }
+    [data-roll-type="even"][data-roll="5"] {
+      transform: rotateX(270.1deg) rotateY(720.1deg) rotateZ(360.1deg);
+    }
+    [data-roll-type="even"][data-roll="6"] {
+      transform: rotateX(360.1deg) rotateY(900.1deg) rotateZ(540.1deg);
+    }
+    [data-roll-type="odd"][data-roll="1"] {
+      transform: rotateX(-360.1deg) rotateY(-720.1deg) rotateZ(-360.1deg);
+    }
+    [data-roll-type="odd"][data-roll="2"] {
+      transform: rotateX(-270.1deg) rotateY(-720.1deg) rotateZ(-360.1deg);
+    }
+    [data-roll-type="odd"][data-roll="3"] {
+      transform: rotateX(-360.1deg) rotateY(-810.1deg) rotateZ(-360.1deg);
+    }
+    [data-roll-type="odd"][data-roll="4"] {
+      transform: rotateX(-360.1deg) rotateY(-630.1deg) rotateZ(-360.1deg);
+    }
+    [data-roll-type="odd"][data-roll="5"] {
+      transform: rotateX(-450.1deg) rotateY(-720.1deg) rotateZ(-360.1deg);
+    }
+    [data-roll-type="odd"][data-roll="6"] {
+      transform: rotateX(-360.1deg) rotateY(-900.1deg) rotateZ(-540.1deg);
+    }
+    [data-roll-type="-"][data-roll="1"] {
+      transform: rotateX(360.1deg) rotateY(720.1deg) rotateZ(360.1deg);
+    }
+    [data-roll-type="-"][data-roll="2"] {
+      transform: rotateX(450.1deg) rotateY(720.1deg) rotateZ(360.1deg);
+    }
+    [data-roll-type="-"][data-roll="3"] {
+      transform: rotateX(360.1deg) rotateY(630.1deg) rotateZ(360.1deg);
+    }
+    [data-roll-type="-"][data-roll="4"] {
+      transform: rotateX(360.1deg) rotateY(810.1deg) rotateZ(360.1deg);
+    }
+    [data-roll-type="-"][data-roll="5"] {
+      transform: rotateX(270.1deg) rotateY(720.1deg) rotateZ(360.1deg);
+    }
+    [data-roll-type="-"][data-roll="6"] {
+      transform: rotateX(360.1deg) rotateY(900.1deg) rotateZ(540.1deg);
+    }
+    [data-roll-type="change"][data-roll="1"] {
+      transform: rotateX(360.1deg) rotateY(720.1deg) rotateZ(360.1deg);
+    }
+    [data-roll-type="change"][data-roll="2"] {
+      transform: rotateX(450.1deg) rotateY(720.1deg) rotateZ(360.1deg);
+    }
+    [data-roll-type="change"][data-roll="3"] {
+      transform: rotateX(360.1deg) rotateY(630.1deg) rotateZ(360.1deg);
+    }
+    [data-roll-type="change"][data-roll="4"] {
+      transform: rotateX(360.1deg) rotateY(810.1deg) rotateZ(360.1deg);
+    }
+    [data-roll-type="change"][data-roll="5"] {
+      transform: rotateX(270.1deg) rotateY(720.1deg) rotateZ(360.1deg);
+    }
+    [data-roll-type="change"][data-roll="6"] {
+      transform: rotateX(360.1deg) rotateY(900.1deg) rotateZ(540.1deg);
+    }
+  
+    [data-side="1"] {
+      transform: rotate3d(0, 0, 0, 90.1deg) translateZ(4*$size);
+    }
+    [data-side="2"] {
+      transform: rotate3d(-1, 0, 0, 90.1deg) translateZ(4*$size);
+    }
+    [data-side="3"] {
+      transform: rotate3d(0, 1, 0, 90.1deg) translateZ(4*$size);
+    }
+    [data-side="4"] {
+      transform: rotate3d(0, -1, 0, 90.1deg) translateZ(4*$size);
+    }
+    [data-side="5"] {
+      transform: rotate3d(1, 0, 0, 90.1deg) translateZ(4*$size);
+    }
+    [data-side="6"] {
+      transform: rotate3d(1, 0, 0, 180.1deg) translateZ(4*$size);
+    }
+  }
+
 #generalactions {
   .die-item {
     width: 36px;
