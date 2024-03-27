@@ -169,12 +169,12 @@ function getEffectExplanation(effect: number) {
         return dojo.string.substitute(_("Lose ${rerolls} reroll token(s)."), { rerolls: `<strong>${-(effect + 40)}</strong>` });
     }
 
-    else if (effect == 50) {
-        return _("Earn 1 token and place back 1 token in front of the bag");
+    else if (effect > 60 && effect < 70) {
+        return dojo.string.substitute(_("Draw ${tokens} butterfly token(s) then returns the same number of your butterfly tokens."), { tokens: `<strong>${effect - 60}</strong>` });
     } else if (effect > 50 && effect < 60) {
-        return dojo.string.substitute(_("Earn ${tokens} token(s)."), { tokens: `<strong>${effect - 50}</strong>` });
+        return dojo.string.substitute(_("Draw ${tokens} butterfly token(s)."), { tokens: `<strong>${effect - 50}</strong>` });
     } else if (effect < -50 && effect > -60) {
-        return dojo.string.substitute(_("Lose ${tokens} token(s)."), { tokens: `<strong>${-(effect + 50)}</strong>` });
+        return dojo.string.substitute(_("Lose ${tokens} butterfly token(s)."), { tokens: `<strong>${-(effect + 50)}</strong>` });
     }
 
     else if (effect === 33) {

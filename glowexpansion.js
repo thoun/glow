@@ -1392,14 +1392,14 @@ function getEffectExplanation(effect) {
     else if (effect < -40 && effect > -50) {
         return dojo.string.substitute(_("Lose ${rerolls} reroll token(s)."), { rerolls: "<strong>" + -(effect + 40) + "</strong>" });
     }
-    else if (effect == 50) {
-        return _("Earn 1 token and place back 1 token in front of the bag");
+    else if (effect > 60 && effect < 70) {
+        return dojo.string.substitute(_("Draw ${tokens} butterfly token(s) then returns the same number of your butterfly tokens."), { tokens: "<strong>" + (effect - 60) + "</strong>" });
     }
     else if (effect > 50 && effect < 60) {
-        return dojo.string.substitute(_("Earn ${tokens} token(s)."), { tokens: "<strong>" + (effect - 50) + "</strong>" });
+        return dojo.string.substitute(_("Draw ${tokens} butterfly token(s)."), { tokens: "<strong>" + (effect - 50) + "</strong>" });
     }
     else if (effect < -50 && effect > -60) {
-        return dojo.string.substitute(_("Lose ${tokens} token(s)."), { tokens: "<strong>" + -(effect + 50) + "</strong>" });
+        return dojo.string.substitute(_("Lose ${tokens} butterfly token(s)."), { tokens: "<strong>" + -(effect + 50) + "</strong>" });
     }
     else if (effect === 33) {
         return _("The companion is immediately placed in the cemetery.");
@@ -3263,14 +3263,18 @@ var Glow = /** @class */ (function () {
                 _this.playersTokens[playerId].onCardClick = function (card) {
                     var _a;
                     if (((_a = _this.gamedatas.gamestate.private_state) === null || _a === void 0 ? void 0 : _a.name) == 'removeToken') {
-                        ;
-                        _this.removeToken(card.id);
+                        if (card.type != 2) {
+                            _this.removeToken(card.id);
+                        }
                     }
                     else if (card.type == 3) {
                         _this.activateToken(card.id);
                     }
                 };
                 _this.playersTokens[playerId].addCards(player.tokens);
+                player.tokens.filter(function (token) { return token.type == 2; }).forEach(function (token) {
+                    return _this.tokensManager.getCardElement(token).classList.add('applied-token');
+                });
             }
             if (playerId != 0) {
                 dojo.place("\n                    <div id=\"firefly-counter-icon-" + player.id + "\" class=\"icon firefly\"></div> \n                    <span id=\"firefly-counter-" + player.id + "\"></span>&nbsp;/&nbsp;<span id=\"companion-counter-" + player.id + "\"></span>\n                ", "firefly-counter-wrapper-" + player.id);
@@ -4331,7 +4335,7 @@ var Glow = /** @class */ (function () {
         this.playersTokens[playerId].addCards(tokens);
         tokens.forEach(function (token) { var _a; return (_a = _this.tokensManager.getCardElement(token)) === null || _a === void 0 ? void 0 : _a.classList.add('new-token'); });
         tokens.filter(function (token) { return token.type == 2; }).forEach(function (token) {
-            return setTimeout(function () { return _this.playersTokens[playerId].removeCard(token); }, 1500);
+            return setTimeout(function () { return _this.tokensManager.getCardElement(token).classList.add('applied-token'); }, 5000);
         });
     };
     Glow.prototype.notif_removeToken = function (notif) {

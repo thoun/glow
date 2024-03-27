@@ -60,14 +60,14 @@ $game_options = [
     ],
 
     OPTION_EXPANSION => [
-        'name' => totranslate('Expansion'),
+        'name' => totranslate('Dawn expansion'),
         'values' => [
             1 => [
                 'name' => totranslate('Disabled'),
             ],
             2 => [
                 'name' => totranslate('Enabled'),
-                'tmdisplay' => totranslate('Expansion'),
+                'tmdisplay' => totranslate('Dawn expansion'),
                 'alpha' => true,
             ],
         ],
@@ -77,7 +77,7 @@ $game_options = [
                 [
                     'type' => 'maxplayers',
                     'value' => 4,
-                    'message' => totranslate('You can only player with 5-6 players if the expansion is activated'),
+                    'message' => totranslate('You can only player with 5-6 players if the Dawn expansion is activated'),
                 ]
             ],
             2 => [],
@@ -85,14 +85,14 @@ $game_options = [
     ],
 
     OPTION_EXPANSION_MODULE1 => [
-        'name' => totranslate('Expansion module 1'),
+        'name' => totranslate('Dawn expansion set : The Elemental'),
         'values' => [
             1 => [
                 'name' => totranslate('Disabled'),
             ],
             2 => [
                 'name' => totranslate('Enabled'),
-                'tmdisplay' => totranslate('Expansion module 1'),
+                'tmdisplay' => totranslate('Dawn expansion set : The Elemental'),
                 'alpha' => true,
             ],
         ],
@@ -111,14 +111,14 @@ $game_options = [
     ],
 
     OPTION_EXPANSION_MODULE2 => [
-        'name' => totranslate('Expansion module 2'),
+        'name' => totranslate('Dawn expansion set : The Anibloom'),
         'values' => [
             1 => [
                 'name' => totranslate('Disabled'),
             ],
             2 => [
                 'name' => totranslate('Enabled'),
-                'tmdisplay' => totranslate('Expansion module 2'),
+                'tmdisplay' => totranslate('Dawn expansion set : The Anibloom'),
                 'alpha' => true,
             ],
         ],
@@ -133,14 +133,14 @@ $game_options = [
     ],
 
     OPTION_EXPANSION_MODULE3 => [
-        'name' => totranslate('Expansion module 3'),
+        'name' => totranslate('Dawn expansion set : The Draconic'),
         'values' => [
             1 => [
                 'name' => totranslate('Disabled'),
             ],
             2 => [
                 'name' => totranslate('Enabled'),
-                'tmdisplay' => totranslate('Expansion module 3'),
+                'tmdisplay' => totranslate('Dawn expansion set : The Draconic'),
                 'alpha' => true,
             ],
         ],

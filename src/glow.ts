@@ -1105,13 +1105,18 @@ class Glow implements GlowGame {
                     gap: '0',
                 });
                 this.playersTokens[playerId].onCardClick = card => {
-                    if (this.gamedatas.gamestate.private_state?.name == 'removeToken') {;
-                    this.removeToken(card.id);
+                    if (this.gamedatas.gamestate.private_state?.name == 'removeToken') {
+                        if (card.type != 2) {
+                            this.removeToken(card.id);
+                        }
                     } else if (card.type == 3) {
                         this.activateToken(card.id);
                     }
                 }
                 this.playersTokens[playerId].addCards(player.tokens);
+                player.tokens.filter(token => token.type == 2).forEach(token => 
+                    this.tokensManager.getCardElement(token).classList.add('applied-token')
+                );
             }
 
             if (playerId != 0) {
@@ -2350,7 +2355,7 @@ class Glow implements GlowGame {
         this.playersTokens[playerId].addCards(tokens);
         tokens.forEach(token => this.tokensManager.getCardElement(token)?.classList.add('new-token'));
         tokens.filter(token => token.type == 2).forEach(token => 
-            setTimeout(() => this.playersTokens[playerId].removeCard(token), 1500)
+            setTimeout(() => this.tokensManager.getCardElement(token).classList.add('applied-token'), 5000)
         );
     }
     

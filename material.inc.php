@@ -146,8 +146,8 @@ $this->COMPANIONS_EXPANSION1_SETS = [
       203 => new CompanionCard('Solas', -1, new Effect([4], [51])),
       204 => new CompanionCard('Cyld', 1, new Effect([5, 5], [52])),
       // B
-      205 => new CompanionCard('Solas', 4, new Effect([3, -41], [50]), 1),
-      206 => new CompanionCard('Lulumipili', 0, new Effect([-1, -41], [50]), 0, 2),
+      205 => new CompanionCard('Solas', 4, new Effect([3, -41], [62]), 1),
+      206 => new CompanionCard('Lulumipili', 0, new Effect([-1, -41], [61]), 0, 2),
       207 => new CompanionCard('Vorivi', 2, new Effect([1, 2, -51], [106]), 1),
       208 => new CompanionCard('Glint', 1, new Effect([2, -4], [52, 22])),
     ],

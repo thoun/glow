@@ -963,7 +963,7 @@ trait UtilTrait {
 
         $negativeTokensEffects = array_filter($effect->conditions, fn($effect) => $effect < -50 && $effect > -60);
         $negativeTokens = array_reduce(array_map(fn($effect) => -$effect -50, $negativeTokensEffects), fn($a, $b) => $a + $b, 0);
-        if ($negativeTokens > 0 && count($this->getPlayerTokens($playerId)) < $negativeTokens) {
+        if ($negativeTokens > 0 && count(array_filter($this->getPlayerTokens($playerId), fn($token) => $token->type != 2)) < $negativeTokens) {
             return false;
         }
 
@@ -1047,11 +1047,12 @@ trait UtilTrait {
             if ($companion->effect != null) {
                 $count = $this->isTriggeredEffectsForCard($playerId, $dice, $companion->effect);
                 $discardDieSelection = $this->mustSelectDiscardDie($playerId, $companion);
-                $exchangeToken = count(array_filter($companion->effect->effects, fn($effect) => $effect == 50)) > 0;
-                $removeToken = count(array_filter($companion->effect->effects, fn($effect) => $effect < -50 && $effect > -60)) > 0;
+                $exchangeToken = $this->array_find($companion->effect->effects, fn($effect) => $effect > 60 && $effect < -70);
+                $exchangeTokenCount = $exchangeToken !== null ? $exchangeToken - 60 : 0;
+                $removeToken = count(array_filter($companion->effect->conditions, fn($effect) => $effect < -50 && $effect > -60)) > 0;
 
                 for ($i=0; $i<$count; $i++) {
-                    $effectsCodes[] = [1, $companion->id, $discardDieSelection ?? ($exchangeToken ? 'exchangeToken' : ($removeToken ? 'removeToken' : null))];
+                    $effectsCodes[] = [1, $companion->id, $discardDieSelection ?? ($exchangeToken ? 'exchangeToken-'.$exchangeTokenCount : ($removeToken ? 'removeToken' : null))];
                     //$effectsCodes[] = [1, $companion->id, $discardDieSelection ? 'discard' : ($exchangeToken ? 'exchangeToken' : ($removeToken ? 'removeToken' : null))];
                 }
             }
@@ -1156,13 +1157,14 @@ trait UtilTrait {
             $this->removePlayerRerolls($playerId, -($effect + 40), clienttranslate('${player_name} ${gainsloses} ${absrerolls} rerolls with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
         }
 
-        if ($effect == 50) {
-            //$this->addPlayerTokens($playerId, 1, clienttranslate('${player_name} ${gainsloses} ${abstokens} tokens with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
-            $this->removePlayerToken($playerId, $tokenId, clienttranslate('${player_name} lose 1 token with ${effectOrigin} effect'), $args);
-        } else if ($effect > 50 && $effect < 60) {
-            $this->addPlayerTokens($playerId, $effect - 50, clienttranslate('${player_name} ${gainsloses} ${abstokens} tokens with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('gains'), 'i18n' => ['gainsloses']]);
+        if ($effect > 50 && $effect < 70) {
+            $this->addPlayerTokens($playerId, $effect - ($effect >= 60 ? 60 : 50), clienttranslate('${player_name} ${gainsloses} ${abstokens} butterfly token(s) with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('gains'), 'i18n' => ['gainsloses']]);
         } else if ($effect < -50 && $effect > -60) {
-            $this->removePlayerToken($playerId, $tokenId, clienttranslate('${player_name} lose 1 token with ${effectOrigin} effect'), $args);
+            $token = $this->getTokenFromDb($this->tokens->getCard($tokenId));
+            if ($token->type == 2) {
+                throw new BgaUserException("You cannot remove this token, it has already been used.");
+            }
+            $this->removePlayerToken($playerId, $tokenId, clienttranslate('${player_name} ${gainsloses} ${abstokens} butterfly token(s) with ${effectOrigin} effect'), $args + ['abstokens' => -($effect + 50), 'gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
         }
 
         else if ($effect === 33) { // skull
@@ -1499,7 +1501,6 @@ trait UtilTrait {
                 if ($token->type == 2) {
                     $effect = $token->typeArg;
                     $this->applyEffect($playerId, $effect, 5);
-                    $this->tokens->moveCard($token->id, 'front');
                 }
             }
         }

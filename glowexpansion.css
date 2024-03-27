@@ -597,6 +597,7 @@ body > .card {
   width: 64px;
   height: 62px;
   border-radius: 50%;
+  transition: opacity 0.5s;
 }
 .module-token.disabled {
   cursor: not-allowed;
@@ -656,6 +657,9 @@ body > .card {
 }
 .module-token.new-token .front {
   animation: new-token-animation 8s 1 forwards ease-in-out;
+}
+.module-token.applied-token {
+  opacity: 0.25;
 }
 
 @keyframes new-token-animation {

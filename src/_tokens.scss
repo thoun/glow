@@ -6,6 +6,7 @@
     height: 62px;
     //margin: 5px;
     border-radius: 50%;
+    transition: opacity 0.5s;
 
     &.disabled {
       cursor: not-allowed;
@@ -64,6 +65,10 @@
       .front {
         animation: new-token-animation 8s 1 forwards ease-in-out;
       }
+    }
+
+    &.applied-token {
+      opacity: 0.25;
     }
   }
   
