@@ -1047,7 +1047,7 @@ trait UtilTrait {
             if ($companion->effect != null) {
                 $count = $this->isTriggeredEffectsForCard($playerId, $dice, $companion->effect);
                 $discardDieSelection = $this->mustSelectDiscardDie($playerId, $companion);
-                $exchangeToken = $this->array_find($companion->effect->effects, fn($effect) => $effect > 60 && $effect < -70);
+                $exchangeToken = $this->array_find($companion->effect->effects, fn($effect) => $effect > 60 && $effect < 70);
                 $exchangeTokenCount = $exchangeToken !== null ? $exchangeToken - 60 : 0;
                 $removeToken = count(array_filter($companion->effect->conditions, fn($effect) => $effect < -50 && $effect > -60)) > 0;
 

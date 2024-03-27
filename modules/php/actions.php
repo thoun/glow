@@ -628,9 +628,12 @@ trait ActionTrait {
 
         if ($remainingEffect[0] == 1 && gettype($remainingEffect[2]) == 'string') {
             $redirect = $remainingEffect[2];
-            if ($redirect == 'exchangeToken') {
-                $this->addPlayerTokens($playerId, 1, clienttranslate('${player_name} ${gainsloses} ${abstokens} tokens with ${effectOrigin} effect'), ['effectOrigin' => 'companion', 'gainsloses' => clienttranslate('gains'), 'i18n' => ['gainsloses']]);
-                $redirect = count($this->getPlayerTokens($playerId)) > 0 ? 'removeToken' : null;
+            if (strpos($redirect, 'exchangeToken') !== false) {
+                $count = intval(explode('-', $redirect)[1]);
+                $this->addPlayerTokens($playerId, $count, clienttranslate('${player_name} ${gainsloses} ${abstokens} tokens with ${effectOrigin} effect'), ['effectOrigin' => 'companion', 'gainsloses' => clienttranslate('gains'), 'i18n' => ['gainsloses']]);
+                $tokens = array_values(array_filter($this->getPlayerTokens($playerId), fn($token) => $token->type != 2));
+                $redirect = count($tokens) > 0 ? 'removeToken' : null;
+                $this->setGlobalVariable(REMOVE_TOKENS, min($count, count($tokens)));
             }
             
             if ($redirect != null) {
@@ -666,10 +669,16 @@ trait ActionTrait {
         if ($remainingEffect == null) {
             throw new BgaUserException("You can't apply that effect");
         }
-
-        $this->applyResolveCard($playerId, 1, $companionId, 0, $tokenId);
         
-        $this->checkResolveCardEnd($playerId);
+        $count = $this->getGlobalVariable(REMOVE_TOKENS) - 1;
+        $this->setGlobalVariable(REMOVE_TOKENS, $count);
+        if ($count > 0) {
+            $this->gamestate->setPrivateState($playerId, ST_PRIVATE_REMOVE_TOKEN);
+        } else {
+            $this->applyResolveCard($playerId, 1, $companionId, 0, $tokenId);
+            
+            $this->checkResolveCardEnd($playerId);
+        }
     }
 
     public function activateToken(int $tokenId) {

@@ -260,7 +260,14 @@ trait StateTrait {
         $this->addFootprintsOnMeetingTrack();
 
         if ($this->tokensActivated()) {
-            $this->soloTiles->moveAllCardsInLocation('front', 'bag');
+            $playersIds = $this->getPlayersIds();
+            foreach($playersIds as $playerId) {
+                $tokens = array_values(array_filter($this->getPlayerTokens($playerId), fn($token) => $token->type == 2));
+                foreach ($tokens as $token) {
+                    $this->removePlayerToken($playerId, $token->id);
+                }
+            }
+            $this->tokens->moveAllCardsInLocation('front', 'bag');
             $this->tokens->shuffle('bag');
         }
 

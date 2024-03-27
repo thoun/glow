@@ -68,6 +68,7 @@ define('SOLO_DECK', 'SOLO_DECK');
  */
 define('TOM', 'TOM');
 define('URIOM_INTERVENTION', 'URIOM_INTERVENTION');
+define('REMOVE_TOKENS', 'REMOVE_TOKENS');
 
 /*
  * Options

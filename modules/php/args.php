@@ -185,8 +185,10 @@ trait ArgsTrait {
     }
 
     function argRemoveToken(int $playerId) {
+        $tokens = array_values(array_filter($this->getPlayerTokens($playerId), fn($token) => $token->type != 2));
+
         return [
-            'tokens' => $this->getPlayerTokens($playerId),
+            'tokens' => $tokens,
         ];
     }
 
