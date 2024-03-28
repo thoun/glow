@@ -267,6 +267,7 @@ class GlowExpansion extends Table {
         if ($solo) {
             $result['tom'] = $this->getTom();
             $result['tom']->meeples = $this->getPlayerMeeples(0);
+            $result['tom']->tokens = $this->getPlayerTokens(0);
         }
 
         $result['ADVENTURERS'] = $this->ADVENTURERS;
