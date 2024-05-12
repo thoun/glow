@@ -229,6 +229,11 @@ interface EnteringMoveForPlayer {
     disableTokenId?: number;
 }
 
+interface EnteringRemoveTokenArgs {    
+    tokens: Token[];
+    count: number;
+}
+
 interface EnteringMoveArgs {
     [playerId: number]: EnteringMoveForPlayer;
 }

@@ -239,6 +239,14 @@
         $this->ajaxResponse();
     }
 
+    public function passRemoveToken() {
+        $this->setAjaxMode();
+
+        $this->game->passRemoveToken();
+
+        $this->ajaxResponse();
+    }
+
     public function activateToken() {
         $this->setAjaxMode();
 

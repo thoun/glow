@@ -794,6 +794,12 @@ class Glow implements GlowGame {
                     this.onLeavingResolveCards();
                     this.onEnteringStatePrivateResolveCards(args);
                     break;
+                case 'removeToken':
+                    const removeTokenArgs = args as EnteringRemoveTokenArgs;
+                    if (removeTokenArgs.tokens.length === 0 && removeTokenArgs.count) {
+                        (this as any).addActionButton(`passRemoveToken-button`, _("Pass (no token to remove)"), () => this.passRemoveToken());
+                    }
+                    break;
                 case 'move':
                     this.onEnteringStateMove(args);
                     break;
@@ -1694,6 +1700,14 @@ class Glow implements GlowGame {
         this.takeNoLockAction('rerollImmediate', { 
             id: onlyPink ? 0 : this.selectedDice[0].id,
         });
+    }
+    
+    private passRemoveToken() {
+        if(!(this as any).checkAction('passRemoveToken')) {
+            return;
+        }
+
+        this.takeNoLockAction('passRemoveToken');
     }
     
     private cancel() {

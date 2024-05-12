@@ -3016,6 +3016,12 @@ var Glow = /** @class */ (function () {
                     this.onLeavingResolveCards();
                     this.onEnteringStatePrivateResolveCards(args);
                     break;
+                case 'removeToken':
+                    var removeTokenArgs = args;
+                    if (removeTokenArgs.tokens.length === 0 && removeTokenArgs.count) {
+                        this.addActionButton("passRemoveToken-button", _("Pass (no token to remove)"), function () { return _this.passRemoveToken(); });
+                    }
+                    break;
                 case 'move':
                     this.onEnteringStateMove(args);
                     break;
@@ -3790,6 +3796,12 @@ var Glow = /** @class */ (function () {
         this.takeNoLockAction('rerollImmediate', {
             id: onlyPink ? 0 : this.selectedDice[0].id,
         });
+    };
+    Glow.prototype.passRemoveToken = function () {
+        if (!this.checkAction('passRemoveToken')) {
+            return;
+        }
+        this.takeNoLockAction('passRemoveToken');
     };
     Glow.prototype.cancel = function () {
         if (!this.checkAction('cancel')) {

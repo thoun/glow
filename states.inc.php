@@ -427,6 +427,7 @@ $playerActionsGameStates = [
         "args" => "argRemoveToken",
         "possibleactions" => [ 
             "removeToken", 
+            "passRemoveToken",
         ],
         "transitions" => [
             "resolve" => ST_PRIVATE_RESOLVE_CARDS,

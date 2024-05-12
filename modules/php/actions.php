@@ -631,9 +631,8 @@ trait ActionTrait {
             if (strpos($redirect, 'exchangeToken') !== false) {
                 $count = intval(explode('-', $redirect)[1]);
                 $this->addPlayerTokens($playerId, $count, clienttranslate('${player_name} ${gainsloses} ${abstokens} tokens with ${effectOrigin} effect'), ['effectOrigin' => 'companion', 'gainsloses' => clienttranslate('gains'), 'i18n' => ['gainsloses']]);
-                $tokens = array_values(array_filter($this->getPlayerTokens($playerId), fn($token) => $token->type != 2));
-                $redirect = count($tokens) > 0 ? 'removeToken' : null;
-                $this->setGlobalVariable(REMOVE_TOKENS, min($count, count($tokens)));
+                $redirect = 'removeToken';
+                $this->setGlobalVariable(REMOVE_TOKENS, $count);
             }
             
             if ($redirect != null) {
@@ -672,13 +671,41 @@ trait ActionTrait {
         
         $count = $this->getGlobalVariable(REMOVE_TOKENS) - 1;
         $this->setGlobalVariable(REMOVE_TOKENS, $count);
+        
+        $companion = $this->getCompanionFromDb($this->companions->getCard($companionId));
+        $this->applyEffect($playerId, -51, 1, $companion, 0, $tokenId); 
+        
         if ($count > 0) {
             $this->gamestate->setPrivateState($playerId, ST_PRIVATE_REMOVE_TOKEN);
         } else {
-            $this->applyResolveCard($playerId, 1, $companionId, 0, $tokenId);
+            $this->saveAppliedEffect($playerId, [1, $companionId]); 
+
+            $this->incStat(1, 'resolvedCards');
+            $this->incStat(1, 'resolvedCards', $playerId);
             
             $this->checkResolveCardEnd($playerId);
         }
+    }
+
+    public function passRemoveToken() {
+        $this->checkAction('passRemoveToken');
+
+        $playerId = intval($this->getCurrentPlayerId());
+        $companionId = $this->getSelectedCompanion($playerId);
+        
+        $resolveCardsForPlayer = $this->argResolveCardsForPlayer($playerId);
+        $remainingEffect = $this->array_find($resolveCardsForPlayer->remainingEffects, fn($remainingEffect) => $remainingEffect[0] == 1 && $remainingEffect[1] == $companionId);
+        if ($remainingEffect == null) {
+            throw new BgaUserException("You can't apply that effect");
+        }
+        
+        $this->setGlobalVariable(REMOVE_TOKENS, 0);
+        $this->saveAppliedEffect($playerId, [1, $companionId]); 
+
+        $this->incStat(1, 'resolvedCards');
+        $this->incStat(1, 'resolvedCards', $playerId);
+        
+        $this->checkResolveCardEnd($playerId);
     }
 
     public function activateToken(int $tokenId) {

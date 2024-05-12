@@ -103,10 +103,10 @@ $game_options = [
               'id' => OPTION_EXPANSION,
               'value' => [2],
             ],
-            /*[
+            [
               'type' => 'minplayers',
-              'value' => [2],
-            ],*/
+              'value' => 2,
+            ],
           ],
     ],
 
@@ -151,10 +151,10 @@ $game_options = [
               'id' => OPTION_EXPANSION,
               'value' => [2],
             ],
-            /*[
+            [
               'type' => 'minplayers',
-              'value' => [2],
-            ],*/
+              'value' => 2,
+            ],
           ],
     ],
 ];
