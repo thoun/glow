@@ -110,6 +110,9 @@ class Glow extends Table {
         $this->reloadPlayersBasicInfos();
         
         /************ Start the game initialization *****/
+        if ($this->getSide() === 0) {
+            $this->setGameStateValue(BOARD_SIDE, bga_rand(1, 2));
+        }
 
         // Init global values with their initial values
         $this->setGameStateInitialValue('DAY', 0);

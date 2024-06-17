@@ -30,6 +30,10 @@ $game_options = [
     100 => [
         'name' => totranslate('Side'),
         'values' => [
+            0 => [
+                'name' => totranslate('Random'),
+                'tmdisplay' => totranslate('Random'),
+            ],
             1 => [
                 'name' => totranslate('The Province of Shadows'),
                 'tmdisplay' => totranslate('The Province of Shadows'),
