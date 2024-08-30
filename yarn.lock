@@ -10,17 +10,17 @@ anymatch@~3.1.2:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-bga-animations@thoun/bga-animations:
-  version "1.0.0"
-  resolved "https://codeload.github.com/thoun/bga-animations/tar.gz/915a7ad917dbef486334b3bf1ec50e171ea3ac1d"
+bga-animations@thoun/bga-animations#1.1.1:
+  version "1.1.1"
+  resolved "https://codeload.github.com/thoun/bga-animations/tar.gz/91a2747fa5f5a7402a5adfa84d976d8216269f6b"
 
-bga-cards@thoun/bga-cards#main:
-  version "1.0.0"
-  resolved "https://codeload.github.com/thoun/bga-cards/tar.gz/9887593c5547d3acef790933b98fcd3e76f525fe"
+bga-cards@thoun/bga-cards#3.2.1:
+  version "3.1.1"
+  resolved "https://codeload.github.com/thoun/bga-cards/tar.gz/1b52f6c9164accfd836f1d4bc6a1fb8efa27a76a"
 
-bga-zoom@thoun/bga-zoom:
-  version "1.0.0"
-  resolved "https://codeload.github.com/thoun/bga-zoom/tar.gz/5965fff329655cafa2faba40e0647cbc4a958f60"
+bga-zoom@thoun/bga-zoom#1.0.3:
+  version "1.0.3"
+  resolved "https://codeload.github.com/thoun/bga-zoom/tar.gz/35183a0c170e787116574f84325fb9c83159fabb"
 
 binary-extensions@^2.0.0:
   version "2.2.0"
