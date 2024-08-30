@@ -200,7 +200,7 @@ var ZoomManager = /** @class */ (function () {
     ZoomManager.prototype.zoomOrDimensionChanged = function () {
         var _a, _b;
         this.settings.element.style.width = this.wrapper.offsetWidth / this._zoom + "px";
-        this.wrapper.style.height = this.settings.element.offsetHeight + "px";
+        this.wrapper.style.height = this.settings.element.offsetHeight * this._zoom + "px";
         (_b = (_a = this.settings).onDimensionsChange) === null || _b === void 0 ? void 0 : _b.call(_a, this._zoom);
     };
     /**
@@ -815,11 +815,11 @@ function sortFunction() {
             if (type === 'string') {
                 var compare = a[field].localeCompare(b[field]);
                 if (compare !== 0) {
-                    return compare * direction;
+                    return compare;
                 }
             }
             else if (type === 'number') {
-                var compare = (a[field] - b[field]);
+                var compare = (a[field] - b[field]) * direction;
                 if (compare !== 0) {
                     return compare * direction;
                 }
@@ -1289,7 +1289,7 @@ var CardStock = /** @class */ (function () {
         }
     };
     /**
-     * Unselect all cards
+     * Unelect all cards
      */
     CardStock.prototype.unselectAll = function (silent) {
         var _this = this;
@@ -1412,24 +1412,6 @@ var CardStock = /** @class */ (function () {
         var unselectableCardsClass = this.getUnselectableCardClass();
         var selectedCardsClass = this.getSelectedCardClass();
         cardElement === null || cardElement === void 0 ? void 0 : cardElement.classList.remove(selectableCardsClass, unselectableCardsClass, selectedCardsClass);
-    };
-    /**
-     * Changes the sort function of the stock.
-     *
-     * @param sort the new sort function. If defined, the stock will be sorted with this new function.
-     */
-    CardStock.prototype.setSort = function (sort) {
-        this.sort = sort;
-        if (this.sort && this.cards.length) {
-            this.cards.sort(this.sort);
-            var previouslyMovedCardDiv = this.getCardElement(this.cards[this.cards.length - 1]);
-            this.element.appendChild(previouslyMovedCardDiv);
-            for (var i = this.cards.length - 2; i >= 0; i--) {
-                var movedCardDiv = this.getCardElement(this.cards[i]);
-                this.element.insertBefore(movedCardDiv, previouslyMovedCardDiv);
-                previouslyMovedCardDiv = movedCardDiv;
-            }
-        }
     };
     return CardStock;
 }());
