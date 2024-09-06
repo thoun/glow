@@ -94,6 +94,7 @@ $basicGameStates = [
         "action" => "stNextPlayerRecruitCompanion",
         "transitions" => [
             "nextPlayer" => ST_PLAYER_RECRUIT_COMPANION, 
+            "uriomRecruit" => ST_PLAYER_URIOM_RECRUIT_COMPANION,
             "end" => ST_END_RECRUIT,
         ],
     ],
@@ -149,6 +150,7 @@ $playerActionsGameStates = [
         "descriptionmyturn" => clienttranslate('${you} must recruit a companion'),
         "type" => "activeplayer",
         "args" => "argRecuitCompanion",
+        "action" => "stRecuitCompanion",
         "updateGameProgression" => true,
         "possibleactions" => [ 
             "recruitCompanion",
@@ -210,6 +212,27 @@ $playerActionsGameStates = [
         ]
     ],
 
+    ST_PLAYER_URIOM_RECRUIT_COMPANION => [
+        "name" => "uriomRecruitCompanion",
+        "description" => /*clienttranslate TODOURIOM */('${actplayer} can recruit the selected companion (Uriom power)'),
+        "descriptionmyturn" => /*clienttranslate TODOURIOM */('${you} can recruit the selected companion (Uriom power)'),
+        "type" => "activeplayer",
+        "args" => "argUriomRecruitCompanion",
+        "possibleactions" => [ 
+            "recruitCompanionUriom", 
+            "passUriomRecruit", 
+        ],
+        "transitions" => [
+            "moveBlackDie" => ST_PLAYER_MOVE_BLACK_DIE,
+            "selectSketalDie" => ST_PLAYER_SELECT_SKETAL_DIE,
+            "nextPlayer" => ST_NEXT_PLAYER_RECRUIT_COMPANION,
+            "removeCompanion" => ST_PLAYER_REMOVE_COMPANION,
+            "zombiePass" => ST_NEXT_PLAYER_RECRUIT_COMPANION,
+            "pass" => ST_NEXT_PLAYER_RECRUIT_COMPANION,
+            "zombiePass" => ST_PLAYER_RECRUIT_COMPANION,
+        ],
+    ],
+
     ST_MULTIPLAYER_CHANGE_DICE => [
         "name" => "changeDice",
         "description" => clienttranslate('Players can reroll or change their dice'),
@@ -219,8 +242,8 @@ $playerActionsGameStates = [
         "action" => "stChangeDice",
         "possibleactions" => [],
         "transitions" => [
-            "keepDice" => ST_MULTIPLAYER_RESURRECT,
-            "zombiePass" => ST_MULTIPLAYER_RESURRECT,
+            "next" => ST_MULTIPLAYER_SWAP,
+            "zombiePass" => ST_MULTIPLAYER_SWAP,
         ],
     ],
 
@@ -237,7 +260,8 @@ $playerActionsGameStates = [
         "transitions" => [
             "rollDice" => ST_PRIVATE_ROLL_DICE,
             "changeDie" => ST_PRIVATE_CHANGE_DIE,
-            "zombiePass" => ST_MULTIPLAYER_RESURRECT,
+            "rerollImmediate" => ST_PRIVATE_REROLL_IMMEDIATE,
+            "zombiePass" => ST_MULTIPLAYER_SWAP,
         ],
     ],
 
@@ -251,9 +275,25 @@ $playerActionsGameStates = [
             "cancel",
         ],
         "transitions" => [
+            "rerollImmediate" => ST_PRIVATE_REROLL_IMMEDIATE,
             "selectDice" => ST_PRIVATE_SELECT_DICE_ACTION,
             "cancel" => ST_PRIVATE_SELECT_DICE_ACTION,
-            "zombiePass" => ST_MULTIPLAYER_RESURRECT,
+            "zombiePass" => ST_MULTIPLAYER_SWAP,
+        ],
+    ],
+
+    ST_PRIVATE_REROLL_IMMEDIATE => [
+        "name" => "privateRerollImmediate",
+        "descriptionmyturn" => clienttranslate('${you} can select a die to reroll with the pink die'),
+        "type" => "private",
+        "args" => "argRerollImmediate",
+        "possibleactions" => [ 
+            "rerollImmediate",
+        ],
+        "transitions" => [
+            "rerollImmediate" => ST_PRIVATE_REROLL_IMMEDIATE,
+            "selectDice" => ST_PRIVATE_SELECT_DICE_ACTION,
+            "zombiePass" => ST_MULTIPLAYER_SWAP,
         ],
     ],
 
@@ -269,6 +309,37 @@ $playerActionsGameStates = [
         "transitions" => [
             "selectDice" => ST_PRIVATE_SELECT_DICE_ACTION,
             "cancel" => ST_PRIVATE_SELECT_DICE_ACTION,
+            "zombiePass" => ST_MULTIPLAYER_SWAP,
+        ],
+    ],
+
+    ST_MULTIPLAYER_SWAP => [
+        "name" => "swapMulti",
+        "description" => clienttranslate("Players with Hulios can swap one companion with his special deck"),
+        "descriptionmyturn" => clienttranslate('${you} can swap one of your companion with this card'),
+        "type" => "multipleactiveplayer",
+        "initialprivate" => ST_PRIVATE_SWAP,
+        "action" => "stSwap",
+        "args" => "argSwap",
+        "possibleactions" => [],
+        "transitions" => [
+            "next" => ST_MULTIPLAYER_RESURRECT,
+            "zombiePass" => ST_MULTIPLAYER_RESURRECT,
+        ],
+    ],
+
+    ST_PRIVATE_SWAP => [
+        "name" => "swap",
+        "descriptionmyturn" => clienttranslate('${you} can swap one of your companion with this card'),
+        "type" => "private",
+        "args" => "argSwap",
+        "possibleactions" => [ 
+            "swap", 
+            "skipSwap", 
+        ],
+        "transitions" => [
+            "stay" => ST_PRIVATE_SWAP,
+            "selectSketalDie" => ST_PRIVATE_SELECT_SKETAL_DIE,
             "zombiePass" => ST_MULTIPLAYER_RESURRECT,
         ],
     ],
@@ -344,7 +415,57 @@ $playerActionsGameStates = [
         ],
         "transitions" => [
             "resolve" => ST_PRIVATE_RESOLVE_CARDS,
+            "removeToken" => ST_PRIVATE_REMOVE_TOKEN,
             "zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
+        ],
+    ],
+
+    ST_PRIVATE_REMOVE_TOKEN => [
+        "name" => "removeToken",
+        "descriptionmyturn" => clienttranslate('${you} must remove one of your tokens (click the token to remove)'),
+        "type" => "private",
+        "args" => "argRemoveToken",
+        "possibleactions" => [ 
+            "removeToken", 
+            "passRemoveToken",
+        ],
+        "transitions" => [
+            "resolve" => ST_PRIVATE_RESOLVE_CARDS,
+            "zombiePass" => ST_MULTIPLAYER_PRIVATE_MOVE,
+        ],
+    ],
+
+    ST_PRIVATE_KILL_TOKEN => [
+        "name" => "privateKillToken",
+        "descriptionmyturn" => clienttranslate('${you} must choose a companion or spell to discard'),
+        "type" => "private",
+        //"args" => "argKillToken",
+        "possibleactions" => [ 
+            "killToken", 
+            "cancelToken",
+        ],
+        "transitions" => [
+            "roll" => ST_PRIVATE_SELECT_DICE_ACTION,
+            "resolve" => ST_PRIVATE_RESOLVE_CARDS,
+            "move" => ST_PRIVATE_MOVE,
+            "zombiePass" => ST_END_ROUND,
+        ],
+    ],
+
+    ST_PRIVATE_DISABLE_TOKEN => [
+        "name" => "privateDisableToken",
+        "descriptionmyturn" => clienttranslate('${you} must choose a symbol to ignore'),
+        "type" => "private",
+        //"args" => "argDisableToken",
+        "possibleactions" => [ 
+            "disableToken", 
+            "cancelToken",
+        ],
+        "transitions" => [
+            "roll" => ST_PRIVATE_SELECT_DICE_ACTION,
+            "resolve" => ST_PRIVATE_RESOLVE_CARDS,
+            "move" => ST_PRIVATE_MOVE,
+            "zombiePass" => ST_END_ROUND,
         ],
     ],
 
@@ -376,6 +497,22 @@ $playerActionsGameStates = [
             "move", 
             "placeEncampment",
             "endTurn",
+        ],
+        "transitions" => [
+            "move" => ST_PRIVATE_MOVE,
+            "discard" => ST_PRIVATE_DISCARD_COMPANION_SPELL,
+            "zombiePass" => ST_END_ROUND,
+        ],
+    ],
+
+    ST_PRIVATE_DISCARD_COMPANION_SPELL => [
+        "name" => "discardCompanionSpell",
+        "descriptionmyturn" => clienttranslate('${you} must choose a companion or spell to discard'),
+        "type" => "private",
+        //"args" => "argDiscardCompanionSpell",
+        "possibleactions" => [ 
+            "discardCompanionSpell", 
+            "cancelDiscardCompanionSpell",
         ],
         "transitions" => [
             "move" => ST_PRIVATE_MOVE,

@@ -99,6 +99,22 @@
         $this->ajaxResponse();
     }
 
+    public function recruitCompanionUriom() {
+        $this->setAjaxMode();     
+
+        $this->game->recruitCompanionUriom();
+
+        $this->ajaxResponse();
+    }
+
+    public function passUriomRecruit() {
+        $this->setAjaxMode();     
+
+        $this->game->passUriomRecruit();
+
+        $this->ajaxResponse();
+    }
+
     public function rollDice() {
         $this->setAjaxMode();     
 
@@ -132,12 +148,21 @@
 
         $id = $this->getArg('id', AT_posint, true);
         $value = $this->getArg('value', AT_posint, true);
-        $cost = explode(',', $this->getArg("cost", AT_numberlist, true)); // cost : [companion, tokens, score]
+        $cost = explode(',', $this->getArg("cost", AT_numberlist, true)); // cost : [companion, tokens, score, krolos]
         $this->game->changeDie($id, $value, $cost);
 
         $this->ajaxResponse();
 
     }
+
+    public function rerollImmediate() {
+        $this->setAjaxMode();     
+
+        $id = $this->getArg('id', AT_posint, true);
+        $this->game->rerollImmediate($id);
+
+        $this->ajaxResponse();
+    }    
 
     public function cancel() {
         $this->setAjaxMode();     
@@ -155,6 +180,24 @@
 
         $this->ajaxResponse();
     }
+    
+    public function swap() {
+        $this->setAjaxMode();
+
+        $id = $this->getArg('id', AT_posint, true);
+
+        $this->game->swap($id);
+
+        $this->ajaxResponse();
+    } 
+
+    public function skipSwap() {
+        $this->setAjaxMode();
+
+        $this->game->skipSwap();
+
+        $this->ajaxResponse();
+    } 
     
     public function resurrect() {
         $this->setAjaxMode();
@@ -182,6 +225,82 @@
         $dieId = $this->getArg('dieId', AT_posint, false);
 
         $this->game->resolveCard($type, $id, $dieId);
+
+        $this->ajaxResponse();
+    }
+
+    public function removeToken() {
+        $this->setAjaxMode();
+
+        $id = $this->getArg('id', AT_posint, true);
+
+        $this->game->removeToken($id);
+
+        $this->ajaxResponse();
+    }
+
+    public function passRemoveToken() {
+        $this->setAjaxMode();
+
+        $this->game->passRemoveToken();
+
+        $this->ajaxResponse();
+    }
+
+    public function activateToken() {
+        $this->setAjaxMode();
+
+        $id = $this->getArg('id', AT_posint, true);
+
+        $this->game->activateToken($id);
+
+        $this->ajaxResponse();
+    }
+
+    public function killToken() {
+        $this->setAjaxMode();
+
+        $type = $this->getArg('type', AT_posint, false);
+        $id = $this->getArg('id', AT_posint, true);
+
+        $this->game->killToken($type, $id);
+
+        $this->ajaxResponse();
+    }
+
+    public function disableToken() {
+        $this->setAjaxMode();
+
+        $symbol = $this->getArg('symbol', AT_posint, true);
+
+        $this->game->disableToken($symbol);
+
+        $this->ajaxResponse();
+    }
+
+    public function cancelToken() {
+        $this->setAjaxMode();
+
+        $this->game->cancelToken();
+
+        $this->ajaxResponse();
+    }
+
+    public function discardCompanionSpell() {
+        $this->setAjaxMode();
+
+        $type = $this->getArg('type', AT_posint, true);
+        $id = $this->getArg('id', AT_posint, true);
+
+        $this->game->discardCompanionSpell($type, $id);
+
+        $this->ajaxResponse();
+    }
+
+    public function cancelDiscardCompanionSpell() {
+        $this->setAjaxMode();
+
+        $this->game->cancelDiscardCompanionSpell();
 
         $this->ajaxResponse();
     }
@@ -222,6 +341,17 @@
         $this->game->endTurn();
 
         $this->ajaxResponse();
+    }
+
+    //////////////////
+    ///// DEBUG  /////
+    //////////////////
+    public function loadBugSQL()
+    {
+      self::setAjaxMode();
+      $reportId = (int) self::getArg('report_id', AT_int, true);
+      $this->game->loadBugSQL($reportId);
+      self::ajaxResponse();
     }
 
   }

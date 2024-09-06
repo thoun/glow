@@ -24,11 +24,13 @@
  *
  */
 
+require_once 'modules/php/constants.inc.php';
+
 $game_options = [
 
     /* note: game variant ID should start at 100 (ie: 100, 101, 102, ...). The maximum is 199.*/
     100 => [
-        'name' => totranslate('Side'),
+        'name' => totranslate('Side of the board'),
         'values' => [
             0 => [
                 'name' => totranslate('Random'),
@@ -60,9 +62,118 @@ $game_options = [
         ],
         'default' => 1,
     ],
+
+    OPTION_EXPANSION => [
+        'name' => totranslate('Dawn expansion'),
+        'values' => [
+            1 => [
+                'name' => totranslate('Disabled'),
+            ],
+            2 => [
+                'name' => totranslate('Enabled'),
+                'tmdisplay' => totranslate('Dawn expansion'),
+                'alpha' => true,
+            ],
+        ],
+        'default' => 2,
+        'startcondition' => [
+            1 => [
+                [
+                    'type' => 'maxplayers',
+                    'value' => 4,
+                    'message' => totranslate('You can only player with 5-6 players if the Dawn expansion is activated'),
+                ]
+            ],
+            2 => [],
+        ],
+    ],
+
+    OPTION_EXPANSION_MODULE1 => [
+        'name' => totranslate('Dawn expansion set : The Elemental'),
+        'values' => [
+            1 => [
+                'name' => totranslate('Disabled'),
+            ],
+            2 => [
+                'name' => totranslate('Enabled'),
+                'tmdisplay' => totranslate('Dawn expansion set : The Elemental'),
+                'alpha' => true,
+            ],
+        ],
+        'default' => 1,
+        'displaycondition' => [
+            [
+              'type' => 'otheroption',
+              'id' => OPTION_EXPANSION,
+              'value' => [2],
+            ],
+            [
+              'type' => 'minplayers',
+              'value' => 2,
+            ],
+          ],
+    ],
+
+    OPTION_EXPANSION_MODULE2 => [
+        'name' => totranslate('Dawn expansion set : The Anibloom'),
+        'values' => [
+            1 => [
+                'name' => totranslate('Disabled'),
+            ],
+            2 => [
+                'name' => totranslate('Enabled'),
+                'tmdisplay' => totranslate('Dawn expansion set : The Anibloom'),
+                'alpha' => true,
+            ],
+        ],
+        'default' => 1,
+        'displaycondition' => [
+            [
+              'type' => 'otheroption',
+              'id' => OPTION_EXPANSION,
+              'value' => [2],
+            ],
+          ],
+    ],
+
+    OPTION_EXPANSION_MODULE3 => [
+        'name' => totranslate('Dawn expansion set : The Draconic'),
+        'values' => [
+            1 => [
+                'name' => totranslate('Disabled'),
+            ],
+            2 => [
+                'name' => totranslate('Enabled'),
+                'tmdisplay' => totranslate('Dawn expansion set : The Draconic'),
+                'alpha' => true,
+            ],
+        ],
+        'default' => 1,
+        'displaycondition' => [
+            [
+              'type' => 'otheroption',
+              'id' => OPTION_EXPANSION,
+              'value' => [2],
+            ],
+            [
+              'type' => 'minplayers',
+              'value' => 2,
+            ],
+          ],
+    ],
 ];
 
 $game_preferences = [
+    204 => [
+        'name' => totranslate('Table position'),
+        'needReload' => false,
+        'values' => [
+            1 => [ 'name' => totranslate('Before current player space')],
+            2 => [ 'name' => totranslate('After current player space')],
+        ],
+        'default' => 2
+    ],
+
     201 => [
         'name' => totranslate('Show color-blind indications'),
         'needReload' => true,
@@ -94,4 +205,5 @@ $game_preferences = [
         'default' => 1,
     ],
     
+    // 204 used
 ];

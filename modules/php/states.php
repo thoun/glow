@@ -22,12 +22,12 @@ trait StateTrait {
     }
 
     function stStartRound() {
-        $solo = $this->isSoloMode();
+        $playerCount = $this->getPlayerCount();
 
         $day = intval($this->getGameStateValue(DAY)) + 1;
         $this->setGameStateValue(DAY, $day);
 
-        $this->DbQuery("UPDATE companion SET `reroll_used` = false");
+        $this->DbQuery("UPDATE companion SET `reroll_used` = 0");
         $this->DbQuery("UPDATE player SET `applied_effects` = null, visited_spots = null");
 
         $this->notifyAllPlayers('newDay', clienttranslate('Day ${day} begins'), [
@@ -35,11 +35,11 @@ trait StateTrait {
         ]);
 
         if ($day == 1) {
-            if ($solo) {
+            if ($playerCount == 1) {
                 $this->placeSoloTilesOnMeetingTrack();
             }
             $this->placeCompanionsOnMeetingTrack();
-            $this->initMeetingTrackSmallDice();
+            $this->initMeetingTrackSmallDice($playerCount);
             $this->addFootprintsOnMeetingTrack();
         }
 
@@ -48,8 +48,36 @@ trait StateTrait {
         $this->gamestate->nextState('morning');
     }
 
-    function stNextPlayerRecruitCompanion() {     
-        $playerId = $this->getActivePlayerId();
+    function stRecuitCompanion() {
+        $uriomIntervention = $this->getGlobalVariable(URIOM_INTERVENTION);
+        if ($uriomIntervention !== null && $uriomIntervention->activated === false) {
+            $this->recruitCompanionAction($uriomIntervention->activePlayerId, $uriomIntervention->spot);
+        } else if (intval($this->getUniqueValueFromDB("SELECT player_recruit_day FROM player where `player_id` = ".$this->getActivePlayerId())) == intval($this->getGameStateValue(DAY)))  {
+            // if Uriom has already played with its intervention, we skip its turn
+            $this->gamestate->nextState('nextPlayer');
+        }
+    }
+
+    function stNextPlayerRecruitCompanion() {
+        $playerId = intval($this->getActivePlayerId());
+
+        $uriomIntervention = $this->getGlobalVariable(URIOM_INTERVENTION);
+        if ($uriomIntervention !== null) {
+            if ($uriomIntervention->activated === null) {
+                // redirect to uriom player
+                $this->gamestate->changeActivePlayer($uriomIntervention->uriomPlayerId);
+                $this->gamestate->nextState('uriomRecruit');
+                return;
+            } else if ($playerId == $uriomIntervention->uriomPlayerId) {
+                // redirect from uriom player to previous active player
+                $this->gamestate->changeActivePlayer($uriomIntervention->activePlayerId);
+                $this->gamestate->nextState('nextPlayer');
+                return;
+            } else {
+                // after a uriom intervention and active player  finished its turn
+                $this->deleteGlobalVariable(URIOM_INTERVENTION);
+            }
+        }
 
         $this->activeNextPlayer();
     
@@ -81,7 +109,51 @@ trait StateTrait {
     
     function stChangeDice() { 
         $this->gamestate->setAllPlayersMultiactive();
-        $this->gamestate->initializePrivateStateForAllActivePlayers(); 
+        
+        $playersIdsToSelectDiceAction = [];
+        $playersIdsToRerollImmediate = [];
+
+
+        $playersIds = $this->getPlayersIds();      
+        foreach($playersIds as $playerId) {
+            $args = $this->argRerollImmediate($playerId);
+            if ($args['selectedDie'] !== null) {
+                $playersIdsToRerollImmediate[] = $playerId;
+            } else {
+                $playersIdsToSelectDiceAction[] = $playerId;
+            }
+        }
+
+        if (count($playersIdsToRerollImmediate) == 0) {
+            $this->gamestate->initializePrivateStateForAllActivePlayers(); 
+        } else {
+            $this->gamestate->initializePrivateStateForPlayers($playersIdsToSelectDiceAction);
+            foreach ($playersIdsToRerollImmediate as $pId) {
+                $this->gamestate->setPrivateState($pId, ST_PRIVATE_REROLL_IMMEDIATE);
+            }
+        }
+    }
+
+    function stSwap() {
+        $playerWithHuliosDiceActivated = [];
+
+        $playersIds = $this->getPlayersIds();
+
+        foreach($playersIds as $playerId) {
+            $dice = $this->getEffectiveDice($playerId);
+            $unusedHuliosDice = array_filter($dice, fn($die) => $die->color == 9 && $die->value == 9 && !$die->used);
+
+            if (count($unusedHuliosDice) > 0) {
+                $playerWithHuliosDiceActivated[] = $playerId;
+            }
+        }
+
+        if (count($playerWithHuliosDiceActivated) > 0) {
+            $this->gamestate->setPlayersMultiactive($playerWithHuliosDiceActivated, 'next', true);
+            $this->gamestate->initializePrivateStateForAllActivePlayers(); 
+        } else {
+            $this->gamestate->nextState('next');
+        }
     }
 
     function stResurrect() {
@@ -97,7 +169,7 @@ trait StateTrait {
     
             foreach($companions as $companion) {
                 if ($companion->subType == 41) { // Cromaug
-                    if ($this->isTriggeredEffectsForCard($dice, $companion->effect)) {
+                    if ($this->isTriggeredEffectsForCard($playerId, $dice, $companion->effect)) {
                         $cromaugCard = $companion;
                         break;
                     }
@@ -140,8 +212,8 @@ trait StateTrait {
                 }
             }
 
-
-            if (count($this->getRemainingEffects($playerId)) > 0) {
+            $args = $this->argResolveCardsForPlayer($playerId);
+            if (count($args->remainingEffects) > 0 || $args->killTokenId > 0 || $args->disableTokenId > 0) {
                 $playerWithEffects[] = $playerId;
             }
         }
@@ -162,7 +234,8 @@ trait StateTrait {
         $autoSkipImpossibleActions = $this->autoSkipImpossibleActions();
 
         foreach($playersIds as $playerId) {
-            if (!$autoSkipImpossibleActions || count($this->getPossibleRoutes($playerId)) > 0) {
+            $args = $this->argMoveForPlayer($playerId);
+            if (!$autoSkipImpossibleActions || count($args->possibleRoutes) > 0 || $args->canSettle || $args->killTokenId > 0 || $args->disableTokenId > 0) {
                 $playerWithRoutes[] = $playerId;
             } else {
                 // player finishes its turn, replace die
@@ -181,9 +254,22 @@ trait StateTrait {
     function stEndRound() {
         // reset dice use        
         $this->DbQuery("UPDATE dice SET `used` = false");
+        $this->DbQuery("UPDATE player SET `player_disabled_symbols` = '[]'");
 
         $this->placeCompanionsOnMeetingTrack();
         $this->addFootprintsOnMeetingTrack();
+
+        if ($this->tokensActivated()) {
+            $playersIds = $this->getPlayersIds();
+            foreach($playersIds as $playerId) {
+                $tokens = array_values(array_filter($this->getPlayerTokens($playerId), fn($token) => $token->type == 2));
+                foreach ($tokens as $token) {
+                    $this->removePlayerToken($playerId, $token->id);
+                }
+            }
+            $this->tokens->moveAllCardsInLocation('front', 'bag');
+            $this->tokens->shuffle('bag');
+        }
 
         $solo = $this->isSoloMode();
 
@@ -357,6 +443,47 @@ trait StateTrait {
             }
         }
 
+        if ($this->tokensActivated()) {
+            foreach($playersIds as $playerId) {
+                $tokens = $this->getPlayerTokens($playerId, true);
+                $points = 0;
+                $tokensByColor = [];
+                foreach($tokens as $token) {
+                    if (!array_key_exists($token->typeArg, $tokensByColor)) {
+                        $tokensByColor[$token->typeArg] = 1;
+                    } else {
+                        $tokensByColor[$token->typeArg]++;
+                    }
+                }
+
+                for($color = 1; $color <= 6; $color++) {
+                    $colorTokens = array_values(array_filter($tokens, fn($token) => $token->typeArg == $color));
+                    if (count($colorTokens)) {
+                        $points += $this->POINTS_FOR_COLOR_TOKENS[$tokensByColor[$color] ?? 0];
+                    }
+                }
+
+                if (count($tokensByColor) >= 6) {
+                    $points += 10; // only once * min($tokensByColor);
+                }
+
+                $this->DbQuery("UPDATE player SET player_score_tokens = $points WHERE player_id = $playerId");
+    
+                $this->notifyAllPlayers('scoreTokens', '', [
+                    'playerId' => $playerId,
+                    'points' => $points,
+                ]);
+    
+                $this->incPlayerScore($playerId, $points, clienttranslate('${player_name} gains ${points} bursts of light with colored tokens'));
+    
+                if ($playerId != 0) {
+                    $this->setStat($points, 'endTokenPoints', $playerId);
+                    $this->setStat(count($tokens), 'coloredTokensCount', $playerId);
+                    $this->setStat(count($this->getPlayerTokens($playerId, false)), 'tokensCount', $playerId);
+                }
+            }
+        }
+
         foreach($playersIds as $playerId) {
             $score = 0;
             if ($playerId == 0) {
@@ -367,12 +494,21 @@ trait StateTrait {
             } else {
                 $this->DbQuery("UPDATE player SET player_score_after_end = player_score WHERE player_id = $playerId");
                 $score = intval($this->getUniqueValueFromDB("SELECT player_score_after_end FROM player where player_id = $playerId"));
+                $this->setStat($score, 'points', $playerId);
             }
 
             $this->notifyAllPlayers('scoreAfterEnd', '', [
                 'playerId' => $playerId,
                 'points' => $score,
             ]);
+
+            
+            $adventurers = $this->getAdventurersFromDb($this->adventurers->getCardsInLocation('player', $playerId));
+            if (count($adventurers) > 0) {
+                $adventurer = $adventurers[0];
+                $this->setStat($score, $adventurer->name.'Points');
+                $this->setStat($score, $adventurer->name.'Points', $playerId);
+            }
         }
         
         if ($solo) { // solo mode

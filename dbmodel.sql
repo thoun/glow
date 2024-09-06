@@ -45,8 +45,8 @@ CREATE TABLE IF NOT EXISTS `meetingtrack` (
 
 CREATE TABLE IF NOT EXISTS `adventurer` (
   `card_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `card_type` int(1) NOT NULL,
-  `card_type_arg` int(1) NULL,
+  `card_type` tinyint NOT NULL,
+  `card_type_arg` tinyint NULL,
   `card_location` varchar(16) NOT NULL,
   `card_location_arg` int(11) NOT NULL,
   PRIMARY KEY (`card_id`)
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS `companion` (
   `card_type_arg` int(2) NOT NULL,
   `card_location` varchar(16) NOT NULL,
   `card_location_arg` int(11) NOT NULL,
-  `reroll_used` TINYINT UNSIGNED,
+  `reroll_used` TINYINT UNSIGNED DEFAULT 0,
   `die_id` TINYINT UNSIGNED,
   PRIMARY KEY (`card_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
@@ -81,6 +81,15 @@ CREATE TABLE IF NOT EXISTS `solotiles` (
   PRIMARY KEY (`card_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
+CREATE TABLE IF NOT EXISTS `token` (
+  `card_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `card_type` tinyint(1) NOT NULL,
+  `card_type_arg` tinyint(2) NOT NULL,
+  `card_location` varchar(16) NOT NULL,
+  `card_location_arg` int(11) NOT NULL,
+  PRIMARY KEY (`card_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+
 ALTER TABLE `player` ADD `player_recruit_day` TINYINT UNSIGNED NOT NULL DEFAULT '0';
 ALTER TABLE `player` ADD `player_rerolls` TINYINT UNSIGNED NOT NULL DEFAULT '0';
 ALTER TABLE `player` ADD `player_footprints` TINYINT UNSIGNED NOT NULL DEFAULT '0';
@@ -90,7 +99,12 @@ ALTER TABLE `player` ADD `visited_spots` json;
 ALTER TABLE `player` ADD `player_score_before_end` int(10) NOT NULL DEFAULT '0';
 ALTER TABLE `player` ADD `player_score_cards` int(10) NOT NULL DEFAULT '0';
 ALTER TABLE `player` ADD `player_score_board` int(10) NOT NULL DEFAULT '0';
+ALTER TABLE `player` ADD `player_score_tokens` int(10) NOT NULL DEFAULT '0';
 ALTER TABLE `player` ADD `player_score_after_end` int(10) NOT NULL DEFAULT '0';
+ALTER TABLE `player` ADD `player_small_board` TINYINT UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `player` ADD `player_selected_companion` int(10) NULL;
+ALTER TABLE `player` ADD `player_selected_destination` json;
+ALTER TABLE `player` ADD `player_disabled_symbols` json;
 
 CREATE TABLE IF NOT EXISTS `global_variables` (
   `name` varchar(50) NOT NULL,

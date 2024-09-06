@@ -1,0 +1,116 @@
+
+.module-token {
+    display: inline-block;
+    position: relative;
+    width: 64px;
+    height: 62px;
+    //margin: 5px;
+    border-radius: 50%;
+    transition: opacity 0.5s;
+
+    &.disabled {
+      cursor: not-allowed;
+      filter: contrast(0.6);
+    }
+
+    .card-sides {
+        .card-side {
+            background-size: auto 100%;
+            background-image: url('img/module-tokens.png');
+            box-shadow: unset;
+            border-radius: 50%;
+
+            &>* {
+                pointer-events: none;
+                user-select: none;
+            }
+        }
+    }    
+
+    &.selectable:not(.disabled) {
+        cursor: pointer;
+        &:not(.selected) {
+            animation: selectable-card-animation 1s alternate infinite ease-in-out;
+        }
+
+        .card-side {
+            box-shadow: unset;
+        }
+    }
+
+    &[data-type="1"] {
+        @for $color from 1 through 6 {
+            &[data-type-arg="#{$color}"] .front {
+                background-position-x: #{($color) * 100% / 11};
+            }
+        }
+    }
+    &[data-type="2"][data-type-arg="41"] .front {
+        background-position-x: #{7 * 100% / 11};
+    }
+    &[data-type="2"][data-type-arg="21"] .front {
+        background-position-x: #{8 * 100% / 11};
+    }
+    &[data-type="2"][data-type-arg="12"] .front {
+        background-position-x: #{9 * 100% / 11};
+    }
+    &[data-type="3"][data-type-arg="37"] .front {
+        background-position-x: #{10 * 100% / 11};
+    }
+    &[data-type="3"][data-type-arg="0"] .front {
+        background-position-x: #{11 * 100% / 11};
+    }
+
+    &.new-token {
+      .front {
+        animation: new-token-animation 8s 1 forwards ease-in-out;
+      }
+    }
+
+    &.applied-token {
+      opacity: 0.25;
+    }
+  }
+  
+  @keyframes new-token-animation {
+    0% {
+      outline: 8px solid gold;
+    }
+    100% { 
+      outline: 0px solid gold;
+    }
+  }
+  
+
+@keyframes selectable-card-animation {
+    0% { 
+      //background: var(--background-lighter);
+      box-shadow: 0 0 3px 2px gray;
+    }
+    100% { 
+      //background: var(--background-darker);
+      box-shadow: 0 0 5px 3px gray;
+    }
+}
+
+
+.action-button {
+    .module-token {
+        display: inline-block;
+        position: relative;
+        width: 64px;
+        height: 62px;
+        //margin: 5px;
+        border-radius: 50%;
+        vertical-align: middle;        
+        background-size: auto 100%;
+        background-image: url('img/module-tokens.png');
+    
+        &[data-type-arg="37"] {
+            background-position-x: #{10 * 100% / 11};
+        }
+        &[data-type-arg="0"] {
+            background-position-x: #{11 * 100% / 11};
+        }
+    }
+  }

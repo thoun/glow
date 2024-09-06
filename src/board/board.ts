@@ -111,8 +111,13 @@ class Board {
         private game: GlowGame, 
         private players: GlowPlayer[],
         tableDice: Die[],
+        solo: boolean,
     ) {
         let html = '';
+
+        if (solo && this.game.getBoardSide() == 2) {
+            html += `<div id="token-solo-board"></div>`;
+        }
 
         // score contrast
         MAPS_POINT[game.getBoardSide()].forEach(point => dojo.place(`<div class="score-contrast score-contrast-map" style="left: ${point[0]}px; top: ${point[1]}px;">${point[2]}</div>`, 'board'));
@@ -131,9 +136,10 @@ class Board {
                 const left = coordinates[0];
                 const top = coordinates[1];
                 const transform = `translateX(${left}px) translateY(${top}px)`;
-                dojo.place(`<div id="meeple0" class="token meeple1 ${this.game.isColorBlindMode() ? 'color-blind' : ''} meeple-player-0" style="background-color: black; transform: ${transform}"></div>`, 'board');
+                dojo.place(`<div id="meeple0" class="token meeple1 ${this.game.isColorBlindMode() ? 'color-blind' : ''} meeple-player-0" style="background-color: #${player.color}; transform: ${transform}"></div>`, 'board');
             }
         });
+        
         this.movePoints();
 
         players.forEach(player => this.placeMeeples(player));

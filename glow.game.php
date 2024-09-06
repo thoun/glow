@@ -59,6 +59,10 @@ class Glow extends Table {
             
             BOARD_SIDE => 100,
             RANDOM_ADVENTURERS => 101,
+            OPTION_EXPANSION => OPTION_EXPANSION,
+            OPTION_EXPANSION_MODULE1 => OPTION_EXPANSION_MODULE1,
+            OPTION_EXPANSION_MODULE2 => OPTION_EXPANSION_MODULE2,
+            OPTION_EXPANSION_MODULE3 => OPTION_EXPANSION_MODULE3,
         ]); 
 		
         $this->adventurers = $this->getNew("module.common.deck");
@@ -72,6 +76,9 @@ class Glow extends Table {
 		
         $this->soloTiles = $this->getNew("module.common.deck");
         $this->soloTiles->init("solotiles");
+		
+        $this->tokens = $this->getNew("module.common.deck");
+        $this->tokens->init("token");
 	}
 	
     protected function getGameName() {
@@ -86,18 +93,21 @@ class Glow extends Table {
         In this method, you must setup the game according to the game rules, so that
         the game is ready to be played.
     */
-    protected function setupNewGame($players, $options = []) {   
+    protected function setupNewGame($players, $options = []) { 
+        $isExpansion = $this->isExpansion();
+
         // Create players
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
-        $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_score, player_avatar, player_rerolls) VALUES ";
+        $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_score, player_avatar, player_rerolls, player_small_board) VALUES ";
         $values = [];
         $i = 0;
         foreach($players as $playerId => $player) {
 
             // The player on the right of first player receives 2 reroll tokens.
             $lastPlayer = $i > 0 && $i == count($players) - 1;
+            $smallBoard = $i >= 4 ? 1 : 0;
 
-            $values[] = "('".$playerId."','000000','".$player['player_canal']."','".addslashes( $player['player_name'] )."', 10, '".addslashes( $player['player_avatar'] )."', ".($lastPlayer ? 2 : 0).")";
+            $values[] = "('".$playerId."','000000','".$player['player_canal']."','".addslashes( $player['player_name'] )."', 10, '".addslashes( $player['player_avatar'] )."', ".($lastPlayer ? 2 : 0).", $smallBoard)";
 
             if ($i == 0) {
                 $this->setGameStateValue(FIRST_PLAYER, $playerId);
@@ -113,10 +123,16 @@ class Glow extends Table {
         if ($this->getSide() === 0) {
             $this->setGameStateValue(BOARD_SIDE, bga_rand(1, 2));
         }
+        // make sure exansion options aren't activated if expansion is not activated
+        if (!$isExpansion) {
+            foreach ([1, 2, 3] as $moduleNumber) {
+                $this->setGameStateValue(OPTION_EXPANSION + $moduleNumber, 1);
+            }
+        }
 
         // Init global values with their initial values
-        $this->setGameStateInitialValue('DAY', 0);
-        $this->setGameStateInitialValue('SOLO_DECK', 1);
+        $this->setGameStateInitialValue(DAY, 0);
+        $this->setGameStateInitialValue(SOLO_DECK, 1);
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -137,34 +153,44 @@ class Glow extends Table {
         $this->initStat('player', 'moves', 0);
         $this->initStat('table', 'footprintsAsJokers', 0);
         $this->initStat('player', 'footprintsAsJokers', 0);
-        foreach($this->ADVENTURERS as $adventurer) {            
+        foreach($this->ADVENTURERS as $adventurer) {
             $this->initStat('table', $adventurer->name, 0);
             $this->initStat('player', $adventurer->name, 0);
         }
+        $this->initStat('player', 'points', 0);
 
-        $solo = count($players) == 1;
+        $playerCount = count($players);
+        $solo = $playerCount == 1;
         if ($solo) {
             $this->initTom();
         }
         
-        $this->createDice($solo);
+        $this->createDice($isExpansion, $playerCount);
         $meeplePlayersIds = array_keys($players);
         if ($solo) {
             $meeplePlayersIds[] = 0;
         }
         $this->createMeeples($meeplePlayersIds);
-        $this->createAdventurers();
-        $this->createCompanions($solo);
+        $this->createAdventurers($isExpansion, $solo);
+        $expansionCompanions = $this->getExpansionCompanions($playerCount);
+        $this->createCompanions($solo, $expansionCompanions[0], $expansionCompanions[1]);
         if ($solo) {
             $this->createSoloTiles();
         } else {
-            $this->createSpells();
+            $this->createSpells($isExpansion);
+        }
+        if ($this->tokensActivated()) {
+            $this->initStat('player', 'endTokenPoints', 0);
+            $this->initStat('player', 'tokensCount', 0);
+            $this->initStat('table', 'tokenBagEmptied', 0);
+            
+            $this->createTokens();
         }
 
         // TODO TEMP card to test
         $this->debugSetup();
 
-        $this->setDiceOnTable($solo);
+        $this->setDiceOnTable($solo, $isExpansion);
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
@@ -182,11 +208,14 @@ class Glow extends Table {
         _ when a player refreshes the game page (F5)
     */
     protected function getAllDatas() {
+        $isExpansion = $this->isExpansion();
+        $tokensActivated = $this->tokensActivated();
+        
         $result = [];
     
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = "SELECT player_id id, player_score score, player_no playerNo, player_rerolls rerolls, player_footprints footprints, player_fireflies fireflies, player_score_before_end scoreBeforeEnd, player_score_cards scoreCards, player_score_board scoreBoard, player_score_after_end scoreAfterEnd FROM player ";
+        $sql = "SELECT player_id id, player_score score, player_no playerNo, player_rerolls rerolls, player_footprints footprints, player_fireflies fireflies, player_score_before_end scoreBeforeEnd, player_score_cards scoreCards, player_score_board scoreBoard, player_score_tokens scoreTokens, player_score_after_end scoreAfterEnd, player_small_board smallBoard FROM player ";
         $result['players'] = $this->getCollectionFromDb($sql);
 
         $solo = count($result['players']) == 1;
@@ -207,7 +236,8 @@ class Glow extends Table {
         $tomDiceSetAside = array_values(array_filter($dice, fn($idie) => $idie->location_arg === 0));
         $meetingTrack[0] = new MeetingTrackSpot(null, $tomDiceSetAside);
 
-        for ($i=1;$i<=5;$i++) {
+        $spotCount = $this->getSpotCount();
+        for ($i=1;$i<=$spotCount;$i++) {
             $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting', $i));
             $companion = count($companions) > 0 ? $companions[0] : null;
 
@@ -231,18 +261,25 @@ class Glow extends Table {
             $player['rerolls'] = intval($player['rerolls']);
             $player['footprints'] = intval($player['footprints']);
             $player['fireflies'] = intval($player['fireflies']);
+            $player['smallBoard'] = boolval($player['smallBoard']);
+            if ($tokensActivated) {
+                $player['tokens'] = $this->getPlayerTokens($playerId);
+            }
         }
 
         if ($solo) {
             $result['tom'] = $this->getTom();
             $result['tom']->meeples = $this->getPlayerMeeples(0);
-            $result['tom']->color = '000000';
+            $result['tom']->tokens = $this->getPlayerTokens(0);
         }
 
         $result['ADVENTURERS'] = $this->ADVENTURERS;
-        $result['COMPANIONS'] = $this->COMPANIONS;
-        $result['SPELLS_EFFECTS'] = array_map(fn ($card) => $card->effect, $this->SPELLS);
+        $result['COMPANIONS'] = $this->getAllCompanions();
+        $result['SPELLS_EFFECTS'] = array_map(fn ($card) => $card->effect, $this->getAllSpells());
         $result['SOLO_TILES'] = $this->SOLO_TILES;
+
+        $result['expansion'] = $isExpansion;
+        $result['tokensActivated'] = $tokensActivated;
   
         return $result;
     }

@@ -1,33 +1,33 @@
 <?php
 
 class CompanionCard {
-    public /*string*/ $name;
-    public /*int*/ $points;
+    public string $name;
+    public int $points;
     public /*EffectCard|null*/ $effect;
-    public /*bool*/ $reroll;
-    public /*int*/ $fireflies;
-    public /*bool*/ $die;
-    public /*int*/ $dieColor;
+    public int $fireflies;
+    public int $reroll;
+    public bool $die;
+    public int $dieColor;
   
-    public function __construct(string $name, int $points, /*object|null*/ $effect = null, bool $reroll = false, int $fireflies = 0, bool $die = false, int $dieColor = 0) {
+    public function __construct(string $name, int $points, /*object|null*/ $effect = null, int $fireflies = 0, int $reroll = 0, bool $die = false, int $dieColor = 0) {
         $this->name = $name;
         $this->points = $points;
         $this->effect = $effect;
-        $this->reroll = $reroll;
         $this->fireflies = $fireflies;
+        $this->reroll = $reroll;
         $this->die = $die;
         $this->dieColor = $dieColor;
     } 
 }
 
 class Companion extends CompanionCard {
-    public $id;
-    public $location;
-    public $location_arg;
-    public $type; // 1 = A, 2 = B
-    public $subType; // index (1-23)
+    public int $id;
+    public string $location;
+    public int $location_arg;
+    public int $type; // 1 = A, 2 = B
+    public int $subType; // index (1-23)
 
-    public $noDieWarning;
+    public /*bool|null*/ $noDieWarning;
 
     public function __construct($dbCard, $COMPANIONS) {
         $this->id = intval($dbCard['id']);

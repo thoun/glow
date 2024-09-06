@@ -172,7 +172,7 @@ trait MapTrait {
             $footprintsCost <= $this->getPlayerFootprints($playerId);
     }
 
-    function getPossibleRoutesForPlayer(int $side, int $position, int $playerId) {
+    function getPossibleRoutesForPlayer(int $side, int $position, int $playerId, bool $solo) {
         $possibleRoutes = [];
         $routes = $this->getRoutes($side, $position);
 
@@ -225,22 +225,16 @@ trait MapTrait {
                 }
     
             } else if ($side === 2) {
-                
-                $groups = [];
-                foreach ($dice as $playerDie) {
-                    if ($playerDie->value <= 5) {
-                        $groups[$playerDie->value] = true;
-                    }
-                }
-                $colors = count($groups);
+                $colors = $this->getDiceDifferentColors($dice);
 
                 $canGoForFree = $route->min === null || ($colors >= $route->min && $colors <= $route->max);
                 $canGoByPaying = 0;
                 if (!$canGoForFree && $colors < $route->min && ($route->min - $colors) <= $footprints) {
                     $canGoByPaying = $route->min - $colors;
                 }
-                
-                if ($canGoForFree || $canGoByPaying > 0) {
+
+                $routeForbidden = $solo && $route->destination == 1;
+                if (!$routeForbidden && ($canGoForFree || $canGoByPaying > 0)) {
                     $effects = $canGoByPaying > 0 ? array_merge($route->effects, [-20 - $canGoByPaying]) : $route->effects;
 
                     $destinationEffects = $this->getMapSpot($side, $route->destination)->effects;

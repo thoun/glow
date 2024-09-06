@@ -33,64 +33,79 @@ $this->DICES = [
   8 => [0, 1], // black
 ];
 
+$this->DICES_EXPANSION1 = [
+  // color is the key, then large number and small number
+  6 => [3, 1], // purple
+  // TODOORIUM 7 => [3, 0], // yellow
+  8 => [1, 1], // black
+  80 => [2, 0], // black/gray/multi
+  9 => [2, 0], // light green
+  10 => [2, 0], // pink
+];
+
 $this->ADVENTURERS = [ // (string $name, int $points, int $dice, $effect)
   1 => new AdventurerCard('Braccio', 1, 2, new Effect([1, 1], [21, 103])),
-  2 => new AdventurerCard('Taetyss', 0, 2, new Effect([3, 2], [30, 103])),
+  2 => new AdventurerCard('Taetyss', 0, 2, new Effect([3, 2], [41, 103])),
   3 => new AdventurerCard('Eoles', 4, 2, new Effect([3, 5], [11, 102])),
   4 => new AdventurerCard('Pocana', 4, 3, null),
-  5 => new AdventurerCard('Moloc\'h', 3, 2, new Effect([5], [21])),
+  5 => new AdventurerCard("Moloc'h", 3, 2, new Effect([5], [21])),
   6 => new AdventurerCard('Noctiluca', 0, 2, new Effect([0, 0, 0], [105])),
   7 => new AdventurerCard('Orium', 0, 2, new Effect([0, 0], [101])),
+  // expansion 1
+  8 => new AdventurerCard("Zay'Drel", 0, 3, new Effect([201, 202], [21, 102])),
+  9 => new AdventurerCard("Hulios", 3, 2, new Effect([203, 203], [21, 41])),
+  10 => new AdventurerCard('Elldir', 0, 2, new Effect([204, 204], [107])),
+  //11 => new AdventurerCard('Uriom', 0, 1, null),
 ];
 
 $this->COMPANIONS = [ // (string $name, int $points, $effect, bool $reroll, int $fireflies, bool $die, int $dieColor)
   // A
-  1 => new CompanionCard('Likyar', 0, new Effect([1, 4], [30, 101]), false, 2),
+  1 => new CompanionCard('Likyar', 0, new Effect([1, 4], [41, 101]), 2),
   2 => new CompanionCard('Thoape', 0, new Effect([2, 5], [11, 102])),
   3 => new CompanionCard('Torke', 0, new Effect([0, 0, 0], [104])),
-  4 => new CompanionCard('Tamnuca', 0, new Effect([5], [101]), false, 1),
-  5 => new CompanionCard('Ladawa', 0, new Effect([4, 4], [104]), false, 1),
-  6 => new CompanionCard('Mindaroo', 0, new Effect([-1, -2], [104]), false, 2),
+  4 => new CompanionCard('Tamnuca', 0, new Effect([5], [101]), 1),
+  5 => new CompanionCard('Ladawa', 0, new Effect([4, 4], [104]), 1),
+  6 => new CompanionCard('Mindaroo', 0, new Effect([-1, -2], [104]), 2),
   7 => new CompanionCard('Mindaroo', 0, new Effect([-3, -4], [106])),
-  8 => new CompanionCard('Donillilu', 0, new Effect([-2], [30, 102])),
+  8 => new CompanionCard('Donillilu', 0, new Effect([-2], [41, 102])),
   9 => new CompanionCard('Oshra', 0, new Effect([-1], [103])),
   10 => new CompanionCard('Xar\'gok', -1, new Effect([4, 4], [33, 36])),
   11 => new CompanionCard('Briki', 6, new Effect([2, 2], [33, 21])),
   12 => new CompanionCard('Briki', 5, new Effect([3, 4], [33, 22])),
-  13 => new CompanionCard('Sketal', 1, new Effect([2, 2, 2], [33, -104]), false, 0, true, 5),
-  14 => new CompanionCard('Sketal', 1, new Effect([1, 1, 1], [33, -104]), false, 0, true, 3),
-  15 => new CompanionCard('Sketal', 0, new Effect([5, 5], [33, 102]), false, 0, true, 1),
-  16 => new CompanionCard('Sketal', 1, new Effect([4, 4, 4], [33, -105]), false, 0, true, 2),
-  17 => new CompanionCard('Sketal', 1, new Effect([3, 3, 3], [33, -104]), false, 0, true, 4),
-  18 => new CompanionCard('Lumipili', 0, new Effect([1, 1], [33, 22]), true),
-  19 => new CompanionCard('Snarexe', 0, new Effect([0, 0, 0, 0], [33, 110]), false, 1),
+  13 => new CompanionCard('Sketal', 1, new Effect([2, 2, 2], [33, -104]), 0, 0, true, 5),
+  14 => new CompanionCard('Sketal', 1, new Effect([1, 1, 1], [33, -104]), 0, 0, true, 3),
+  15 => new CompanionCard('Sketal', 0, new Effect([5, 5], [33, 102]), 0, 0, true, 1),
+  16 => new CompanionCard('Sketal', 1, new Effect([4, 4, 4], [33, -105]), 0, 0, true, 2),
+  17 => new CompanionCard('Sketal', 1, new Effect([3, 3, 3], [33, -104]), 0, 0, true, 4),
+  18 => new CompanionCard('Lumipili', 0, new Effect([1, 1], [33, 22]), 0, 1),
+  19 => new CompanionCard('Snarexe', 0, new Effect([0, 0, 0, 0], [33, 110]), 1),
   20 => new CompanionCard('Kaar', 4, null),
-  21 => new CompanionCard('Hymoros', -2, new Effect([2], [21]), false, 1),
+  21 => new CompanionCard('Hymoros', -2, new Effect([2], [21]), 1),
   22 => new CompanionCard('Dvol', -5, new Effect([3], [21, 101])),
-  23 => new CompanionCard('Okans', -2, new Effect([1], [30, 101])),
+  23 => new CompanionCard('Okans', -2, new Effect([1], [41, 101])),
   // B
-  24 => new CompanionCard('Brikix', 4, new Effect([5, 5, 5], [33]), false, 1),
-  25 => new CompanionCard('Zzibelu', 0, new Effect([3, 5], [105]), false, 1),
-  26 => new CompanionCard('Torke', 0, new Effect([0, 0], [102]), false, 1),
+  24 => new CompanionCard('Brikix', 4, new Effect([5, 5, 5], [33]), 1),
+  25 => new CompanionCard('Zzibelu', 0, new Effect([3, 5], [105]), 1),
+  26 => new CompanionCard('Torke', 0, new Effect([0, 0], [102]), 1),
   27 => new CompanionCard('Torkos', 2, new Effect([0, 0, 0], [106])),
-  28 => new CompanionCard('Wapoki', 2, new Effect([1, 2], [11, 102]), false, 1),
+  28 => new CompanionCard('Wapoki', 2, new Effect([1, 2], [11, 102]), 1),
   29 => new CompanionCard('Tamnuca', 2, new Effect([5], [21])),
   30 => new CompanionCard('Zellyf', 5, new Effect([2, 2], [-102])),
   31 => new CompanionCard('Zellyf', 0, new Effect([2], [103])),
-  32 => new CompanionCard('Biraii', 1, new Effect([4], [11, 101]), false, 1),
-  33 => new CompanionCard('Biraii', 0, new Effect([4], [11, 21]), false, 2),
+  32 => new CompanionCard('Biraii', 1, new Effect([4], [11, 101]), 1),
+  33 => new CompanionCard('Biraii', 0, new Effect([4], [11, 21]), 2),
   34 => new CompanionCard('Dvol', 4, new Effect([3, 3, 3], [103])),
   35 => new CompanionCard('Dvol', 3, new Effect([3], [101])),
   36 => new CompanionCard('Okanios', 3, new Effect([1, 1, 1], [105])),
-  37 => new CompanionCard('Gluach', 0, new Effect([2, -5], [106]), false, 2),
+  37 => new CompanionCard('Gluach', 0, new Effect([2, -5], [106]), 2),
   38 => new CompanionCard('Drel', 3, new Effect([-4], [102])),
-  39 => new CompanionCard('Oshra', 2, new Effect([-5], [103]), false, 1),
+  39 => new CompanionCard('Oshra', 2, new Effect([-5], [103]), 1),
   40 => new CompanionCard('Drel', 2, new Effect([-3], [104])),
   41 => new CompanionCard('Cromaug', -1, new Effect([3], [33, 35])),
   42 => new CompanionCard('Kapaoro', 5, new Effect([0, 0, 0], [33])),
   43 => new CompanionCard('Kapao', 5, new Effect([3, 3], [33])),
-  44 => new CompanionCard('Sketal', 2, new Effect([1, 1], [33, 22]), false, 0, true, 0),
-  45 => new CompanionCard('Lumipili', 1, new Effect([4, 4], [33, 106]), true),
+  44 => new CompanionCard('Sketal', 2, new Effect([1, 1], [33, 22]), 0, 0, true, 0),
+  45 => new CompanionCard('Lumipili', 1, new Effect([4, 4], [33, 106]), 0, 1),
   46 => new CompanionCard('Kapao', 4, new Effect([2, 2], [33, 22])),
 ];
 
@@ -101,6 +116,71 @@ $this->REMOVED_COMPANION_FOR_SOLO = [
   25, 33, 38, 41, 44, 46, 34,
 ];
 
+$this->COMPANIONS_EXPANSION1_SETS = [
+  1 => [
+    'adds' => [
+      // A
+      101 => new CompanionCard("Li'Lan", 0, new Effect([203, 203, -41], [105])),
+      102 => new CompanionCard('Phyrene', 2, new Effect([204, 204], [23])),
+      103 => new CompanionCard('Celes', 2, new Effect([201, 202], [42])),
+      104 => new CompanionCard('Sketal', 0, new Effect([-3, -2], [33, 12]), 0, 0, true, 6),
+      // B
+      105 => new CompanionCard('Celes', 0, new Effect([203, 203], [103, 12])),
+      106 => new CompanionCard('Esul', 1, new Effect([-5, -22], [108]), 2),
+      107 => new CompanionCard('Crolos', 0, null),
+      108 => new CompanionCard('Phyrene', 4, new Effect([201, 202], [37, 103])),
+    ],
+    'removes' => [
+      // A
+      20, 10, 12, 8,
+      // B
+      41, 44, 29, 28,
+    ],
+  ],
+
+  2 => [
+    'adds' => [
+      // A
+      201 => new CompanionCard('Glint', -2, new Effect([5, 1], [51, 21]), 2),
+      202 => new CompanionCard('Cyld', 0, new Effect([1, 3], [51, 41])),
+      203 => new CompanionCard('Solas', -1, new Effect([4], [51])),
+      204 => new CompanionCard('Cyld', 1, new Effect([5, 5], [52])),
+      // B
+      205 => new CompanionCard('Solas', 4, new Effect([3, -21], [62]), 1),
+      206 => new CompanionCard('Lulumipili', 0, new Effect([-1, -41], [61]), 0, 2),
+      207 => new CompanionCard('Vorivi', 2, new Effect([1, 2, -51], [106]), 1),
+      208 => new CompanionCard('Glint', 1, new Effect([2, -4], [52, 22])),
+    ],
+    'removes' => [
+      // A
+      4, 22, 2, 18,
+      // B
+      40, 36, 30, 32,
+    ],
+  ],
+
+  3 => [
+    'adds' => [
+      // A
+      301 => new CompanionCard('Knif', -4, new Effect([3, 4], [104, 11])),
+      302 => new CompanionCard('Ki Dun', 0, new Effect([1, -3], [22])),
+      303 => new CompanionCard('Ty Fla', 9, new Effect([1, 5, -41], [33, -103]), 1),
+      304 => new CompanionCard('Ma Vos', 2, new Effect([-2, -21], [104])),
+      // B
+      305 => new CompanionCard('Wo Shan', 0, new Effect([3, 1, -12], [33, 110])),
+      306 => new CompanionCard('Ty Fla', 1, new Effect([5, 4, -41], [11, 102]), 3),
+      307 => new CompanionCard('Lumipili', 0, new Effect([5, 2], [103, 41]), 0, 1),
+      308 => new CompanionCard('Wo Shan', 2, new Effect([2, 4, -11], [23])),
+    ],
+    'removes' => [
+      // A
+      11, 7, 19, 23,
+      // B
+      25, 33, 26, 37,
+    ],
+  ],
+];
+
 $this->SPELLS = [
   1 => new SpellCard(new Effect([1, 1], [-105])),
   2 => new SpellCard(new Effect([2, 2], [-105])),
@@ -108,6 +188,14 @@ $this->SPELLS = [
   4 => new SpellCard(new Effect([4, 4], [-106])),
   5 => new SpellCard(new Effect([5, 5], [-23])),
   6 => new SpellCard(new Effect([0, 0, 0], [-107]), 2),
+];
+
+
+$this->SPELLS_EXPANSION1 = [
+  7 => new SpellCard(new Effect([-5], [-104])),
+  8 => new SpellCard(new Effect([201, 202], [-104])),
+  9 => new SpellCard(new Effect([203, 203], [-13])),
+  10 => new SpellCard(new Effect([204, 204], [-107])),
 ];
 
 $this->SOLO_TILES = [
@@ -189,7 +277,7 @@ $this->MAP1 = [
   ]),
   new MapSpot1(19, [3], [
     new MapRoute(20),
-    new MapRoute(26, [30]),
+    new MapRoute(26, [41]),
   ]),
   new MapSpot1(20, [3], [
     new MapRoute(21),
@@ -198,7 +286,7 @@ $this->MAP1 = [
     new MapRoute(22),
   ]),
   new MapSpot1(22, [-1], [
-    new MapRoute(23, [30]),
+    new MapRoute(23, [41]),
   ]),
   new MapSpot1(23, [5], [
     new MapRoute(24),
@@ -249,7 +337,7 @@ $this->MAP1 = [
   new MapSpot1(37, [-5], [
     new MapRoute(38),
   ]),
-  new MapSpot1(38, [30, -21], [
+  new MapSpot1(38, [41, -21], [
     new MapRoute(39),
     new MapRoute(40),
   ], 10, true),
@@ -310,7 +398,7 @@ $this->MAP1 = [
   new MapSpot1(58, [-3], [
     new MapRoute(59),
   ]),
-  new MapSpot1(59, [-21, 30], [
+  new MapSpot1(59, [-21, 41], [
     new MapRoute(60),
   ], 3, true),
   new MapSpot1(60, [3], []),
@@ -338,10 +426,10 @@ $this->MAP2 = [
   new MapSpot2(5, [], [
     new MapRoute(6, [-21], 5),
   ], 4, 2),
-  new MapSpot2(6, [30], [
+  new MapSpot2(6, [41], [
     new MapRoute(7, [], 4),
   ], 2, 1),
-  new MapSpot2(7, [30], [
+  new MapSpot2(7, [41], [
     new MapRoute(8, [], 4),
   ], 2, 2),
   new MapSpot2(8, [], [
@@ -350,7 +438,7 @@ $this->MAP2 = [
   new MapSpot2(9, [], [
     new MapRoute(10, [-21], 1, 2),
   ], 8, 2),
-  new MapSpot2(10, [30], [
+  new MapSpot2(10, [41], [
     new MapRoute(11, [], 5),
   ], 0, 1),
   new MapSpot2(11, [37], [
@@ -370,4 +458,28 @@ $this->ADVENTURERS_COLORS = [
   5 => 'ea7d28',
   6 => '8a298a',
   7 => 'ffd503',
+  8 => '939598',
+  9 => 'a7ce39',
+  10 => 'eca3c8',
+  11 => 'ffd503',
 ];
+
+$this->SMALL_BOARD_COLOR = [
+  5 => [
+    1 => 7,
+    2 => 6,
+    3 => 7,
+    4 => 6,
+    5 => 6,
+  ],
+
+  6 => [
+    1 => 8,
+    2 => 6,
+    3 => 7,
+    4 => 8,
+    5 => 6,
+  ],
+];
+
+$this->POINTS_FOR_COLOR_TOKENS = [0, 1, 3, 6, 10, 15, 21];

@@ -20,6 +20,16 @@
     }
   }
 
+  #token-solo-board {
+    position: absolute;
+    background-image: url("img/token-solo-board.png");
+    background-size: contain;
+    width: 40px;
+    height: 40px;
+    left: 565px;
+    top: 223px;
+  }
+
   .point-marker {
     position: absolute;
     top: 0;

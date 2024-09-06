@@ -9,6 +9,7 @@ declare const board: HTMLDivElement;*/
 
 const CARD_WIDTH = 129;
 const CARD_HEIGHT = 240;
+const SOLO_CARD_HEIGHT = 36;
 
 const SPELL_DIAMETER = 64;
 
@@ -22,6 +23,7 @@ ADVENTURERS_POINTS[1] = 1;
 ADVENTURERS_POINTS[3] = 4;
 ADVENTURERS_POINTS[4] = 4;
 ADVENTURERS_POINTS[5] = 3;
+ADVENTURERS_POINTS[9] = 4;
 const COMPANION_POINTS = [];
 COMPANION_POINTS[10] = -1;
 COMPANION_POINTS[11] = 6;
@@ -52,16 +54,33 @@ COMPANION_POINTS[43] = 5;
 COMPANION_POINTS[44] = 2;
 COMPANION_POINTS[45] = 1;
 COMPANION_POINTS[46] = 4;
+COMPANION_POINTS[102] = 2;
+COMPANION_POINTS[103] = 2;
+COMPANION_POINTS[106] = 1;
+COMPANION_POINTS[108] = 4;
+COMPANION_POINTS[201] = -2;
+COMPANION_POINTS[203] = -1;
+COMPANION_POINTS[204] = 1;
+COMPANION_POINTS[205] = 4;
+COMPANION_POINTS[207] = 2;
+COMPANION_POINTS[208] = 1;
+COMPANION_POINTS[301] = -4;
+COMPANION_POINTS[303] = 9;
+COMPANION_POINTS[304] = 2;
+COMPANION_POINTS[306] = 1;
+COMPANION_POINTS[308] = 2;
 
 function setupAdventurersCards(adventurerStock: Stock) {
     const cardsurl = `${g_gamethemeurl}img/adventurers.png`;
+    const cardsurlExpansion = `${g_gamethemeurl}img/adventurers-expansion1.png`;
 
-    for (let i=0; i<=7;i++) {
+    for (let i=0; i<=10;i++) {
+        const expansion1 = i > 7;
         adventurerStock.addItemType(
             i, 
             i, 
-            cardsurl, 
-            i
+            expansion1 ? cardsurlExpansion : cardsurl, 
+            expansion1 ? i - 8 : i,
         );
     }
 }
@@ -80,6 +99,18 @@ function setupCompanionCards(companionsStock: Stock) {
         );
     }
 
+    for (let module=1; module<=3;module++) {
+        const cardsurl = `${g_gamethemeurl}img/companions-expansion1-set${module}.png`;
+        for (let subType=1; subType<=8;subType++) {
+            companionsStock.addItemType(
+                module*100 + subType, 
+                0, 
+                cardsurl, 
+                subType - 1
+            );
+        }
+    }
+
     companionsStock.addItemType(1001,  0, cardsurl, 0);
     companionsStock.addItemType(1002,  0, cardsurl, 24);
 }
@@ -87,7 +118,7 @@ function setupCompanionCards(companionsStock: Stock) {
 function setupSpellCards(spellsStock: Stock) {
     const cardsurl = `${g_gamethemeurl}img/spells.png`;
 
-    for (let type=1; type<=7;type++) {
+    for (let type=1; type<=10;type++) {
         spellsStock.addItemType(
             type, 
             type, 
@@ -107,7 +138,7 @@ function setupSoloTileCards(soloTilesStock: Stock) {
             type, 
             type, 
             cardsurl, 
-            type - 1
+            type,
         );
     }
 
@@ -115,9 +146,9 @@ function setupSoloTileCards(soloTilesStock: Stock) {
 }
 
 function getEffectExplanation(effect: number) {    
-    if (effect > 100) {
+    if (effect > 100 && effect < 200) {
         return dojo.string.substitute(_("Earn ${points} burst(s) of light."), { points: `<strong>${effect - 100}</strong>` });
-    } else if (effect < -100) {
+    } else if (effect < -100 && effect > -200) {
         return dojo.string.substitute(_("Lose ${points} burst(s) of light."), { points: `<strong>${-(effect + 100)}</strong>` });
     }
 
@@ -131,8 +162,18 @@ function getEffectExplanation(effect: number) {
         return dojo.string.substitute(_("Earn ${fireflies} firefly(ies)."), { fireflies: `<strong>${effect - 10}</strong>` });
     }
 
-    else if (effect === 30) {
-        return _("Earn 1 reroll token.");
+    else if (effect > 40 && effect < 50) {
+        return dojo.string.substitute(_("Earn ${rerolls} reroll token(s)."), { rerolls: `<strong>${effect - 40}</strong>` });
+    } else if (effect < -40 && effect > -50) {
+        return dojo.string.substitute(_("Lose ${rerolls} reroll token(s)."), { rerolls: `<strong>${-(effect + 40)}</strong>` });
+    }
+
+    else if (effect > 60 && effect < 70) {
+        return dojo.string.substitute(_("Draw ${tokens} butterfly token(s) then returns the same number of your butterfly tokens."), { tokens: `<strong>${effect - 60}</strong>` });
+    } else if (effect > 50 && effect < 60) {
+        return dojo.string.substitute(_("Draw ${tokens} butterfly token(s)."), { tokens: `<strong>${effect - 50}</strong>` });
+    } else if (effect < -50 && effect > -60) {
+        return dojo.string.substitute(_("Lose ${tokens} butterfly token(s)."), { tokens: `<strong>${-(effect + 50)}</strong>` });
     }
 
     else if (effect === 33) {
@@ -145,25 +186,39 @@ function getEffectTooltip(effect: Effect) {
         return null;
     }
 
+    const effectConditions = effect.conditions.filter(condition => condition > -10);
+    const remainingConditions = effect.conditions.filter(condition => condition <= -10);
+
     let conditions = null;
-    if (effect.conditions.every(condition => condition > 0)) {
+    if (effectConditions.every(condition => condition > 200) && effectConditions.length == 2) {
+        const message = effectConditions[0] == effectConditions[1] ?
+            _("Exactly ${min} different element symbols on dice triggers the effect.") :
+            _("Between ${min} and ${max} different element symbols on dice triggers the effect.");
+
+        conditions = dojo.string.substitute(message, { 
+            min: `<strong>${effectConditions[0] - 200}</strong>` ,
+            max: `<strong>${effectConditions[1] - 200}</strong>` ,
+        });
+    } else if (effectConditions.every(condition => condition > 0)) {
         conditions = dojo.string.substitute(_("${symbols} triggers the effect."), { 
-            symbols: formatTextIcons(effect.conditions.map(condition => `[symbol${condition}]`).join('')) 
+            symbols: formatTextIcons(effectConditions.map(condition => `[symbol${condition}]`).join('')) 
         });
-    } else if (effect.conditions.every(condition => condition == 0)) {
-        conditions = dojo.string.substitute(formatTextIcons(effect.conditions.map(_ => `[symbol0]`).join('')) + ' : ' + _("any ${number} identical symbols."), { 
-            number: `<strong>${effect.conditions.length}</strong>` 
+    } else if (effectConditions.every(condition => condition == 0)) {
+        conditions = dojo.string.substitute(formatTextIcons(effectConditions.map(_ => `[symbol0]`).join('')) + ' : ' + _("any ${number} identical symbols."), { 
+            number: `<strong>${effectConditions.length}</strong>` 
         });
-    } else if (effect.conditions.every(condition => condition < 0)) {
+    } else if (effectConditions.every(condition => condition < 0)) {
         conditions = dojo.string.substitute(_("If the symbols ${symbols} are not present on any of the dice, the effect is triggered."), { 
-            symbols: formatTextIcons(effect.conditions.map(condition => `[symbol${-condition}]`).join('')) 
+            symbols: formatTextIcons(effectConditions.map(condition => `[symbol${-condition}]`).join('')) 
         });
-    } else if (effect.conditions.some(condition => condition > 0) && effect.conditions.some(condition => condition < 0)) {
+    } else if (effectConditions.some(condition => condition > 0) && effectConditions.some(condition => condition < 0)) {
         conditions = dojo.string.substitute(_("If the symbols ${forbiddenSymbols} are not present on any of the dice, ${symbols} triggers the effect."), { 
-            forbiddenSymbols: formatTextIcons(effect.conditions.filter(condition => condition < 0).map(condition => `[symbol${-condition}]`).join('')),  
-            symbols: formatTextIcons(effect.conditions.filter(condition => condition > 0).map(condition => `[symbol${condition}]`).join('')) ,
+            forbiddenSymbols: formatTextIcons(effectConditions.filter(condition => condition < 0).map(condition => `[symbol${-condition}]`).join('')),  
+            symbols: formatTextIcons(effectConditions.filter(condition => condition > 0).map(condition => `[symbol${condition}]`).join('')) ,
         });
     }
+
+    remainingConditions.forEach(effect => conditions += `<br>${getEffectExplanation(effect)}`);
     
     return `
     <div class="tooltip-effect-title">${_("Conditions")}</div>
@@ -174,10 +229,18 @@ function getEffectTooltip(effect: Effect) {
     `;
 }
 
+function getAdventurerTooltip(type: number) {
+    switch (type) {
+        //case 11: return `<p>${_(`Uriom has 2 special small yellow dice that are available only for Uriom`)}</p>`; // TODO
+    }
+    return null;
+}
+
 function setupAdventurerCard(game: Game, cardDiv: HTMLDivElement, type: number) {
     const adventurer = ((game as any).gamedatas as GlowGamedatas).ADVENTURERS[type];
     const tooltip = getEffectTooltip(adventurer.effect);
-    (game as any).addTooltipHtml(cardDiv.id, `<h3>${adventurer.name}</h3>${tooltip || ''}`);
+    const adventurerTooltip = getAdventurerTooltip(type);
+    (game as any).addTooltipHtml(cardDiv.id, `<h3>${adventurer.name}</h3>${tooltip || ''}${tooltip && adventurerTooltip ? '<hr>' : ''}${adventurerTooltip || ''}`);
 
     const adventurerPoints = ADVENTURERS_POINTS[type];
     if (adventurerPoints) {
@@ -205,6 +268,8 @@ function getCompanionTooltip(type: number) {
         case 41: return `<p>` + _(`If the player obtains an air symbol, they immediately discard Cromaug and can take another companion of their choice from the cemetery that they place in front of them. The chosen companion becomes the last companion to be recruited.`) + `</p>
         <p>` + _(`If it is a Sketal, they take the additional die indicated by its power, if it is available in the reserve pool, and can roll it from the next round. If it is Kaar, the black die comes into play.`) + `</p>
         <p>` + _(`If the previously obtained result of the dice allows it, they can immediately trigger the effect of this new companion.`) + `</p>`;
+
+        case 107: return `<p>` + _(`The player who has recruited Crolos may decide to move 2 spaces back on the score track to obtain an immediate reroll. To apply this effect, they must be  able to move backwards. They may do this as many times as they like, as long as they do not go beyond space 0 on the score track.`) + `</p>`;
     }
     return null;
 }

@@ -47,8 +47,16 @@ interface SoloTile extends SoloTileCard {
     location_arg: number;
 }
 
+interface Token {
+    id: number;
+    type: number;
+    typeArg: number;
+}
+
 interface Die {
     id: number;
+    location: string;
+    location_arg: number;
     face: number;
     value: number;
     color: number;
@@ -89,7 +97,9 @@ interface GlowPlayer extends Player {
     rerolls: number;
     footprints: number;
     fireflies: number;
+    smallBoard: boolean;
     company?: number; // tom company score
+    tokens?: Token[];
 }
 
 /**
@@ -129,14 +139,19 @@ interface GlowGamedatas {
     COMPANIONS: Companion[];
     SPELLS_EFFECTS: Effect[];
     SOLO_TILES: SoloTileCard[];
+
+    expansion: boolean;
+    tokensActivated: boolean;
 }
 
 interface GlowGame extends Game {
+    animationManager: AnimationManager;
     adventurersStock: Stock;
     
     getPlayerId(): number;
     getBoardSide(): number;
     isColorBlindMode(): boolean;
+    isExpansion(): boolean;
     chooseAdventurer(id: number): void;
     selectMeetingTrackCompanion(spot: number): void;
     //createAndPlaceDieHtml(die: Die, destinationId: string): void;    
@@ -145,10 +160,11 @@ interface GlowGame extends Game {
     createOrMoveDie(die: Die, destinationId: string, rollClass?: string): void;
     cardClick(type: number, id: number): void;
     selectMove(possibleDestination: Route): void;
-    moveBlackDie(spot: number): void;
+    onMeetingTrackDiceClick(spot: number): void;
     selectSketalDie(dieId: number): void;
     isSolo(): boolean;
     tableHeightChange(): void;
+    getSpotCount(): number;
 }
 
 interface EnteringChooseAdventurerArgs {
@@ -162,8 +178,10 @@ interface EnteringRecruitCompanionArgs {
 
 interface EnteringRollDiceForPlayer {
     rerollCompanion: number;
+    rerollCrolos: number;
     rerollTokens: number;
     rerollScore: { [rerolls: number]: number }; // number of rerolls -> cost
+    grayMultiDice: boolean;
 }
 
 interface EnteringRollDiceArgs {
@@ -174,8 +192,20 @@ interface EnteringSelectSketalDieArgs {
     dice: Die[];
 }
 
+interface EnteringRerollImmediateArgs {
+    selectedDie: Die;
+}
+
 interface EnteringMoveBlackDieArgs {
     possibleSpots: number[];
+}
+
+interface EnteringUriomRecruitCompanionArgs {
+    spot: number;
+}
+
+interface EnteringSwapArgs {
+    card: Companion;
 }
 
 interface EnteringResurrectArgs {
@@ -184,6 +214,8 @@ interface EnteringResurrectArgs {
 
 interface ResolveCardsForPlayer {
     remainingEffects: number[][];
+    killTokenId?: number;
+    disableTokenId?: number;
 }
 
 interface EnteringResolveCardsArgs {
@@ -193,6 +225,13 @@ interface EnteringResolveCardsArgs {
 interface EnteringMoveForPlayer {
     possibleRoutes: Route[];
     canSettle?: boolean;
+    killTokenId?: number;
+    disableTokenId?: number;
+}
+
+interface EnteringRemoveTokenArgs {    
+    tokens: Token[];
+    count: number;
 }
 
 interface EnteringMoveArgs {
@@ -221,6 +260,7 @@ interface NotifChosenCompanionArgs {
     dice: Die[];
     removedBySpell: Spell;
     cemetaryTop?: Companion;
+    ignoreCemetary?: boolean;
 }
 
 interface NotifRemoveCompanionsArgs {
@@ -260,10 +300,6 @@ interface NotifResolveCardUpdateArgs {
     resolveCardsForPlayer: ResolveCardsForPlayer;
 }
 
-interface NotifMoveUpdateArgs {
-    args: EnteringMoveForPlayer;
-}
-
 interface NotifMeepleMovedArgs {
     meeple: Meeple;
 }
@@ -276,6 +312,7 @@ interface NotifUsedDiceArgs {
 interface NotifSketalDieArgs {
     playerId: number;
     die: Die;
+    remove: true;
 }
 
 interface NotifMoveBlackDieArgs {
@@ -312,4 +349,14 @@ interface NotifUpdateSoloTilesArgs {
 interface NotifScorePointArgs {
     playerId: number;
     points: number;
+}
+
+interface NotifGetTokensArgs {
+    playerId: number;
+    tokens: Token[];
+}
+
+interface NotifRemoveTokenArgs {
+    playerId: number;
+    tokenId: number;
 }

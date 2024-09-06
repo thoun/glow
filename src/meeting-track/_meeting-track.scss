@@ -5,6 +5,22 @@
   background-image: url('img/meeting-track.png'); 
   margin-bottom: 260px; 
 
+  #meeting-track-expansion {
+    position: absolute;
+    width: 422px;
+    height: 163px;
+    top: 0;
+    left: 916px;
+    margin-left: 8px;
+
+    &[data-players="5"] {
+      background-image: url('img/meeting-track-little-board-5p.png'); 
+    }
+    &[data-players="6"] {
+      background-image: url('img/meeting-track-little-board-6p.png'); 
+    }
+  }
+
   .meeting-track-zone {
     position: absolute;
     width: 129px;
@@ -43,7 +59,7 @@
 
   .meeting-track-solo-tile {
     position: absolute;
-    top: -135px;
+    top: -42px;
     height: 129px;
     width: 129px;
 
@@ -92,9 +108,9 @@
     }
 
     &.solo-tiles {
-      top: -135px;
-      height: 129px;
-      background: white;
+      top: -42px;
+      height: 36px;
+      background-image: url('img/solo-tiles.png');
       border: 1px solid gray;
 
       &.hidden {

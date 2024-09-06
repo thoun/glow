@@ -1,5 +1,7 @@
 <?php
 
+require_once(__DIR__.'/objects/uriom-intervention.php');
+
 trait ActionTrait {
 
     //////////////////////////////////////////////////////////////////////////////
@@ -22,7 +24,30 @@ trait ActionTrait {
 
         // take big dice
         $dice = $this->getBigDiceByColor($adventurer->color, $adventurer->dice);
+        if ($adventurer->color == 8) {
+            $dice = array_merge(
+                $this->getBigDiceByColor(8, 1),
+                $this->getBigDiceByColor(80, 2),
+            );
+        } else if ($adventurer->color == 11) {
+            $dice = array_merge(
+                $this->getBigDiceByColor(7, $adventurer->dice),
+            );
+        }
         $this->moveDice($dice, 'player', $playerId);
+
+        if ($adventurer->color == 11) {
+            // we create and place the 2 special yellow small dice
+            $sql = "INSERT INTO dice (`color`, `small`, `die_face`, `location`) VALUES ";
+            $values = [];
+            $deck = $this->getPlayerSmallBoard($playerId) ? 'decksmall' : 'deck';
+            foreach ([1, 2] as $i) {
+                $values[] = "(11, true, ".bga_rand(1, 5).", '$deck')";
+            }
+    
+            $sql .= implode(',', $values);
+            $this->DbQuery($sql);
+        }
 
         $newPlayerColor = $this->ADVENTURERS_COLORS[$adventurer->color];
         $this->DbQuery("UPDATE player SET `player_color` = '$newPlayerColor' WHERE player_id = $playerId");
@@ -85,6 +110,9 @@ trait ActionTrait {
         $dice = null;
         if ($spot !== null) {
             $dice = $this->getDiceByLocation('meeting', $spot);
+            if ($playerId != $this->getPlayerWithUriom()) {
+                $dice = array_values(array_filter($dice, fn($die) => $die->color != 11 || !$die->small));
+            }
             $count = count($dice);
             if ($count > 0) {
                 $this->moveDice($dice, 'player', $playerId);
@@ -127,11 +155,17 @@ trait ActionTrait {
                 }
             }
         } else if ($companion->subType == KAAR) {
-            $die = $this->getBlackDie();
+            $die = $this->getSmallBlackDie();
 
-            // black die enters the game
+            // small black die enters the game
             if ($die->location == 'table') {
-                $availableSpots = [1,2,3,4,5];
+                
+                $availableSpots = [];
+                $spotCount = $this->getSpotCount();
+                for ($i=1;$i<=$spotCount;$i++) {
+                    $availableSpots[] = $i;
+                }
+
                 if ($spot !== null) {
                     $availableSpots = array_values(array_map(fn($dbLine) => 
                         intval($dbLine['card_location_arg'])
@@ -151,6 +185,25 @@ trait ActionTrait {
                     'die' => $die,
                 ]);
             }
+
+            $adventurers = $this->getAdventurersFromDb($this->adventurers->getCardsInLocation('player', $playerId));
+            $adventurer = count($adventurers) > 0 ? $adventurers[0] : null;
+            // remove big black die if Kaar is played
+            if ($adventurer->color == 8) {
+                $dbDices = $this->getCollectionFromDB("SELECT * FROM dice WHERE `location` = 'player' AND `color` = 8 AND `small` = false");
+                $bigBlackDice = array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices));
+                if (count($bigBlackDice) > 0) {
+                    $bigBlackDie = $bigBlackDice[0];
+                    $this->moveDice([$bigBlackDie], 'zaydrel');
+
+                    $this->notifyAllPlayers('removeSketalDie', clienttranslate('${player_name} loses the big black die'), [
+                        'playerId' => $playerId,
+                        'player_name' => $this->getPlayerName($playerId),
+                        'die' => $bigBlackDie,
+                        'remove' => true,
+                    ]);
+                }
+            }
         }
     }
 
@@ -168,11 +221,24 @@ trait ActionTrait {
             $this->checkAction('recruitCompanion'); 
         }
 
-        if ($spot < 1 || $spot > 5) {
+        $spotCount = $this->getSpotCount();
+        if ($spot < 1 || $spot > $spotCount) {
             throw new BgaUserException("Not a valid spot");
         }
         
         $playerId = $this->getActivePlayerId();
+
+        $spotDice = $this->getDiceByLocation('meeting', $spot);
+        if ($this->array_some($spotDice, fn($die) => $die->color == 11 && $die->small) && !$this->uriomHasRecruited($playerId)) {
+            $this->setGlobalVariable(URIOM_INTERVENTION, new UriomIntervention($playerId, $this->getPlayerWithUriom(), $spot));
+            $this->gamestate->nextState('nextPlayer');
+            return;
+        }
+
+        $this->recruitCompanionAction($playerId, $spot);
+    }
+
+    public function recruitCompanionAction(int $playerId, int $spot) {
         $solo = $this->isSoloMode();
         if ($solo) {
             $soloTile = $this->getSoloTilesFromDb($this->soloTiles->getCardsInLocation('meeting', $spot))[0];
@@ -181,7 +247,8 @@ trait ActionTrait {
         }
 
         $spotDice = $this->getDiceByLocation('meeting', $spot);
-        if ($this->array_some($spotDice, fn($die) => $die->color == 8)) {
+
+        if ($this->array_some($spotDice, fn($die) => $die->color == 8 && $die->small)) {
             $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId, null, 'location_arg'));
             if ($this->array_some($companions, fn($companion) => $companion->subType == KAAR)) {
                 $this->gamestate->nextState('moveBlackDie');
@@ -240,11 +307,12 @@ trait ActionTrait {
 
         $playerId = $this->getCurrentPlayerId();
 
-        if ($spot < 1 || $spot > 5) {
+        $spotCount = $this->getSpotCount();
+        if ($spot < 1 || $spot > $spotCount) {
             throw new BgaUserException("Not a valid spot");
         }
 
-        $die = $this->getBlackDie();
+        $die = $this->getSmallBlackDie();
         $currentSpot = $die->location_arg;
 
         $die->setFace($spot);
@@ -263,11 +331,17 @@ trait ActionTrait {
     public function removeCompanion(int $spot) {
         $this->checkAction('removeCompanion'); 
 
-        $playerId = $this->getCurrentPlayerId();
+        $playerId = intval($this->getCurrentPlayerId());
 
-        if ($spot < 1 || $spot > 5) {
+        $spotCount = $this->getSpotCount();
+        if ($spot < 1 || $spot > $spotCount) {
             throw new BgaUserException("Not a valid spot");
         }
+
+        if ($this->spotHasUriomDice($spot) && $playerId != $this->getPlayerWithUriom()) {
+            throw new BgaUserException("You can't remove a card with a small yellow die"); // TODO check translation / make translatable
+        }
+
         $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('meeting', $spot));
 
         if (count($companions) == 0) {
@@ -291,6 +365,26 @@ trait ActionTrait {
         ]);
         
         $this->gamestate->nextState('nextPlayer');
+    }
+
+    public function recruitCompanionUriom() {
+        $this->checkAction('recruitCompanionUriom');
+
+        $uriomIntervention = $this->getGlobalVariable(URIOM_INTERVENTION);
+        $uriomIntervention->activated = true;
+        $this->setGlobalVariable(URIOM_INTERVENTION, $uriomIntervention);
+
+        $this->recruitCompanionAction($uriomIntervention->uriomPlayerId, $uriomIntervention->spot);
+    }
+    
+    public function passUriomRecruit() {
+        $this->checkAction('passUriomRecruit');
+
+        $uriomIntervention = $this->getGlobalVariable(URIOM_INTERVENTION);
+        $uriomIntervention->activated = false;
+        $this->setGlobalVariable(URIOM_INTERVENTION, $uriomIntervention);
+
+        $this->gamestate->nextState('pass');
     }
     
     public function selectDiceToRoll() {
@@ -329,7 +423,8 @@ trait ActionTrait {
         $this->incStat(count($ids), 'rerolledDice');
         $this->incStat(count($ids), 'rerolledDice', $playerId);
 
-        $this->gamestate->nextPrivateState($playerId, 'selectDice');
+        $args = $this->argRerollImmediate($playerId);
+        $this->gamestate->nextPrivateState($playerId, $args['selectedDie'] !== null ? 'rerollImmediate' : 'selectDice');
     }
 
     public function changeDie(int $id, int $face, array $cost) {
@@ -342,7 +437,10 @@ trait ActionTrait {
             throw new BgaUserException("You can't roll this die");
         }
 
-        $this->applyRollDieCost($playerId, 3, $cost);
+        $free = $die->color == 80 && $die->face == 6;
+        if (!$free) {
+            $this->applyRollDieCost($playerId, 3, $cost);
+        }
         $originalDiceStr = $this->getDieFaceLogName($die);
         $die->setFace($face);
         $rolledDiceStr = $this->getDieFaceLogName($die);
@@ -363,6 +461,33 @@ trait ActionTrait {
         $this->gamestate->nextPrivateState($playerId, 'selectDice');
     }
 
+    public function rerollImmediate(int $id) {
+        $this->checkAction('rerollImmediate');
+
+        $playerId = $this->getCurrentPlayerId();
+
+        $args = $this->argRerollImmediate($playerId);
+        $ids = [$args['selectedDie']->id];
+        if ($id > 0) {
+            $ids[] = $id;
+        }
+
+        foreach($ids as $id) {
+            $die = $this->getDieById($id);
+            if ($die->location_arg != $playerId) {
+                throw new BgaUserException("You can't roll this die");
+            }
+        }
+
+        $this->rollPlayerDice($playerId, $ids, clienttranslate('${player_name} rerolls dice ${originalDice} and gets ${rolledDice}'), []);
+
+        $this->incStat(count($ids), 'rerolledDice');
+        $this->incStat(count($ids), 'rerolledDice', $playerId);
+
+        $args = $this->argRerollImmediate($playerId);
+        $this->gamestate->nextPrivateState($playerId, $args['selectedDie'] !== null ? 'rerollImmediate' : 'selectDice');
+    }
+
     public function cancel() {
         $this->checkAction('cancel');
 
@@ -376,8 +501,77 @@ trait ActionTrait {
 
         $playerId = $this->getCurrentPlayerId();
 
+        $dice = $this->getEffectiveDice($playerId);
+        $grayMultiDice = array_values(array_filter($dice, fn($die) => $die->color == 80 && $die->face == 6));
+        if (count($grayMultiDice) > 0) {
+            throw new BgaUserException("You must change multi die face");
+        }
+
         $this->giveExtraTime($playerId);
-        $this->gamestate->setPlayerNonMultiactive($playerId, 'keepDice');
+        $this->gamestate->setPlayerNonMultiactive($playerId, 'next');
+    }
+    
+    public function swap(int $id) {
+        $this->checkAction('swap');
+
+        $playerId = intval($this->getCurrentPlayerId());
+
+        $companion = $this->getCompanionFromDb($this->companions->getCardOnTop('hulios'));
+        $replaced = $this->getCompanionFromDb($this->companions->getCard($id));
+
+        if ($companion->location != 'hulios' || $replaced->location != 'player'.$playerId) {
+            throw new BgaUserException("Companion not available");
+        }
+
+        $this->DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 1 where `card_location` = 'hulios'");
+        $this->companions->moveCard($replaced->id, 'hulios', 0); 
+        $this->afterDiscardCompanion($playerId, $replaced);   
+
+        $this->notifyAllPlayers('removeCompanion', '', [
+            'playerId' => $playerId,
+            'companion' => $replaced,
+        ]);
+
+        $this->applyRecruitCompanion($playerId, $companion);
+
+        $dice = $this->getEffectiveDice($playerId);
+        $unusedHuliosDice = array_values(array_filter($dice, fn($die) => $die->color == 9 && $die->value == 9 && !$die->used));
+        if (count($unusedHuliosDice) > 0) {
+            $die = $unusedHuliosDice[0];
+            $this->DbQuery("UPDATE dice SET `used` = true WHERE die_id = $die->id");
+        }
+
+        if ($companion->die && $companion->dieColor === 0 && $this->canChooseSketalDie()) {
+            $this->gamestate->nextPrivateState($playerId, 'selectSketalDie'); // we don't disable player so he stays active for selectSketalDieMulti
+        } else if (count($unusedHuliosDice) > 1) {
+            $this->gamestate->nextPrivateState($playerId, 'stay');
+        } else {
+            $this->gamestate->setPlayerNonMultiactive($playerId, 'next');
+        }
+    } 
+
+    public function skipSwap() {
+        $this->checkAction('skipSwap');
+
+        $playerId = intval($this->getCurrentPlayerId());
+        $companion = $this->getCompanionFromDb($this->companions->getCardOnTop('hulios'));
+
+        $dice = $this->getEffectiveDice($playerId);
+        $unusedHuliosDice = array_values(array_filter($dice, fn($die) => $die->color == 9 && $die->value == 9 && !$die->used));
+        if (count($unusedHuliosDice) > 0) {
+            $die = $unusedHuliosDice[0];
+            $this->DbQuery("UPDATE dice SET `used` = true WHERE die_id = $die->id");
+        }
+
+        // put the card under the deck
+        $this->DbQuery("UPDATE companion SET `card_location_arg` = card_location_arg + 1 where `card_location` = 'hulios'");
+        $this->DbQuery("UPDATE companion SET `card_location_arg` = 0 where `card_id` = $companion->id");
+
+        if (count($unusedHuliosDice) > 1) {            
+            $this->gamestate->nextPrivateState($playerId, 'stay');
+        } else {
+            $this->gamestate->setPlayerNonMultiactive($playerId, 'next');
+        }
     }
     
     public function resurrect(int $id) {
@@ -408,8 +602,8 @@ trait ActionTrait {
         $this->gamestate->setPlayerNonMultiactive($playerId, 'next');
     }
 
-    public function applyResolveCard(int $playerId, int $cardType, int $id, $dieId = 0) {
-        $this->applyCardEffect($playerId, $cardType, $id, $dieId);
+    public function applyResolveCard(int $playerId, int $cardType, int $id, $dieId = 0, $tokenId = 0) {
+        $this->applyCardEffect($playerId, $cardType, $id, $dieId, $tokenId);
 
         $resolveCardsForPlayer = $this->argResolveCardsForPlayer($playerId);
      
@@ -427,15 +621,161 @@ trait ActionTrait {
         $playerId = intval($this->getCurrentPlayerId());
         
         $resolveCardsForPlayer = $this->argResolveCardsForPlayer($playerId);
-        if (!$this->array_some($resolveCardsForPlayer->remainingEffects, fn($remainingEffect) => $remainingEffect[0] == $cardType && $remainingEffect[1] == $id)) {
+        $remainingEffect = $this->array_find($resolveCardsForPlayer->remainingEffects, fn($remainingEffect) => $remainingEffect[0] == $cardType && $remainingEffect[1] == $id);
+        if ($remainingEffect == null) {
             throw new BgaUserException("You can't apply that effect");
         }
 
-        $resolveCardsForPlayer = $this->applyResolveCard($playerId, $cardType, $id, $dieId);
+        if ($remainingEffect[0] == 1 && gettype($remainingEffect[2]) == 'string') {
+            $redirect = $remainingEffect[2];
+            if (strpos($redirect, 'exchangeToken') !== false) {
+                $count = intval(explode('-', $redirect)[1]);
+                $this->addPlayerTokens($playerId, $count, clienttranslate('${player_name} ${gainsloses} ${abstokens} tokens with ${effectOrigin} effect'), ['effectOrigin' => 'companion', 'gainsloses' => clienttranslate('gains'), 'i18n' => ['gainsloses']]);
+                $redirect = 'removeToken';
+                $this->setGlobalVariable(REMOVE_TOKENS, $count);
+            }
+            
+            if ($redirect != null) {
+                $this->setSelectedCompanion($playerId, $remainingEffect[1]);
+                $this->gamestate->nextPrivateState($playerId, $redirect);
+                return;
+            }
+        }
+
+        $this->applyResolveCard($playerId, $cardType, $id, $dieId);
         
-        if (count($resolveCardsForPlayer->remainingEffects) === 0) {
+        $this->checkResolveCardEnd($playerId);
+    }
+
+    function checkResolveCardEnd(int $playerId) {
+        $args = $this->argResolveCardsForPlayer($playerId);
+        if (count($args->remainingEffects) > 0 || $args->killTokenId > 0 || $args->disableTokenId > 0) {
+            $this->gamestate->nextPrivateState($playerId, 'resolve');
+        } else {
             $this->gamestate->setPlayerNonMultiactive($playerId, 'move');
             $this->giveExtraTime($playerId);
+        }
+    }
+
+    public function removeToken(int $tokenId) {
+        $this->checkAction('removeToken');
+
+        $playerId = intval($this->getCurrentPlayerId());
+        $companionId = $this->getSelectedCompanion($playerId);
+        
+        $resolveCardsForPlayer = $this->argResolveCardsForPlayer($playerId);
+        $remainingEffect = $this->array_find($resolveCardsForPlayer->remainingEffects, fn($remainingEffect) => $remainingEffect[0] == 1 && $remainingEffect[1] == $companionId);
+        if ($remainingEffect == null) {
+            throw new BgaUserException("You can't apply that effect");
+        }
+        
+        $count = $this->getGlobalVariable(REMOVE_TOKENS) - 1;
+        $this->setGlobalVariable(REMOVE_TOKENS, $count);
+        
+        $companion = $this->getCompanionFromDb($this->companions->getCard($companionId));
+        $this->applyEffect($playerId, -51, 1, $companion, 0, $tokenId); 
+        
+        if ($count > 0) {
+            $this->gamestate->setPrivateState($playerId, ST_PRIVATE_REMOVE_TOKEN);
+        } else {
+            $this->saveAppliedEffect($playerId, [1, $companionId]); 
+
+            $this->incStat(1, 'resolvedCards');
+            $this->incStat(1, 'resolvedCards', $playerId);
+            
+            $this->checkResolveCardEnd($playerId);
+        }
+    }
+
+    public function passRemoveToken() {
+        $this->checkAction('passRemoveToken');
+
+        $playerId = intval($this->getCurrentPlayerId());
+        $companionId = $this->getSelectedCompanion($playerId);
+        
+        $resolveCardsForPlayer = $this->argResolveCardsForPlayer($playerId);
+        $remainingEffect = $this->array_find($resolveCardsForPlayer->remainingEffects, fn($remainingEffect) => $remainingEffect[0] == 1 && $remainingEffect[1] == $companionId);
+        if ($remainingEffect == null) {
+            throw new BgaUserException("You can't apply that effect");
+        }
+        
+        $this->setGlobalVariable(REMOVE_TOKENS, 0);
+        $this->saveAppliedEffect($playerId, [1, $companionId]); 
+
+        $this->incStat(1, 'resolvedCards');
+        $this->incStat(1, 'resolvedCards', $playerId);
+        
+        $this->checkResolveCardEnd($playerId);
+    }
+
+    public function activateToken(int $tokenId) {
+        $playerId = intval($this->getCurrentPlayerId());
+        $token = $this->getTokenFromDb($this->tokens->getCard($tokenId));
+        
+        $currentState = intval($this->gamestate->state_id());
+        if (!in_array($currentState, [ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS, ST_MULTIPLAYER_PRIVATE_MOVE])) {
+            throw new BgaUserException("You can use this token only during the resolve card phase or the move phase.");
+        }
+
+        if ($token->type == 3 && $token->typeArg == 37) {
+            $this->gamestate->setPrivateState($playerId, ST_PRIVATE_KILL_TOKEN);
+            // TODO check if need to activate player in case of inactive player
+        }
+
+        if ($token->type == 3 && $token->typeArg == 0) {
+            $this->gamestate->setPrivateState($playerId, ST_PRIVATE_DISABLE_TOKEN);
+            // TODO check if need to activate player in case of inactive player
+        }
+    }
+
+    public function killToken(int $type, int $id) {
+        $this->checkAction('killToken');
+
+        $playerId = intval($this->getCurrentPlayerId());
+
+        $this->applyDiscardCompanionSpell($playerId, $type, $id);
+        $args = new stdClass();
+        $this->addActivableTokens($playerId, $args);
+        $this->removePlayerToken($playerId, $args->killTokenId);
+        
+        $this->checkActivateTokenEnd();
+    }
+
+    public function disableToken(int $symbol) {
+        $this->checkAction('disableToken');
+
+        $playerId = intval($this->getCurrentPlayerId());
+
+        $this->addDisabledSymbol($playerId, $symbol);
+        $args = new stdClass();
+        $this->addActivableTokens($playerId, $args);
+        $this->removePlayerToken($playerId, $args->disableTokenId);
+
+        $this->notifyAllPlayers('symbolDisabled', clienttranslate('${player_name} disable symbol ${disabledSymbol} on its dice until the end of the round'), [
+            'playerId' => $playerId,
+            'player_name' => $this->getPlayerName($playerId),
+            'symbol' => $symbol,
+            'disabledSymbol' => "[symbol$symbol]", // for log
+        ]);
+        
+        $this->checkActivateTokenEnd();
+    }
+
+    public function cancelToken() {
+        $this->checkAction('cancelToken');
+        $this->checkActivateTokenEnd();
+    }
+
+    public function checkActivateTokenEnd() {
+        $playerId = intval($this->getCurrentPlayerId());
+
+        $currentState = intval($this->gamestate->state_id());
+        if ($currentState == ST_MULTIPLAYER_CHANGE_DICE) {
+            $this->gamestate->nextPrivateState($playerId, 'roll');
+        } else if ($currentState == ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS) {
+            $this->checkResolveCardEnd($playerId);
+        } else if ($currentState == ST_MULTIPLAYER_PRIVATE_MOVE) {
+            $this->checkMoveEnd($playerId);
         }
     }
 
@@ -489,24 +829,31 @@ trait ActionTrait {
 
         if ($side === 1) {
             $this->movePlayerCompany($playerId, $route->destination, $route->from);
-
-            $args = $this->argMoveForPlayer($playerId);
-            if (count($args->possibleRoutes) == 0 && $args->canSettle != true) {
-                $this->applyEndTurn($playerId);
-            } else {         
-                $this->gamestate->nextPrivateState($playerId, 'move');
-            }
         } else if ($side === 2) {
             $this->movePlayerBoat($playerId, $route->destination, $route->from);
-
-            $this->applyEndTurn($playerId);
         }
 
         $this->incStat(1, 'moves');
         $this->incStat(1, 'moves', $playerId);
+
+        $this->checkMoveEnd($playerId);
     }
 
-    public function move(int $destination, $from = null, $type = null, $id = null) {
+    function checkMoveEnd(int $playerId) {    
+        $args = $this->argMoveForPlayer($playerId);
+        $side = $this->getSide();
+        if ($side != 2 && (count($args->possibleRoutes) > 0 || $args->canSettle || $args->killTokenId > 0 || $args->disableTokenId > 0)) {
+            $this->gamestate->nextPrivateState($playerId, 'move');
+        } else {
+            $this->applyEndTurn($playerId);
+        }
+    }
+
+    private function canDiscardCompanionSpell(int $playerId) {
+        return count($this->companions->getCardsInLocation('player'.$playerId)) > 0 || count($this->spells->getCardsInLocation('player', $playerId)) > 0;
+    }
+
+    public function move(int $destination, $from = null) {
         // TODO add die id for companion
         $this->checkAction('move');
 
@@ -518,35 +865,67 @@ trait ActionTrait {
             throw new BgaUserException("Impossible to move here");
         }
 
-        // if we pass a discard companion/spell
-        if ($type != null && $id != null) {
-            if ($type == 1) {
-                $companion = $this->getCompanionFromDb($this->companions->getCard($id));
-
-                if ($companion->location != 'player'.$playerId) {
-                    throw new BgaUserException("Player doesn't have selected companion");
-                }
-
-                $this->sendToCemetery($playerId, $companion->id);
-
-                $this->notifyAllPlayers('removeCompanion', clienttranslate('${player_name} removes companion ${companionName}'), [
-                    'playerId' => $playerId,
-                    'player_name' => $this->getPlayerName($playerId),
-                    'companion' => $companion,
-                    'companionName' => $companion->name,
-                ]);
-            } else if ($type == 2) {
-                $spell = $this->getSpellFromDb($this->spells->getCard($id));
-
-                if ($spell->location != 'player' || $spell->location_arg != $playerId) {
-                    throw new BgaUserException("Player doesn't have selected spell");
-                }
-
-                $this->discardSpell($playerId, $spell);
-            }
+        if (in_array(37, $route->effects) && $this->canDiscardCompanionSpell($playerId)) {
+            $this->DbQuery("UPDATE player SET player_selected_destination = '".json_encode([$from !== null ? intval($from) : null, $destination])."' WHERE player_id = $playerId");
+            $this->gamestate->nextPrivateState($playerId, 'discard');
+            return;
         }
 
         $this->applyMove($playerId, $route);
+    }
+
+    private function applyDiscardCompanionSpell(int $playerId, int $type, int $id) {
+
+        if ($type == 1) {
+            $companion = $this->getCompanionFromDb($this->companions->getCard($id));
+
+            if ($companion->location != 'player'.$playerId) {
+                throw new BgaUserException("Player doesn't have selected companion");
+            }
+
+            $this->sendToCemetery($playerId, $companion->id);
+
+            $this->notifyAllPlayers('removeCompanion', clienttranslate('${player_name} removes companion ${companionName}'), [
+                'playerId' => $playerId,
+                'player_name' => $this->getPlayerName($playerId),
+                'companion' => $companion,
+                'companionName' => $companion->name,
+            ]);
+        } else if ($type == 2) {
+            $spell = $this->getSpellFromDb($this->spells->getCard($id));
+
+            if ($spell->location != 'player' || $spell->location_arg != $playerId) {
+                throw new BgaUserException("Player doesn't have selected spell");
+            }
+
+            $this->discardSpell($playerId, $spell);
+        }
+    }
+
+    public function discardCompanionSpell(int $type, int $id) {
+        $this->checkAction('discardCompanionSpell');
+
+        $playerId = intval($this->getCurrentPlayerId());
+
+        $this->applyDiscardCompanionSpell($playerId, $type, $id);
+
+        $routeParams = json_decode($this->getUniqueValueFromDB("SELECT player_selected_destination FROM player where `player_id` = $playerId") ?? '[]');
+        $from = $routeParams[0];
+        $destination = $routeParams[1];
+        $possibleRoutes = $this->getPossibleRoutes($playerId);
+        $route = $this->array_find($possibleRoutes, fn($possibleRoute) => $possibleRoute->destination == $destination && ($from == null || $possibleRoute->from == $from));
+
+        $this->applyMove($playerId, $route);
+
+        $this->gamestate->nextPrivateState($playerId, 'move');
+    }
+
+    public function cancelDiscardCompanionSpell() {
+        $this->checkAction('cancelDiscardCompanionSpell');
+
+        $playerId = intval($this->getCurrentPlayerId());
+
+        $this->gamestate->nextPrivateState($playerId, 'move');
     }
 
     private function applyEndTurn(int $playerId) {

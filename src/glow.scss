@@ -1,6 +1,8 @@
-@import url(../../../css/csslayer.css);
+//@import '../node_modules/bga-zoom/bga-zoom';
+@import '../node_modules/bga-cards/bga-cards';
 
 @import 'dice';
+@import 'tokens';
 @import 'board/board';
 @import 'meeting-track/meeting-track';
 @import 'players-tables/players-tables';
@@ -178,7 +180,7 @@ html {
   }
 
   &.solo {
-    padding-bottom: 139px;
+    padding-bottom: 46px;
 
     #round-counter-wrapper-max-days {
       display: none;
@@ -354,10 +356,13 @@ html {
   display: inline-block;
   margin-bottom: -4px;
 
-  @for $i from 1 through 8 {
+  @for $i from 1 through 10 {
       &[data-color="#{$i}"] {
         background-image: url('img/die#{$i}.png');
       }
+  }
+  &[data-color="80"] {
+    background-image: url('img/die80.png');
   }
 
   @for $i from 1 through 6 {

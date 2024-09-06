@@ -4,6 +4,7 @@ require_once(__DIR__.'/objects/effect.php');
 require_once(__DIR__.'/objects/adventurer.php');
 require_once(__DIR__.'/objects/companion.php');
 require_once(__DIR__.'/objects/spell.php');
+require_once(__DIR__.'/objects/token.php');
 require_once(__DIR__.'/objects/solo-tile.php');
 require_once(__DIR__.'/objects/dice.php');
 require_once(__DIR__.'/objects/meeple.php');
@@ -43,6 +44,37 @@ trait UtilTrait {
         }
         return false;
     }
+        
+    function array_every(array $array, callable $fn) {
+        foreach ($array as $value) {
+            if(!$fn($value)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function setGlobalVariable(string $name, /*object|array*/ $obj) {
+        /*if ($obj == null) {
+            throw new \Error('Global Variable null');
+        }*/
+        $jsonObj = json_encode($obj);
+        $this->DbQuery("INSERT INTO `global_variables`(`name`, `value`)  VALUES ('$name', '$jsonObj') ON DUPLICATE KEY UPDATE `value` = '$jsonObj'");
+    }
+
+    function getGlobalVariable(string $name, $asArray = null) {
+        $json_obj = $this->getUniqueValueFromDB("SELECT `value` FROM `global_variables` where `name` = '$name'");
+        if ($json_obj) {
+            $object = json_decode($json_obj, $asArray);
+            return $object;
+        } else {
+            return null;
+        }
+    }
+
+    function deleteGlobalVariable(string $name) {
+        $this->DbQuery("DELETE FROM `global_variables` where `name` = '$name'");
+    }
 
     function isTurnBased() {
         return intval($this->gamestate->table_globals[200]) >= 10;
@@ -68,24 +100,49 @@ trait UtilTrait {
         return intval($this->getGameStateValue(BOARD_SIDE));
     }
 
-    function createDice(bool $solo) {
-        $sql = "INSERT INTO dice (`color`, `small`, `die_face`) VALUES ";
+    function isExpansion() {
+        return intval($this->getGameStateValue(OPTION_EXPANSION)) >= 2;
+    }
+
+    function createDice(bool $isExpansion, int $playerCount) {
+        $sql = "INSERT INTO dice (`color`, `small`, `die_face`, `location`) VALUES ";
         $values = [];
-        foreach($this->DICES as $color => $counts) {
-            if ($solo && $color == 8) {
-                continue;
+
+        $DICE = $this->DICES;
+        if ($isExpansion) {
+            foreach($this->DICES_EXPANSION1 as $color => $numbers) {
+                $DICE[$color] = $numbers;
             }
+        }
+
+        foreach($DICE as $color => $counts) {
 
             $face = min($color, 6);
 
             // big
             for ($i=0; $i<$counts[0]; $i++) {
-                $values[] = "($color, false, $face)";
+                $values[] = "($color, false, $face, 'deck')";
+            }
+
+            if ($playerCount == 1 && $color == 8) {
+                continue;
             }
 
             // small
             for ($i=0; $i<$counts[1]; $i++) {
-                $values[] = "($color, true, $face)";
+                $values[] = "($color, true, $face, 'deck')";
+            }
+        }
+
+        if ($playerCount >= 5) {
+            foreach ([1, 2, 3, 6] as $color) {
+                $values[] = "($color, true, $face, 'decksmall')";
+            }
+
+            if ($playerCount >= 6) {
+                foreach ([4, 5] as $color) {
+                    $values[] = "($color, true, $face, 'decksmall')";
+                }
             }
         }
 
@@ -110,11 +167,24 @@ trait UtilTrait {
         return array_map(fn($dbObject) => $this->getAdventurerFromDb($dbObject), array_values($dbObjects));
     }
 
+    function getAllCompanions() {
+        $COMPANIONS = $this->COMPANIONS;
+        foreach ([1, 2, 3] as $moduleNumber) {
+            $COMPANIONS = $COMPANIONS + $this->COMPANIONS_EXPANSION1_SETS[$moduleNumber]['adds'];
+        }
+        return $COMPANIONS;
+    }
+
+    function getAllSpells() {
+        return $this->SPELLS + $this->SPELLS_EXPANSION1;
+    }
+
     function getCompanionFromDb($dbObject) {
         if (!$dbObject || !array_key_exists('id', $dbObject)) {
             throw new BgaSystemException("Companion doesn't exists ".json_encode($dbObject));
         }
-        return new Companion($dbObject, $this->COMPANIONS);
+
+        return new Companion($dbObject, $this->getAllCompanions());
     }
 
     function getCompanionsFromDb(array $dbObjects) {
@@ -125,7 +195,7 @@ trait UtilTrait {
         if (!$dbObject || !array_key_exists('id', $dbObject)) {
             throw new BgaSystemException("Spell doesn't exists ".json_encode($dbObject));
         }
-        return new Spell($dbObject, $this->SPELLS);
+        return new Spell($dbObject, $this->getAllSpells());
     }
 
     function getSpellsFromDb(array $dbObjects) {
@@ -142,12 +212,23 @@ trait UtilTrait {
     function getSoloTilesFromDb(array $dbObjects) {
         return array_map(fn($dbObject) => $this->getSoloTileFromDb($dbObject), array_values($dbObjects));
     }
+
+    function getTokenFromDb($dbObject) {
+        if (!$dbObject || !array_key_exists('id', $dbObject)) {
+            throw new BgaSystemException("Token doesn't exists ".json_encode($dbObject));
+        }
+        return new Token($dbObject);
+    }
+
+    function getTokensFromDb(array $dbObjects) {
+        return array_map(fn($dbObject) => $this->getTokenFromDb($dbObject), array_values($dbObjects));
+    }
     
-    function getSmallDice(bool $ignoreBlack) {
-        $sql = "SELECT * FROM dice WHERE `small` = true ";
+    function getSmallDice(bool $ignoreBlack, string $location) {
+        $sql = "SELECT * FROM dice WHERE `small` = true AND `location` = '$location' ";
         if ($ignoreBlack) {
             $sql .= " AND `color` <> 8";
-        } 
+        }
         $dbDices = $this->getCollectionFromDB($sql);
         return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices));
     }
@@ -192,8 +273,8 @@ trait UtilTrait {
         return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices));
     }
 
-    function getBlackDie() {
-        $sql = "SELECT * FROM dice WHERE `color` = 8";
+    function getSmallBlackDie() {
+        $sql = "SELECT * FROM dice WHERE `color` = 8 AND `small` = true";
         $dbDices = $this->getCollectionFromDB($sql);
         return array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices))[0];
     }
@@ -217,6 +298,15 @@ trait UtilTrait {
         return intval($this->getUniqueValueFromDB("SELECT count(*) FROM player"));
     }
 
+    function getSpotCount() {
+        $spotCount = 5;
+        $playerCount = $this->getPlayerCount();
+        if ($playerCount >= 5) {
+            $spotCount = $playerCount + 2;
+        }
+        return  $spotCount;
+    }        
+
     function getPlayerName(int $playerId) {
         if ($playerId == 0) {
             return 'Tom';
@@ -227,6 +317,14 @@ trait UtilTrait {
 
     function getPlayerScore(int $playerId) {
         return intval($this->getUniqueValueFromDB("SELECT player_score FROM player where `player_id` = $playerId"));
+    }
+
+    function getPlayerSmallBoard(int $playerId) {
+        if ($playerId == 0) {
+            return false;
+        } else {
+            return boolval($this->getUniqueValueFromDb("SELECT player_small_board FROM player WHERE player_id = $playerId"));
+        }
     }
 
     function incPlayerScore(int $playerId, int $incScore, $message = '', $params = []) {
@@ -277,6 +375,7 @@ trait UtilTrait {
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'rerolls' => $rerolls,
+            'absrerolls' => $rerolls,
         ]);
     }
 
@@ -288,6 +387,7 @@ trait UtilTrait {
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'rerolls' => -$dec,
+            'absrerolls' => $dec,
         ]);
 
         return $newValue;
@@ -352,22 +452,51 @@ trait UtilTrait {
         ]);
     }
 
-    function createAdventurers() {        
+    function removePlayerFireflies(int $playerId, int $dec, $message = '', $params = []) {
+        if ($playerId != 0) {
+            $newValue = max(0, $this->getPlayerFireflies($playerId) - $dec);
+            $this->DbQuery("UPDATE player SET `player_fireflies` = $newValue WHERE player_id = $playerId");
+        }
+
+        $this->notifyAllPlayers('fireflies', $message, $params + [
+            'playerId' => $playerId,
+            'player_name' => $this->getPlayerName($playerId),
+            'fireflies' => -$dec,
+            'absfireflies' => $dec,
+        ]);
+
+        return $newValue;
+    }
+
+    function createAdventurers(bool $expansion, bool $solo) {        
         foreach($this->ADVENTURERS as $type => $adventurer) {
-            $adventurers[] = [ 'type' => $type, 'type_arg' => null, 'nbr' => 1];
+            $create = $expansion || $type <= 7;
+            if ($create) {
+                $adventurers[] = [ 'type' => $type, 'type_arg' => null, 'nbr' => 1];
+            }
         }
         $this->adventurers->createCards($adventurers, 'deck');
     }
 
-    function createCompanions(bool $solo) {
+    function createCompanions(bool $solo, array $addedCompanions, array $removedCompanions) {
         $companions = [];
         $companionsB = [];
-        foreach($this->COMPANIONS as $subType => $companion) {
-            if ($solo && in_array($subType, $this->REMOVED_COMPANION_FOR_SOLO)) {
+        foreach ($this->COMPANIONS as $subType => $companion) {
+            if (in_array($subType, $removedCompanions) || ($solo && in_array($subType, $this->REMOVED_COMPANION_FOR_SOLO))) {
                 continue;
             }
-            $card = [ 'type' => $subType > 23 ? 2 : 1, 'type_arg' => $subType, 'nbr' => 1];
-            if ($solo && $subType > 23) {
+            $typeB = $subType > 23;
+            $card = [ 'type' => $typeB ? 2 : 1, 'type_arg' => $subType, 'nbr' => 1];
+            if ($solo && $typeB) {
+                $companionsB[] = $card;
+            } else {
+                $companions[] = $card;
+            }
+        }
+        foreach ($addedCompanions as $subType => $companion) {
+            $typeB = $subType % 100 > 4;
+            $card = [ 'type' => $typeB ? 2 : 1, 'type_arg' => $subType, 'nbr' => 1];
+            if ($solo && $typeB) {
                 $companionsB[] = $card;
             } else {
                 $companions[] = $card;
@@ -380,32 +509,82 @@ trait UtilTrait {
             $this->companions->shuffle('deckB');
         } 
 
-        if (!$solo) {
+        if ($solo) {
+            $companionsB = [];
+            $companions = [];
+            foreach ($this->COMPANIONS as $subType => $companion) {
+                if (!in_array($subType, $removedCompanions) && in_array($subType, $this->REMOVED_COMPANION_FOR_SOLO) && !in_array($subType, [XARGOK, KAAR, CROMAUG])) {
+                    $typeB = $subType > 23;
+                    $card = [ 'type' => $typeB ? 2 : 1, 'type_arg' => $subType, 'nbr' => 1];
+                    if ($typeB) {
+                        $companionsB[] = $card;
+                    } else {
+                        $companions[] = $card;
+                    }
+                }
+            }
+            $this->companions->createCards($companions, 'huliosA');
+            $this->companions->createCards($companionsB, 'huliosB');
+            $this->companions->shuffle('huliosA');
+            $this->companions->shuffle('huliosB');
+            $this->DbQuery("UPDATE companion SET `card_location_arg` = `card_location_arg` + 100 WHERE `card_location` = 'huliosB'");
+            $this->companions->moveAllCardsInLocationKeepOrder('huliosA', 'hulios');
+            $this->companions->moveAllCardsInLocationKeepOrder('huliosB', 'hulios');
+        } else {
             // remove 3 of each face
             for ($face=1; $face<=2; $face++) {
                 $removed = array_slice($this->getCompanionsFromDb($this->companions->getCardsOfTypeInLocation($face, null, 'deck')), 0, 3);
-                $this->companions->moveCards(array_map(fn($companion) => $companion->id, $removed), 'discard');
-
+                $this->companions->moveCards(array_map(fn($companion) => $companion->id, $removed), 'hulios');
             }
             // set face 1 (A) before face 2 (B)
-            $this->DbQuery("UPDATE companion SET `card_location_arg` = `card_location_arg` + (100 * (2 - `card_type`)) WHERE `card_location` = 'deck' ");
+            $this->DbQuery("UPDATE companion SET `card_location_arg` = `card_location_arg` + (1000 * (2 - `card_type`)) WHERE `card_location` IN ('deck', 'hulios') ");
         }
     }
 
-    function createSpells() {
+    function createSpells(bool $isExpansion) {
+        $spells = [];
+
         foreach($this->SPELLS as $type => $spellCard) {
             $spells[] = [ 'type' => $type, 'type_arg' => 0, 'nbr' => $spellCard->number];
         }
+        if ($isExpansion) {
+            foreach($this->SPELLS_EXPANSION1 as $type => $spellCard) {
+                $spells[] = [ 'type' => $type, 'type_arg' => 0, 'nbr' => $spellCard->number];
+            }
+        }
+
         $this->spells->createCards($spells, 'deck');
         $this->spells->shuffle('deck');
     }
 
     function createSoloTiles() {
+        $soloTiles = [];
+
         foreach($this->SOLO_TILES as $type => $tile) {
             $soloTiles[] = [ 'type' => $type, 'type_arg' => 0, 'nbr' => 1];
         }
         $this->soloTiles->createCards($soloTiles, 'deck');
         $this->soloTiles->shuffle('deck');
+    }
+
+    function createTokens() {
+        $tokens = [
+            [ 'type' => 2, 'type_arg' => 41, 'nbr' => 3],
+            [ 'type' => 2, 'type_arg' => 21, 'nbr' => 2],
+            [ 'type' => 2, 'type_arg' => 12, 'nbr' => 1],
+            [ 'type' => 3, 'type_arg' => 37, 'nbr' => 1],
+            [ 'type' => 3, 'type_arg' => 0, 'nbr' => 2],
+        ];
+        
+        for($color = 1; $color <= 6; $color++) {
+            $tokens[] = [ 'type' => 1, 'type_arg' => $color, 'nbr' => 6];
+        }
+        $this->tokens->createCards($tokens, 'bag');
+        $this->tokens->shuffle('bag');
+    }
+
+    function tokensActivated() {
+        return intval($this->getGameStateValue(OPTION_EXPANSION + 2)) == 2;
     }
 
     function getMeetingTrackFootprints(int $spot) {
@@ -423,8 +602,8 @@ trait UtilTrait {
 
     function placeCompanionsOnMeetingTrack() {        
         $solo = $this->isSoloMode();
-
-        for ($i=1;$i<=5;$i++) {
+        $spotCount = $this->getSpotCount();
+        for ($i=1;$i<=$spotCount;$i++) {
             $bigDieInSpot = false;
             if ($solo) {
                 $dice = $this->getDiceByLocation('meeting', $i);
@@ -440,33 +619,47 @@ trait UtilTrait {
         }
     }
     
-    function setDiceOnTable(bool $solo) {
-        for ($i=1; $i<=5; $i++) {
+    function setDiceOnTable(bool $solo, bool $isExpansion) {
+        $max = $isExpansion ? 6 : 5;
+        for ($i=1; $i<= $max; $i++) {
             $bigDie = $this->getBigDiceByColor($i, 1)[0];            
             $this->moveDice([$bigDie], 'table');
         }
         if (!$solo) {
-            $blackDie = $this->getBlackDie();
+            $blackDie = $this->getSmallBlackDie();
             $this->moveDice([$blackDie], 'table');
         }
     }
 
-    function initMeetingTrackSmallDice() {
-        $this->DbQuery("INSERT INTO meetingtrack (`spot`, `footprints`) VALUES (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)");
-
-        $smallDice = $this->getSmallDice(true);
+    function intRollAndPlaceSmallDice(bool $smallBoard) {
+        $smallDice = $this->getSmallDice(true, $smallBoard ? 'decksmall' : 'deck');
 
         // rolls the 9 small dice
         foreach($smallDice as &$idie) {
             $idie->roll();
 
             // If the purple die indicates the footprint symbol, it is rerolled
-            while ($idie->color === 6 && $idie->face === 6) {
+            while (in_array($idie->color, [6, 11]) && $idie->face === 6) {
                 $idie->roll();
             }
         }
 
-        $this->moveSmallDiceToMeetingTrack($smallDice);
+        $this->moveSmallDiceToMeetingTrack($smallDice, $smallBoard);
+    }
+
+    function initMeetingTrackSmallDice(int $playerCount) {
+        $this->DbQuery("INSERT INTO meetingtrack (`spot`, `footprints`) VALUES (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)");
+
+        $this->intRollAndPlaceSmallDice(false);
+
+        if ($playerCount >= 5) {
+            $this->DbQuery("INSERT INTO meetingtrack (`spot`, `footprints`) VALUES (6, 0), (7, 0)");
+            if ($playerCount >= 6) {
+                $this->DbQuery("INSERT INTO meetingtrack (`spot`, `footprints`) VALUES (8, 0)");
+            }
+
+            $this->intRollAndPlaceSmallDice(true);
+        }
     }
 
     
@@ -481,27 +674,31 @@ trait UtilTrait {
             }
         }
 
-        $this->moveSmallDiceToMeetingTrack($smallDice);
+        $this->moveSmallDiceToMeetingTrack($smallDice, $this->getPlayerSmallBoard($playerId));
 
         $this->notifyAllPlayers('replaceSmallDice', '', [
             'dice' => $smallDice,
         ]);
     }
 
-    private function moveSmallDiceToMeetingTrack(array $smallDice) {
+    private function moveSmallDiceToMeetingTrack(array $smallDice, bool $toSmallBoard) {
+        $playerCount = $this->getPlayerCount();
+
         for ($i=1; $i<=5; $i++) {
             $colorDice = array_values(array_filter($smallDice, fn($idie) => $idie->value === $i));
             if (count($colorDice) > 0) {
-                $this->moveDice($colorDice, 'meeting', $i);
+                $this->moveDice($colorDice, 'meeting', $toSmallBoard ? $this->SMALL_BOARD_COLOR[$playerCount][$i] : $i);
             }
         }
 
         $this->persistDice($smallDice);
     }
 
-    private function addFootprintsOnMeetingTrack() {
-        for ($i=1; $i<=5; $i++) {
+    private function addFootprintsOnMeetingTrack() {        
+        $spotCount = $this->getSpotCount();
+        for ($i=1;$i<=$spotCount;$i++) {
             $dice = $this->getDiceByLocation('meeting', $i);
+            $dice = array_values(array_filter($dice, fn($die) => $die->color != 11 || !$die->small));
             if (count($dice) === 0) {
                 // add footprint if no die on track
                 $footprints = 1;
@@ -541,10 +738,7 @@ trait UtilTrait {
         ] + $params);
     }
 
-    function sendToCemetery(int $playerId, int $companionId, /*int*/ $dieId = 0) {
-        $this->companions->moveCard($companionId, 'cemetery', intval($this->companions->countCardInLocation('cemetery')));
-
-        $companion = $this->getCompanionFromDb($this->companions->getCard($companionId));
+    function afterDiscardCompanion(int $playerId, /*Companion*/ $companion, /*int*/ $dieId = 0) {
         if ($companion->die) {
             $removedDieId = $dieId > 0 ? $dieId : intval($this->getUniqueValueFromDB("SELECT `die_id` FROM companion WHERE `card_id` = $companion->id"));
             
@@ -552,6 +746,35 @@ trait UtilTrait {
                 $this->removeSketalDie($playerId, $companion, $this->getDieById($removedDieId));
             }
         }
+
+        if ($companion->subType == KAAR) {   
+            $playersIds = $this->getPlayersIds();
+            foreach($playersIds as $pId) {
+                $adventurers = $this->getAdventurersFromDb($this->adventurers->getCardsInLocation('player', $pId));
+                $adventurer = count($adventurers) > 0 ? $adventurers[0] : null;
+                // get back the big black die if Kaar is removed
+                if ($adventurer->color == 8) {
+                    $dbDices = $this->getCollectionFromDB("SELECT * FROM dice WHERE `location` = 'zaydrel' AND `color` = 8 AND `small` = false");
+                    $bigBlackDice = array_map(fn($dbDice) => new Dice($dbDice), array_values($dbDices));
+                    if (count($bigBlackDice) > 0) {
+                        $bigBlackDie = $bigBlackDice[0];
+                        $this->moveDice([$bigBlackDie], 'player', $pId);
+
+                        $this->notifyAllPlayers('takeSketalDie', clienttranslate('${player_name} takes back the black die'), [
+                            'playerId' => $playerId,
+                            'player_name' => $this->getPlayerName($playerId),
+                            'die' => $bigBlackDie,
+                        ]);
+                    }
+                }
+            }
+        }
+    }
+
+    function sendToCemetery(int $playerId, int $companionId, /*int*/ $dieId = 0) {
+        $this->companions->moveCard($companionId, 'cemetery', intval($this->companions->countCardInLocation('cemetery')));
+        $companion = $this->getCompanionFromDb($this->companions->getCard($companionId));
+        $this->afterDiscardCompanion($playerId, $companion, $dieId);
 
         if ($playerId > 0) {
             $this->incStat(1, 'discardedCompanions');
@@ -598,7 +821,7 @@ trait UtilTrait {
     }
 
     function getRerollUsed(object $companion) {
-        return boolval($this->getUniqueValueFromDB("SELECT `reroll_used` FROM companion WHERE `card_id` = $companion->id"));
+        return intval($this->getUniqueValueFromDB("SELECT `reroll_used` FROM companion WHERE `card_id` = $companion->id"));
     }
 
     function getPlayerCompanionRerolls(int $playerId) {
@@ -606,8 +829,24 @@ trait UtilTrait {
 
         $rerolls = 0;
         foreach($companions as $companion) {
-            if ($companion->reroll && !$this->getRerollUsed($companion)) {
-                $rerolls++;
+            if ($companion->reroll > 0) {
+                $used = $this->getRerollUsed($companion);
+                if ($used < $companion->reroll) {
+                    $rerolls += ($companion->reroll - $used);
+                }
+            }
+        }
+
+        return $rerolls;
+    }
+
+    function getPlayerCrolosRerolls(int $playerId, int $score) {
+        $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId, null, 'location_arg'));
+
+        $rerolls = 0;
+        foreach($companions as $companion) {
+            if ($companion->subType == CROLOS) {
+                $rerolls += floor($score / 2);
             }
         }
 
@@ -630,9 +869,13 @@ trait UtilTrait {
             $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId, null, 'location_arg'));
             $companionsFlagged = 0;
             foreach($companions as $companion) {
-                if ($companionsFlagged < $cost[0] && $companion->reroll && !$this->getRerollUsed($companion)) {
-                    $this->DbQuery("UPDATE companion SET `reroll_used` = true WHERE card_id = $companion->id");
-                    $companionsFlagged++;
+                if ($companionsFlagged < $cost[0] && $companion->reroll > 0) {
+                    $used = $this->getRerollUsed($companion);
+                    if ($used < $companion->reroll) {
+                        $diff = min($cost[0] - $companionsFlagged, $companion->reroll - $used);
+                        $this->DbQuery("UPDATE companion SET `reroll_used` = `reroll_used` + $diff WHERE card_id = $companion->id");
+                        $companionsFlagged += $diff;
+                    }
                 }
             }
         }
@@ -654,6 +897,14 @@ trait UtilTrait {
             $this->incStat($cost[2], 'scoreBack', $playerId);
 
             $this->decPlayerScore($playerId, $args['rerollScore'][$cost[2]]);
+        } 
+
+        if ($cost[3] > 0) {
+            if ($args['rerollCrolos'] < $cost[3]) {
+                throw new BgaUserException('Not enough reroll available (Crolos)');
+            }
+
+            $this->decPlayerScore($playerId, $cost[3] * 2);
         }        
     }
 
@@ -672,7 +923,18 @@ trait UtilTrait {
         return 1 + $this->countRepetitionInDiceForEffectCondition($unusedValues, $conditions);
     }
 
-    public function isTriggeredEffectsForCard(array $dice, object $effect) {
+    public function getDiceDifferentColors(array $dice) {
+        $groups = [];
+        foreach ($dice as $playerDie) {
+            if ($playerDie->value <= 5) {
+                $groups[$playerDie->value] = true;
+            }
+        }
+        $colors = count($groups);
+        return $colors;
+    }
+
+    public function isTriggeredEffectsForCard(int $playerId, array $dice, object $effect) {
         // we check if we have a forbidden die, preventing the effect
         foreach($effect->conditions as $condition) {
             if ($condition >= -5 && $condition <= -1 && $this->array_some($dice, fn($die) => $die->value == -$condition)) {
@@ -680,9 +942,44 @@ trait UtilTrait {
             }
         }
 
+        // we check if card needs to remove tokens we don't have
+        $negativeFirefliesEffects = array_filter($effect->conditions, fn($effect) => $effect < -10 && $effect > -20);
+        $negativeFireflies = array_reduce(array_map(fn($effect) => -$effect -10, $negativeFirefliesEffects), fn($a, $b) => $a + $b, 0);
+        if ($negativeFireflies > 0 && $this->getPlayerFireflies($playerId) < $negativeFireflies) {
+            return false;
+        }
+
+        $negativeFootprintsEffects = array_filter($effect->conditions, fn($effect) => $effect < -20 && $effect > -30);
+        $negativeFootprints = array_reduce(array_map(fn($effect) => -$effect -20, $negativeFootprintsEffects), fn($a, $b) => $a + $b, 0);
+        if ($negativeFootprints > 0 && $this->getPlayerFootprints($playerId) < $negativeFootprints) {
+            return false;
+        }
+        
+        $negativeRerollEffects = array_filter($effect->conditions, fn($effect) => $effect < -40 && $effect > -50);
+        $negativeRerolls = array_reduce(array_map(fn($effect) => -$effect -40, $negativeRerollEffects), fn($a, $b) => $a + $b, 0);
+        if ($negativeRerolls > 0 && $this->getPlayerRerolls($playerId) < $negativeRerolls) {
+            return false;
+        }
+
+        $negativeTokensEffects = array_filter($effect->conditions, fn($effect) => $effect < -50 && $effect > -60);
+        $negativeTokens = array_reduce(array_map(fn($effect) => -$effect -50, $negativeTokensEffects), fn($a, $b) => $a + $b, 0);
+        if ($negativeTokens > 0 && count(array_filter($this->getPlayerTokens($playerId), fn($token) => $token->type != 2)) < $negativeTokens) {
+            return false;
+        }
+
+        if (count(array_filter($effect->conditions, fn($condition) => $condition > 200)) == 2) { // number of colors
+            $colorConditions = array_values(array_filter($effect->conditions, fn($condition) => $condition > 200));
+            $colors = $this->getDiceDifferentColors($dice);
+
+            $min = $colorConditions[0] - 200;
+            $max = $colorConditions[1] - 200;
+            
+            return $colors >= $min && $colors <= $max ? 1 : 0;
+        }
+
         $diceValues = array_map(fn($die) => $die->value, $dice);
         // we remove forbidden signs, as they have been checked before
-        $effectConditions = array_values(array_filter($effect->conditions, fn ($condition) => $condition >= 0));
+        $effectConditions = array_values(array_filter($effect->conditions, fn($condition) => $condition >= 0));
         if (count($effectConditions) === 0) {
             return 1;
         }
@@ -708,10 +1005,15 @@ trait UtilTrait {
         $dice = $this->getDiceByLocation('player', $playerId, $used);
         $blackDie = $this->array_find($dice, fn($die) => $die->color == 8);
         if ($blackDie != null) { // got black Die
-            return array_values(array_filter($dice, fn($die) => $die->value != $blackDie->value));
-        } else {
-            return $dice;
+            $dice = array_values(array_filter($dice, fn($die) => $die->value != $blackDie->value));
         }
+
+        $disabledSymbols = $this->getDisabledSymbol($playerId);
+        if (count($disabledSymbols) > 0) {
+            $dice = array_values(array_filter($dice, fn($die) => !in_array($die->value, $disabledSymbols)));
+        }
+
+        return $dice;
     }
 
     private function mustSelectDiscardDie(int $playerId, object $companion) {
@@ -734,7 +1036,7 @@ trait UtilTrait {
 
         $adventurer = $this->getAdventurersFromDb($this->adventurers->getCardsInLocation('player', $playerId))[0];
         if ($adventurer->effect != null) {
-            $count = $this->isTriggeredEffectsForCard($dice, $adventurer->effect);
+            $count = $this->isTriggeredEffectsForCard($playerId, $dice, $adventurer->effect);
             for ($i=0; $i<$count; $i++) {
                 $effectsCodes[] = [0, $adventurer->id, null];
             }
@@ -743,17 +1045,22 @@ trait UtilTrait {
         $companions = $this->getCompanionsFromDb($this->companions->getCardsInLocation('player'.$playerId, null, 'location_arg'));
         foreach($companions as $companion) {
             if ($companion->effect != null) {
-                $count = $this->isTriggeredEffectsForCard($dice, $companion->effect);
+                $count = $this->isTriggeredEffectsForCard($playerId, $dice, $companion->effect);
                 $discardDieSelection = $this->mustSelectDiscardDie($playerId, $companion);
+                $exchangeToken = $this->array_find($companion->effect->effects, fn($effect) => $effect > 60 && $effect < 70);
+                $exchangeTokenCount = $exchangeToken !== null ? $exchangeToken - 60 : 0;
+                $removeToken = count(array_filter($companion->effect->conditions, fn($effect) => $effect < -50 && $effect > -60)) > 0;
+
                 for ($i=0; $i<$count; $i++) {
-                    $effectsCodes[] = [1, $companion->id, $discardDieSelection];
+                    $effectsCodes[] = [1, $companion->id, $discardDieSelection ?? ($exchangeToken ? 'exchangeToken-'.$exchangeTokenCount : ($removeToken ? 'removeToken' : null))];
+                    //$effectsCodes[] = [1, $companion->id, $discardDieSelection ? 'discard' : ($exchangeToken ? 'exchangeToken' : ($removeToken ? 'removeToken' : null))];
                 }
             }
         }
 
         $spells = $this->getSpellsFromDb($this->spells->getCardsInLocation('player', $playerId));
         foreach($spells as $spell) {
-            if ($spell->visible && $this->isTriggeredEffectsForCard($dice, $spell->effect)) {
+            if ($spell->visible && $this->isTriggeredEffectsForCard($playerId, $dice, $spell->effect)) {
                 $effectsCodes[] = [2, $spell->id, null];
             }
         }
@@ -797,7 +1104,7 @@ trait UtilTrait {
     // 2 spell
     // 3 dice
     // 4 route
-    function applyEffect(int $playerId, int $effect, int $cardType, /*object|null*/ $card, /*int*/ $dieId = 0) {
+    function applyEffect(int $playerId, int $effect, int $cardType, /*object|null*/ $card = null, /*int*/ $dieId = 0, /*int*/ $tokenId = 0) {
 
         $args = [];
         switch ($cardType) {
@@ -820,12 +1127,15 @@ trait UtilTrait {
             case 4:
                 $effectOrigin = _('route');
                 break;
+            case 5:
+                $effectOrigin = _('token');
+                break;
         }
         $args['effectOrigin'] = $effectOrigin;
 
-        if ($effect > 100) {
+        if ($effect > 100 && $effect < 200) {
             $this->incPlayerScore($playerId, $effect - 100, clienttranslate('${player_name} ${gainsloses} ${abspoints} burst of light with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('gains'), 'i18n' => ['gainsloses']]);
-        } else if ($effect < -100) {
+        } else if ($effect < -100 && $effect > -200) {
             $this->decPlayerScore($playerId, -($effect + 100), clienttranslate('${player_name} ${gainsloses} ${abspoints} burst of light with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
         }
 
@@ -837,10 +1147,24 @@ trait UtilTrait {
 
         else if ($effect > 10 && $effect < 20) {
             $this->addPlayerFireflies($playerId, $effect - 10, clienttranslate('${player_name} gains ${fireflies} fireflies with ${effectOrigin} effect'), $args);
+        } else if ($effect < -10 && $effect > -20) {
+            $this->removePlayerFireflies($playerId, -($effect + 10), clienttranslate('${player_name} ${gainsloses} ${absfireflies} fireflies with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
         }
 
-        else if ($effect === 30) {
-            $this->addPlayerRerolls($playerId, 1, clienttranslate('${player_name} gains ${rerolls} rerolls with ${effectOrigin} effect'), $args);
+        else if ($effect > 40 && $effect < 50) {
+            $this->addPlayerRerolls($playerId, $effect - 40, clienttranslate('${player_name} ${gainsloses} ${absrerolls} rerolls with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('gains'), 'i18n' => ['gainsloses']]);
+        } else if ($effect < -40 && $effect > -50) {
+            $this->removePlayerRerolls($playerId, -($effect + 40), clienttranslate('${player_name} ${gainsloses} ${absrerolls} rerolls with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
+        }
+
+        if ($effect > 50 && $effect < 70) {
+            $this->addPlayerTokens($playerId, $effect - ($effect >= 60 ? 60 : 50), clienttranslate('${player_name} ${gainsloses} ${abstokens} butterfly token(s) with ${effectOrigin} effect'), $args + ['gainsloses' => clienttranslate('gains'), 'i18n' => ['gainsloses']]);
+        } else if ($effect < -50 && $effect > -60) {
+            $token = $this->getTokenFromDb($this->tokens->getCard($tokenId));
+            if ($token->type == 2) {
+                throw new BgaUserException("You cannot remove this token, it has already been used.");
+            }
+            $this->removePlayerToken($playerId, $tokenId, clienttranslate('${player_name} ${gainsloses} ${abstokens} butterfly token(s) with ${effectOrigin} effect'), $args + ['abstokens' => -($effect + 50), 'gainsloses' => clienttranslate('loses'), 'i18n' => ['gainsloses']]);
         }
 
         else if ($effect === 33) { // skull
@@ -858,7 +1182,7 @@ trait UtilTrait {
         }
     }
 
-    function applyCardEffect(int $playerId, int $cardType, int $id, $dieId = 0) {
+    function applyCardEffect(int $playerId, int $cardType, int $id, $dieId = 0, $tokenId = 0) {
 
         $card = null;
         $cardEffect = null;
@@ -936,7 +1260,13 @@ trait UtilTrait {
                     $this->spells->moveCard($spell->id, 'discard');
                 }
             } else {
-                $this->applyEffect($playerId, $effect, $cardType, $card, $dieId);
+                $this->applyEffect($playerId, $effect, $cardType, $card, $dieId, $tokenId);
+            }
+        }
+
+        foreach($cardEffect->conditions as $effect) {
+            if ($effect <= -10) {
+                $this->applyEffect($playerId, $effect, $cardType, $card, $dieId, $tokenId);
             }
         }
 
@@ -1058,6 +1388,155 @@ trait UtilTrait {
             $this->gamestate->nextState('chooseTomDice');
         } else {
             $this->gamestate->nextState('recruit');
+        }
+    }
+
+    public function spotHasUriomDice(int $spot) {
+        $spotDice = $this->getDiceByLocation('meeting', $spot);
+
+        return $this->array_some($spotDice, fn($die) => $die->color == 11 && $die->small);
+    }
+
+    public function getPlayerWithUriom() {
+        return intval($this->getUniqueValueFromDB("SELECT card_location_arg FROM adventurer where `card_location` = 'player' AND `card_type` = 11"));
+    }
+
+    public function uriomHasRecruited(int $playerId) {
+        $playerWithUriom = $this->getPlayerWithUriom();
+        // ignore this check if no Uriom, or if the active player is the one with Uriom
+        if ($playerWithUriom == 0 || $playerWithUriom == $playerId) {
+            return true;
+        }
+        return intval($this->getUniqueValueFromDB("SELECT player_recruit_day FROM player where player_id = $playerWithUriom")) == intval($this->getGameStateValue(DAY));
+    }
+
+    public function getExpansionCompanions(int $playerCount) {
+        $addedCompanions = [];
+        $removedCompanions = [];
+
+        $activatedModules = [];
+        $removedModules = [];
+
+        if ($playerCount === 1) {
+            foreach ([1, 3] as $moduleNumber) {
+                if (intval($this->getGameStateValue(OPTION_EXPANSION + $moduleNumber)) >= 2) {
+                    $this->setGameStateValue(OPTION_EXPANSION + $moduleNumber, 1);
+
+                    $this->notifyAllPlayers('log', clienttranslate('The expansion module ${number} have been disabled (not available in solo mode)'), [
+                        'number' => $moduleNumber,
+                    ]);
+                }
+            }
+        }
+
+        foreach ([1, 2, 3] as $moduleNumber) {
+            if (intval($this->getGameStateValue(OPTION_EXPANSION + $moduleNumber)) >= 2) {
+                $activatedModules[] = $moduleNumber;
+            }
+        }
+
+        $minSets = 0;
+        if ($playerCount < 5) {
+            $removedModules = $activatedModules;
+        } else {
+            $minSets = $playerCount - 3;
+            while (count($activatedModules) < $minSets) {
+                $unactivatedModule = array_values(array_filter([1, 2, 3], fn($m) => !in_array($m, $activatedModules)));
+                $moduleNumber = $unactivatedModule[bga_rand(0, count($unactivatedModule) -1)];
+                $activatedModules[] = $moduleNumber;
+                $this->setGameStateValue(OPTION_EXPANSION + $moduleNumber, 2);
+
+                $this->notifyAllPlayers('log', clienttranslate('Expansion cards from expansion module ${number} have been added to the deck'), [
+                    'number' => $moduleNumber,
+                ]);
+            }
+
+            if ($playerCount == 5 && count($activatedModules) == 3) {
+                $moduleNumber = bga_rand(1, 3);
+                $removedModules[] = $moduleNumber;
+                
+                $this->notifyAllPlayers('log', clienttranslate('Replaced cards from expansion module ${number} are removed from the deck'), [
+                    'number' => $moduleNumber,
+                ]);
+            }
+        }
+
+        foreach ($activatedModules as $moduleNumber) {
+            $addedCompanions = $addedCompanions + $this->COMPANIONS_EXPANSION1_SETS[$moduleNumber]['adds'];
+        }
+
+        foreach ($removedModules as $moduleNumber) {
+            $removedCompanions = array_merge($removedCompanions, $this->COMPANIONS_EXPANSION1_SETS[$moduleNumber]['removes']);
+        }
+
+        return [$addedCompanions, $removedCompanions];
+    }
+
+    function getPlayerTokens(int $playerId, bool $colorOnly = false) {
+        $tokens = $this->getTokensFromDb($this->tokens->getCardsInLocation('player', $playerId));
+        if ($colorOnly) {
+            $tokens = array_values(array_filter($tokens, fn($token) => $token->type == 1));
+        }
+        return $tokens;
+    }
+
+    function addPlayerTokens(int $playerId, int $inc, $message = '', $params = []) {
+        $available = intval($this->tokens->countCardInLocation('bag'));
+
+        if ($available > 0) {
+            $tokens = $this->getTokensFromDb($this->tokens->pickCardsForLocation(min($available, $inc), 'bag', 'player', $playerId));
+
+            if (intval($this->tokens->countCardInLocation('bag')) == 0) {
+                $this->setStat(1, 'tokenBagEmptied');
+            }
+
+            $this->notifyAllPlayers('getTokens', $message, $params + [
+                'playerId' => $playerId,
+                'player_name' => $this->getPlayerName($playerId),
+                'tokens' => $tokens,
+                'abstokens' => count($tokens),
+            ]);
+
+            foreach ($tokens as $token) {
+                if ($token->type == 2) {
+                    $effect = $token->typeArg;
+                    $this->applyEffect($playerId, $effect, 5);
+                }
+            }
+        }
+
+        if ($available < $inc) {
+            $this->incPlayerScore($playerId, $inc - $available, clienttranslate('${player_name} gains ${abspoints} burst of light instead of ${abspoints} token(s) because the bag is empty'));
+        }
+    }
+
+    function removePlayerToken(int $playerId, int $tokenId, $message = '', $params = []) {
+        $this->tokens->moveCard($tokenId, 'front');
+
+        $this->notifyAllPlayers('removeToken', $message, $params + [
+            'playerId' => $playerId,
+            'player_name' => $this->getPlayerName($playerId),
+            'tokenId' => $tokenId,
+        ]);
+    }
+
+    function getSelectedCompanion(int $playerId) {
+        return intval($this->getUniqueValueFromDB("SELECT player_selected_companion FROM player where `player_id` = $playerId"));
+    }
+
+    function setSelectedCompanion(int $playerId, /*int|null*/ $companionId) {
+        $this->DbQuery("UPDATE player SET player_selected_companion = ".($companionId !== null ? $companionId : 'NULL')." WHERE player_id = $playerId");
+    }
+
+    function getDisabledSymbol(int $playerId) {
+        return json_decode($this->getUniqueValueFromDB("SELECT player_disabled_symbols FROM player where `player_id` = $playerId") ?? '[]');
+    }
+
+    function addDisabledSymbol(int $playerId, int $symbol) {
+        $symbols = $this->getDisabledSymbol($playerId);
+        if (!in_array($symbol, $symbols)) {
+            $symbols[] = $symbol;
+            $this->DbQuery("UPDATE player SET player_disabled_symbols = '".json_encode($symbols)."' WHERE player_id = $playerId");
         }
     }
 }

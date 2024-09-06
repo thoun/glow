@@ -42,3 +42,31 @@
   background: url('img/gear.png');
 }
 
+.meeting-track-icon {
+  display: inline-block;
+  width: 84px;
+  height: 32px;
+  background-size: contain;
+  background-repeat: no-repeat;
+
+  &[data-players="5"] {
+    background-image: url('img/meeting-track-little-board-5p.png'); 
+  }
+  &[data-players="6"] {
+    background-image: url('img/meeting-track-little-board-6p.png'); 
+  }
+}
+
+.tokens-stock {
+  border-radius: 8px;
+  margin: 4px;
+
+  &.selectable {
+    box-shadow: 0 0 4px 4px red;
+  }
+
+  .module-token {
+    cursor: pointer;
+  }
+}
+

@@ -55,6 +55,11 @@ $size: 0.25rem;
         z-index: 1;
         transform: translateZ(20px);
     }
+
+    &.selected-pink {
+      outline: 5px dashed #eca3c8;
+      pointer-events: none;
+    }
 }
 
 @keyframes selected-dice-animation {
@@ -100,10 +105,13 @@ $size: 0.25rem;
 
     box-sizing: border-box;
 
-    @for $i from 1 through 8 {
+    @for $i from 1 through 10 {
         &.color#{$i} {
             background-image: url('img/die#{$i}.png');
         }
+    }
+    &.color80 {
+      background-image: url('img/die80.png');
     }
 
     
@@ -115,6 +123,9 @@ $size: 0.25rem;
     &.color6 { border-color: #8a298a; }
     &.color7 { border-color: #ffd503; }
     &.color8 { border-color: #000000; }
+    &.color9 { border-color: #a7ce39; }
+    &.color10 { border-color: #eca3c8; }
+    &.color80 { border-color: #888888; }
 
     background-size: auto 100%;
 
