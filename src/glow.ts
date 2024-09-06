@@ -609,7 +609,7 @@ class Glow implements GlowGame {
             _("Number of bursts of light indicated on the islands on which players have placed their boats."));
         (this as any).addTooltipHtmlToClass('fireflies-score', _("Total number of fireflies in player possession, represented on companions and tokens. If there is many or more fireflies than companions, player score an additional 10 bursts of light."));
         if (this.gamedatas.tokensActivated) {
-            (this as any).addTooltipHtmlToClass('tokens-score', _("Pour chaque série de couleur, le joueur gagne 1/3/6/10/15/21PV s’il possède 1/2/3/4/5/6 jetons identiques et un bonus de +10PV s’il en possède 1 de chaque couleur")); // TODO
+            (this as any).addTooltipHtmlToClass('tokens-score', _("For each color, the player earns 1/3/6/10/15/21 shards of light if he got 1/2/3/4/5/6 tokens of the same color and a bonus of 10 shards of light if the player got at least 1 butterfly token in each of the 6 colors."));
         }
         (this as any).addTooltipHtmlToClass('footprints-score', _("1 burst of light per footprint in player possession."));
     }
