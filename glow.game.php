@@ -408,5 +408,13 @@ class Glow extends Table {
             $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_board` int(10)");
             $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` MODIFY  `player_score_after_end` int(10)");
         }
+        
+        if ($from_version <= 2409071101) {
+            $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_tokens` int(10) NOT NULL DEFAULT '0'");
+            $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_small_board` TINYINT UNSIGNED NOT NULL DEFAULT '0'");
+            $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_selected_companion` int(10) NULL");
+            $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_selected_destination` json");
+            $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player`  ADD `player_disabled_symbols` json");
+        }
     }    
 }
