@@ -410,11 +410,14 @@ class Glow extends Table {
         }
         
         if ($from_version <= 2409071101) {
-            $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_tokens` int(10) NOT NULL DEFAULT '0'");
-            $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_small_board` TINYINT UNSIGNED NOT NULL DEFAULT '0'");
-            $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_selected_companion` int(10) NULL");
-            $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_selected_destination` json");
-            $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player`  ADD `player_disabled_symbols` json");
+            $result = self::getUniqueValueFromDB("SHOW COLUMNS FROM `player` LIKE 'player_score_tokens'");
+            if (is_null($result)) {
+                $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_score_tokens` int(10) NOT NULL DEFAULT '0'");
+                $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_small_board` TINYINT UNSIGNED NOT NULL DEFAULT '0'");
+                $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_selected_companion` int(10) NULL");
+                $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player` ADD `player_selected_destination` json");
+                $this->applyDbUpgradeToAllDB("ALTER TABLE `DBPREFIX_player`  ADD `player_disabled_symbols` json");
+            }
         }
     }    
 }
