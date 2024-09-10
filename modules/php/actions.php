@@ -775,7 +775,7 @@ trait ActionTrait {
         } else if ($currentState == ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS) {
             $this->checkResolveCardEnd($playerId);
         } else if ($currentState == ST_MULTIPLAYER_PRIVATE_MOVE) {
-            $this->checkMoveEnd($playerId);
+            $this->checkMoveEnd($playerId, false);
         }
     }
 
@@ -836,13 +836,15 @@ trait ActionTrait {
         $this->incStat(1, 'moves');
         $this->incStat(1, 'moves', $playerId);
 
-        $this->checkMoveEnd($playerId);
+        $this->checkMoveEnd($playerId, true);
     }
 
-    function checkMoveEnd(int $playerId) {    
+    function checkMoveEnd(int $playerId, bool $fromMove) {    
         $args = $this->argMoveForPlayer($playerId);
         $side = $this->getSide();
         if ($side != 2 && (count($args->possibleRoutes) > 0 || $args->canSettle || $args->killTokenId > 0 || $args->disableTokenId > 0)) {
+            $this->gamestate->nextPrivateState($playerId, 'move');
+        } else if (!$fromMove) {
             $this->gamestate->nextPrivateState($playerId, 'move');
         } else {
             $this->applyEndTurn($playerId);

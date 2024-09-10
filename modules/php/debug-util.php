@@ -107,7 +107,7 @@ trait DebugUtilTrait {
   
       // Change for your game
       // We are setting the current state to match the start of a player's turn if it's already game over
-      $sql = ['UPDATE global SET global_value=2 WHERE global_id=1 AND global_value=99'];
+      $sql = ['UPDATE global SET global_value=20 WHERE global_id=1 AND global_value=99'];
       foreach ($players as $index => $pId) {
         $studioPlayer = $studioPlayers[$index];
   
