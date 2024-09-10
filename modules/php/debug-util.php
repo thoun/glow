@@ -90,6 +90,11 @@ trait DebugUtilTrait {
         $this->setGameStateValue(DAY, 8);
     }
 
+    function debug_reactivateCurrentPlayer() {
+        $this->gamestate->setPlayersMultiactive([$this->getCurrentPlayerId()], 'move');
+        $this->gamestate->jumpToState(ST_MULTIPLAYER_PRIVATE_MOVE);
+    }
+
     function debug($debugData) {
         if ($this->getBgaEnvironment() != 'studio') { 
             return;
@@ -98,7 +103,6 @@ trait DebugUtilTrait {
     
     public function loadBugReportSQL(int $reportId, array $studioPlayers)
     {
-      $studioPlayer = self::getCurrentPlayerId();
       $players = self::getObjectListFromDb('SELECT player_id FROM player', true);
   
       // Change for your game
@@ -125,8 +129,6 @@ trait DebugUtilTrait {
       foreach ($sql as $q) {
         self::DbQuery($q);
       }
-  
-      self::reloadPlayersBasicInfos();
     }
 
 }

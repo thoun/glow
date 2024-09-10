@@ -865,7 +865,7 @@ trait ActionTrait {
             throw new BgaUserException("Impossible to move here");
         }
 
-        if (in_array(37, $route->effects) && $this->canDiscardCompanionSpell($playerId)) {
+        if ((in_array(37, $route->effects) || in_array(37, $route->costForPlayer)) && $this->canDiscardCompanionSpell($playerId)) {
             $this->DbQuery("UPDATE player SET player_selected_destination = '".json_encode([$from !== null ? intval($from) : null, $destination])."' WHERE player_id = $playerId");
             $this->gamestate->nextPrivateState($playerId, 'discard');
             return;
