@@ -2337,6 +2337,9 @@ function getEffectExplanation(effect) {
     else if (effect > 10 && effect < 20) {
         return dojo.string.substitute(_("Earn ${fireflies} firefly(ies)."), { fireflies: "<strong>" + (effect - 10) + "</strong>" });
     }
+    else if (effect < -10 && effect > -20) {
+        return dojo.string.substitute(_("Lose ${fireflies} firefly(ies)."), { fireflies: "<strong>" + -(effect + 10) + "</strong>" });
+    }
     else if (effect > 40 && effect < 50) {
         return dojo.string.substitute(_("Earn ${rerolls} reroll token(s)."), { rerolls: "<strong>" + (effect - 40) + "</strong>" });
     }

@@ -160,6 +160,8 @@ function getEffectExplanation(effect: number) {
 
     else if (effect > 10 && effect < 20) {
         return dojo.string.substitute(_("Earn ${fireflies} firefly(ies)."), { fireflies: `<strong>${effect - 10}</strong>` });
+    } else if (effect < -10 && effect >- 20) {
+        return dojo.string.substitute(_("Lose ${fireflies} firefly(ies)."), { fireflies: `<strong>${-(effect + 10)}</strong>` });
     }
 
     else if (effect > 40 && effect < 50) {
