@@ -72,7 +72,6 @@ $game_options = [
             2 => [
                 'name' => totranslate('Enabled'),
                 'tmdisplay' => totranslate('Dawn expansion'),
-                'alpha' => true,
             ],
         ],
         'default' => 2,
@@ -97,7 +96,6 @@ $game_options = [
             2 => [
                 'name' => totranslate('Enabled'),
                 'tmdisplay' => totranslate('Dawn expansion set : The Elemental'),
-                'alpha' => true,
             ],
         ],
         'default' => 1,
@@ -123,7 +121,6 @@ $game_options = [
             2 => [
                 'name' => totranslate('Enabled'),
                 'tmdisplay' => totranslate('Dawn expansion set : The Anibloom'),
-                'alpha' => true,
             ],
         ],
         'default' => 1,
@@ -145,7 +142,6 @@ $game_options = [
             2 => [
                 'name' => totranslate('Enabled'),
                 'tmdisplay' => totranslate('Dawn expansion set : The Draconic'),
-                'alpha' => true,
             ],
         ],
         'default' => 1,
