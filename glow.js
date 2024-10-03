@@ -2358,6 +2358,9 @@ function getEffectExplanation(effect) {
     else if (effect === 33) {
         return _("The companion is immediately placed in the cemetery.");
     }
+    else if (effect === 37) {
+        return _("Send one of your companions to the cemetery, without applying any effect, or cancel the spell if you possess one.");
+    }
 }
 function getEffectTooltip(effect) {
     if (!effect) {
