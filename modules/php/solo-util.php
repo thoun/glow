@@ -67,6 +67,7 @@ trait SoloUtilTrait {
             'playerId' => 0,
             'player_name' => 'Tom',
             'points' => $incScore,
+            'abspoints' => $incScore,
             'newScore' => $tom->score,
         ]);
     }
@@ -110,7 +111,8 @@ trait SoloUtilTrait {
     function rollAndPlaceTomDice(array $dice) {
         // roll dice
         foreach($dice as &$idie) {
-            $idie->roll();
+            //$idie->roll();
+            $idie->setFace(6);
             if ($idie->value > 5) { // we apply black die "-2"
                 $this->applyEffect(0, $idie->value, 3, null);
                 $this->moveDice([$idie], 'meeting', 0);

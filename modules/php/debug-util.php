@@ -100,35 +100,5 @@ trait DebugUtilTrait {
             return;
         }die('debug data : '.json_encode($debugData));
     }
-    
-    public function loadBugReportSQL(int $reportId, array $studioPlayers)
-    {
-      $players = self::getObjectListFromDb('SELECT player_id FROM player', true);
-  
-      // Change for your game
-      // We are setting the current state to match the start of a player's turn if it's already game over
-      $sql = ['UPDATE global SET global_value=20 WHERE global_id=1 AND global_value=99'];
-      foreach ($players as $index => $pId) {
-        $studioPlayer = $studioPlayers[$index];
-  
-        // All games can keep this SQL
-        $sql[] = "UPDATE player SET player_id=$studioPlayer WHERE player_id=$pId";
-        $sql[] = "UPDATE global SET global_value=$studioPlayer WHERE global_value=$pId";
-        $sql[] = "UPDATE stats SET stats_player_id=$studioPlayer WHERE stats_player_id=$pId";
-  
-        // Add game-specific SQL update the tables for your game
-        $sql[] = "UPDATE dice SET location_arg=$studioPlayer WHERE location_arg = $pId";
-        $sql[] = "UPDATE meeple SET player_id=$studioPlayer WHERE player_id = $pId";
-        $sql[] = "UPDATE adventurer SET card_location_arg=$studioPlayer WHERE card_location_arg = $pId";
-        $sql[] = "UPDATE adventurer SET card_location_arg=$studioPlayer WHERE card_location_arg = $pId";
-        $sql[] = "UPDATE companion SET card_location='player$studioPlayer' WHERE card_location='player$pId'";
-        $sql[] = "UPDATE spells SET card_location_arg=$studioPlayer WHERE card_location_arg = $pId";
-        $sql[] = "UPDATE token SET card_location_arg=$studioPlayer WHERE card_location_arg = $pId";
-      }
-  
-      foreach ($sql as $q) {
-        self::DbQuery($q);
-      }
-    }
 
 }
