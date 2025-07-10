@@ -2415,7 +2415,7 @@ function setupAdventurerCard(game, cardDiv, type) {
     game.addTooltipHtml(cardDiv.id, "<h3>" + adventurer.name + "</h3>" + (tooltip || '') + (tooltip && adventurerTooltip ? '<hr>' : '') + (adventurerTooltip || ''));
     var adventurerPoints = ADVENTURERS_POINTS[type];
     if (adventurerPoints) {
-        dojo.place("<div class=\"score-contrast\">" + adventurerPoints + "</div>", cardDiv);
+        cardDiv.insertAdjacentHTML('beforeend', "<div class=\"score-contrast\">" + adventurerPoints + "</div>");
     }
 }
 function getCompanionTooltip(type) {
@@ -3327,25 +3327,43 @@ var ZOOM_LEVELS_MARGIN = [-300, -166, -100, -60, -33, -14, 0, 20, 33.34];
 var LOCAL_STORAGE_ZOOM_KEY = 'Glow-zoom';
 var isDebug = window.location.host == 'studio.boardgamearena.com';
 var log = isDebug ? console.log.bind(window.console) : function () { };
-var Glow = /** @class */ (function () {
+// @ts-ignore
+GameGui = (function () {
+    function GameGui() { }
+    return GameGui;
+})();
+var Glow = /** @class */ (function (_super) {
+    __extends(Glow, _super);
     function Glow() {
-        this.rerollCounters = [];
-        this.footprintCounters = [];
-        this.fireflyCounters = [];
-        this.fireflyTokenCounters = [];
-        this.companionCounters = [];
-        this.selectedDice = [];
-        this.selectedDieFace = null;
-        this.diceSelectionActive = false;
-        this.playersTables = [];
-        this.playersTokens = [];
+        var _this = _super.call(this) || this;
+        _this.rerollCounters = [];
+        _this.footprintCounters = [];
+        _this.fireflyCounters = [];
+        _this.fireflyTokenCounters = [];
+        _this.companionCounters = [];
+        _this.selectedDice = [];
+        _this.selectedDieFace = null;
+        _this.diceSelectionActive = false;
+        _this.playersTables = [];
+        _this.playersTokens = [];
         //private zoomManager: ZoomManager;
-        this.zoom = 1;
-        this.DICE_FACES_TOOLTIP = [];
+        _this.zoom = 1;
+        _this.DICE_FACES_TOOLTIP = [];
+        _this.onGameUserPreferenceChanged = function (prefId, prefValue) {
+            switch (prefId) {
+                case 202:
+                    document.getElementById('full-table').dataset.highContrastPoints = '' + prefValue;
+                    break;
+                case 204:
+                    document.getElementById('full-table').insertAdjacentElement('afterbegin', document.getElementById(prefValue == 2 ? 'currentplayertable' : 'full-board-wrapper'));
+                    break;
+            }
+        };
         var zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
-            this.zoom = Number(zoomStr);
+            _this.zoom = Number(zoomStr);
         }
+        return _this;
     }
     /*
         setup:
@@ -3411,7 +3429,6 @@ var Glow = /** @class */ (function () {
         }
         this.addHelp();
         this.setupNotifications();
-        this.setupPreferences();
         document.getElementById('zoom-out').addEventListener('click', function () { return _this.zoomOut(); });
         document.getElementById('zoom-in').addEventListener('click', function () { return _this.zoomIn(); });
         if (this.zoom !== 1) {
@@ -3518,7 +3535,7 @@ var Glow = /** @class */ (function () {
         if (!document.getElementById('adventurers-stock')) {
             dojo.place("<div id=\"adventurers-stock\"></div>", 'currentplayertable', 'before');
             this.adventurersStock = new ebg.stock();
-            this.adventurersStock.create(this, $('adventurers-stock'), CARD_WIDTH, CARD_HEIGHT);
+            this.adventurersStock.create(this, document.getElementById('adventurers-stock'), CARD_WIDTH, CARD_HEIGHT);
             this.adventurersStock.setSelectionMode(0);
             this.adventurersStock.setSelectionAppearance('class');
             this.adventurersStock.selectionClass = 'nothing';
@@ -3783,7 +3800,7 @@ var Glow = /** @class */ (function () {
                 html += "\n                    <th id=\"th-tokens-score\" class=\"tokens-score\">" + _("Tokens score") + "</th>\n                ";
             }
             html += "\n                <th id=\"th-after-end-score\" class=\"after-end-score\">" + _("Final score") + "</th>\n            ";
-            dojo.place(html, headers);
+            headers.insertAdjacentHTML('beforeend', html);
         }
         var players = Object.values(this.gamedatas.players);
         if (players.length == 1) {
@@ -3907,7 +3924,7 @@ var Glow = /** @class */ (function () {
         document.getElementById("tokens-" + this.getPlayerId()).classList.remove('selectable');
     };
     Glow.prototype.onLeavingResolveCards = function () {
-        Array.from(document.getElementsByClassName('selectable')).forEach(function (node) { return dojo.removeClass(node, 'selectable'); });
+        Array.from(document.getElementsByClassName('selectable')).forEach(function (node) { return node.classList.remove('selectable'); });
         __spreadArray(__spreadArray(__spreadArray([], this.playersTables.map(function (pt) { return pt.adventurerStock; })), this.playersTables.map(function (pt) { return pt.companionsStock; })), this.playersTables.map(function (pt) { return pt.spellsStock; })).forEach(function (stock) { return stock.setSelectionMode(0); });
     };
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
@@ -4089,34 +4106,6 @@ var Glow = /** @class */ (function () {
         }
         this.setZoom(newZoom);
     };
-    Glow.prototype.setupPreferences = function () {
-        var _this = this;
-        // Extract the ID and value from the UI control
-        var onchange = function (e) {
-            var match = e.target.id.match(/^preference_control_(\d+)$/);
-            if (!match) {
-                return;
-            }
-            var prefId = +match[1];
-            var prefValue = +e.target.value;
-            _this.prefs[prefId].value = prefValue;
-            _this.onPreferenceChange(prefId, prefValue);
-        };
-        // Call onPreferenceChange() when any value changes
-        dojo.query(".preference_control").connect("onchange", onchange);
-        // Call onPreferenceChange() now
-        dojo.forEach(dojo.query("#ingame_menu_content .preference_control"), function (el) { return onchange({ target: el }); });
-    };
-    Glow.prototype.onPreferenceChange = function (prefId, prefValue) {
-        switch (prefId) {
-            case 202:
-                document.getElementById('full-table').dataset.highContrastPoints = '' + prefValue;
-                break;
-            case 204:
-                document.getElementById('full-table').insertAdjacentElement('afterbegin', document.getElementById(prefValue == 2 ? 'currentplayertable' : 'full-board-wrapper'));
-                break;
-        }
-    };
     Glow.prototype.isSolo = function () {
         return Object.keys(this.gamedatas.players).length == 1;
     };
@@ -4176,7 +4165,7 @@ var Glow = /** @class */ (function () {
         return this.gamedatas.side;
     };
     Glow.prototype.isColorBlindMode = function () {
-        return this.prefs[201].value == 1;
+        return this.getGameUserPreference(201) == 1;
     };
     Glow.prototype.isExpansion = function () {
         return this.gamedatas.expansion;
@@ -4200,16 +4189,15 @@ var Glow = /** @class */ (function () {
         var players = Object.values(gamedatas.players);
         var solo = players.length === 1;
         if (solo) {
-            dojo.place("\n            <div id=\"overall_player_board_0\" class=\"player-board current-player-board\">\t\t\t\t\t\n                <div class=\"player_board_inner\" id=\"player_board_inner_982fff\">\n                    \n                    <div class=\"emblemwrap\" id=\"avatar_active_wrap_0\">\n                        <div src=\"img/gear.png\" alt=\"\" class=\"avatar avatar_active\" id=\"avatar_active_0\"></div>\n                    </div>\n                                               \n                    <div class=\"player-name\" id=\"player_name_0\" style=\"color: #" + gamedatas.tom.color + "\">\n                        Tom\n                    </div>\n                    <div id=\"player_board_0\" class=\"player_board_content\">\n                        <div class=\"player_score\">\n                            <span id=\"player_score_0\" class=\"player_score_value\">10</span> <i class=\"fa fa-star\" id=\"icon_point_0\"></i>           \n                        </div>\n                    </div>\n                </div>\n            </div>", "overall_player_board_" + players[0].id, 'after');
-            var tomScoreCounter = new ebg.counter();
-            tomScoreCounter.create("player_score_0");
-            tomScoreCounter.setValue(gamedatas.tom.score);
-            this.scoreCtrl[0] = tomScoreCounter;
+            this.addAutomataPlayerPanel(0, 'Tom', {
+                iconClass: 'tom-avatar'
+            });
+            this.scoreCtrl[0].setValue(Number(gamedatas.tom.score));
         }
         (solo ? __spreadArray(__spreadArray([], players), [gamedatas.tom]) : players).forEach(function (player) {
             var playerId = Number(player.id);
             // counters
-            dojo.place("\n            <div class=\"counters\">\n                <div id=\"reroll-counter-wrapper-" + player.id + "\" class=\"reroll-counter\">\n                    <div class=\"icon reroll\"></div> \n                    <span id=\"reroll-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"footprint-counter-wrapper-" + player.id + "\" class=\"footprint-counter\">\n                    <div class=\"icon footprint\"></div> \n                    <span id=\"footprint-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"firefly-counter-wrapper-" + player.id + "\" class=\"firefly-counter\">\n                </div>\n            </div>\n            <div id=\"tokens-" + player.id + "\" class=\"tokens-stock\"></div>\n            ", "player_board_" + player.id);
+            _this.getPlayerPanelElement(playerId).innerHTML = "\n            <div class=\"counters\">\n                <div id=\"reroll-counter-wrapper-" + player.id + "\" class=\"reroll-counter\">\n                    <div class=\"icon reroll\"></div> \n                    <span id=\"reroll-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"footprint-counter-wrapper-" + player.id + "\" class=\"footprint-counter\">\n                    <div class=\"icon footprint\"></div> \n                    <span id=\"footprint-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"firefly-counter-wrapper-" + player.id + "\" class=\"firefly-counter\">\n                </div>\n            </div>\n            <div id=\"tokens-" + player.id + "\" class=\"tokens-stock\"></div>\n            ";
             var rerollCounter = new ebg.counter();
             rerollCounter.create("reroll-counter-" + playerId);
             rerollCounter.setValue(player.rerolls);
@@ -4578,7 +4566,7 @@ var Glow = /** @class */ (function () {
     Glow.prototype.onSelectedDiceChange = function () {
         var _this = this;
         var count = this.selectedDice.length;
-        this.getRollDiceButtons().forEach(function (button) { return dojo.toggleClass(button, 'disabled', count < 1 || count > 2); });
+        this.getRollDiceButtons().forEach(function (button) { return button === null || button === void 0 ? void 0 : button.classList.toggle('disabled', count < 1 || count > 2); });
         if (this.currentDieAction == 'change') {
             console.log(this.selectedDice);
             this.createChangeDieButtons(count === 1 && this.selectedDice[0].color == 80 && this.selectedDice[0].face == 6);
@@ -4596,7 +4584,7 @@ var Glow = /** @class */ (function () {
                         }
                         else {
                             var changeDieButtons = _this.getChangeDieButtons();
-                            changeDieButtons.forEach(function (elem) { return dojo.removeClass(elem, 'disabled'); });
+                            changeDieButtons.forEach(function (elem) { return elem === null || elem === void 0 ? void 0 : elem.classList.remove('disabled'); });
                         }
                         _this.selectedDieFace = i;
                         dojo.removeClass("changeDie" + _this.selectedDieFace + "-button", 'bgabutton_gray');
@@ -4654,7 +4642,7 @@ var Glow = /** @class */ (function () {
     Glow.prototype.setDiceSelectionActive = function (active) {
         this.unselectDice();
         this.diceSelectionActive = active;
-        Array.from(document.getElementsByClassName('die')).forEach(function (node) { return dojo.toggleClass(node, 'selectable', active); });
+        Array.from(document.getElementsByClassName('die')).forEach(function (node) { return node === null || node === void 0 ? void 0 : node.classList.toggle('selectable', active); });
     };
     Glow.prototype.diceChangedOrRolled = function (dice, changed, args, playerId) {
         var _this = this;
@@ -4921,7 +4909,7 @@ var Glow = /** @class */ (function () {
         });
     };
     Glow.prototype.activateToken = function (id) {
-        /*if(!(this as any).checkAction('removeToken')) {
+        /*if(!this.checkAction('removeToken')) {
             return;
         }*/
         this.takeAction('activateToken', {
@@ -5043,8 +5031,7 @@ var Glow = /** @class */ (function () {
         this.helpDialog.show();
     };
     Glow.prototype.startActionTimer = function (buttonId, time) {
-        var _a;
-        if (((_a = this.prefs[203]) === null || _a === void 0 ? void 0 : _a.value) === 2) {
+        if (this.getGameUserPreference(203) == 2) {
             return;
         }
         var button = document.getElementById(buttonId);
@@ -5117,7 +5104,6 @@ var Glow = /** @class */ (function () {
             ['scoreFootprints', SCORE_MS],
             ['scoreTokens', SCORE_MS],
             ['scoreAfterEnd', SCORE_MS],
-            ['loadBug', 1],
         ];
         notifs.forEach(function (notif) {
             dojo.subscribe(notif[0], _this, "notif_" + notif[0]);
@@ -5229,9 +5215,9 @@ var Glow = /** @class */ (function () {
         else {
             this.roundCounter.toValue(day);
         }
-        dojo.place("<div id=\"new-day\"><span>" + _(notif.log).replace('${day}', '' + notif.args.day) + "</span></div>", document.body);
+        document.body.insertAdjacentHTML('beforeend', "<div id=\"new-day\"><span>" + _(notif.log).replace('${day}', '' + notif.args.day) + "</span></div>");
         var div = document.getElementById("new-day");
-        div.addEventListener('animationend', function () { return dojo.destroy(div); });
+        div.addEventListener('animationend', function () { return div === null || div === void 0 ? void 0 : div.remove(); });
         div.classList.add('new-day-animation');
     };
     Glow.prototype.notif_replaceSmallDice = function (notif) {
@@ -5348,48 +5334,6 @@ var Glow = /** @class */ (function () {
         log('notif_scoreAfterEnd', notif.args);
         this.setScore(notif.args.playerId, this.gamedatas.tokensActivated ? 7 : 6, notif.args.points);
     };
-    /**
-    * Load production bug report handler
-    */
-    Glow.prototype.notif_loadBug = function (_a) {
-        var args = _a.args;
-        var that = this;
-        function fetchNextUrl() {
-            var url = args.urls.shift();
-            console.log('Fetching URL', url, '...');
-            // all the calls have to be made with ajaxcall in order to add the csrf token, otherwise you'll get "Invalid session information for this action. Please try reloading the page or logging in again"
-            that.ajaxcall(url, {
-                lock: true,
-            }, that, function (success) {
-                console.log('=> Success ', success);
-                if (args.urls.length > 1) {
-                    fetchNextUrl();
-                }
-                else if (args.urls.length > 0) {
-                    //except the last one, clearing php cache
-                    url = args.urls.shift();
-                    dojo.xhrGet({
-                        url: url,
-                        headers: {
-                            'X-Request-Token': bgaConfig.requestToken,
-                        },
-                        load: function (success) {
-                            console.log('Success for URL', url, success);
-                            console.log('Done, reloading page');
-                            window.location.reload();
-                        },
-                        handleAs: 'text',
-                        error: function (error) { return console.log('Error while loading : ', error); },
-                    });
-                }
-            }, function (error) {
-                if (error)
-                    console.log('=> Error ', error);
-            });
-        }
-        console.log('Notif: load bug', args);
-        fetchNextUrl();
-    };
     Glow.prototype.getColor = function (color) {
         switch (color) {
             case 1: return '#00995c';
@@ -5404,8 +5348,7 @@ var Glow = /** @class */ (function () {
         return null;
     };
     /* This enable to inject translatable styled things to logs or action bar */
-    /* @Override */
-    Glow.prototype.format_string_recursive = function (log, args) {
+    Glow.prototype.bgaFormatText = function (log, args) {
         var _a, _b, _c, _d;
         try {
             if (log && args && !args.processed) {
@@ -5434,10 +5377,10 @@ var Glow = /** @class */ (function () {
         catch (e) {
             console.error(log, args, "Exception thrown", e.stack);
         }
-        return this.inherited(arguments);
+        return { log: log, args: args };
     };
     return Glow;
-}());
+}(GameGui));
 define([
     "dojo", "dojo/_base/declare",
     "ebg/core/gamegui",

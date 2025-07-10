@@ -250,7 +250,7 @@ function setupAdventurerCard(game: Game, cardDiv: HTMLDivElement, type: number) 
 
     const adventurerPoints = ADVENTURERS_POINTS[type];
     if (adventurerPoints) {
-        dojo.place(`<div class="score-contrast">${adventurerPoints}</div>`, cardDiv);
+        cardDiv.insertAdjacentHTML('beforeend', `<div class="score-contrast">${adventurerPoints}</div>`);
     }
 }
 

@@ -8,9 +8,7 @@
       "outFile": "glow.js",
     },
     "files": [
-        "src/framework.d.ts",
-        "src/counter.d.ts",
-        "src/stock.d.ts",
+        "bga-framework.d.ts",
         "node_modules/bga-zoom/src/zoom-manager.ts",
         "node_modules/bga-animations/src/framework.d.ts",
         "node_modules/bga-animations/src/animations.ts",

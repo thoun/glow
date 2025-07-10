@@ -1,11 +1,3 @@
-declare const define;
-declare const ebg;
-declare const $;
-declare const dojo: Dojo;
-declare const _;
-declare const g_gamethemeurl;
-declare const bgaConfig;
-
 declare const board: HTMLDivElement;
 
 const ANIMATION_MS = 500;
@@ -22,8 +14,14 @@ const LOCAL_STORAGE_ZOOM_KEY = 'Glow-zoom';
 const isDebug = window.location.host == 'studio.boardgamearena.com';
 const log = isDebug ? console.log.bind(window.console) : function () { };
 
-class Glow implements GlowGame {
-    private gamedatas: GlowGamedatas;
+// @ts-ignore
+GameGui = (function () { // this hack required so we fake extend GameGui
+  function GameGui() {}
+  return GameGui;
+})();
+
+class Glow extends GameGui<GlowGamedatas> implements GlowGame {
+    public gamedatas: GlowGamedatas;
     private rerollCounters: Counter[] = [];
     private footprintCounters: Counter[] = [];
     private fireflyCounters: Counter[] = [];
@@ -57,7 +55,8 @@ class Glow implements GlowGame {
 
     private DICE_FACES_TOOLTIP: string[] = [];
 
-    constructor() {    
+    constructor() {
+        super();
         const zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
             this.zoom = Number(zoomStr);
@@ -78,20 +77,20 @@ class Glow implements GlowGame {
     */
 
     public setup(gamedatas: GlowGamedatas) {
-        (this as any).dontPreloadImage(`side${gamedatas.side == 2 ? 1 : 2}.png`);
-        (this as any).dontPreloadImage('side1-hd.png');
-        (this as any).dontPreloadImage('side2-hd.png');
+        this.dontPreloadImage(`side${gamedatas.side == 2 ? 1 : 2}.png`);
+        this.dontPreloadImage('side1-hd.png');
+        this.dontPreloadImage('side2-hd.png');
         const playerCount = Object.keys(gamedatas.players).length;
         if (playerCount != 5) {            
-            (this as any).dontPreloadImage('meeting-track-little-board-5p.png');
+            this.dontPreloadImage('meeting-track-little-board-5p.png');
         }
         if (playerCount != 6) {            
-            (this as any).dontPreloadImage('meeting-track-little-board-6p.png');
+            this.dontPreloadImage('meeting-track-little-board-6p.png');
         }
         if (!gamedatas.expansion) {
-            (this as any).dontPreloadImage('companions-expansion1-set1.png');
-            (this as any).dontPreloadImage('companions-expansion1-set2.png');
-            (this as any).dontPreloadImage('companions-expansion1-set3.png');
+            this.dontPreloadImage('companions-expansion1-set1.png');
+            this.dontPreloadImage('companions-expansion1-set2.png');
+            this.dontPreloadImage('companions-expansion1-set3.png');
         }
 
         log( "Starting game setup" );
@@ -137,14 +136,12 @@ class Glow implements GlowGame {
         this.addHelp();
         this.setupNotifications();
 
-        this.setupPreferences();
-
         document.getElementById('zoom-out').addEventListener('click', () => this.zoomOut());
         document.getElementById('zoom-in').addEventListener('click', () => this.zoomIn());
         if (this.zoom !== 1) {
             this.setZoom(this.zoom);
         }
-        (this as any).onScreenWidthChange = () => {
+        this.onScreenWidthChange = () => {
             this.setAutoZoom();
         }
 
@@ -238,7 +235,7 @@ class Glow implements GlowGame {
             if (this.gamedatas.gamestate.private_state) {
                 this.gamedatas.gamestate.private_state.descriptionmyturn = originalState['descriptionmyturn' + property]; 
             }
-            (this as any).updatePageTitle();
+            this.updatePageTitle();
         }
     }
 
@@ -255,7 +252,7 @@ class Glow implements GlowGame {
             dojo.place(`<div id="adventurers-stock"></div>`, 'currentplayertable', 'before');
             
             this.adventurersStock = new ebg.stock() as Stock;
-            this.adventurersStock.create(this, $('adventurers-stock'), CARD_WIDTH, CARD_HEIGHT);
+            this.adventurersStock.create(this, document.getElementById('adventurers-stock') as HTMLDivElement, CARD_WIDTH, CARD_HEIGHT);
             this.adventurersStock.setSelectionMode(0);
             this.adventurersStock.setSelectionAppearance('class');
             this.adventurersStock.selectionClass = 'nothing';
@@ -271,7 +268,7 @@ class Glow implements GlowGame {
         }
 
         
-        if((this as any).isCurrentPlayerActive()) {
+        if(this.isCurrentPlayerActive()) {
             this.adventurersStock.setSelectionMode(1);
         }
     }
@@ -298,7 +295,7 @@ class Glow implements GlowGame {
 
         this.meetingTrack.setDeckTop(DECK, args.topDeckType);
         
-        if((this as any).isCurrentPlayerActive()) {
+        if(this.isCurrentPlayerActive()) {
             this.meetingTrack.setSelectionMode(1);
         }
     }
@@ -308,10 +305,10 @@ class Glow implements GlowGame {
         args.dice.filter((die, index, self) => index === self.findIndex((t) => t.color === die.color)).forEach(die => {
             const html = `<div class="die-item color${die.color} side${Math.min(6, die.color)}"></div>`;
 
-            (this as any).addActionButton(`selectTomDie${die.color}-button`, html, () => this.onTomDiceSelection(die), null, null, 'gray');
+            this.addActionButton(`selectTomDie${die.color}-button`, html, () => this.onTomDiceSelection(die), null, null, 'gray');
         });
 
-        (this as any).addActionButton(`confirmTomDice-button`, _("Confirm"), () => this.chooseTomDice());
+        this.addActionButton(`confirmTomDice-button`, _("Confirm"), () => this.chooseTomDice());
         dojo.addClass(`confirmTomDice-button`, 'disabled');
     }
 
@@ -320,7 +317,7 @@ class Glow implements GlowGame {
         args.dice.filter((die, index, self) => index === self.findIndex((t) => t.color === die.color)).forEach(die => {
             const html = `<div class="die-item color${die.color} side${Math.min(6, die.color)}"></div>`;
 
-            (this as any).addActionButton(`selectSketalDie${die.id}-button`, html, () => this.selectSketalDie(die.id));
+            this.addActionButton(`selectSketalDie${die.id}-button`, html, () => this.selectSketalDie(die.id));
         });
     }
 
@@ -333,19 +330,19 @@ class Glow implements GlowGame {
             }
         });
         
-        if((this as any).isCurrentPlayerActive()) {
+        if(this.isCurrentPlayerActive()) {
             this.meetingTrack.setSelectionMode(1);
         }
     }
 
     private onEnteringStateMoveBlackDie(args: EnteringMoveBlackDieArgs) {
-        if ((this as any).isCurrentPlayerActive()) {
+        if (this.isCurrentPlayerActive()) {
             this.meetingTrack.setSelectableDice(args.possibleSpots);
         }
     }
 
     private onEnteringStateUriomRecruitCompanion(args: EnteringUriomRecruitCompanionArgs) {
-        if ((this as any).isCurrentPlayerActive()) {
+        if (this.isCurrentPlayerActive()) {
             this.meetingTrack.setSelectableDice([args.spot]);
         }
     }
@@ -369,7 +366,7 @@ class Glow implements GlowGame {
             dojo.place(`<div id="cemetary-companions-stock"></div>`, 'currentplayertable', 'before');
             
             this.cemetaryCompanionsStock = new ebg.stock() as Stock;
-            this.cemetaryCompanionsStock.create(this, $('cemetary-companions-stock'), CARD_WIDTH, CARD_HEIGHT);
+            this.cemetaryCompanionsStock.create(this, $('cemetary-companions-stock') as HTMLDivElement, CARD_WIDTH, CARD_HEIGHT);
             this.cemetaryCompanionsStock.setSelectionMode(0);            
             this.cemetaryCompanionsStock.setSelectionAppearance('class');
             this.cemetaryCompanionsStock.selectionClass = 'nothing';
@@ -384,9 +381,9 @@ class Glow implements GlowGame {
             this.cemetaryCompanionsStock.addToStockWithId(companion.subType, ''+companion.id);
         }
         
-        if ((this as any).isCurrentPlayerActive()) {
+        if (this.isCurrentPlayerActive()) {
             this.getCurrentPlayerTable().companionsStock.setSelectionMode(1);
-            (this as any).addActionButton(`skipSwap-button`, _("Skip"), () => this.skipSwap(), null, null, 'red');
+            this.addActionButton(`skipSwap-button`, _("Skip"), () => this.skipSwap(), null, null, 'red');
         }
 
         this.tableHeightChange();        
@@ -399,7 +396,7 @@ class Glow implements GlowGame {
             dojo.place(`<div id="cemetary-companions-stock"></div>`, 'currentplayertable', 'before');
             
             this.cemetaryCompanionsStock = new ebg.stock() as Stock;
-            this.cemetaryCompanionsStock.create(this, $('cemetary-companions-stock'), CARD_WIDTH, CARD_HEIGHT);
+            this.cemetaryCompanionsStock.create(this, $('cemetary-companions-stock') as HTMLDivElement, CARD_WIDTH, CARD_HEIGHT);
             this.cemetaryCompanionsStock.setSelectionMode(0);            
             this.cemetaryCompanionsStock.setSelectionAppearance('class');
             this.cemetaryCompanionsStock.selectionClass = 'nothing';
@@ -414,10 +411,10 @@ class Glow implements GlowGame {
             this.meetingTrack.setDeckTop(CEMETERY, 0);
         }
         
-        if((this as any).isCurrentPlayerActive()) {
+        if(this.isCurrentPlayerActive()) {
             this.cemetaryCompanionsStock.setSelectionMode(1);
 
-            (this as any).addActionButton(`skipResurrect-button`, _("Skip"), () => this.skipResurrect(), null, null, 'red');
+            this.addActionButton(`skipResurrect-button`, _("Skip"), () => this.skipResurrect(), null, null, 'red');
         }
 
         this.tableHeightChange();        
@@ -456,7 +453,7 @@ class Glow implements GlowGame {
         });
         
         if (!document.getElementById(`resolveAll-button`)) {
-            (this as any).addActionButton(`resolveAll-button`, resolveArgs.remainingEffects.length ? _("Resolve all") : _("Pass"), () => this.resolveAll(), null, null, 'red');
+            this.addActionButton(`resolveAll-button`, resolveArgs.remainingEffects.length ? _("Resolve all") : _("Pass"), () => this.resolveAll(), null, null, 'red');
         }
         document.getElementById(`resolveAll-button`).classList.toggle('disabled', resolveArgs.remainingEffects.some(remainingEffect => remainingEffect[2]));
     }
@@ -489,7 +486,7 @@ class Glow implements GlowGame {
         });
         
         if (!document.getElementById(`resolveAll-button`)) {
-            (this as any).addActionButton(`resolveAll-button`, resolveArgs.remainingEffects.length ? _("Resolve all") : _("Pass"), () => this.resolveAll(), null, null, 'red');
+            this.addActionButton(`resolveAll-button`, resolveArgs.remainingEffects.length ? _("Resolve all") : _("Pass"), () => this.resolveAll(), null, null, 'red');
         }
         document.getElementById(`resolveAll-button`).classList.toggle('disabled', resolveArgs.remainingEffects.some(remainingEffect => remainingEffect[2]));
     }
@@ -499,13 +496,13 @@ class Glow implements GlowGame {
         
         if (this.gamedatas.side === 1) {
             if (!document.getElementById(`placeEncampment-button`)) {
-                (this as any).addActionButton(`placeEncampment-button`, _("Place encampment"), () => this.placeEncampment());
+                this.addActionButton(`placeEncampment-button`, _("Place encampment"), () => this.placeEncampment());
             }
             dojo.toggleClass(`placeEncampment-button`, 'disabled', !args.canSettle);
         }
 
         if (!document.getElementById(`endTurn-button`)) {
-            (this as any).addActionButton(`endTurn-button`, _("End turn"), () => this.endTurn(), null, null, 'red');
+            this.addActionButton(`endTurn-button`, _("End turn"), () => this.endTurn(), null, null, 'red');
         }
 
         if (args.possibleRoutes && !args.possibleRoutes.length && !args.canSettle && !args.killTokenId && !args.disableTokenId) {
@@ -519,13 +516,13 @@ class Glow implements GlowGame {
         
         if (this.gamedatas.side === 1) {
             if (!document.getElementById(`placeEncampment-button`)) {
-                (this as any).addActionButton(`placeEncampment-button`, _("Place encampment"), () => this.placeEncampment());
+                this.addActionButton(`placeEncampment-button`, _("Place encampment"), () => this.placeEncampment());
             }
             dojo.toggleClass(`placeEncampment-button`, 'disabled', !moveArgs.canSettle);
         }
 
         if (!document.getElementById(`endTurn-button`)) {
-            (this as any).addActionButton(`endTurn-button`, _("End turn"), () => this.endTurn(), null, null, 'red');
+            this.addActionButton(`endTurn-button`, _("End turn"), () => this.endTurn(), null, null, 'red');
         }
 
         if (moveArgs.possibleRoutes && !moveArgs.possibleRoutes.length && !moveArgs.canSettle && !moveArgs.killTokenId && !moveArgs.disableTokenId) {
@@ -569,7 +566,7 @@ class Glow implements GlowGame {
             html += `
                 <th id="th-after-end-score" class="after-end-score">${_("Final score")}</th>
             `;
-            dojo.place(html, headers);
+            headers.insertAdjacentHTML('beforeend', html);
         }
 
         const players = Object.values(this.gamedatas.players);
@@ -602,16 +599,16 @@ class Glow implements GlowGame {
             dojo.place(html, 'score-table-body');
         });
 
-        (this as any).addTooltipHtmlToClass('before-end-score', _("Score before the final count."));
-        (this as any).addTooltipHtmlToClass('cards-score', _("Total number of bursts of light on adventurer and companions."));
-        (this as any).addTooltipHtmlToClass('board-score', this.gamedatas.side == 1 ?
+        this.addTooltipHtmlToClass('before-end-score', _("Score before the final count."));
+        this.addTooltipHtmlToClass('cards-score', _("Total number of bursts of light on adventurer and companions."));
+        this.addTooltipHtmlToClass('board-score', this.gamedatas.side == 1 ?
             _("Number of bursts of light indicated on the village where encampment is situated.") :
             _("Number of bursts of light indicated on the islands on which players have placed their boats."));
-        (this as any).addTooltipHtmlToClass('fireflies-score', _("Total number of fireflies in player possession, represented on companions and tokens. If there is many or more fireflies than companions, player score an additional 10 bursts of light."));
+        this.addTooltipHtmlToClass('fireflies-score', _("Total number of fireflies in player possession, represented on companions and tokens. If there is many or more fireflies than companions, player score an additional 10 bursts of light."));
         if (this.gamedatas.tokensActivated) {
-            (this as any).addTooltipHtmlToClass('tokens-score', _("For each color, the player earns 1/3/6/10/15/21 shards of light if he got 1/2/3/4/5/6 tokens of the same color and a bonus of 10 shards of light if the player got at least 1 butterfly token in each of the 6 colors."));
+            this.addTooltipHtmlToClass('tokens-score', _("For each color, the player earns 1/3/6/10/15/21 shards of light if he got 1/2/3/4/5/6 tokens of the same color and a bonus of 10 shards of light if the player got at least 1 butterfly token in each of the 6 colors."));
         }
-        (this as any).addTooltipHtmlToClass('footprints-score', _("1 burst of light per footprint in player possession."));
+        this.addTooltipHtmlToClass('footprints-score', _("1 burst of light per footprint in player possession."));
     }
 
     // onLeavingState: this method is called each time we are leaving a game state.
@@ -696,7 +693,7 @@ class Glow implements GlowGame {
     private onLeavingSwap() {
         if (document.getElementById('cemetary-companions-stock')) {
             this.cemetaryCompanionsStock?.removeAll();
-            (this as any).fadeOutAndDestroy('cemetary-companions-stock');
+            this.fadeOutAndDestroy('cemetary-companions-stock');
             this.cemetaryCompanionsStock = null;
             setTimeout(() => this.tableHeightChange(), 200);
             this.getCurrentPlayerTable()?.companionsStock.setSelectionMode(0);
@@ -706,7 +703,7 @@ class Glow implements GlowGame {
     private onLeavingResurrect() {
         if (document.getElementById('cemetary-companions-stock')) {
             this.cemetaryCompanionsStock?.removeAllTo(CEMETERY);
-            (this as any).fadeOutAndDestroy('cemetary-companions-stock');
+            this.fadeOutAndDestroy('cemetary-companions-stock');
             this.cemetaryCompanionsStock = null;
             setTimeout(() => this.tableHeightChange(), 200);
         }
@@ -717,7 +714,7 @@ class Glow implements GlowGame {
     }
 
     private onLeavingResolveCards() {
-        (Array.from(document.getElementsByClassName('selectable')) as HTMLElement[]).forEach(node => dojo.removeClass(node, 'selectable'));
+        (Array.from(document.getElementsByClassName('selectable')) as HTMLElement[]).forEach(node => node.classList.remove('selectable'));
         [...this.playersTables.map(pt => pt.adventurerStock), ...this.playersTables.map(pt => pt.companionsStock), ...this.playersTables.map(pt => pt.spellsStock)].forEach(stock => stock.setSelectionMode(0));
     }
 
@@ -726,7 +723,7 @@ class Glow implements GlowGame {
     //
     public onUpdateActionButtons(stateName: string, args: any) {
 
-        if ((this as any).isCurrentPlayerActive()) {
+        if (this.isCurrentPlayerActive()) {
             switch (stateName) {
                 case 'chooseTomDice':
                     this.onEnteringChooseTomDice(args as EnteringSelectSketalDieArgs);
@@ -735,8 +732,8 @@ class Glow implements GlowGame {
                     this.onEnteringSelectSketalDie(args as EnteringSelectSketalDieArgs);
                     break;
                 case 'uriomRecruitCompanion':
-                    (this as any).addActionButton(`recruitCompanionUriom-button`, _("Recruit selected companion"), () => this.recruitCompanionUriom());
-                    (this as any).addActionButton(`passUriomRecruit-button`, _("Pass"), () => this.passUriomRecruit());
+                    this.addActionButton(`recruitCompanionUriom-button`, _("Recruit selected companion"), () => this.recruitCompanionUriom());
+                    this.addActionButton(`passUriomRecruit-button`, _("Pass"), () => this.passUriomRecruit());
                     break;    
                 case 'privateSelectDiceAction':
                     this.currentDieAction = null;
@@ -744,9 +741,9 @@ class Glow implements GlowGame {
                     const rollDiceArgs = args as EnteringRollDiceForPlayer;
                     const possibleRerolls = rollDiceArgs.rerollCompanion + rollDiceArgs.rerollCrolos + rollDiceArgs.rerollTokens + Object.values(rollDiceArgs.rerollScore).length;
             
-                    (this as any).addActionButton(`setRollDice-button`, _("Reroll 1 or 2 dice") + formatTextIcons(' (1 [reroll] )'), () => this.selectDiceToRoll());
-                    (this as any).addActionButton(`setChangeDie-button`, _("Change die face") + formatTextIcons(` (3 [reroll]${rollDiceArgs.grayMultiDice ? ' / ' + _('free for ${symbol}').replace('${symbol}', '[symbol0]') : ''})`), () => this.selectDieToChange());
-                    (this as any).addActionButton(`keepDice-button`, _("Keep current dice") + (rollDiceArgs.grayMultiDice ? formatTextIcons(` (${_('change ${symbol} face before').replace('${symbol}', '[symbol0]')})`) : ''), () => this.keepDice(), null, null, 'red');
+                    this.addActionButton(`setRollDice-button`, _("Reroll 1 or 2 dice") + formatTextIcons(' (1 [reroll] )'), () => this.selectDiceToRoll());
+                    this.addActionButton(`setChangeDie-button`, _("Change die face") + formatTextIcons(` (3 [reroll]${rollDiceArgs.grayMultiDice ? ' / ' + _('free for ${symbol}').replace('${symbol}', '[symbol0]') : ''})`), () => this.selectDieToChange());
+                    this.addActionButton(`keepDice-button`, _("Keep current dice") + (rollDiceArgs.grayMultiDice ? formatTextIcons(` (${_('change ${symbol} face before').replace('${symbol}', '[symbol0]')})`) : ''), () => this.keepDice(), null, null, 'red');
             
                     dojo.toggleClass(`setRollDice-button`, 'disabled', possibleRerolls < 1);
                     dojo.toggleClass(`setChangeDie-button`, 'disabled', possibleRerolls < 3 && !rollDiceArgs.grayMultiDice);
@@ -758,11 +755,11 @@ class Glow implements GlowGame {
                     const possibleCostsRollDice = this.getPossibleCosts(1);
                     possibleCostsRollDice.forEach((possibleCost, index) => {
                         const costStr = possibleCost.map((cost, costTypeIndex) => this.getRollDiceCostStr(costTypeIndex, cost)).filter(str => str !== null).join(' ');
-                        (this as any).addActionButton(`rollDice-button${index}`, _("Reroll selected dice") + ` (${costStr})`, () => this.rollDice(possibleCost));
+                        this.addActionButton(`rollDice-button${index}`, _("Reroll selected dice") + ` (${costStr})`, () => this.rollDice(possibleCost));
                         dojo.toggleClass(`rollDice-button${index}`, 'disabled', this.selectedDice.length < 1 || this.selectedDice.length > 2);
 
                     });
-                    (this as any).addActionButton(`cancel-button`, _("Cancel"), () => this.cancel());
+                    this.addActionButton(`cancel-button`, _("Cancel"), () => this.cancel());
                     break;
                 case 'privateChangeDie':
                     this.currentDieAction = 'change';
@@ -778,8 +775,8 @@ class Glow implements GlowGame {
                 case 'privateRerollImmediate':
                     this.currentDieAction = 'rerollImmediate';
 
-                    (this as any).addActionButton(`rerollImmediate-button`, _("Reroll selected and pink dice"), () => this.rerollImmediate());
-                    (this as any).addActionButton(`rerollImmediateOnlyPink-button`, _("Reroll only pink dice"), () => this.rerollImmediate(true));
+                    this.addActionButton(`rerollImmediate-button`, _("Reroll selected and pink dice"), () => this.rerollImmediate());
+                    this.addActionButton(`rerollImmediateOnlyPink-button`, _("Reroll only pink dice"), () => this.rerollImmediate(true));
                     document.getElementById(`rerollImmediate-button`).classList.add('disabled');
 
                     if (this.selectedDice.length === 1) {
@@ -797,7 +794,7 @@ class Glow implements GlowGame {
                 case 'removeToken':
                     const removeTokenArgs = args as EnteringRemoveTokenArgs;
                     if (removeTokenArgs.tokens.length === 0 && removeTokenArgs.count) {
-                        (this as any).addActionButton(`passRemoveToken-button`, _("Pass (no token to remove)"), () => this.passRemoveToken());
+                        this.addActionButton(`passRemoveToken-button`, _("Pass (no token to remove)"), () => this.passRemoveToken());
                     }
                     break;
                 case 'move':
@@ -814,13 +811,13 @@ class Glow implements GlowGame {
     
                 case 'discardCompanionSpell':
                 case 'privateKillToken':
-                    (this as any).addActionButton(`cancel-button`, _("Cancel"), () => stateName == 'privateKillToken' ? this.cancelToken() : this.cancelDiscardCompanionSpell(), null, null, 'gray');
+                    this.addActionButton(`cancel-button`, _("Cancel"), () => stateName == 'privateKillToken' ? this.cancelToken() : this.cancelDiscardCompanionSpell(), null, null, 'gray');
                     break;   
                 case 'privateDisableToken':
                     for (let i=1; i<=5; i++) {
-                        (this as any).addActionButton(`disableSymbol${i}-button`, formatTextIcons(`[symbol${i}]`), () => this.disableToken(i), null, null, 'gray');
+                        this.addActionButton(`disableSymbol${i}-button`, formatTextIcons(`[symbol${i}]`), () => this.disableToken(i), null, null, 'gray');
                     }                 
-                    (this as any).addActionButton(`cancel-button`, _("Cancel"), () => this.cancelToken(), null, null, 'gray');
+                    this.addActionButton(`cancel-button`, _("Cancel"), () => this.cancelToken(), null, null, 'gray');
                     break;                
             }
         } else {
@@ -843,10 +840,10 @@ class Glow implements GlowGame {
             case 'privateMove':
                 const tokenArgs = args as EnteringMoveForPlayer;
                 if (tokenArgs.killTokenId) {
-                    (this as any).addActionButton(`useKillToken-button`, _("Use ${token}").replace('${token}', `<div class="module-token" data-type-arg="37"></div>`), () => this.activateToken(tokenArgs.killTokenId), null, null, 'gray');
+                    this.addActionButton(`useKillToken-button`, _("Use ${token}").replace('${token}', `<div class="module-token" data-type-arg="37"></div>`), () => this.activateToken(tokenArgs.killTokenId), null, null, 'gray');
                 }
                 if (tokenArgs.disableTokenId) {
-                    (this as any).addActionButton(`useDisableToken-button`, _("Use ${token}").replace('${token}', `<div class="module-token" data-type-arg="0"></div>`), () => this.activateToken(tokenArgs.disableTokenId), null, null, 'gray');
+                    this.addActionButton(`useDisableToken-button`, _("Use ${token}").replace('${token}', `<div class="module-token" data-type-arg="0"></div>`), () => this.activateToken(tokenArgs.disableTokenId), null, null, 'gray');
                 }
                 break;
         }
@@ -921,31 +918,8 @@ class Glow implements GlowGame {
         }
         this.setZoom(newZoom);
     }
-
-    private setupPreferences() {
-        // Extract the ID and value from the UI control
-        const onchange = (e) => {
-          var match = e.target.id.match(/^preference_control_(\d+)$/);
-          if (!match) {
-            return;
-          }
-          var prefId = +match[1];
-          var prefValue = +e.target.value;
-          (this as any).prefs[prefId].value = prefValue;
-          this.onPreferenceChange(prefId, prefValue);
-        }
-        
-        // Call onPreferenceChange() when any value changes
-        dojo.query(".preference_control").connect("onchange", onchange);
-        
-        // Call onPreferenceChange() now
-        dojo.forEach(
-          dojo.query("#ingame_menu_content .preference_control"),
-          el => onchange({ target: el })
-        );
-    }
       
-    private onPreferenceChange(prefId: number, prefValue: number) {
+    onGameUserPreferenceChanged = (prefId: number, prefValue: number): void => {
         switch (prefId) {
             case 202: 
                 document.getElementById('full-table').dataset.highContrastPoints = '' + prefValue;
@@ -995,7 +969,7 @@ class Glow implements GlowGame {
         } else {
             dojo.place('<div id="firstPlayerToken"></div>', `player_board_${playerId}_firstPlayerWrapper`);
 
-            (this as any).addTooltipHtml('firstPlayerToken', _("First Player token"));
+            this.addTooltipHtml('firstPlayerToken', _("First Player token"));
         }
     }
 
@@ -1014,7 +988,7 @@ class Glow implements GlowGame {
     }
 
     public getPlayerId(): number {
-        return Number((this as any).player_id);
+        return Number(this.player_id);
     }
 
     
@@ -1022,7 +996,7 @@ class Glow implements GlowGame {
         return this.gamedatas.side;
     }
     public isColorBlindMode(): boolean {
-        return (this as any).prefs[201].value == 1;
+        return this.getGameUserPreference(201) == 1;
     }
     public isExpansion(): boolean {
         return this.gamedatas.expansion;
@@ -1033,7 +1007,7 @@ class Glow implements GlowGame {
     }
 
     public getPlayerScore(playerId: number): number {
-        return (this as any).scoreCtrl[playerId]?.getValue() ?? Number(this.gamedatas.players[playerId].score);
+        return this.scoreCtrl[playerId]?.getValue() ?? Number(this.gamedatas.players[playerId].score);
     }
 
     private getPlayerTable(playerId: number): PlayerTable {
@@ -1050,36 +1024,17 @@ class Glow implements GlowGame {
         const solo = players.length === 1;
 
         if (solo) {
-            dojo.place(`
-            <div id="overall_player_board_0" class="player-board current-player-board">					
-                <div class="player_board_inner" id="player_board_inner_982fff">
-                    
-                    <div class="emblemwrap" id="avatar_active_wrap_0">
-                        <div src="img/gear.png" alt="" class="avatar avatar_active" id="avatar_active_0"></div>
-                    </div>
-                                               
-                    <div class="player-name" id="player_name_0" style="color: #${gamedatas.tom.color}">
-                        Tom
-                    </div>
-                    <div id="player_board_0" class="player_board_content">
-                        <div class="player_score">
-                            <span id="player_score_0" class="player_score_value">10</span> <i class="fa fa-star" id="icon_point_0"></i>           
-                        </div>
-                    </div>
-                </div>
-            </div>`, `overall_player_board_${players[0].id}`, 'after');
-
-            const tomScoreCounter = new ebg.counter();
-            tomScoreCounter.create(`player_score_0`);
-            tomScoreCounter.setValue(gamedatas.tom.score);
-            (this as any).scoreCtrl[0] = tomScoreCounter;
+            this.addAutomataPlayerPanel(0, 'Tom', {
+                iconClass: 'tom-avatar'
+            });
+            this.scoreCtrl[0].setValue(Number(gamedatas.tom.score));
         }
 
         (solo ? [...players, gamedatas.tom] : players).forEach(player => {
             const playerId = Number(player.id);     
 
             // counters
-            dojo.place(`
+            this.getPlayerPanelElement(playerId).innerHTML = `
             <div class="counters">
                 <div id="reroll-counter-wrapper-${player.id}" class="reroll-counter">
                     <div class="icon reroll"></div> 
@@ -1093,7 +1048,7 @@ class Glow implements GlowGame {
                 </div>
             </div>
             <div id="tokens-${player.id}" class="tokens-stock"></div>
-            `, `player_board_${player.id}`);
+            `;
 
             const rerollCounter = new ebg.counter();
             rerollCounter.create(`reroll-counter-${playerId}`);
@@ -1149,7 +1104,7 @@ class Glow implements GlowGame {
             if (!solo) {
                 if (player.smallBoard) {
                     dojo.place(`<div id="player_board_${player.id}_meeting_track" class="meeting-track-icon" data-players="${players.length}"></div>`, `player_board_${player.id}`);
-                    (this as any).addTooltipHtml(`player_board_${player.id}_meeting_track`, _("This player will place its small dice on the meeting track small board"));
+                    this.addTooltipHtml(`player_board_${player.id}_meeting_track`, _("This player will place its small dice on the meeting track small board"));
                 }
 
                 // first player token
@@ -1173,9 +1128,9 @@ class Glow implements GlowGame {
             }
         });
 
-        (this as any).addTooltipHtmlToClass('reroll-counter', _("Rerolls tokens"));
-        (this as any).addTooltipHtmlToClass('footprint-counter', _("Footprints tokens"));
-        (this as any).addTooltipHtmlToClass('firefly-counter', _("Fireflies (tokens + companion fireflies) / number of companions"));
+        this.addTooltipHtmlToClass('reroll-counter', _("Rerolls tokens"));
+        this.addTooltipHtmlToClass('footprint-counter', _("Footprints tokens"));
+        this.addTooltipHtmlToClass('firefly-counter', _("Fireflies (tokens + companion fireflies) / number of companions"));
     }
     
     private updateFireflyCounterIcon(playerId: number) {
@@ -1186,7 +1141,7 @@ class Glow implements GlowGame {
 
     private createPlayerTables(gamedatas: GlowGamedatas) {
         const players = Object.values(gamedatas.players).sort((a, b) => a.playerNo - b.playerNo);
-        const playerIndex = players.findIndex(player => Number(player.id) === Number((this as any).player_id));
+        const playerIndex = players.findIndex(player => Number(player.id) === Number(this.player_id));
         const orderedPlayers = playerIndex > 0 ? [...players.slice(playerIndex), ...players.slice(0, playerIndex)] : players;
 
         orderedPlayers.forEach(player => this.createPlayerTable(gamedatas, Number(player.id)) );
@@ -1213,7 +1168,7 @@ class Glow implements GlowGame {
 
         document.getElementById(`die${die.id}`).addEventListener('click', () => this.onDiceClick(die));
 
-        (this as any).addTooltipHtml(`die${die.id}`, this.DICE_FACES_TOOLTIP[die.color]);        
+        this.addTooltipHtml(`die${die.id}`, this.DICE_FACES_TOOLTIP[die.color]);        
     }
 
     public createOrMoveDie(die: Die, destinationId: string, rollClass: string = '-') {
@@ -1407,16 +1362,16 @@ class Glow implements GlowGame {
         document.getElementById(`cancelRollDice-button`)?.remove();
 
         if (free) {
-            (this as any).addActionButton(`changeDie-buttonFree`, _("Change selected die") + ` (${_('free')})`, () => this.changeDie([]));
+            this.addActionButton(`changeDie-buttonFree`, _("Change selected die") + ` (${_('free')})`, () => this.changeDie([]));
         } else {
             const possibleCosts = this.getPossibleCosts(3);
             possibleCosts.forEach((possibleCost, index) => {
                 const costStr = possibleCost.map((cost, costTypeIndex) => this.getRollDiceCostStr(costTypeIndex, cost)).filter(str => str !== null).join(' ');
-                (this as any).addActionButton(`changeDie-button${index}`, _("Change selected die") + ` (${costStr})`, () => this.changeDie(possibleCost));
+                this.addActionButton(`changeDie-button${index}`, _("Change selected die") + ` (${costStr})`, () => this.changeDie(possibleCost));
                 dojo.addClass(`changeDie-button${index}`, 'disabled');
             });
         }
-        (this as any).addActionButton(`cancelRollDice-button`, _("Cancel"), () => this.cancel());
+        this.addActionButton(`cancelRollDice-button`, _("Cancel"), () => this.cancel());
     }
 
     private removeResolveActionButtons() {
@@ -1461,13 +1416,13 @@ class Glow implements GlowGame {
         dice.forEach(die => {
             const html = `<div class="die-item color${die.color} side${die.face}"></div>`;
 
-            (this as any).addActionButton(`selectDiscardDie${die.id}-button`, html, () => {
+            this.addActionButton(`selectDiscardDie${die.id}-button`, html, () => {
                 this.resolveCard(type, id, die.id);
                 this.setActionBarResolve(true);
             }, null, null, 'gray');
         });
 
-        (this as any).addActionButton(`cancelResolveDiscardDie-button`, _("Cancel"), () => this.setActionBarResolve(true));
+        this.addActionButton(`cancelResolveDiscardDie-button`, _("Cancel"), () => this.setActionBarResolve(true));
     }
 
     private removeMoveActionButtons() {
@@ -1515,7 +1470,7 @@ class Glow implements GlowGame {
 
     private onSelectedDiceChange() {
         const count = this.selectedDice.length;
-        this.getRollDiceButtons().forEach(button => dojo.toggleClass(button, 'disabled', count < 1 || count > 2));
+        this.getRollDiceButtons().forEach(button => button?.classList.toggle('disabled', count < 1 || count > 2));
 
         if (this.currentDieAction == 'change') {
             console.log(this.selectedDice);
@@ -1531,13 +1486,13 @@ class Glow implements GlowGame {
                 for (let i=1; i<=faces; i++) {
                     const html = `<div class="die-item color${die.color} side${i}"></div>`;
 
-                    (this as any).addActionButton(`changeDie${i}-button`, html, () => {
+                    this.addActionButton(`changeDie${i}-button`, html, () => {
                         if (this.selectedDieFace !== null) {
                             dojo.removeClass(`changeDie${this.selectedDieFace}-button`, 'bgabutton_blue');
                             dojo.addClass(`changeDie${this.selectedDieFace}-button`, 'bgabutton_gray');
                         } else {
                             const changeDieButtons = this.getChangeDieButtons();
-                            changeDieButtons.forEach(elem => dojo.removeClass(elem, 'disabled'));
+                            changeDieButtons.forEach(elem => elem?.classList.remove('disabled'));
                         }
 
                         this.selectedDieFace = i;
@@ -1594,7 +1549,7 @@ class Glow implements GlowGame {
     private setDiceSelectionActive(active: boolean) {        
         this.unselectDice();
         this.diceSelectionActive = active;        
-        (Array.from(document.getElementsByClassName('die')) as HTMLElement[]).forEach(node => dojo.toggleClass(node, 'selectable', active));
+        (Array.from(document.getElementsByClassName('die')) as HTMLElement[]).forEach(node => node?.classList.toggle('selectable', active));
     }
 
     private diceChangedOrRolled(dice: Die[], changed: boolean, args: EnteringRollDiceArgs, playerId: number) {
@@ -1650,7 +1605,7 @@ class Glow implements GlowGame {
     }
 
     private selectDiceToRoll() {
-        if(!(this as any).checkAction('selectDiceToRoll')) {
+        if(!this.checkAction('selectDiceToRoll')) {
             return;
         }
 
@@ -1660,7 +1615,7 @@ class Glow implements GlowGame {
     }
 
     private selectDieToChange() {
-        if(!(this as any).checkAction('selectDieToChange')) {
+        if(!this.checkAction('selectDieToChange')) {
             return;
         }
 
@@ -1670,7 +1625,7 @@ class Glow implements GlowGame {
     }
 
     private rollDice(cost: number[]) {
-        if(!(this as any).checkAction('rollDice')) {
+        if(!this.checkAction('rollDice')) {
             return;
         }
 
@@ -1681,7 +1636,7 @@ class Glow implements GlowGame {
     }
     
     private changeDie(cost: number[]) {
-        if(!(this as any).checkAction('changeDie')) {
+        if(!this.checkAction('changeDie')) {
             return;
         }
 
@@ -1693,7 +1648,7 @@ class Glow implements GlowGame {
     }
 
     private rerollImmediate(onlyPink: boolean = false) {
-        if(!(this as any).checkAction('rerollImmediate')) {
+        if(!this.checkAction('rerollImmediate')) {
             return;
         }
 
@@ -1703,7 +1658,7 @@ class Glow implements GlowGame {
     }
     
     private passRemoveToken() {
-        if(!(this as any).checkAction('passRemoveToken')) {
+        if(!this.checkAction('passRemoveToken')) {
             return;
         }
 
@@ -1711,7 +1666,7 @@ class Glow implements GlowGame {
     }
     
     private cancel() {
-        if(!(this as any).checkAction('cancel')) {
+        if(!this.checkAction('cancel')) {
             return;
         }
 
@@ -1727,7 +1682,7 @@ class Glow implements GlowGame {
     }
 
     public chooseAdventurer(id: number) {
-        if(!(this as any).checkAction('chooseAdventurer')) {
+        if(!this.checkAction('chooseAdventurer')) {
             return;
         }
 
@@ -1738,7 +1693,7 @@ class Glow implements GlowGame {
 
     
     public chooseTomDice() {
-        if(!(this as any).checkAction('chooseTomDice')) {
+        if(!this.checkAction('chooseTomDice')) {
             return;
         }
 
@@ -1748,14 +1703,14 @@ class Glow implements GlowGame {
     }
 
     public recruitCompanion(spot: number, warningPrompted: boolean = false) {
-        if(!(this as any).checkAction('recruitCompanion')) {
+        if(!this.checkAction('recruitCompanion')) {
             return;
         }
 
         if (!warningPrompted) {
             const args = this.gamedatas.gamestate.args as EnteringRecruitCompanionArgs;
             if (args.companions[spot].companion.noDieWarning) {
-                (this as any).confirmationDialog(
+                this.confirmationDialog(
                     _("Are you sure you want to take that card? There is no available big die for it."), 
                     () => this.recruitCompanion(spot, true)
                 );
@@ -1769,7 +1724,7 @@ class Glow implements GlowGame {
     }
 
     public selectSketalDie(id: number) {
-        if(!(this as any).checkAction('selectSketalDie')) {
+        if(!this.checkAction('selectSketalDie')) {
             return;
         }
 
@@ -1779,7 +1734,7 @@ class Glow implements GlowGame {
     }
 
     public removeCompanion(spot: number) {
-        if(!(this as any).checkAction('removeCompanion')) {
+        if(!this.checkAction('removeCompanion')) {
             return;
         }
 
@@ -1789,7 +1744,7 @@ class Glow implements GlowGame {
     }
 
     public moveBlackDie(spot: number) {
-        if(!(this as any).checkAction('moveBlackDie')) {
+        if(!this.checkAction('moveBlackDie')) {
             return;
         }
 
@@ -1799,7 +1754,7 @@ class Glow implements GlowGame {
     }
 
     public recruitCompanionUriom() {
-        if(!(this as any).checkAction('recruitCompanionUriom')) {
+        if(!this.checkAction('recruitCompanionUriom')) {
             return;
         }
 
@@ -1807,7 +1762,7 @@ class Glow implements GlowGame {
     }
 
     public passUriomRecruit() {
-        if(!(this as any).checkAction('passUriomRecruit')) {
+        if(!this.checkAction('passUriomRecruit')) {
             return;
         }
 
@@ -1815,7 +1770,7 @@ class Glow implements GlowGame {
     }
 
     public keepDice() {
-        if(!(this as any).checkAction('keepDice')) {
+        if(!this.checkAction('keepDice')) {
             return;
         }
 
@@ -1823,14 +1778,14 @@ class Glow implements GlowGame {
     }
 
     public swap(id: number, warningPrompted: boolean = false) {
-        if(!(this as any).checkAction('swap')) {
+        if(!this.checkAction('swap')) {
             return;
         }
 
         if (!warningPrompted) {
             const args = this.gamedatas.gamestate.args as EnteringSwapArgs;
             if (args.card.noDieWarning) {
-                (this as any).confirmationDialog(
+                this.confirmationDialog(
                     _("Are you sure you want to take that card? There is no available big die for it."), 
                     () => this.swap(id, true)
                 );
@@ -1844,7 +1799,7 @@ class Glow implements GlowGame {
     }
 
     public skipSwap() {
-        if(!(this as any).checkAction('skipSwap')) {
+        if(!this.checkAction('skipSwap')) {
             return;
         }
 
@@ -1852,14 +1807,14 @@ class Glow implements GlowGame {
     }
 
     public resurrect(id: number, warningPrompted: boolean = false) {
-        if(!(this as any).checkAction('resurrect')) {
+        if(!this.checkAction('resurrect')) {
             return;
         }
 
         if (!warningPrompted) {
             const args = this.gamedatas.gamestate.args as EnteringResurrectArgs;
             if (args.cemeteryCards.find(card => card.id == id).noDieWarning) {
-                (this as any).confirmationDialog(
+                this.confirmationDialog(
                     _("Are you sure you want to take that card? There is no available big die for it."), 
                     () => this.resurrect(id, true)
                 );
@@ -1873,7 +1828,7 @@ class Glow implements GlowGame {
     }
 
     public skipResurrect() {
-        if(!(this as any).checkAction('skipResurrect')) {
+        if(!this.checkAction('skipResurrect')) {
             return;
         }
 
@@ -1881,7 +1836,7 @@ class Glow implements GlowGame {
     }
 
     public resolveCard(type: number, id: number, dieId?: number) {
-        if(!(this as any).checkAction('resolveCard')) {
+        if(!this.checkAction('resolveCard')) {
             return;
         }
 
@@ -1893,7 +1848,7 @@ class Glow implements GlowGame {
     }
 
     public resolveAll() {
-        if(!(this as any).checkAction('resolveAll')) {
+        if(!this.checkAction('resolveAll')) {
             return;
         }
 
@@ -1901,7 +1856,7 @@ class Glow implements GlowGame {
     }
 
     public removeToken(id: number) {
-        if(!(this as any).checkAction('removeToken')) {
+        if(!this.checkAction('removeToken')) {
             return;
         }
 
@@ -1911,7 +1866,7 @@ class Glow implements GlowGame {
     }
 
     public activateToken(id: number) {
-        /*if(!(this as any).checkAction('removeToken')) {
+        /*if(!this.checkAction('removeToken')) {
             return;
         }*/
 
@@ -1922,7 +1877,7 @@ class Glow implements GlowGame {
     
 
     public killToken(type: number, id: number) {
-        if(!(this as any).checkAction('killToken')) {
+        if(!this.checkAction('killToken')) {
             return;
         }
 
@@ -1933,7 +1888,7 @@ class Glow implements GlowGame {
     }
 
     public disableToken(symbol: number) {
-        if(!(this as any).checkAction('disableToken')) {
+        if(!this.checkAction('disableToken')) {
             return;
         }
 
@@ -1943,7 +1898,7 @@ class Glow implements GlowGame {
     }
 
     public cancelToken() {
-        if(!(this as any).checkAction('cancelToken')) {
+        if(!this.checkAction('cancelToken')) {
             return;
         }
 
@@ -1951,7 +1906,7 @@ class Glow implements GlowGame {
     }
 
     public discardCompanionSpell(type: number, id: number) {
-        if(!(this as any).checkAction('discardCompanionSpell')) {
+        if(!this.checkAction('discardCompanionSpell')) {
             return;
         }
 
@@ -1962,7 +1917,7 @@ class Glow implements GlowGame {
     }
 
     public cancelDiscardCompanionSpell() {
-        if(!(this as any).checkAction('cancelDiscardCompanionSpell')) {
+        if(!this.checkAction('cancelDiscardCompanionSpell')) {
             return;
         }
 
@@ -1970,7 +1925,7 @@ class Glow implements GlowGame {
     }
 
     public move(destination: number, from?: number) {
-        if(!(this as any).checkAction('move')) {
+        if(!this.checkAction('move')) {
             return;
         }
 
@@ -1981,7 +1936,7 @@ class Glow implements GlowGame {
     }
 
     public placeEncampment() {
-        if(!(this as any).checkAction('placeEncampment')) {
+        if(!this.checkAction('placeEncampment')) {
             return;
         }
 
@@ -1989,7 +1944,7 @@ class Glow implements GlowGame {
     }
 
     public endTurn() {
-        if(!(this as any).checkAction('endTurn')) {
+        if(!this.checkAction('endTurn')) {
             return;
         }
 
@@ -1999,16 +1954,16 @@ class Glow implements GlowGame {
     public takeAction(action: string, data?: any) {
         data = data || {};
         data.lock = true;
-        (this as any).ajaxcall(`/glow/glow/${action}.html`, data, this, () => {});
+        this.ajaxcall(`/glow/glow/${action}.html`, data, this, () => {});
     }
 
     public takeNoLockAction(action: string, data?: any) {
         data = data || {};
-        (this as any).ajaxcall(`/glow/glow/${action}.html`, data, this, () => {});
+        this.ajaxcall(`/glow/glow/${action}.html`, data, this, () => {});
     }
     
     private setPoints(playerId: number, points: number) {
-        (this as any).scoreCtrl[playerId]?.toValue(points);
+        this.scoreCtrl[playerId]?.toValue(points);
         this.board.setPoints(playerId, points);
     }
 
@@ -2083,7 +2038,7 @@ class Glow implements GlowGame {
     }
 
     private startActionTimer(buttonId: string, time: number) {
-        if ((this as any).prefs[203]?.value === 2) {
+        if (this.getGameUserPreference(203) == 2) {
             return;
         }
 
@@ -2158,7 +2113,6 @@ class Glow implements GlowGame {
             ['scoreFootprints', SCORE_MS],
             ['scoreTokens', SCORE_MS],
             ['scoreAfterEnd', SCORE_MS],
-            ['loadBug', 1],
         ];
 
         notifs.forEach((notif) => {
@@ -2283,9 +2237,9 @@ class Glow implements GlowGame {
             this.roundCounter.toValue(day);
         }
 
-        dojo.place(`<div id="new-day"><span>${_(notif.log).replace('${day}', ''+notif.args.day)}</span></div>`, document.body);
+        document.body.insertAdjacentHTML('beforeend', `<div id="new-day"><span>${_(notif.log).replace('${day}', ''+notif.args.day)}</span></div>`);
         const div = document.getElementById(`new-day`);
-        div.addEventListener('animationend', () => dojo.destroy(div));
+        div.addEventListener('animationend', () => div?.remove());
         div.classList.add('new-day-animation');
     }
 
@@ -2426,53 +2380,6 @@ class Glow implements GlowGame {
         log('notif_scoreAfterEnd', notif.args);
         this.setScore(notif.args.playerId, this.gamedatas.tokensActivated ? 7 : 6, notif.args.points);
     }
-    
-    /**
-    * Load production bug report handler
-    */
-   notif_loadBug({ args }) {
-     const that: any = this;
-     function fetchNextUrl() {
-       var url = args.urls.shift();
-       console.log('Fetching URL', url, '...');
-       // all the calls have to be made with ajaxcall in order to add the csrf token, otherwise you'll get "Invalid session information for this action. Please try reloading the page or logging in again"
-       that.ajaxcall(
-         url,
-         {
-           lock: true,
-         },
-         that,
-         function (success) {
-           console.log('=> Success ', success);
-
-           if (args.urls.length > 1) {
-             fetchNextUrl();
-           } else if (args.urls.length > 0) {
-             //except the last one, clearing php cache
-             url = args.urls.shift();
-             (dojo as any).xhrGet({
-               url: url,
-               headers: {
-                 'X-Request-Token': bgaConfig.requestToken,
-               },
-               load: success => {
-                 console.log('Success for URL', url, success);
-                 console.log('Done, reloading page');
-                 window.location.reload();
-               },
-               handleAs: 'text',
-               error: error => console.log('Error while loading : ', error),
-             });
-           }
-         },
-         error => {
-           if (error) console.log('=> Error ', error);
-         },
-       );
-     }
-     console.log('Notif: load bug', args);
-     fetchNextUrl();
-   }
 
     private getColor(color: number) {
         switch (color) {
@@ -2489,8 +2396,7 @@ class Glow implements GlowGame {
     }
 
     /* This enable to inject translatable styled things to logs or action bar */
-    /* @Override */
-    public format_string_recursive(log: string, args: any) {
+    public bgaFormatText(log: string, args: any) {
         try {
             if (log && args && !args.processed) {
                 if (typeof args.adventurerName == 'string' && args.adventurerName[0] != '<') {
@@ -2520,6 +2426,6 @@ class Glow implements GlowGame {
         } catch (e) {
             console.error(log,args,"Exception thrown", e.stack);
         }
-        return (this as any).inherited(arguments);
+        return { log, args };
     }
 }
