@@ -1025,9 +1025,9 @@ class Glow extends GameGui<GlowGamedatas> implements GlowGame {
 
         if (solo) {
             this.addAutomataPlayerPanel(0, 'Tom', {
-                iconClass: 'tom-avatar'
+                iconClass: 'tom-avatar',
+                score: Number(gamedatas.tom.score),
             });
-            this.scoreCtrl[0].setValue(Number(gamedatas.tom.score));
         }
 
         (solo ? [...players, gamedatas.tom] : players).forEach(player => {

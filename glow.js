@@ -4190,9 +4190,9 @@ var Glow = /** @class */ (function (_super) {
         var solo = players.length === 1;
         if (solo) {
             this.addAutomataPlayerPanel(0, 'Tom', {
-                iconClass: 'tom-avatar'
+                iconClass: 'tom-avatar',
+                score: Number(gamedatas.tom.score),
             });
-            this.scoreCtrl[0].setValue(Number(gamedatas.tom.score));
         }
         (solo ? __spreadArray(__spreadArray([], players), [gamedatas.tom]) : players).forEach(function (player) {
             var playerId = Number(player.id);
