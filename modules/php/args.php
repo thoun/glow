@@ -181,7 +181,7 @@ trait ArgsTrait {
         $resolveCardsForPlayer = new stdClass();
         $resolveCardsForPlayer->remainingEffects = $this->getRemainingEffects($playerId);
         $this->addActivableTokens($playerId, $resolveCardsForPlayer);
-        return $resolveCardsForPlayer;
+        return (array)$resolveCardsForPlayer;
     }
 
     function argRemoveToken(int $playerId) {
@@ -227,7 +227,7 @@ trait ArgsTrait {
         $args->canSettle = $side == 1 ? $this->canSettle($playerId) : null;
         $this->addActivableTokens($playerId, $args);
 
-        return $args;
+        return (array)$args;
     }
 
     function argMoveBlackDie() {

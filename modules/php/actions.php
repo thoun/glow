@@ -620,7 +620,7 @@ trait ActionTrait {
 
         $playerId = intval($this->getCurrentPlayerId());
         
-        $resolveCardsForPlayer = $this->argResolveCardsForPlayer($playerId);
+        $resolveCardsForPlayer = (object)$this->argResolveCardsForPlayer($playerId);
         $remainingEffect = $this->array_find($resolveCardsForPlayer->remainingEffects, fn($remainingEffect) => $remainingEffect[0] == $cardType && $remainingEffect[1] == $id);
         if ($remainingEffect == null) {
             throw new BgaUserException("You can't apply that effect");
@@ -648,7 +648,7 @@ trait ActionTrait {
     }
 
     function checkResolveCardEnd(int $playerId) {
-        $args = $this->argResolveCardsForPlayer($playerId);
+        $args = (object)$this->argResolveCardsForPlayer($playerId);
         if (count($args->remainingEffects) > 0 || $args->killTokenId > 0 || $args->disableTokenId > 0) {
             $this->gamestate->nextPrivateState($playerId, 'resolve');
         } else {
@@ -663,7 +663,7 @@ trait ActionTrait {
         $playerId = intval($this->getCurrentPlayerId());
         $companionId = $this->getSelectedCompanion($playerId);
         
-        $resolveCardsForPlayer = $this->argResolveCardsForPlayer($playerId);
+        $resolveCardsForPlayer = (object)$this->argResolveCardsForPlayer($playerId);
         $remainingEffect = $this->array_find($resolveCardsForPlayer->remainingEffects, fn($remainingEffect) => $remainingEffect[0] == 1 && $remainingEffect[1] == $companionId);
         if ($remainingEffect == null) {
             throw new BgaUserException("You can't apply that effect");
@@ -693,7 +693,7 @@ trait ActionTrait {
         $playerId = intval($this->getCurrentPlayerId());
         $companionId = $this->getSelectedCompanion($playerId);
         
-        $resolveCardsForPlayer = $this->argResolveCardsForPlayer($playerId);
+        $resolveCardsForPlayer = (object)$this->argResolveCardsForPlayer($playerId);
         $remainingEffect = $this->array_find($resolveCardsForPlayer->remainingEffects, fn($remainingEffect) => $remainingEffect[0] == 1 && $remainingEffect[1] == $companionId);
         if ($remainingEffect == null) {
             throw new BgaUserException("You can't apply that effect");
@@ -784,7 +784,7 @@ trait ActionTrait {
 
         $playerId = intval($this->getCurrentPlayerId());
 
-        $resolveCardsForPlayer = $this->argResolveCardsForPlayer($playerId);
+        $resolveCardsForPlayer = (object)$this->argResolveCardsForPlayer($playerId);
         
         while (count($resolveCardsForPlayer->remainingEffects) > 0) {
             $firstRemainingEffect = $resolveCardsForPlayer->remainingEffects[0];
@@ -840,7 +840,7 @@ trait ActionTrait {
     }
 
     function checkMoveEnd(int $playerId, bool $fromMove) {    
-        $args = $this->argMoveForPlayer($playerId);
+        $args = (object)$this->argMoveForPlayer($playerId);
         $side = $this->getSide();
         if ($side != 2 && (count($args->possibleRoutes) > 0 || $args->canSettle || $args->killTokenId > 0 || $args->disableTokenId > 0)) {
             $this->gamestate->nextPrivateState($playerId, 'move');

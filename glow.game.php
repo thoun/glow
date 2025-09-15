@@ -43,6 +43,8 @@ class Glow extends Table {
 
     use DebugUtilTrait;
 
+    public \Bga\GameFramework\Components\Deck $adventurers;
+
 	function __construct() {
         // Your global variables labels:
         //  Here, you can assign labels to global variables you are using for this game.

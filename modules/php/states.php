@@ -212,7 +212,7 @@ trait StateTrait {
                 }
             }
 
-            $args = $this->argResolveCardsForPlayer($playerId);
+            $args = (object)$this->argResolveCardsForPlayer($playerId);
             if (count($args->remainingEffects) > 0 || $args->killTokenId > 0 || $args->disableTokenId > 0) {
                 $playerWithEffects[] = $playerId;
             }
@@ -234,7 +234,7 @@ trait StateTrait {
         $autoSkipImpossibleActions = $this->autoSkipImpossibleActions();
 
         foreach($playersIds as $playerId) {
-            $args = $this->argMoveForPlayer($playerId);
+            $args = (object)$this->argMoveForPlayer($playerId);
             if (!$autoSkipImpossibleActions || count($args->possibleRoutes) > 0 || $args->canSettle || $args->killTokenId > 0 || $args->disableTokenId > 0) {
                 $playerWithRoutes[] = $playerId;
             } else {
