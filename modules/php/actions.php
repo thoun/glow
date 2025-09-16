@@ -605,7 +605,7 @@ trait ActionTrait {
     public function applyResolveCard(int $playerId, int $cardType, int $id, $dieId = 0, $tokenId = 0) {
         $this->applyCardEffect($playerId, $cardType, $id, $dieId, $tokenId);
 
-        $resolveCardsForPlayer = $this->argResolveCardsForPlayer($playerId);
+        $resolveCardsForPlayer = (object)$this->argResolveCardsForPlayer($playerId);
      
         $this->gamestate->nextPrivateState($playerId, 'resolve');        
 
