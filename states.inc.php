@@ -52,18 +52,6 @@
 require_once("modules/php/constants.inc.php");
 
 $basicGameStates = [
-
-    // The initial state. Please do not modify.
-    ST_BGA_GAME_SETUP => [
-        "name" => "gameSetup",
-        "description" => clienttranslate("Game setup"),
-        "type" => "manager",
-        "action" => "stGameSetup",
-        "transitions" => [ 
-            "" => ST_PREPARE_ADVENTURER_CHOICE,
-        ]
-    ],
-
     ST_PREPARE_ADVENTURER_CHOICE => [
         "name" => "prepareAdventurerChoice",
         "description" => "",
@@ -97,16 +85,6 @@ $basicGameStates = [
             "uriomRecruit" => ST_PLAYER_URIOM_RECRUIT_COMPANION,
             "end" => ST_END_RECRUIT,
         ],
-    ],
-   
-    // Final state.
-    // Please do not modify.
-    ST_END_GAME => [
-        "name" => "gameEnd",
-        "description" => clienttranslate("End of game"),
-        "type" => "manager",
-        "action" => "stGameEnd",
-        "args" => "argGameEnd",
     ],
 ];
 

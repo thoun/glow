@@ -1,0 +1,346 @@
+{
+    "table": {
+        "collectedSmallDice": {
+            "id": 11,
+            "name": "Collected small dice",
+            "type": "int"
+        },
+        "rerolledDice": {
+            "id": 12,
+            "name": "Rerolled dice",
+            "type": "int"
+        },
+        "changedDice": {
+            "id": 13,
+            "name": "Changed dice",
+            "type": "int"
+        },
+        "scoreBack": {
+            "id": 14,
+            "name": "Score track cases back to get reroll",
+            "type": "int"
+        },
+        "resolvedCards": {
+            "id": 15,
+            "name": "Resolved cards",
+            "type": "int"
+        },
+        "discardedCompanions": {
+            "id": 16,
+            "name": "Discarded companions",
+            "type": "int"
+        },
+        "moves": {
+            "id": 17,
+            "name": "Moves",
+            "type": "int"
+        },
+        "footprintsAsJokers": {
+            "id": 18,
+            "name": "Footprints used as jokers",
+            "type": "int"
+        },
+        "Braccio": {
+            "id": 51,
+            "name": "Braccio",
+            "type": "bool"
+        },
+        "BraccioPoints": {
+            "id": 151,
+            "name": "Braccio points",
+            "type": "int"
+        },
+        "Taetyss": {
+            "id": 52,
+            "name": "Taetyss",
+            "type": "bool"
+        },
+        "TaetyssPoints": {
+            "id": 152,
+            "name": "Taetyss points",
+            "type": "int"
+        },
+        "Eoles": {
+            "id": 53,
+            "name": "Eoles",
+            "type": "bool"
+        },
+        "EolesPoints": {
+            "id": 153,
+            "name": "Eoles points",
+            "type": "int"
+        },
+        "Pocana": {
+            "id": 54,
+            "name": "Pocana",
+            "type": "bool"
+        },
+        "PocanaPoints": {
+            "id": 154,
+            "name": "Pocana points",
+            "type": "int"
+        },
+        "Moloc'h": {
+            "id": 55,
+            "name": "Moloc'h",
+            "type": "bool"
+        },
+        "Moloc'hPoints": {
+            "id": 155,
+            "name": "Moloc'h points",
+            "type": "int"
+        },
+        "Noctiluca": {
+            "id": 56,
+            "name": "Noctiluca",
+            "type": "bool"
+        },
+        "NoctilucaPoints": {
+            "id": 156,
+            "name": "Noctiluca points",
+            "type": "int"
+        },
+        "Orium": {
+            "id": 57,
+            "name": "Orium",
+            "type": "bool"
+        },
+        "OriumPoints": {
+            "id": 157,
+            "name": "Orium points",
+            "type": "int"
+        },
+        "Zay'Drel": {
+            "id": 58,
+            "name": "Zay'Drel",
+            "type": "bool"
+        },
+        "Zay'DrelPoints": {
+            "id": 158,
+            "name": "Zay'Drel points",
+            "type": "int"
+        },
+        "Hulios": {
+            "id": 59,
+            "name": "Hulios",
+            "type": "bool"
+        },
+        "HuliosPoints": {
+            "id": 159,
+            "name": "Hulios points",
+            "type": "int"
+        },
+        "Elldir": {
+            "id": 60,
+            "name": "Elldir",
+            "type": "bool"
+        },
+        "ElldirPoints": {
+            "id": 160,
+            "name": "Elldir points",
+            "type": "int"
+        },
+        "days": {
+            "id": 10,
+            "name": "Days",
+            "type": "int"
+        },
+        "tokenBagEmptied": {
+            "id": 104,
+            "name": "Bag emptied",
+            "type": "bool"
+        }
+    },
+    "player": {
+        "collectedSmallDice": {
+            "id": 11,
+            "name": "Collected small dice",
+            "type": "int"
+        },
+        "rerolledDice": {
+            "id": 12,
+            "name": "Rerolled dice",
+            "type": "int"
+        },
+        "changedDice": {
+            "id": 13,
+            "name": "Changed dice",
+            "type": "int"
+        },
+        "scoreBack": {
+            "id": 14,
+            "name": "Score track cases back to get reroll",
+            "type": "int"
+        },
+        "resolvedCards": {
+            "id": 15,
+            "name": "Resolved cards",
+            "type": "int"
+        },
+        "discardedCompanions": {
+            "id": 16,
+            "name": "Discarded companions",
+            "type": "int"
+        },
+        "moves": {
+            "id": 17,
+            "name": "Moves",
+            "type": "int"
+        },
+        "footprintsAsJokers": {
+            "id": 18,
+            "name": "Footprints used as jokers",
+            "type": "int"
+        },
+        "Braccio": {
+            "id": 51,
+            "name": "Braccio",
+            "type": "bool"
+        },
+        "BraccioPoints": {
+            "id": 151,
+            "name": "Braccio points",
+            "type": "int"
+        },
+        "Taetyss": {
+            "id": 52,
+            "name": "Taetyss",
+            "type": "bool"
+        },
+        "TaetyssPoints": {
+            "id": 152,
+            "name": "Taetyss points",
+            "type": "int"
+        },
+        "Eoles": {
+            "id": 53,
+            "name": "Eoles",
+            "type": "bool"
+        },
+        "EolesPoints": {
+            "id": 153,
+            "name": "Eoles points",
+            "type": "int"
+        },
+        "Pocana": {
+            "id": 54,
+            "name": "Pocana",
+            "type": "bool"
+        },
+        "PocanaPoints": {
+            "id": 154,
+            "name": "Pocana points",
+            "type": "int"
+        },
+        "Moloc'h": {
+            "id": 55,
+            "name": "Moloc'h",
+            "type": "bool"
+        },
+        "Moloc'hPoints": {
+            "id": 155,
+            "name": "Moloc'h points",
+            "type": "int"
+        },
+        "Noctiluca": {
+            "id": 56,
+            "name": "Noctiluca",
+            "type": "bool"
+        },
+        "NoctilucaPoints": {
+            "id": 156,
+            "name": "Noctiluca points",
+            "type": "int"
+        },
+        "Orium": {
+            "id": 57,
+            "name": "Orium",
+            "type": "bool"
+        },
+        "OriumPoints": {
+            "id": 157,
+            "name": "Orium points",
+            "type": "int"
+        },
+        "Zay'Drel": {
+            "id": 58,
+            "name": "Zay'Drel",
+            "type": "bool"
+        },
+        "Zay'DrelPoints": {
+            "id": 158,
+            "name": "Zay'Drel points",
+            "type": "int"
+        },
+        "Hulios": {
+            "id": 59,
+            "name": "Hulios",
+            "type": "bool"
+        },
+        "HuliosPoints": {
+            "id": 159,
+            "name": "Hulios points",
+            "type": "int"
+        },
+        "Elldir": {
+            "id": 60,
+            "name": "Elldir",
+            "type": "bool"
+        },
+        "ElldirPoints": {
+            "id": 160,
+            "name": "Elldir points",
+            "type": "int"
+        },
+        "cardsEndPoints": {
+            "id": 20,
+            "name": "Points gained with adventurers and companions",
+            "type": "int"
+        },
+        "meepleEndPoints": {
+            "id": 21,
+            "name": "Points gained with encampment or boats",
+            "type": "int"
+        },
+        "endFirefliesTokens": {
+            "id": 22,
+            "name": "Fireflies tokens",
+            "type": "int"
+        },
+        "endCompanionCount": {
+            "id": 23,
+            "name": "Companion count",
+            "type": "int"
+        },
+        "endFirefliesBonus": {
+            "id": 24,
+            "name": "Fireflies bonus",
+            "type": "bool"
+        },
+        "endFootprintsCount": {
+            "id": 25,
+            "name": "Points gained with footprints",
+            "type": "int"
+        },
+        "endTokenPoints": {
+            "id": 26,
+            "name": "Points gained with tokens",
+            "type": "int"
+        },
+        "points": {
+            "id": 101,
+            "name": "Points",
+            "type": "int"
+        },
+        "coloredTokensCount": {
+            "id": 102,
+            "name": "Colored token count",
+            "type": "int"
+        },
+        "tokensCount": {
+            "id": 103,
+            "name": "Token count",
+            "type": "int"
+        }
+    }
+}

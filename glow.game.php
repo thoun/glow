@@ -16,8 +16,9 @@
   *
   */
 
-
-require_once(APP_GAMEMODULE_PATH.'module/table/table.game.php');
+use Bga\GameFramework\Components\Deck;
+use Bga\GameFramework\Table;
+use Bga\GameFramework\VisibleSystemException;
 
 require_once('modules/php/constants.inc.php');
 require_once('modules/php/utils.php');
@@ -43,7 +44,28 @@ class Glow extends Table {
 
     use DebugUtilTrait;
 
-    public \Bga\GameFramework\Components\Deck $adventurers;
+    public Deck $adventurers;
+    public Deck $companions;
+    public Deck $spells;
+    public Deck $soloTiles;
+    public Deck $tokens;
+
+    public array $DICES;
+    public array $DICES_EXPANSION1;
+    public array $ADVENTURERS;
+    public array $COMPANIONS;
+    public array $REMOVED_COMPANION_FOR_SOLO;
+    public array $OMPANIONS_EXPANSION1_SETS;
+    public array $SPELLS;
+    public array $SPELLS_EXPANSION1;
+    public array $SOLO_TILES;
+    public array $SCORE_TRACK_REROLLS;
+    public array $MAP1;
+    public array $MAP2;
+    public array $MAPS;
+    public array $ADVENTURERS_COLORS;
+    public array $SMALL_BOARD_COLOR;
+    public array $POINTS_FOR_COLOR_TOKENS;
 
 	function __construct() {
         // Your global variables labels:
@@ -67,26 +89,16 @@ class Glow extends Table {
             OPTION_EXPANSION_MODULE3 => OPTION_EXPANSION_MODULE3,
         ]); 
 		
-        $this->adventurers = $this->getNew("module.common.deck");
-        $this->adventurers->init("adventurer");
+        $this->adventurers = $this->deckFactory->createDeck("adventurer");
 		
-        $this->companions = $this->getNew("module.common.deck");
-        $this->companions->init("companion");
+        $this->companions = $this->deckFactory->createDeck("companion");
 		
-        $this->spells = $this->getNew("module.common.deck");
-        $this->spells->init("spells");
+        $this->spells = $this->deckFactory->createDeck("spells");
 		
-        $this->soloTiles = $this->getNew("module.common.deck");
-        $this->soloTiles->init("solotiles");
+        $this->soloTiles = $this->deckFactory->createDeck("solotiles");
 		
-        $this->tokens = $this->getNew("module.common.deck");
-        $this->tokens->init("token");
-	}
-	
-    protected function getGameName() {
-		// Used for translations and stuff. Please do not modify.
-        return "glow";
-    }	
+        $this->tokens = $this->deckFactory->createDeck("token");
+	}	
 
     /*
         setupNewGame:
@@ -189,15 +201,12 @@ class Glow extends Table {
             $this->createTokens();
         }
 
-        // TODO TEMP card to test
-        $this->debugSetup();
-
         $this->setDiceOnTable($solo, $isExpansion);
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
 
-        /************ End of the game initialization *****/
+        return \ST_PREPARE_ADVENTURER_CHOICE;
     }
 
     /*
@@ -209,7 +218,7 @@ class Glow extends Table {
         _ when the game starts
         _ when a player refreshes the game page (F5)
     */
-    protected function getAllDatas() {
+    protected function getAllDatas(): array {
         $isExpansion = $this->isExpansion();
         $tokensActivated = $this->tokensActivated();
         
@@ -297,7 +306,7 @@ class Glow extends Table {
         (see states.inc.php)
     */
     function getGameProgression() {
-        $stateName = $this->gamestate->state()['name']; 
+        $stateName = $this->gamestate->getCurrentMainState()->name; 
         if ($stateName === 'gameEnd') {
             return 100;
         }
@@ -342,7 +351,7 @@ class Glow extends Table {
             return;
         }
 
-        throw new feException("Zombie mode not supported at this game state: ".$statename);
+        throw new VisibleSystemException("Zombie mode not supported at this game state: ".$statename);
     }
     
 ///////////////////////////////////////////////////////////////////////////////////:

@@ -144,7 +144,7 @@ interface GlowGamedatas {
     tokensActivated: boolean;
 }
 
-interface GlowGame extends Game {
+interface GlowGame {
     animationManager: AnimationManager;
     adventurersStock: Stock;
     

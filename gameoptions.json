@@ -1,0 +1,131 @@
+{
+    "100": {
+        "name": "Side of the board",
+        "values": [
+            {
+                "name": "Random",
+                "tmdisplay": "Random"
+            },
+            {
+                "name": "The Province of Shadows",
+                "tmdisplay": "The Province of Shadows"
+            },
+            {
+                "name": "The Archipelago of Darkness",
+                "tmdisplay": "The Archipelago of Darkness"
+            }
+        ],
+        "default": 1,
+        "level": "major"
+    },
+    "101": {
+        "name": "Random adventurers",
+        "values": {
+            "1": {
+                "name": "Disabled"
+            },
+            "2": {
+                "name": "Enabled",
+                "tmdisplay": "Random adventurers"
+            }
+        },
+        "default": 1
+    },
+    "110": {
+        "name": "Dawn expansion",
+        "values": {
+            "1": {
+                "name": "Disabled"
+            },
+            "2": {
+                "name": "Enabled",
+                "tmdisplay": "Dawn expansion"
+            }
+        },
+        "default": 2,
+        "startcondition": {
+            "1": [
+                {
+                    "type": "maxplayers",
+                    "value": 4,
+                    "message": "You can only player with 5-6 players if the Dawn expansion is activated"
+                }
+            ],
+            "2": []
+        }
+    },
+    "111": {
+        "name": "Dawn expansion set : The Elemental",
+        "values": {
+            "1": {
+                "name": "Disabled"
+            },
+            "2": {
+                "name": "Enabled",
+                "tmdisplay": "Dawn expansion set : The Elemental"
+            }
+        },
+        "default": 1,
+        "displaycondition": [
+            {
+                "type": "otheroption",
+                "id": 110,
+                "value": [
+                    2
+                ]
+            },
+            {
+                "type": "minplayers",
+                "value": 2
+            }
+        ]
+    },
+    "112": {
+        "name": "Dawn expansion set : The Anibloom",
+        "values": {
+            "1": {
+                "name": "Disabled"
+            },
+            "2": {
+                "name": "Enabled",
+                "tmdisplay": "Dawn expansion set : The Anibloom"
+            }
+        },
+        "default": 1,
+        "displaycondition": [
+            {
+                "type": "otheroption",
+                "id": 110,
+                "value": [
+                    2
+                ]
+            }
+        ]
+    },
+    "113": {
+        "name": "Dawn expansion set : The Draconic",
+        "values": {
+            "1": {
+                "name": "Disabled"
+            },
+            "2": {
+                "name": "Enabled",
+                "tmdisplay": "Dawn expansion set : The Draconic"
+            }
+        },
+        "default": 1,
+        "displaycondition": [
+            {
+                "type": "otheroption",
+                "id": 110,
+                "value": [
+                    2
+                ]
+            },
+            {
+                "type": "minplayers",
+                "value": 2
+            }
+        ]
+    }
+}

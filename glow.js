@@ -815,11 +815,11 @@ function sortFunction() {
             if (type === 'string') {
                 var compare = a[field].localeCompare(b[field]);
                 if (compare !== 0) {
-                    return compare;
+                    return compare * direction;
                 }
             }
             else if (type === 'number') {
-                var compare = (a[field] - b[field]) * direction;
+                var compare = (a[field] - b[field]);
                 if (compare !== 0) {
                     return compare * direction;
                 }
@@ -1289,7 +1289,7 @@ var CardStock = /** @class */ (function () {
         }
     };
     /**
-     * Unelect all cards
+     * Unselect all cards
      */
     CardStock.prototype.unselectAll = function (silent) {
         var _this = this;
@@ -1412,6 +1412,24 @@ var CardStock = /** @class */ (function () {
         var unselectableCardsClass = this.getUnselectableCardClass();
         var selectedCardsClass = this.getSelectedCardClass();
         cardElement === null || cardElement === void 0 ? void 0 : cardElement.classList.remove(selectableCardsClass, unselectableCardsClass, selectedCardsClass);
+    };
+    /**
+     * Changes the sort function of the stock.
+     *
+     * @param sort the new sort function. If defined, the stock will be sorted with this new function.
+     */
+    CardStock.prototype.setSort = function (sort) {
+        this.sort = sort;
+        if (this.sort && this.cards.length) {
+            this.cards.sort(this.sort);
+            var previouslyMovedCardDiv = this.getCardElement(this.cards[this.cards.length - 1]);
+            this.element.appendChild(previouslyMovedCardDiv);
+            for (var i = this.cards.length - 2; i >= 0; i--) {
+                var movedCardDiv = this.getCardElement(this.cards[i]);
+                this.element.insertBefore(movedCardDiv, previouslyMovedCardDiv);
+                previouslyMovedCardDiv = movedCardDiv;
+            }
+        }
     };
     return CardStock;
 }());
@@ -3327,29 +3345,22 @@ var ZOOM_LEVELS_MARGIN = [-300, -166, -100, -60, -33, -14, 0, 20, 33.34];
 var LOCAL_STORAGE_ZOOM_KEY = 'Glow-zoom';
 var isDebug = window.location.host == 'studio.boardgamearena.com';
 var log = isDebug ? console.log.bind(window.console) : function () { };
-// @ts-ignore
-GameGui = (function () {
-    function GameGui() { }
-    return GameGui;
-})();
-var Glow = /** @class */ (function (_super) {
-    __extends(Glow, _super);
+var Glow = /** @class */ (function () {
     function Glow() {
-        var _this = _super.call(this) || this;
-        _this.rerollCounters = [];
-        _this.footprintCounters = [];
-        _this.fireflyCounters = [];
-        _this.fireflyTokenCounters = [];
-        _this.companionCounters = [];
-        _this.selectedDice = [];
-        _this.selectedDieFace = null;
-        _this.diceSelectionActive = false;
-        _this.playersTables = [];
-        _this.playersTokens = [];
+        this.rerollCounters = [];
+        this.footprintCounters = [];
+        this.fireflyCounters = [];
+        this.fireflyTokenCounters = [];
+        this.companionCounters = [];
+        this.selectedDice = [];
+        this.selectedDieFace = null;
+        this.diceSelectionActive = false;
+        this.playersTables = [];
+        this.playersTokens = [];
         //private zoomManager: ZoomManager;
-        _this.zoom = 1;
-        _this.DICE_FACES_TOOLTIP = [];
-        _this.onGameUserPreferenceChanged = function (prefId, prefValue) {
+        this.zoom = 1;
+        this.DICE_FACES_TOOLTIP = [];
+        this.onGameUserPreferenceChanged = function (prefId, prefValue) {
             switch (prefId) {
                 case 202:
                     document.getElementById('full-table').dataset.highContrastPoints = '' + prefValue;
@@ -3361,9 +3372,8 @@ var Glow = /** @class */ (function (_super) {
         };
         var zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
-            _this.zoom = Number(zoomStr);
+            this.zoom = Number(zoomStr);
         }
-        return _this;
     }
     /*
         setup:
@@ -3379,20 +3389,20 @@ var Glow = /** @class */ (function (_super) {
     */
     Glow.prototype.setup = function (gamedatas) {
         var _this = this;
-        this.dontPreloadImage("side" + (gamedatas.side == 2 ? 1 : 2) + ".png");
-        this.dontPreloadImage('side1-hd.png');
-        this.dontPreloadImage('side2-hd.png');
+        this.bga.images.dontPreloadImage("side" + (gamedatas.side == 2 ? 1 : 2) + ".png");
+        this.bga.images.dontPreloadImage('side1-hd.png');
+        this.bga.images.dontPreloadImage('side2-hd.png');
         var playerCount = Object.keys(gamedatas.players).length;
         if (playerCount != 5) {
-            this.dontPreloadImage('meeting-track-little-board-5p.png');
+            this.bga.images.dontPreloadImage('meeting-track-little-board-5p.png');
         }
         if (playerCount != 6) {
-            this.dontPreloadImage('meeting-track-little-board-6p.png');
+            this.bga.images.dontPreloadImage('meeting-track-little-board-6p.png');
         }
         if (!gamedatas.expansion) {
-            this.dontPreloadImage('companions-expansion1-set1.png');
-            this.dontPreloadImage('companions-expansion1-set2.png');
-            this.dontPreloadImage('companions-expansion1-set3.png');
+            this.bga.images.dontPreloadImage('companions-expansion1-set1.png');
+            this.bga.images.dontPreloadImage('companions-expansion1-set2.png');
+            this.bga.images.dontPreloadImage('companions-expansion1-set3.png');
         }
         log("Starting game setup");
         [1, 2, 3, 4, 5, 6, 7, 8, 80, 9, 10].forEach(function (color) {
@@ -3434,7 +3444,7 @@ var Glow = /** @class */ (function (_super) {
         if (this.zoom !== 1) {
             this.setZoom(this.zoom);
         }
-        this.onScreenWidthChange = function () {
+        this.bga.gameui.onScreenWidthChange = function () {
             _this.setAutoZoom();
         };
         log("Ending game setup");
@@ -3520,7 +3530,7 @@ var Glow = /** @class */ (function (_super) {
             if (this.gamedatas.gamestate.private_state) {
                 this.gamedatas.gamestate.private_state.descriptionmyturn = originalState['descriptionmyturn' + property];
             }
-            this.updatePageTitle();
+            this.bga.gameui.updatePageTitle();
         }
     };
     Glow.prototype.onEnteringStateStartRound = function () {
@@ -3548,7 +3558,7 @@ var Glow = /** @class */ (function (_super) {
         else {
             this.adventurersStock.items.filter(function (item) { return !adventurers.some(function (adventurer) { return adventurer.color == item.type; }); }).forEach(function (item) { return _this.adventurersStock.removeFromStockById(item.id); });
         }
-        if (this.isCurrentPlayerActive()) {
+        if (this.bga.players.isCurrentPlayerActive()) {
             this.adventurersStock.setSelectionMode(1);
         }
     };
@@ -3570,7 +3580,7 @@ var Glow = /** @class */ (function (_super) {
             }
         });
         this.meetingTrack.setDeckTop(DECK, args.topDeckType);
-        if (this.isCurrentPlayerActive()) {
+        if (this.bga.players.isCurrentPlayerActive()) {
             this.meetingTrack.setSelectionMode(1);
         }
     };
@@ -3579,9 +3589,9 @@ var Glow = /** @class */ (function (_super) {
         // remove color duplicates
         args.dice.filter(function (die, index, self) { return index === self.findIndex(function (t) { return t.color === die.color; }); }).forEach(function (die) {
             var html = "<div class=\"die-item color" + die.color + " side" + Math.min(6, die.color) + "\"></div>";
-            _this.addActionButton("selectTomDie" + die.color + "-button", html, function () { return _this.onTomDiceSelection(die); }, null, null, 'gray');
+            _this.bga.gameui.addActionButton("selectTomDie" + die.color + "-button", html, function () { return _this.onTomDiceSelection(die); }, null, null, 'gray');
         });
-        this.addActionButton("confirmTomDice-button", _("Confirm"), function () { return _this.chooseTomDice(); });
+        this.bga.gameui.addActionButton("confirmTomDice-button", _("Confirm"), function () { return _this.chooseTomDice(); });
         dojo.addClass("confirmTomDice-button", 'disabled');
     };
     Glow.prototype.onEnteringSelectSketalDie = function (args) {
@@ -3589,7 +3599,7 @@ var Glow = /** @class */ (function (_super) {
         // remove color duplicates
         args.dice.filter(function (die, index, self) { return index === self.findIndex(function (t) { return t.color === die.color; }); }).forEach(function (die) {
             var html = "<div class=\"die-item color" + die.color + " side" + Math.min(6, die.color) + "\"></div>";
-            _this.addActionButton("selectSketalDie" + die.id + "-button", html, function () { return _this.selectSketalDie(die.id); });
+            _this.bga.gameui.addActionButton("selectSketalDie" + die.id + "-button", html, function () { return _this.selectSketalDie(die.id); });
         });
     };
     Glow.prototype.onEnteringStateRemoveCompanion = function (args) {
@@ -3600,17 +3610,17 @@ var Glow = /** @class */ (function (_super) {
                 _this.meetingTrack.setCompanion(meetingTrackSpot.companion, spot);
             }
         });
-        if (this.isCurrentPlayerActive()) {
+        if (this.bga.players.isCurrentPlayerActive()) {
             this.meetingTrack.setSelectionMode(1);
         }
     };
     Glow.prototype.onEnteringStateMoveBlackDie = function (args) {
-        if (this.isCurrentPlayerActive()) {
+        if (this.bga.players.isCurrentPlayerActive()) {
             this.meetingTrack.setSelectableDice(args.possibleSpots);
         }
     };
     Glow.prototype.onEnteringStateUriomRecruitCompanion = function (args) {
-        if (this.isCurrentPlayerActive()) {
+        if (this.bga.players.isCurrentPlayerActive()) {
             this.meetingTrack.setSelectableDice([args.spot]);
         }
     };
@@ -3642,9 +3652,9 @@ var Glow = /** @class */ (function (_super) {
             this.cemetaryCompanionsStock.removeAll();
             this.cemetaryCompanionsStock.addToStockWithId(companion.subType, '' + companion.id);
         }
-        if (this.isCurrentPlayerActive()) {
+        if (this.bga.players.isCurrentPlayerActive()) {
             this.getCurrentPlayerTable().companionsStock.setSelectionMode(1);
-            this.addActionButton("skipSwap-button", _("Skip"), function () { return _this.skipSwap(); }, null, null, 'red');
+            this.bga.gameui.addActionButton("skipSwap-button", _("Skip"), function () { return _this.skipSwap(); }, null, null, 'red');
         }
         this.tableHeightChange();
     };
@@ -3665,9 +3675,9 @@ var Glow = /** @class */ (function (_super) {
             companions.forEach(function (companion) { return _this.cemetaryCompanionsStock.addToStockWithId(companion.subType, '' + companion.id, CEMETERY); });
             this.meetingTrack.setDeckTop(CEMETERY, 0);
         }
-        if (this.isCurrentPlayerActive()) {
+        if (this.bga.players.isCurrentPlayerActive()) {
             this.cemetaryCompanionsStock.setSelectionMode(1);
-            this.addActionButton("skipResurrect-button", _("Skip"), function () { return _this.skipResurrect(); }, null, null, 'red');
+            this.bga.gameui.addActionButton("skipResurrect-button", _("Skip"), function () { return _this.skipResurrect(); }, null, null, 'red');
         }
         this.tableHeightChange();
     };
@@ -3703,7 +3713,7 @@ var Glow = /** @class */ (function (_super) {
             }
         });
         if (!document.getElementById("resolveAll-button")) {
-            this.addActionButton("resolveAll-button", resolveArgs.remainingEffects.length ? _("Resolve all") : _("Pass"), function () { return _this.resolveAll(); }, null, null, 'red');
+            this.bga.gameui.addActionButton("resolveAll-button", resolveArgs.remainingEffects.length ? _("Resolve all") : _("Pass"), function () { return _this.resolveAll(); }, null, null, 'red');
         }
         document.getElementById("resolveAll-button").classList.toggle('disabled', resolveArgs.remainingEffects.some(function (remainingEffect) { return remainingEffect[2]; }));
     };
@@ -3735,7 +3745,7 @@ var Glow = /** @class */ (function (_super) {
             }
         });
         if (!document.getElementById("resolveAll-button")) {
-            this.addActionButton("resolveAll-button", resolveArgs.remainingEffects.length ? _("Resolve all") : _("Pass"), function () { return _this.resolveAll(); }, null, null, 'red');
+            this.bga.gameui.addActionButton("resolveAll-button", resolveArgs.remainingEffects.length ? _("Resolve all") : _("Pass"), function () { return _this.resolveAll(); }, null, null, 'red');
         }
         document.getElementById("resolveAll-button").classList.toggle('disabled', resolveArgs.remainingEffects.some(function (remainingEffect) { return remainingEffect[2]; }));
     };
@@ -3745,12 +3755,12 @@ var Glow = /** @class */ (function (_super) {
         this.board.createDestinationZones((_a = args.possibleRoutes) === null || _a === void 0 ? void 0 : _a.map(function (route) { return route; }));
         if (this.gamedatas.side === 1) {
             if (!document.getElementById("placeEncampment-button")) {
-                this.addActionButton("placeEncampment-button", _("Place encampment"), function () { return _this.placeEncampment(); });
+                this.bga.gameui.addActionButton("placeEncampment-button", _("Place encampment"), function () { return _this.placeEncampment(); });
             }
             dojo.toggleClass("placeEncampment-button", 'disabled', !args.canSettle);
         }
         if (!document.getElementById("endTurn-button")) {
-            this.addActionButton("endTurn-button", _("End turn"), function () { return _this.endTurn(); }, null, null, 'red');
+            this.bga.gameui.addActionButton("endTurn-button", _("End turn"), function () { return _this.endTurn(); }, null, null, 'red');
         }
         if (args.possibleRoutes && !args.possibleRoutes.length && !args.canSettle && !args.killTokenId && !args.disableTokenId) {
             this.startActionTimer('endTurn-button', 10);
@@ -3763,12 +3773,12 @@ var Glow = /** @class */ (function (_super) {
         this.board.createDestinationZones((_a = moveArgs.possibleRoutes) === null || _a === void 0 ? void 0 : _a.map(function (route) { return route; }));
         if (this.gamedatas.side === 1) {
             if (!document.getElementById("placeEncampment-button")) {
-                this.addActionButton("placeEncampment-button", _("Place encampment"), function () { return _this.placeEncampment(); });
+                this.bga.gameui.addActionButton("placeEncampment-button", _("Place encampment"), function () { return _this.placeEncampment(); });
             }
             dojo.toggleClass("placeEncampment-button", 'disabled', !moveArgs.canSettle);
         }
         if (!document.getElementById("endTurn-button")) {
-            this.addActionButton("endTurn-button", _("End turn"), function () { return _this.endTurn(); }, null, null, 'red');
+            this.bga.gameui.addActionButton("endTurn-button", _("End turn"), function () { return _this.endTurn(); }, null, null, 'red');
         }
         if (moveArgs.possibleRoutes && !moveArgs.possibleRoutes.length && !moveArgs.canSettle && !moveArgs.killTokenId && !moveArgs.disableTokenId) {
             this.startActionTimer('endTurn-button', 10);
@@ -3818,16 +3828,16 @@ var Glow = /** @class */ (function (_super) {
             html += "\n                <td id=\"after-end-score" + player.id + "\" class=\"score-number after-end-score total\">" + ((playerScore === null || playerScore === void 0 ? void 0 : playerScore.scoreAfterEnd) !== undefined ? playerScore.scoreAfterEnd : '') + "</td>\n            </tr>\n            ";
             dojo.place(html, 'score-table-body');
         });
-        this.addTooltipHtmlToClass('before-end-score', _("Score before the final count."));
-        this.addTooltipHtmlToClass('cards-score', _("Total number of bursts of light on adventurer and companions."));
-        this.addTooltipHtmlToClass('board-score', this.gamedatas.side == 1 ?
+        this.bga.gameui.addTooltipHtmlToClass('before-end-score', _("Score before the final count."));
+        this.bga.gameui.addTooltipHtmlToClass('cards-score', _("Total number of bursts of light on adventurer and companions."));
+        this.bga.gameui.addTooltipHtmlToClass('board-score', this.gamedatas.side == 1 ?
             _("Number of bursts of light indicated on the village where encampment is situated.") :
             _("Number of bursts of light indicated on the islands on which players have placed their boats."));
-        this.addTooltipHtmlToClass('fireflies-score', _("Total number of fireflies in player possession, represented on companions and tokens. If there is many or more fireflies than companions, player score an additional 10 bursts of light."));
+        this.bga.gameui.addTooltipHtmlToClass('fireflies-score', _("Total number of fireflies in player possession, represented on companions and tokens. If there is many or more fireflies than companions, player score an additional 10 bursts of light."));
         if (this.gamedatas.tokensActivated) {
-            this.addTooltipHtmlToClass('tokens-score', _("For each color, the player earns 1/3/6/10/15/21 shards of light if he got 1/2/3/4/5/6 tokens of the same color and a bonus of 10 shards of light if the player got at least 1 butterfly token in each of the 6 colors."));
+            this.bga.gameui.addTooltipHtmlToClass('tokens-score', _("For each color, the player earns 1/3/6/10/15/21 shards of light if he got 1/2/3/4/5/6 tokens of the same color and a bonus of 10 shards of light if the player got at least 1 butterfly token in each of the 6 colors."));
         }
-        this.addTooltipHtmlToClass('footprints-score', _("1 burst of light per footprint in player possession."));
+        this.bga.gameui.addTooltipHtmlToClass('footprints-score', _("1 burst of light per footprint in player possession."));
     };
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
@@ -3904,7 +3914,7 @@ var Glow = /** @class */ (function (_super) {
         var _a, _b;
         if (document.getElementById('cemetary-companions-stock')) {
             (_a = this.cemetaryCompanionsStock) === null || _a === void 0 ? void 0 : _a.removeAll();
-            this.fadeOutAndDestroy('cemetary-companions-stock');
+            this.bga.gameui.fadeOutAndDestroy('cemetary-companions-stock');
             this.cemetaryCompanionsStock = null;
             setTimeout(function () { return _this.tableHeightChange(); }, 200);
             (_b = this.getCurrentPlayerTable()) === null || _b === void 0 ? void 0 : _b.companionsStock.setSelectionMode(0);
@@ -3915,7 +3925,7 @@ var Glow = /** @class */ (function (_super) {
         var _a;
         if (document.getElementById('cemetary-companions-stock')) {
             (_a = this.cemetaryCompanionsStock) === null || _a === void 0 ? void 0 : _a.removeAllTo(CEMETERY);
-            this.fadeOutAndDestroy('cemetary-companions-stock');
+            this.bga.gameui.fadeOutAndDestroy('cemetary-companions-stock');
             this.cemetaryCompanionsStock = null;
             setTimeout(function () { return _this.tableHeightChange(); }, 200);
         }
@@ -3932,7 +3942,7 @@ var Glow = /** @class */ (function (_super) {
     //
     Glow.prototype.onUpdateActionButtons = function (stateName, args) {
         var _this = this;
-        if (this.isCurrentPlayerActive()) {
+        if (this.bga.players.isCurrentPlayerActive()) {
             switch (stateName) {
                 case 'chooseTomDice':
                     this.onEnteringChooseTomDice(args);
@@ -3942,16 +3952,16 @@ var Glow = /** @class */ (function (_super) {
                     this.onEnteringSelectSketalDie(args);
                     break;
                 case 'uriomRecruitCompanion':
-                    this.addActionButton("recruitCompanionUriom-button", _("Recruit selected companion"), function () { return _this.recruitCompanionUriom(); });
-                    this.addActionButton("passUriomRecruit-button", _("Pass"), function () { return _this.passUriomRecruit(); });
+                    this.bga.gameui.addActionButton("recruitCompanionUriom-button", _("Recruit selected companion"), function () { return _this.recruitCompanionUriom(); });
+                    this.bga.gameui.addActionButton("passUriomRecruit-button", _("Pass"), function () { return _this.passUriomRecruit(); });
                     break;
                 case 'privateSelectDiceAction':
                     this.currentDieAction = null;
                     var rollDiceArgs = args;
                     var possibleRerolls = rollDiceArgs.rerollCompanion + rollDiceArgs.rerollCrolos + rollDiceArgs.rerollTokens + Object.values(rollDiceArgs.rerollScore).length;
-                    this.addActionButton("setRollDice-button", _("Reroll 1 or 2 dice") + formatTextIcons(' (1 [reroll] )'), function () { return _this.selectDiceToRoll(); });
-                    this.addActionButton("setChangeDie-button", _("Change die face") + formatTextIcons(" (3 [reroll]" + (rollDiceArgs.grayMultiDice ? ' / ' + _('free for ${symbol}').replace('${symbol}', '[symbol0]') : '') + ")"), function () { return _this.selectDieToChange(); });
-                    this.addActionButton("keepDice-button", _("Keep current dice") + (rollDiceArgs.grayMultiDice ? formatTextIcons(" (" + _('change ${symbol} face before').replace('${symbol}', '[symbol0]') + ")") : ''), function () { return _this.keepDice(); }, null, null, 'red');
+                    this.bga.gameui.addActionButton("setRollDice-button", _("Reroll 1 or 2 dice") + formatTextIcons(' (1 [reroll] )'), function () { return _this.selectDiceToRoll(); });
+                    this.bga.gameui.addActionButton("setChangeDie-button", _("Change die face") + formatTextIcons(" (3 [reroll]" + (rollDiceArgs.grayMultiDice ? ' / ' + _('free for ${symbol}').replace('${symbol}', '[symbol0]') : '') + ")"), function () { return _this.selectDieToChange(); });
+                    this.bga.gameui.addActionButton("keepDice-button", _("Keep current dice") + (rollDiceArgs.grayMultiDice ? formatTextIcons(" (" + _('change ${symbol} face before').replace('${symbol}', '[symbol0]') + ")") : ''), function () { return _this.keepDice(); }, null, null, 'red');
                     dojo.toggleClass("setRollDice-button", 'disabled', possibleRerolls < 1);
                     dojo.toggleClass("setChangeDie-button", 'disabled', possibleRerolls < 3 && !rollDiceArgs.grayMultiDice);
                     dojo.toggleClass("keepDice-button", 'disabled', rollDiceArgs.grayMultiDice);
@@ -3961,10 +3971,10 @@ var Glow = /** @class */ (function (_super) {
                     var possibleCostsRollDice = this.getPossibleCosts(1);
                     possibleCostsRollDice.forEach(function (possibleCost, index) {
                         var costStr = possibleCost.map(function (cost, costTypeIndex) { return _this.getRollDiceCostStr(costTypeIndex, cost); }).filter(function (str) { return str !== null; }).join(' ');
-                        _this.addActionButton("rollDice-button" + index, _("Reroll selected dice") + (" (" + costStr + ")"), function () { return _this.rollDice(possibleCost); });
+                        _this.bga.gameui.addActionButton("rollDice-button" + index, _("Reroll selected dice") + (" (" + costStr + ")"), function () { return _this.rollDice(possibleCost); });
                         dojo.toggleClass("rollDice-button" + index, 'disabled', _this.selectedDice.length < 1 || _this.selectedDice.length > 2);
                     });
-                    this.addActionButton("cancel-button", _("Cancel"), function () { return _this.cancel(); });
+                    this.bga.gameui.addActionButton("cancel-button", _("Cancel"), function () { return _this.cancel(); });
                     break;
                 case 'privateChangeDie':
                     this.currentDieAction = 'change';
@@ -3976,8 +3986,8 @@ var Glow = /** @class */ (function (_super) {
                     break;
                 case 'privateRerollImmediate':
                     this.currentDieAction = 'rerollImmediate';
-                    this.addActionButton("rerollImmediate-button", _("Reroll selected and pink dice"), function () { return _this.rerollImmediate(); });
-                    this.addActionButton("rerollImmediateOnlyPink-button", _("Reroll only pink dice"), function () { return _this.rerollImmediate(true); });
+                    this.bga.gameui.addActionButton("rerollImmediate-button", _("Reroll selected and pink dice"), function () { return _this.rerollImmediate(); });
+                    this.bga.gameui.addActionButton("rerollImmediateOnlyPink-button", _("Reroll only pink dice"), function () { return _this.rerollImmediate(true); });
                     document.getElementById("rerollImmediate-button").classList.add('disabled');
                     if (this.selectedDice.length === 1) {
                         this.onSelectedDiceChange();
@@ -3994,7 +4004,7 @@ var Glow = /** @class */ (function (_super) {
                 case 'removeToken':
                     var removeTokenArgs = args;
                     if (removeTokenArgs.tokens.length === 0 && removeTokenArgs.count) {
-                        this.addActionButton("passRemoveToken-button", _("Pass (no token to remove)"), function () { return _this.passRemoveToken(); });
+                        this.bga.gameui.addActionButton("passRemoveToken-button", _("Pass (no token to remove)"), function () { return _this.passRemoveToken(); });
                     }
                     break;
                 case 'move':
@@ -4009,17 +4019,17 @@ var Glow = /** @class */ (function (_super) {
                     break;
                 case 'discardCompanionSpell':
                 case 'privateKillToken':
-                    this.addActionButton("cancel-button", _("Cancel"), function () { return stateName == 'privateKillToken' ? _this.cancelToken() : _this.cancelDiscardCompanionSpell(); }, null, null, 'gray');
+                    this.bga.gameui.addActionButton("cancel-button", _("Cancel"), function () { return stateName == 'privateKillToken' ? _this.cancelToken() : _this.cancelDiscardCompanionSpell(); }, null, null, 'gray');
                     break;
                 case 'privateDisableToken':
                     var _loop_8 = function (i) {
-                        this_4.addActionButton("disableSymbol" + i + "-button", formatTextIcons("[symbol" + i + "]"), function () { return _this.disableToken(i); }, null, null, 'gray');
+                        this_4.bga.gameui.addActionButton("disableSymbol" + i + "-button", formatTextIcons("[symbol" + i + "]"), function () { return _this.disableToken(i); }, null, null, 'gray');
                     };
                     var this_4 = this;
                     for (var i = 1; i <= 5; i++) {
                         _loop_8(i);
                     }
-                    this.addActionButton("cancel-button", _("Cancel"), function () { return _this.cancelToken(); }, null, null, 'gray');
+                    this.bga.gameui.addActionButton("cancel-button", _("Cancel"), function () { return _this.cancelToken(); }, null, null, 'gray');
                     break;
             }
         }
@@ -4041,10 +4051,10 @@ var Glow = /** @class */ (function (_super) {
             case 'privateMove':
                 var tokenArgs_1 = args;
                 if (tokenArgs_1.killTokenId) {
-                    this.addActionButton("useKillToken-button", _("Use ${token}").replace('${token}', "<div class=\"module-token\" data-type-arg=\"37\"></div>"), function () { return _this.activateToken(tokenArgs_1.killTokenId); }, null, null, 'gray');
+                    this.bga.gameui.addActionButton("useKillToken-button", _("Use ${token}").replace('${token}', "<div class=\"module-token\" data-type-arg=\"37\"></div>"), function () { return _this.activateToken(tokenArgs_1.killTokenId); }, null, null, 'gray');
                 }
                 if (tokenArgs_1.disableTokenId) {
-                    this.addActionButton("useDisableToken-button", _("Use ${token}").replace('${token}', "<div class=\"module-token\" data-type-arg=\"0\"></div>"), function () { return _this.activateToken(tokenArgs_1.disableTokenId); }, null, null, 'gray');
+                    this.bga.gameui.addActionButton("useDisableToken-button", _("Use ${token}").replace('${token}', "<div class=\"module-token\" data-type-arg=\"0\"></div>"), function () { return _this.activateToken(tokenArgs_1.disableTokenId); }, null, null, 'gray');
                 }
                 break;
         }
@@ -4143,7 +4153,7 @@ var Glow = /** @class */ (function (_super) {
         }
         else {
             dojo.place('<div id="firstPlayerToken"></div>', "player_board_" + playerId + "_firstPlayerWrapper");
-            this.addTooltipHtml('firstPlayerToken', _("First Player token"));
+            this.bga.gameui.addTooltipHtml('firstPlayerToken', _("First Player token"));
         }
     };
     Glow.prototype.onCemetarySelection = function (items) {
@@ -4159,13 +4169,13 @@ var Glow = /** @class */ (function (_super) {
         }
     };
     Glow.prototype.getPlayerId = function () {
-        return Number(this.player_id);
+        return this.bga.players.getCurrentPlayerId();
     };
     Glow.prototype.getBoardSide = function () {
         return this.gamedatas.side;
     };
     Glow.prototype.isColorBlindMode = function () {
-        return this.getGameUserPreference(201) == 1;
+        return this.bga.userPreferences.get(201) == 1;
     };
     Glow.prototype.isExpansion = function () {
         return this.gamedatas.expansion;
@@ -4175,7 +4185,7 @@ var Glow = /** @class */ (function (_super) {
     };
     Glow.prototype.getPlayerScore = function (playerId) {
         var _a, _b;
-        return (_b = (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.getValue()) !== null && _b !== void 0 ? _b : Number(this.gamedatas.players[playerId].score);
+        return (_b = (_a = this.bga.gameui.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.getValue()) !== null && _b !== void 0 ? _b : Number(this.gamedatas.players[playerId].score);
     };
     Glow.prototype.getPlayerTable = function (playerId) {
         return this.playersTables.find(function (playerTable) { return playerTable.playerId === playerId; });
@@ -4189,7 +4199,7 @@ var Glow = /** @class */ (function (_super) {
         var players = Object.values(gamedatas.players);
         var solo = players.length === 1;
         if (solo) {
-            this.addAutomataPlayerPanel(0, 'Tom', {
+            this.bga.playerPanels.addAutomataPlayerPanel(0, 'Tom', {
                 iconClass: 'tom-avatar',
                 score: Number(gamedatas.tom.score),
             });
@@ -4197,7 +4207,7 @@ var Glow = /** @class */ (function (_super) {
         (solo ? __spreadArray(__spreadArray([], players), [gamedatas.tom]) : players).forEach(function (player) {
             var playerId = Number(player.id);
             // counters
-            _this.getPlayerPanelElement(playerId).innerHTML = "\n            <div class=\"counters\">\n                <div id=\"reroll-counter-wrapper-" + player.id + "\" class=\"reroll-counter\">\n                    <div class=\"icon reroll\"></div> \n                    <span id=\"reroll-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"footprint-counter-wrapper-" + player.id + "\" class=\"footprint-counter\">\n                    <div class=\"icon footprint\"></div> \n                    <span id=\"footprint-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"firefly-counter-wrapper-" + player.id + "\" class=\"firefly-counter\">\n                </div>\n            </div>\n            <div id=\"tokens-" + player.id + "\" class=\"tokens-stock\"></div>\n            ";
+            _this.bga.playerPanels.getElement(playerId).innerHTML = "\n            <div class=\"counters\">\n                <div id=\"reroll-counter-wrapper-" + player.id + "\" class=\"reroll-counter\">\n                    <div class=\"icon reroll\"></div> \n                    <span id=\"reroll-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"footprint-counter-wrapper-" + player.id + "\" class=\"footprint-counter\">\n                    <div class=\"icon footprint\"></div> \n                    <span id=\"footprint-counter-" + player.id + "\"></span>\n                </div>\n                <div id=\"firefly-counter-wrapper-" + player.id + "\" class=\"firefly-counter\">\n                </div>\n            </div>\n            <div id=\"tokens-" + player.id + "\" class=\"tokens-stock\"></div>\n            ";
             var rerollCounter = new ebg.counter();
             rerollCounter.create("reroll-counter-" + playerId);
             rerollCounter.setValue(player.rerolls);
@@ -4244,7 +4254,7 @@ var Glow = /** @class */ (function (_super) {
             if (!solo) {
                 if (player.smallBoard) {
                     dojo.place("<div id=\"player_board_" + player.id + "_meeting_track\" class=\"meeting-track-icon\" data-players=\"" + players.length + "\"></div>", "player_board_" + player.id);
-                    _this.addTooltipHtml("player_board_" + player.id + "_meeting_track", _("This player will place its small dice on the meeting track small board"));
+                    _this.bga.gameui.addTooltipHtml("player_board_" + player.id + "_meeting_track", _("This player will place its small dice on the meeting track small board"));
                 }
                 // first player token
                 dojo.place("<div id=\"player_board_" + player.id + "_firstPlayerWrapper\"></div>", "player_board_" + player.id);
@@ -4262,9 +4272,9 @@ var Glow = /** @class */ (function (_super) {
                 dojo.place("\n            <div class=\"token meeple" + (_this.gamedatas.side == 2 ? 0 : 1) + " color-blind meeple-player-" + player.id + "\" data-player-no=\"" + player.playerNo + "\" style=\"background-color: #" + player.color + ";\"></div>\n            ", "player_board_" + player.id);
             }
         });
-        this.addTooltipHtmlToClass('reroll-counter', _("Rerolls tokens"));
-        this.addTooltipHtmlToClass('footprint-counter', _("Footprints tokens"));
-        this.addTooltipHtmlToClass('firefly-counter', _("Fireflies (tokens + companion fireflies) / number of companions"));
+        this.bga.gameui.addTooltipHtmlToClass('reroll-counter', _("Rerolls tokens"));
+        this.bga.gameui.addTooltipHtmlToClass('footprint-counter', _("Footprints tokens"));
+        this.bga.gameui.addTooltipHtmlToClass('firefly-counter', _("Fireflies (tokens + companion fireflies) / number of companions"));
     };
     Glow.prototype.updateFireflyCounterIcon = function (playerId) {
         var activated = this.fireflyCounters[playerId].getValue() >= this.companionCounters[playerId].getValue();
@@ -4273,7 +4283,7 @@ var Glow = /** @class */ (function (_super) {
     Glow.prototype.createPlayerTables = function (gamedatas) {
         var _this = this;
         var players = Object.values(gamedatas.players).sort(function (a, b) { return a.playerNo - b.playerNo; });
-        var playerIndex = players.findIndex(function (player) { return Number(player.id) === Number(_this.player_id); });
+        var playerIndex = players.findIndex(function (player) { return Number(player.id) === _this.bga.players.getCurrentPlayerId(); });
         var orderedPlayers = playerIndex > 0 ? __spreadArray(__spreadArray([], players.slice(playerIndex)), players.slice(0, playerIndex)) : players;
         orderedPlayers.forEach(function (player) { return _this.createPlayerTable(gamedatas, Number(player.id)); });
     };
@@ -4293,7 +4303,7 @@ var Glow = /** @class */ (function (_super) {
         //dieDiv?.parentNode.removeChild(dieDiv);
         dojo.place(html, destinationId);
         document.getElementById("die" + die.id).addEventListener('click', function () { return _this.onDiceClick(die); });
-        this.addTooltipHtml("die" + die.id, this.DICE_FACES_TOOLTIP[die.color]);
+        this.bga.gameui.addTooltipHtml("die" + die.id, this.DICE_FACES_TOOLTIP[die.color]);
     };
     Glow.prototype.createOrMoveDie = function (die, destinationId, rollClass) {
         var _this = this;
@@ -4470,17 +4480,17 @@ var Glow = /** @class */ (function (_super) {
         changeDieButtons.forEach(function (elem) { return elem.parentElement.removeChild(elem); });
         (_a = document.getElementById("cancelRollDice-button")) === null || _a === void 0 ? void 0 : _a.remove();
         if (free) {
-            this.addActionButton("changeDie-buttonFree", _("Change selected die") + (" (" + _('free') + ")"), function () { return _this.changeDie([]); });
+            this.bga.gameui.addActionButton("changeDie-buttonFree", _("Change selected die") + (" (" + _('free') + ")"), function () { return _this.changeDie([]); });
         }
         else {
             var possibleCosts = this.getPossibleCosts(3);
             possibleCosts.forEach(function (possibleCost, index) {
                 var costStr = possibleCost.map(function (cost, costTypeIndex) { return _this.getRollDiceCostStr(costTypeIndex, cost); }).filter(function (str) { return str !== null; }).join(' ');
-                _this.addActionButton("changeDie-button" + index, _("Change selected die") + (" (" + costStr + ")"), function () { return _this.changeDie(possibleCost); });
+                _this.bga.gameui.addActionButton("changeDie-button" + index, _("Change selected die") + (" (" + costStr + ")"), function () { return _this.changeDie(possibleCost); });
                 dojo.addClass("changeDie-button" + index, 'disabled');
             });
         }
-        this.addActionButton("cancelRollDice-button", _("Cancel"), function () { return _this.cancel(); });
+        this.bga.gameui.addActionButton("cancelRollDice-button", _("Cancel"), function () { return _this.cancel(); });
     };
     Glow.prototype.removeResolveActionButtons = function () {
         var ids = RESOLVE_ACTION_BUTTONS_IDS;
@@ -4517,12 +4527,12 @@ var Glow = /** @class */ (function (_super) {
         this.setResolveGamestateDescription("discardDie");
         dice.forEach(function (die) {
             var html = "<div class=\"die-item color" + die.color + " side" + die.face + "\"></div>";
-            _this.addActionButton("selectDiscardDie" + die.id + "-button", html, function () {
+            _this.bga.gameui.addActionButton("selectDiscardDie" + die.id + "-button", html, function () {
                 _this.resolveCard(type, id, die.id);
                 _this.setActionBarResolve(true);
             }, null, null, 'gray');
         });
-        this.addActionButton("cancelResolveDiscardDie-button", _("Cancel"), function () { return _this.setActionBarResolve(true); });
+        this.bga.gameui.addActionButton("cancelResolveDiscardDie-button", _("Cancel"), function () { return _this.setActionBarResolve(true); });
     };
     Glow.prototype.removeMoveActionButtons = function () {
         var ids = MOVE_ACTION_BUTTONS_IDS;
@@ -4577,7 +4587,7 @@ var Glow = /** @class */ (function (_super) {
                 var facesButtons = document.getElementById('change-die-faces-buttons');
                 var _loop_10 = function (i) {
                     var html = "<div class=\"die-item color" + die.color + " side" + i + "\"></div>";
-                    this_5.addActionButton("changeDie" + i + "-button", html, function () {
+                    this_5.bga.gameui.addActionButton("changeDie" + i + "-button", html, function () {
                         if (_this.selectedDieFace !== null) {
                             dojo.removeClass("changeDie" + _this.selectedDieFace + "-button", 'bgabutton_blue');
                             dojo.addClass("changeDie" + _this.selectedDieFace + "-button", 'bgabutton_gray');
@@ -4700,7 +4710,7 @@ var Glow = /** @class */ (function (_super) {
         }
     };
     Glow.prototype.selectDiceToRoll = function () {
-        if (!this.checkAction('selectDiceToRoll')) {
+        if (!this.bga.actions.checkAction('selectDiceToRoll')) {
             return;
         }
         this.takeNoLockAction('selectDiceToRoll', {
@@ -4708,7 +4718,7 @@ var Glow = /** @class */ (function (_super) {
         });
     };
     Glow.prototype.selectDieToChange = function () {
-        if (!this.checkAction('selectDieToChange')) {
+        if (!this.bga.actions.checkAction('selectDieToChange')) {
             return;
         }
         this.takeNoLockAction('selectDieToChange', {
@@ -4716,7 +4726,7 @@ var Glow = /** @class */ (function (_super) {
         });
     };
     Glow.prototype.rollDice = function (cost) {
-        if (!this.checkAction('rollDice')) {
+        if (!this.bga.actions.checkAction('rollDice')) {
             return;
         }
         this.takeNoLockAction('rollDice', {
@@ -4725,7 +4735,7 @@ var Glow = /** @class */ (function (_super) {
         });
     };
     Glow.prototype.changeDie = function (cost) {
-        if (!this.checkAction('changeDie')) {
+        if (!this.bga.actions.checkAction('changeDie')) {
             return;
         }
         this.takeNoLockAction('changeDie', {
@@ -4736,7 +4746,7 @@ var Glow = /** @class */ (function (_super) {
     };
     Glow.prototype.rerollImmediate = function (onlyPink) {
         if (onlyPink === void 0) { onlyPink = false; }
-        if (!this.checkAction('rerollImmediate')) {
+        if (!this.bga.actions.checkAction('rerollImmediate')) {
             return;
         }
         this.takeNoLockAction('rerollImmediate', {
@@ -4744,13 +4754,13 @@ var Glow = /** @class */ (function (_super) {
         });
     };
     Glow.prototype.passRemoveToken = function () {
-        if (!this.checkAction('passRemoveToken')) {
+        if (!this.bga.actions.checkAction('passRemoveToken')) {
             return;
         }
         this.takeNoLockAction('passRemoveToken');
     };
     Glow.prototype.cancel = function () {
-        if (!this.checkAction('cancel')) {
+        if (!this.bga.actions.checkAction('cancel')) {
             return;
         }
         this.takeNoLockAction('cancel');
@@ -4764,7 +4774,7 @@ var Glow = /** @class */ (function (_super) {
         }
     };
     Glow.prototype.chooseAdventurer = function (id) {
-        if (!this.checkAction('chooseAdventurer')) {
+        if (!this.bga.actions.checkAction('chooseAdventurer')) {
             return;
         }
         this.takeAction('chooseAdventurer', {
@@ -4772,7 +4782,7 @@ var Glow = /** @class */ (function (_super) {
         });
     };
     Glow.prototype.chooseTomDice = function () {
-        if (!this.checkAction('chooseTomDice')) {
+        if (!this.bga.actions.checkAction('chooseTomDice')) {
             return;
         }
         this.takeAction('chooseTomDice', {
@@ -4782,13 +4792,13 @@ var Glow = /** @class */ (function (_super) {
     Glow.prototype.recruitCompanion = function (spot, warningPrompted) {
         var _this = this;
         if (warningPrompted === void 0) { warningPrompted = false; }
-        if (!this.checkAction('recruitCompanion')) {
+        if (!this.bga.actions.checkAction('recruitCompanion')) {
             return;
         }
         if (!warningPrompted) {
             var args = this.gamedatas.gamestate.args;
             if (args.companions[spot].companion.noDieWarning) {
-                this.confirmationDialog(_("Are you sure you want to take that card? There is no available big die for it."), function () { return _this.recruitCompanion(spot, true); });
+                this.bga.gameui.confirmationDialog(_("Are you sure you want to take that card? There is no available big die for it."), function () { return _this.recruitCompanion(spot, true); });
                 return;
             }
         }
@@ -4797,7 +4807,7 @@ var Glow = /** @class */ (function (_super) {
         });
     };
     Glow.prototype.selectSketalDie = function (id) {
-        if (!this.checkAction('selectSketalDie')) {
+        if (!this.bga.actions.checkAction('selectSketalDie')) {
             return;
         }
         this.takeAction('selectSketalDie', {
@@ -4805,7 +4815,7 @@ var Glow = /** @class */ (function (_super) {
         });
     };
     Glow.prototype.removeCompanion = function (spot) {
-        if (!this.checkAction('removeCompanion')) {
+        if (!this.bga.actions.checkAction('removeCompanion')) {
             return;
         }
         this.takeAction('removeCompanion', {
@@ -4813,7 +4823,7 @@ var Glow = /** @class */ (function (_super) {
         });
     };
     Glow.prototype.moveBlackDie = function (spot) {
-        if (!this.checkAction('moveBlackDie')) {
+        if (!this.bga.actions.checkAction('moveBlackDie')) {
             return;
         }
         this.takeAction('moveBlackDie', {
@@ -4821,19 +4831,19 @@ var Glow = /** @class */ (function (_super) {
         });
     };
     Glow.prototype.recruitCompanionUriom = function () {
-        if (!this.checkAction('recruitCompanionUriom')) {
+        if (!this.bga.actions.checkAction('recruitCompanionUriom')) {
             return;
         }
         this.takeAction('recruitCompanionUriom');
     };
     Glow.prototype.passUriomRecruit = function () {
-        if (!this.checkAction('passUriomRecruit')) {
+        if (!this.bga.actions.checkAction('passUriomRecruit')) {
             return;
         }
         this.takeAction('passUriomRecruit');
     };
     Glow.prototype.keepDice = function () {
-        if (!this.checkAction('keepDice')) {
+        if (!this.bga.actions.checkAction('keepDice')) {
             return;
         }
         this.takeNoLockAction('keepDice');
@@ -4841,13 +4851,13 @@ var Glow = /** @class */ (function (_super) {
     Glow.prototype.swap = function (id, warningPrompted) {
         var _this = this;
         if (warningPrompted === void 0) { warningPrompted = false; }
-        if (!this.checkAction('swap')) {
+        if (!this.bga.actions.checkAction('swap')) {
             return;
         }
         if (!warningPrompted) {
             var args = this.gamedatas.gamestate.args;
             if (args.card.noDieWarning) {
-                this.confirmationDialog(_("Are you sure you want to take that card? There is no available big die for it."), function () { return _this.swap(id, true); });
+                this.bga.gameui.confirmationDialog(_("Are you sure you want to take that card? There is no available big die for it."), function () { return _this.swap(id, true); });
                 return;
             }
         }
@@ -4856,7 +4866,7 @@ var Glow = /** @class */ (function (_super) {
         });
     };
     Glow.prototype.skipSwap = function () {
-        if (!this.checkAction('skipSwap')) {
+        if (!this.bga.actions.checkAction('skipSwap')) {
             return;
         }
         this.takeAction('skipSwap');
@@ -4864,13 +4874,13 @@ var Glow = /** @class */ (function (_super) {
     Glow.prototype.resurrect = function (id, warningPrompted) {
         var _this = this;
         if (warningPrompted === void 0) { warningPrompted = false; }
-        if (!this.checkAction('resurrect')) {
+        if (!this.bga.actions.checkAction('resurrect')) {
             return;
         }
         if (!warningPrompted) {
             var args = this.gamedatas.gamestate.args;
             if (args.cemeteryCards.find(function (card) { return card.id == id; }).noDieWarning) {
-                this.confirmationDialog(_("Are you sure you want to take that card? There is no available big die for it."), function () { return _this.resurrect(id, true); });
+                this.bga.gameui.confirmationDialog(_("Are you sure you want to take that card? There is no available big die for it."), function () { return _this.resurrect(id, true); });
                 return;
             }
         }
@@ -4879,13 +4889,13 @@ var Glow = /** @class */ (function (_super) {
         });
     };
     Glow.prototype.skipResurrect = function () {
-        if (!this.checkAction('skipResurrect')) {
+        if (!this.bga.actions.checkAction('skipResurrect')) {
             return;
         }
         this.takeAction('skipResurrect');
     };
     Glow.prototype.resolveCard = function (type, id, dieId) {
-        if (!this.checkAction('resolveCard')) {
+        if (!this.bga.actions.checkAction('resolveCard')) {
             return;
         }
         this.takeNoLockAction('resolveCard', {
@@ -4895,13 +4905,13 @@ var Glow = /** @class */ (function (_super) {
         });
     };
     Glow.prototype.resolveAll = function () {
-        if (!this.checkAction('resolveAll')) {
+        if (!this.bga.actions.checkAction('resolveAll')) {
             return;
         }
         this.takeNoLockAction('resolveAll');
     };
     Glow.prototype.removeToken = function (id) {
-        if (!this.checkAction('removeToken')) {
+        if (!this.bga.actions.checkAction('removeToken')) {
             return;
         }
         this.takeAction('removeToken', {
@@ -4909,7 +4919,7 @@ var Glow = /** @class */ (function (_super) {
         });
     };
     Glow.prototype.activateToken = function (id) {
-        /*if(!this.checkAction('removeToken')) {
+        /*if(!this.bga.actions.checkAction('removeToken')) {
             return;
         }*/
         this.takeAction('activateToken', {
@@ -4917,7 +4927,7 @@ var Glow = /** @class */ (function (_super) {
         });
     };
     Glow.prototype.killToken = function (type, id) {
-        if (!this.checkAction('killToken')) {
+        if (!this.bga.actions.checkAction('killToken')) {
             return;
         }
         this.takeAction('killToken', {
@@ -4926,7 +4936,7 @@ var Glow = /** @class */ (function (_super) {
         });
     };
     Glow.prototype.disableToken = function (symbol) {
-        if (!this.checkAction('disableToken')) {
+        if (!this.bga.actions.checkAction('disableToken')) {
             return;
         }
         this.takeAction('disableToken', {
@@ -4934,13 +4944,13 @@ var Glow = /** @class */ (function (_super) {
         });
     };
     Glow.prototype.cancelToken = function () {
-        if (!this.checkAction('cancelToken')) {
+        if (!this.bga.actions.checkAction('cancelToken')) {
             return;
         }
         this.takeAction('cancelToken');
     };
     Glow.prototype.discardCompanionSpell = function (type, id) {
-        if (!this.checkAction('discardCompanionSpell')) {
+        if (!this.bga.actions.checkAction('discardCompanionSpell')) {
             return;
         }
         this.takeAction('discardCompanionSpell', {
@@ -4949,13 +4959,13 @@ var Glow = /** @class */ (function (_super) {
         });
     };
     Glow.prototype.cancelDiscardCompanionSpell = function () {
-        if (!this.checkAction('cancelDiscardCompanionSpell')) {
+        if (!this.bga.actions.checkAction('cancelDiscardCompanionSpell')) {
             return;
         }
         this.takeAction('cancelDiscardCompanionSpell');
     };
     Glow.prototype.move = function (destination, from) {
-        if (!this.checkAction('move')) {
+        if (!this.bga.actions.checkAction('move')) {
             return;
         }
         this.takeNoLockAction('move', {
@@ -4964,29 +4974,28 @@ var Glow = /** @class */ (function (_super) {
         });
     };
     Glow.prototype.placeEncampment = function () {
-        if (!this.checkAction('placeEncampment')) {
+        if (!this.bga.actions.checkAction('placeEncampment')) {
             return;
         }
         this.takeNoLockAction('placeEncampment');
     };
     Glow.prototype.endTurn = function () {
-        if (!this.checkAction('endTurn')) {
+        if (!this.bga.actions.checkAction('endTurn')) {
             return;
         }
         this.takeNoLockAction('endTurn');
     };
     Glow.prototype.takeAction = function (action, data) {
         data = data || {};
-        data.lock = true;
-        this.ajaxcall("/glow/glow/" + action + ".html", data, this, function () { });
+        this.bga.actions.performAction(action, data, { checkAction: false });
     };
     Glow.prototype.takeNoLockAction = function (action, data) {
         data = data || {};
-        this.ajaxcall("/glow/glow/" + action + ".html", data, this, function () { });
+        this.bga.actions.performAction(action, data, { checkAction: false, lock: false });
     };
     Glow.prototype.setPoints = function (playerId, points) {
         var _a;
-        (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.toValue(points);
+        (_a = this.bga.gameui.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.toValue(points);
         this.board.setPoints(playerId, points);
     };
     Glow.prototype.limitCounterToZero = function (counter) {
@@ -5017,7 +5026,7 @@ var Glow = /** @class */ (function (_super) {
     Glow.prototype.addHelp = function () {
         var _this = this;
         dojo.place("<button id=\"glow-help-button\">?</button>", 'left-side');
-        dojo.connect($('glow-help-button'), 'onclick', this, function () { return _this.showHelp(); });
+        document.getElementById('glow-help-button').addEventListener('click', function () { return _this.showHelp(); });
     };
     Glow.prototype.showHelp = function () {
         if (!this.helpDialog) {
@@ -5031,7 +5040,7 @@ var Glow = /** @class */ (function (_super) {
         this.helpDialog.show();
     };
     Glow.prototype.startActionTimer = function (buttonId, time) {
-        if (this.getGameUserPreference(203) == 2) {
+        if (this.bga.userPreferences.get(203) == 2) {
             return;
         }
         var button = document.getElementById(buttonId);
@@ -5380,7 +5389,7 @@ var Glow = /** @class */ (function (_super) {
         return { log: log, args: args };
     };
     return Glow;
-}(GameGui));
+}());
 define([
     "dojo", "dojo/_base/declare",
     "ebg/core/gamegui",
