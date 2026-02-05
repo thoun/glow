@@ -88,6 +88,51 @@ class Glow implements GlowGame {
             this.bga.images.dontPreloadImage('companions-expansion1-set3.png');
         }
 
+        this.bga.gameArea.getElement().insertAdjacentHTML('beforeend', `
+            <div id="score">
+                <div id="tabble-wrapper">
+                    <table>
+                        <thead>
+                            <tr id="scoretr"></tr>
+                        </thead>
+                        <tbody id="score-table-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="zoom-wrapper">
+                <div id="full-table">
+
+                    <div id="currentplayertable"></div>
+
+                    <div id="full-board-wrapper">
+                        <div id="full-board">
+                            <div id="board">
+                                <div id="table-dice"></div>
+                            </div>
+                            <div id="middle-band">
+                                <div id="round-counter-wrapper">
+                                    ${_("Day")} <span id="round-counter">-</span><span id="round-counter-wrapper-max-days">&nbsp;/&nbsp;8</span>
+                                </div>
+                            </div>
+                            <div id="meeting-track">
+                                <div id="deckB" class="meeting-track-stock hidden-pile"></div>
+                                <div id="deck" class="meeting-track-stock hidden-pile"></div>
+                                <div id="cemetery" class="meeting-track-stock hidden-pile"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="playerstables"></div>
+                </div>
+                <div id="zoom-controls">
+                    <button id="zoom-out"></button>
+                    <button id="zoom-in" class="disabled"></button>
+                </div>
+            </div>
+        `);
+
         log( "Starting game setup" );
 
         [1, 2, 3, 4, 5, 6, 7, 8, 80, 9, 10].forEach(color => {
@@ -1002,7 +1047,7 @@ class Glow implements GlowGame {
     }
 
     public getPlayerScore(playerId: number): number {
-        return this.bga.gameui.scoreCtrl[playerId]?.getValue() ?? Number(this.gamedatas.players[playerId].score);
+        return this.bga.playerPanels.getScoreCounter(playerId).getValue() ?? Number(this.gamedatas.players[playerId].score);
     }
 
     private getPlayerTable(playerId: number): PlayerTable {
@@ -1957,7 +2002,7 @@ class Glow implements GlowGame {
     }
     
     private setPoints(playerId: number, points: number) {
-        this.bga.gameui.scoreCtrl[playerId]?.toValue(points);
+        this.bga.playerPanels.getScoreCounter(playerId).toValue(points);
         this.board.setPoints(playerId, points);
     }
 

@@ -51,44 +51,6 @@
 
 require_once("modules/php/constants.inc.php");
 
-$basicGameStates = [
-    ST_PREPARE_ADVENTURER_CHOICE => [
-        "name" => "prepareAdventurerChoice",
-        "description" => "",
-        "type" => "game",
-        "action" => "stPrepareAdventurerChoice",
-        "transitions" => [
-            "chooseAdventurer" => ST_PLAYER_CHOOSE_ADVENTURER,
-            "recruit" => ST_START_ROUND,
-            "chooseTomDice" => ST_PLAYER_CHOOSE_TOM_DICE,
-        ],
-    ],
-
-    ST_NEXT_PLAYER_CHOOSE_ADVENTURER => [
-        "name" => "nextPlayerChooseAdventurer",
-        "description" => "",
-        "type" => "game",
-        "action" => "stNextPlayerChooseAdventurer",
-        "transitions" => [
-            "nextPlayer" => ST_PLAYER_CHOOSE_ADVENTURER, 
-            "end" => ST_START_ROUND,
-        ],
-    ],
-
-    ST_NEXT_PLAYER_RECRUIT_COMPANION => [
-        "name" => "nextPlayerRecruitCompanion",
-        "description" => "",
-        "type" => "game",
-        "action" => "stNextPlayerRecruitCompanion",
-        "transitions" => [
-            "nextPlayer" => ST_PLAYER_RECRUIT_COMPANION, 
-            "uriomRecruit" => ST_PLAYER_URIOM_RECRUIT_COMPANION,
-            "end" => ST_END_RECRUIT,
-        ],
-    ],
-];
-
-
 $playerActionsGameStates = [
 
     ST_PLAYER_CHOOSE_ADVENTURER => [
@@ -502,6 +464,41 @@ $playerActionsGameStates = [
 
 
 $gameGameStates = [
+    ST_PREPARE_ADVENTURER_CHOICE => [
+        "name" => "prepareAdventurerChoice",
+        "description" => "",
+        "type" => "game",
+        "action" => "stPrepareAdventurerChoice",
+        "transitions" => [
+            "chooseAdventurer" => ST_PLAYER_CHOOSE_ADVENTURER,
+            "recruit" => ST_START_ROUND,
+            "chooseTomDice" => ST_PLAYER_CHOOSE_TOM_DICE,
+        ],
+    ],
+
+    ST_NEXT_PLAYER_CHOOSE_ADVENTURER => [
+        "name" => "nextPlayerChooseAdventurer",
+        "description" => "",
+        "type" => "game",
+        "action" => "stNextPlayerChooseAdventurer",
+        "transitions" => [
+            "nextPlayer" => ST_PLAYER_CHOOSE_ADVENTURER, 
+            "end" => ST_START_ROUND,
+        ],
+    ],
+
+    ST_NEXT_PLAYER_RECRUIT_COMPANION => [
+        "name" => "nextPlayerRecruitCompanion",
+        "description" => "",
+        "type" => "game",
+        "action" => "stNextPlayerRecruitCompanion",
+        "transitions" => [
+            "nextPlayer" => ST_PLAYER_RECRUIT_COMPANION, 
+            "uriomRecruit" => ST_PLAYER_URIOM_RECRUIT_COMPANION,
+            "end" => ST_END_RECRUIT,
+        ],
+    ],
+
     ST_START_ROUND => [
         "name" => "startRound",
         "description" => "",
@@ -544,4 +541,4 @@ $gameGameStates = [
     ],
 ];
  
-$machinestates = $basicGameStates + $playerActionsGameStates + $gameGameStates;
+$machinestates = $playerActionsGameStates + $gameGameStates;

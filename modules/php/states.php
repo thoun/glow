@@ -528,7 +528,8 @@ trait StateTrait {
             ]);*/
 
             $score = (($playerScore > $tom->score) || ($playerScore == $tom->score && $this->getPlayerFootprints($playerId) > $tom->footprints)) ? 1 : 0;
-            $this->DbQuery("UPDATE player SET `player_score` = $score, `player_score_aux` = 0");
+            $this->bga->playerScore->set($playerId, $score, null);
+            $this->bga->playerScoreAux->set($playerId, 0, null);
         } else {  
             // Tie          
             $this->DbQuery("UPDATE player SET `player_score_aux` = `player_rerolls`");

@@ -11,6 +11,7 @@ require_once(__DIR__.'/objects/meeple.php');
 require_once(__DIR__.'/objects/meeting-track-spot.php');
 
 trait UtilTrait {
+    public \Bga\GameFramework\Bga $bga;
 
     //////////////////////////////////////////////////////////////////////////////
     //////////// Utility functions
@@ -76,12 +77,8 @@ trait UtilTrait {
         $this->DbQuery("DELETE FROM `global_variables` where `name` = '$name'");
     }
 
-    function isTurnBased() {
-        return intval($this->gamestate->table_globals[200]) >= 10;
-    }
-
-    function autoSkipImpossibleActions() {
-        return $this->isTurnBased();
+    function autoSkipImpossibleActions(): bool {
+        return $this->bga->tableOptions->isTurnBased();
     }
 
     function getFirstPlayerId() {
@@ -294,10 +291,6 @@ trait UtilTrait {
         }
     }
 
-    function getPlayerCount() {
-        return intval($this->getUniqueValueFromDB("SELECT count(*) FROM player"));
-    }
-
     function getSpotCount() {
         $spotCount = 5;
         $playerCount = $this->getPlayerCount();
@@ -333,8 +326,7 @@ trait UtilTrait {
             return;
         }
         
-        $this->DbQuery("UPDATE player SET player_score = player_score + $incScore WHERE player_id = $playerId");
-        
+        $this->bga->playerScore->inc($playerId, $incScore, null);        
 
         $this->notifyAllPlayers('points', $message, $params + [
             'playerId' => $playerId,
@@ -347,7 +339,7 @@ trait UtilTrait {
 
     function decPlayerScore(int $playerId, int $decScore, $message = '', $params = []) {
         $newScore = max(0, $this->getPlayerScore($playerId) - $decScore);
-        $this->DbQuery("UPDATE player SET player_score = $newScore WHERE player_id = $playerId");
+        $this->bga->playerScore->set($playerId, $newScore, null);
 
         $this->notifyAllPlayers('points', $message, $params + [
             'playerId' => $playerId,

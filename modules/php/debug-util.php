@@ -82,8 +82,8 @@ trait DebugUtilTrait {
         $this->DbQuery("UPDATE player SET `player_fireflies` = $number");
     }
 
-    function debugSetScore($number) {
-        $this->DbQuery("UPDATE player SET `player_score` = $number");
+    function debugSetScore(int $number) {
+        $this->bga->playerScore->setAll($number, null);
     }
 
     function debugLastDay() {

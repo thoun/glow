@@ -144,7 +144,7 @@ trait ActionTrait {
             foreach($dice as $die) {
                 if ($die->color === $companion->dieColor) {
 
-                    $multi = ($this->gamestate->state()['name']) == 'resurrect';
+                    $multi = $this->gamestate->getCurrentMainState()->name == 'resurrect';
                     if ($multi) {
                         $this->DbQuery("UPDATE dice SET `used` = true WHERE die_id = $die->id");
                         $die->used = true;
@@ -278,7 +278,7 @@ trait ActionTrait {
 
     public function selectSketalDie(int $id) {
         $this->checkAction('selectSketalDie');
-        $multi = ($this->gamestate->state()['name']) != 'selectSketalDie';
+        $multi = $this->gamestate->getCurrentMainState()->name != 'selectSketalDie';
 
         $die = $this->getDieById($id);
 
@@ -712,7 +712,7 @@ trait ActionTrait {
         $playerId = intval($this->getCurrentPlayerId());
         $token = $this->getTokenFromDb($this->tokens->getCard($tokenId));
         
-        $currentState = intval($this->gamestate->state_id());
+        $currentState = $this->gamestate->getCurrentMainStateId();
         if (!in_array($currentState, [ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS, ST_MULTIPLAYER_PRIVATE_MOVE])) {
             throw new BgaUserException("You can use this token only during the resolve card phase or the move phase.");
         }
@@ -769,7 +769,7 @@ trait ActionTrait {
     public function checkActivateTokenEnd() {
         $playerId = intval($this->getCurrentPlayerId());
 
-        $currentState = intval($this->gamestate->state_id());
+        $currentState = $this->gamestate->getCurrentMainStateId();
         if ($currentState == ST_MULTIPLAYER_CHANGE_DICE) {
             $this->gamestate->nextPrivateState($playerId, 'roll');
         } else if ($currentState == ST_MULTIPLAYER_PRIVATE_RESOLVE_CARDS) {

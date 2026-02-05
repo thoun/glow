@@ -3404,6 +3404,7 @@ var Glow = /** @class */ (function () {
             this.bga.images.dontPreloadImage('companions-expansion1-set2.png');
             this.bga.images.dontPreloadImage('companions-expansion1-set3.png');
         }
+        this.bga.gameArea.getElement().insertAdjacentHTML('beforeend', "\n            <div id=\"score\">\n                <div id=\"tabble-wrapper\">\n                    <table>\n                        <thead>\n                            <tr id=\"scoretr\"></tr>\n                        </thead>\n                        <tbody id=\"score-table-body\">\n                        </tbody>\n                    </table>\n                </div>\n            </div>\n\n            <div id=\"zoom-wrapper\">\n                <div id=\"full-table\">\n\n                    <div id=\"currentplayertable\"></div>\n\n                    <div id=\"full-board-wrapper\">\n                        <div id=\"full-board\">\n                            <div id=\"board\">\n                                <div id=\"table-dice\"></div>\n                            </div>\n                            <div id=\"middle-band\">\n                                <div id=\"round-counter-wrapper\">\n                                    " + _("Day") + " <span id=\"round-counter\">-</span><span id=\"round-counter-wrapper-max-days\">&nbsp;/&nbsp;8</span>\n                                </div>\n                            </div>\n                            <div id=\"meeting-track\">\n                                <div id=\"deckB\" class=\"meeting-track-stock hidden-pile\"></div>\n                                <div id=\"deck\" class=\"meeting-track-stock hidden-pile\"></div>\n                                <div id=\"cemetery\" class=\"meeting-track-stock hidden-pile\"></div>\n                            </div>\n                        </div>\n                    </div>\n\n                    <div id=\"playerstables\"></div>\n                </div>\n                <div id=\"zoom-controls\">\n                    <button id=\"zoom-out\"></button>\n                    <button id=\"zoom-in\" class=\"disabled\"></button>\n                </div>\n            </div>\n        ");
         log("Starting game setup");
         [1, 2, 3, 4, 5, 6, 7, 8, 80, 9, 10].forEach(function (color) {
             var facesStr = '';
@@ -4184,8 +4185,8 @@ var Glow = /** @class */ (function () {
         return Number(Object.values(this.gamedatas.players).find(function (player) { return Number(player.id) != playerId; }).id);
     };
     Glow.prototype.getPlayerScore = function (playerId) {
-        var _a, _b;
-        return (_b = (_a = this.bga.gameui.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.getValue()) !== null && _b !== void 0 ? _b : Number(this.gamedatas.players[playerId].score);
+        var _a;
+        return (_a = this.bga.playerPanels.getScoreCounter(playerId).getValue()) !== null && _a !== void 0 ? _a : Number(this.gamedatas.players[playerId].score);
     };
     Glow.prototype.getPlayerTable = function (playerId) {
         return this.playersTables.find(function (playerTable) { return playerTable.playerId === playerId; });
@@ -4994,8 +4995,7 @@ var Glow = /** @class */ (function () {
         this.bga.actions.performAction(action, data, { checkAction: false, lock: false });
     };
     Glow.prototype.setPoints = function (playerId, points) {
-        var _a;
-        (_a = this.bga.gameui.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.toValue(points);
+        this.bga.playerPanels.getScoreCounter(playerId).toValue(points);
         this.board.setPoints(playerId, points);
     };
     Glow.prototype.limitCounterToZero = function (counter) {
