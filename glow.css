@@ -1289,7 +1289,7 @@ html[data-theme=dark] {
 
 @font-face {
   font-family: "glow";
-  src: url("img/glow.woff2") format("woff2"), url("img/glow.woff") format("woff");
+  src: url("fonts/glow.woff2") format("woff2"), url("fonts/glow.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
