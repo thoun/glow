@@ -89,3 +89,13 @@ ol.help-list {
     float: left;
     margin: 10px;
 }
+
+html[data-theme="dark"] {
+    #popin_glowHelpDialog {
+        background-color: var(--game-palette-bga-gray-244);
+    }
+
+    #help-popin h1 {
+        color: unset;
+    }
+}

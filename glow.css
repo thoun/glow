@@ -200,7 +200,6 @@ body > .card {
   width: calc(var(--width) + (var(--tile-count) - 1) * var(--horizontal-shift));
   height: calc(var(--height) + (var(--tile-count) - 1) * var(--vertical-shift));
   transition: width 0.5s ease-in-out, height 0.5s ease-in-out, background-color 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
-  opacity: var(--tile-count);
 }
 
 .card-stock.all-visible-deck > .card {
@@ -1213,9 +1212,17 @@ ol.help-list {
   margin: 10px;
 }
 
-.player-board {
-  background-color: white;
+html[data-theme=dark] #popin_glowHelpDialog {
+  background-color: var(--game-palette-bga-gray-244);
 }
+html[data-theme=dark] #help-popin h1 {
+  color: unset;
+}
+
+html[data-theme=light] .player-board {
+  --game-bga-player-panel-background: white;
+}
+
 .player-board .counters {
   display: flex;
   align-items: center;
@@ -1240,9 +1247,6 @@ ol.help-list {
   border-radius: 50%;
   width: 48px;
   height: 48px;
-}
-.player-board .roundedbox_topleft, .player-board .roundedbox_topmain, .player-board .roundedbox_topright, .player-board .roundedbox_main, .player-board .roundedbox_bottomleft, .player-board .roundedbox_bottommain, .player-board .roundedbox_bottomright {
-  background-color: white;
 }
 
 .tom-avatar {
@@ -1279,9 +1283,8 @@ html {
   background-repeat: repeat;
 }
 
-.mode_3d #game_play_area_background {
-  background: url("img/background.jpg");
-  background-repeat: repeat;
+html[data-theme=dark] {
+  background-blend-mode: soft-light;
 }
 
 @font-face {

@@ -1,6 +1,10 @@
-.player-board {
-  background-color: white;
+html[data-theme="light"] {
+  .player-board {
+    --game-bga-player-panel-background: white;
+  }
+}
 
+.player-board {
   .counters {
     display: flex;
     align-items: center;
@@ -30,11 +34,6 @@
     border-radius: 50%;
     width: 48px;
     height: 48px;
-  }
-
-  // spectator mode box
-  .roundedbox_topleft, .roundedbox_topmain, .roundedbox_topright, .roundedbox_main, .roundedbox_bottomleft, .roundedbox_bottommain, .roundedbox_bottomright {
-    background-color: white;
   }
 }
 

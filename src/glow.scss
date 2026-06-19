@@ -16,9 +16,8 @@ html {
     background-repeat: repeat;
 }
 
-.mode_3d #game_play_area_background {
-    background: url('img/background.jpg');
-    background-repeat: repeat;
+html[data-theme="dark"] {
+  background-blend-mode: soft-light;
 }
 
 @font-face {
