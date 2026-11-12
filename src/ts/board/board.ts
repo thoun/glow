@@ -1,0 +1,332 @@
+
+export const POINT_CASE_SIZE = 25.5;
+export const BOARD_POINTS_MARGIN = 38;
+export const HIDDEN_TOKENS_DELAY = 2000;
+
+export const MAP1: number[][] = [
+    [36, 396, 1], // 0
+    [157, 382], // 1
+    [204, 360], // 2
+    [267, 376], // 3
+    [332, 358], // 4
+    [383, 388, 1], // 5
+    [530, 393], // 6
+    [596, 373], // 7
+    [654, 341], // 8
+    [771, 315], // 9
+    [817, 269], // 10
+    [741, 134], // 11
+    [710, 44], // 12
+    [766, 39], // 13
+    [786, 78, 1], // 14
+    [695, 164], // 15
+    [720, 257], // 16
+    [572, 250, 1], // 17
+    [657, 201], // 18
+    [615, 157], // 19
+    [651, 124], // 20
+    [666, 88], // 21
+    [646, 37], // 22
+    [561, 36], // 23
+    [538, 77], // 24
+    [584, 94], // 25
+    [523, 133], // 26
+    [529, 197], // 27
+    [474, 132], // 28
+    [404, 150], // 29
+    [410, 201], // 30
+    [467, 218], // 31
+    [566, 312], // 32
+    [436, 292, 1], // 33
+    [380, 250], // 34
+    [314, 230], // 35
+    [346, 200], // 36
+    [336, 155], // 37
+    [222, 115, 1], // 38
+    [373, 105], // 39
+    [159, 40], // 40
+    [289, 44], // 41
+    [348, 38], // 42
+    [419, 62, 1], // 43
+    [78, 367], // 44
+    [124, 353], // 45
+    [150, 317], // 46
+    [201, 313], // 47
+    [227, 278], // 48
+    [275, 292], // 49
+    [316, 275], // 50
+    [361, 304], // 51
+    [227, 209], // 52
+    [102, 43], // 53
+    [77, 77], // 54
+    [42, 105], // 55
+    [70, 179], // 56
+    [130, 198], // 57
+    [176, 255], // 58
+    [37, 233, 1], // 59
+    [74, 319], // 60
+];
+
+export const MAP2: number[][] = [
+    [416, 204, 1], // 0
+    [635, 200, 1], // 1
+    [760, 132, 1], // 2
+    [564, 299, 1], // 3
+    [762, 355, 1], // 4
+    [393, 383, 1], // 5
+    [252, 300, 1], // 6
+    [58, 352, 1], // 7
+    [139, 196, 1], // 8
+    [69, 66, 1], // 9
+    [286, 69, 1], // 10
+    [504, 55, 1], // 11
+];
+export const MAPS: number[][][] = [null, MAP1, MAP2];
+
+export const MAP1_POINT = [
+    [418, 406, 5], // 5
+    [819, 98, 20], // 14
+    [605, 269, 12], // 17
+    [469, 312, 8], // 33
+    [257, 134, 10], // 38
+    [455, 79, 15], // 43
+    [69, 254, 3], // 59
+];
+export const MAP2_POINT = [
+    [795, 373, 5], // 4
+    [428, 402, 4], // 5
+    [285, 318, 2], // 6
+    [84, 369, 2], // 7
+    [104, 85, 8], // 9
+    [539, 72, 3], // 11
+];
+export const MAPS_POINT: number[][][] = [null, MAP1_POINT, MAP2_POINT];
+
+export class Board {
+    private points = new Map<number, number>();
+    private meeples: Meeple[] = [];
+    tomCompany: number;
+    private tokensOpacityTimeout: any;
+
+    constructor(
+        private game: GlowGame,
+        private players: GlowPlayer[],
+        tableDice: Die[],
+        solo: boolean,
+    ) {
+        let html = '';
+
+        if (solo && this.game.getBoardSide() == 2) {
+            html += `<div id="token-solo-board"></div>`;
+        }
+
+        // score contrast
+        MAPS_POINT[game.getBoardSide()].forEach(point => document.getElementById('board').insertAdjacentHTML('beforeend', `<div class="score-contrast score-contrast-map" style="left: ${point[0]}px; top: ${point[1]}px;">${point[2]}</div>`));
+
+        // points
+        players.forEach(player =>
+            html += `<div id="player-${player.id}-point-marker" class="point-marker ${this.game.isColorBlindMode() ? 'color-blind' : ''}" data-player-no="${player.playerNo}" style="background: #${player.color};"></div>`
+        );
+        document.getElementById('board').insertAdjacentHTML('beforeend', html);
+        players.forEach(player => {
+            this.points.set(Number(player.id), Number(player.score));
+            this.meeples.push(...player.meeples);
+
+            if (Number(player.id) == 0) { // tom
+                const coordinates = this.getPointsCoordinates(player.company);
+                const left = coordinates[0];
+                const top = coordinates[1];
+                const transform = `translateX(${left}px) translateY(${top}px)`;
+                document.getElementById('board').insertAdjacentHTML('beforeend', `<div id="meeple0" class="token meeple1 ${this.game.isColorBlindMode() ? 'color-blind' : ''} meeple-player-0" style="background-color: #${player.color}; transform: ${transform}"></div>`);
+            }
+        });
+
+        this.movePoints();
+
+        players.forEach(player => this.placeMeeples(player));
+
+        tableDice.forEach(die => this.game.createOrMoveDie(die, 'table-dice'));
+
+        document.getElementById('table-dice').addEventListener('click', event => {
+            if (!this.game.gamedatas.gamestate.name.startsWith('selectSketalDie')) {
+                return;
+            }
+
+            const target = event.target as HTMLDivElement;
+            if (!target || !target.classList.contains('die')) {
+                return;
+            }
+
+            this.game.selectSketalDie(Number(target.dataset.dieId));
+        });
+
+        const boardDiv = document.getElementById('board');
+        boardDiv.addEventListener('click', event => this.hideTokens(boardDiv, event));
+        boardDiv.addEventListener('mousemove', event => {
+            if (!this.tokensOpacityTimeout) {
+                this.hideTokens(boardDiv, event);
+            }
+        });
+        boardDiv.addEventListener('mouseleave', () => {
+            if (this.tokensOpacityTimeout) {
+                clearTimeout(this.tokensOpacityTimeout);
+                document.getElementById('board').classList.remove('hidden-tokens');
+                document.getElementById('board').classList.remove('hidden-meeples');
+                this.tokensOpacityTimeout = null;
+            }
+        });
+    }
+
+    private hideTokens(boardDiv: HTMLElement, event: MouseEvent) {
+        const x = event.offsetX;
+        const y = event.offsetY;
+
+        //if (x < BOARD_POINTS_MARGIN || y < BOARD_POINTS_MARGIN || x > boardDiv.clientWidth - BOARD_POINTS_MARGIN || y > boardDiv.clientHeight - BOARD_POINTS_MARGIN) {
+            document.getElementById('board').classList.add('hidden-tokens');
+            document.getElementById('board').classList.add('hidden-meeples');
+
+            if (this.tokensOpacityTimeout) {
+                clearTimeout(this.tokensOpacityTimeout);
+            }
+            this.tokensOpacityTimeout = setTimeout(() => {
+                document.getElementById('board').classList.remove('hidden-tokens');
+                document.getElementById('board').classList.remove('hidden-meeples');
+                this.tokensOpacityTimeout = null;
+            }, HIDDEN_TOKENS_DELAY);
+        //}
+    }
+
+    public setPoints(playerId: number, points: number) {
+        this.points.set(playerId, points);
+        this.movePoints();
+    }
+
+    public setTomCompany(company: number) {
+        const coordinates = this.getPointsCoordinates(company);
+        const left = coordinates[0];
+        const top = coordinates[1];
+        document.getElementById(`meeple0`).style.transform = `translateX(${left}px) translateY(${top}px)`;
+    }
+
+    private getPointsCoordinates(points: number) {
+        const pointsModulo = points % 100;
+        const cases = pointsModulo === 10 ? 11 :
+            (pointsModulo > 10 ? pointsModulo + 2 : pointsModulo);
+
+        const top = cases < 86 ? Math.min(Math.max(cases - 34, 0), 17) * POINT_CASE_SIZE : (102 - cases) * POINT_CASE_SIZE;
+        const left = cases < 52 ? Math.min(cases, 34) * POINT_CASE_SIZE : Math.max((33 - Math.max(cases - 52, 0))*POINT_CASE_SIZE, 0);
+
+        return [17 + left, 15 + top];
+    }
+
+    private movePoints() {
+        this.points.forEach((points, playerId) => {
+            const markerDiv = document.getElementById(`player-${playerId}-point-marker`);
+
+            const coordinates = this.getPointsCoordinates(points);
+            const left = coordinates[0];
+            const top = coordinates[1];
+
+            let topShift = 0;
+            let leftShift = 0;
+            this.points.forEach((iPoints, iPlayerId) => {
+                if (iPoints === points && iPlayerId < playerId) {
+                    topShift += 5;
+                    leftShift += 5;
+                }
+            });
+
+            markerDiv.style.transform = `translateX(${left + leftShift}px) translateY(${top + topShift}px)`;
+        });
+    }
+
+    private placeMeeples(player: GlowPlayer) {
+        player.meeples.forEach(meeple => this.placeMeeple(meeple, player.color));
+    }
+
+    private getMapSpot(spot: number): number[] {
+        return MAPS[this.game.getBoardSide()][spot];
+    }
+
+    private placeMeeple(meeple: Meeple, color?: string) {
+        const mapSpot = this.getMapSpot(meeple.position);
+        const x = mapSpot[0];
+        const y = mapSpot[1];
+
+        let shift = 0;
+        let transform = '';
+        if (meeple.type > 0) {
+            shift = this.meeples.filter(m => m.type === meeple.type && (m.playerId < meeple.playerId || (m.playerId === meeple.playerId  && m.id < meeple.id))).length;
+            transform = `translate(${x + shift*5 + (meeple.type === 2 ? 50 : 0)}px, ${y + shift*5}px)`;
+        } else {
+            shift = this.meeples.filter(m => m.type === meeple.type && m.playerId === meeple.playerId  && m.id < meeple.id).length;
+            const playerIndex = this.players.findIndex(player => Number(player.id) == meeple.playerId);
+            transform = `translate(${x + shift*5 + (playerIndex * 30 - 8*(this.players.length-1))}px, ${y + shift*5 + 10}px)`;
+        }
+
+        const div = document.getElementById(`meeple${meeple.id}`);
+        if (div) {
+            div.style.transform = transform;
+        } else {
+            document.getElementById('board').insertAdjacentHTML('beforeend', `<div id="meeple${meeple.id}" class="token meeple${meeple.type} ${this.game.isColorBlindMode() ? 'color-blind' : ''} meeple-player-${meeple.playerId}" data-player-no="${this.players.find(p => Number(p.id) == meeple.playerId).playerNo}" style="background-color: #${color}; transform: ${transform}"></div>`);
+        }
+    }
+
+    public moveMeeple(meeple: Meeple) {
+        this.meeples.find(m => m.id = meeple.id).position = meeple.position;
+
+        this.placeMeeple(meeple);
+    }
+
+    public createDestinationZones(possibleDestinations: Route[]) {
+        (Array.from(document.getElementsByClassName('destination-zone')) as HTMLElement[]).forEach(node => node.parentElement.removeChild(node));
+        (Array.from(document.getElementsByClassName('destination-arrow')) as HTMLElement[]).forEach(node => node.parentElement.removeChild(node));
+
+        possibleDestinations?.forEach(possibleDestination => {
+            const position = possibleDestination.destination;
+            const mapSpot = this.getMapSpot(position);
+            const big = mapSpot.length > 2;
+            if (!document.getElementById(`destination-zone-${position}`)) {
+                document.getElementById('board').insertAdjacentHTML('beforeend', `<div id="destination-zone-${position}" class="destination-zone ${mapSpot[2] ? 'big' : 'small'}" style="left: ${mapSpot[0]}px; top: ${mapSpot[1]}px;"></div>`);
+            }
+
+            const from = possibleDestination.from;
+            const mapSpotFrom = this.getMapSpot(from);
+
+            const deltaX = mapSpot[0] - mapSpotFrom[0];
+            const deltaY = mapSpot[1] - mapSpotFrom[1];
+            const rad = Math.atan2(deltaY, deltaX); // In radians
+            let left = (mapSpot[0] + mapSpotFrom[0]) / 2;
+            let top = (mapSpot[1] + mapSpotFrom[1]) / 2;
+            if (!big) {
+                left -= 25;
+            }
+            const onlyOneDestinationToSpot = possibleDestinations.filter(pd => pd.destination === possibleDestination.destination).length <= 1;
+
+            if (!document.getElementById(`destination-arrow-${position}-from-${from}`)) {
+                const distance = Math.sqrt( deltaX*deltaX + deltaY*deltaY );
+                const scaleX = Math.min(1, distance / 180);
+                const scaleY = Math.min(1, distance / 100);
+
+                document.getElementById('board').insertAdjacentHTML('beforeend', `<div id="destination-arrow-${position}-from-${from}" class="destination-arrow" style="left: ${left}px; top: ${top}px; transform: rotate(${rad}rad) scaleX(${scaleX}) scaleY(${scaleY})"></div>`);
+                document.getElementById(`destination-arrow-${position}-from-${from}`).addEventListener('click', () => this.game.selectMove(possibleDestination));
+
+                const footprintsCost = possibleDestination.costForPlayer.filter(cost => cost > -30 && cost < -20).map(cost => (-cost) - 20).reduce((a, b) => a + b, 0);
+
+                for (let i=0; i<footprintsCost; i++) {
+                    document.getElementById(`destination-arrow-${position}-from-${from}`).insertAdjacentHTML('beforeend', `<div class="footprint round-token" style="position: absolute; left: ${i*10}px; top: ${i*10}px; transform: scaleX(${(1/scaleX) / 1.8}) scaleY(${(1/scaleY) / 1.8})"></div>`);
+                }
+            }
+            if (onlyOneDestinationToSpot) {
+                document.getElementById(`destination-zone-${position}`).addEventListener('click', () => this.game.selectMove(possibleDestination));
+            }
+            document.getElementById(`destination-zone-${position}`).classList.toggle('unselectable', !onlyOneDestinationToSpot);
+        });
+
+    }
+
+    public setColor(playerId: number, newPlayerColor: string) {
+        document.getElementById(`player-${playerId}-point-marker`).style.background = `#${newPlayerColor}`;
+        (Array.from(document.getElementsByClassName(`meeple-player-${playerId}`)) as HTMLDivElement[]).forEach(elem => elem.style.background = `#${newPlayerColor}`);
+    }
+}

@@ -1,5 +1,3 @@
-//@import '../node_modules/bga-zoom/bga-zoom';
-@import '../node_modules/bga-cards/bga-cards';
 
 @import 'dice';
 @import 'tokens';
@@ -167,6 +165,7 @@ html[data-theme="dark"] {
 
 #middle-band {
   background: white;
+  color: black;
   display: flex;
   align-items: center;
 

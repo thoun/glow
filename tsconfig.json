@@ -1,43 +1,19 @@
 {
-    "rootDir": ".", 
-    "compilerOptions": {
-      "target": "es5",
-      "module": "none",
-      "lib": ["dom", "esnext"],  
-      "sourceMap": false,
-      "outFile": "glow.js",
-    },
-    "files": [
-        "bga-framework.d.ts",
-        "node_modules/bga-zoom/src/zoom-manager.ts",
-        "node_modules/bga-animations/src/framework.d.ts",
-        "node_modules/bga-animations/src/animations.ts",
-        "node_modules/bga-animations/src/animations/attach-with-animation.ts",
-        "node_modules/bga-animations/src/animations/cumulated-animations.ts",
-        "node_modules/bga-animations/src/animations/pause-animation.ts",
-        "node_modules/bga-animations/src/animations/show-screen-center-animation.ts",
-        "node_modules/bga-animations/src/animations/slide-animation.ts",
-        "node_modules/bga-animations/src/animations/slide-to-animation.ts",
-        "node_modules/bga-animations/src/animations-utils.ts",
-        "node_modules/bga-animations/src/animation-manager.ts",
-        "node_modules/bga-cards/src/animations.ts",
-        "node_modules/bga-cards/src/sort.ts",
-        "node_modules/bga-cards/src/stocks/card-stock.ts",
-        "node_modules/bga-cards/src/stocks/deck.ts",
-        "node_modules/bga-cards/src/stocks/line-stock.ts",
-        "node_modules/bga-cards/src/stocks/slot-stock.ts",
-        "node_modules/bga-cards/src/stocks/void-stock.ts",
-        "node_modules/bga-cards/src/stocks/manual-position-stock.ts",
-        "node_modules/bga-cards/src/card-manager.ts",
-        "src/glow.d.ts",
-        "src/tokens.ts",
-        "src/slide-utils.ts",
-        "src/stock-utils.ts",
-        "src/text-icons-formatter.ts",
-        "src/board/board.ts",
-        "src/meeting-track/meeting-track.ts",
-        "src/players-tables/player-table.ts",
-        "src/glow.ts",
-        "src/define.ts"
-    ]
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "strict": false,
+    "lib": [
+      "dom",
+      "esnext"
+    ],
+    "sourceMap": false,
+    "rootDir": "."
+  },
+  "include": [
+    "*.d.ts",
+    "src/ts/**/*.d.ts",
+    "src/ts/**/*.ts"
+  ]
 }

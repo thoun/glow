@@ -13,8 +13,8 @@
       filter: contrast(0.6);
     }
 
-    .card-sides {
-        .card-side {
+    .bga-cards_card-sides {
+        .bga-cards_card-side {
             background-size: auto 100%;
             background-image: url('img/module-tokens.png');
             box-shadow: unset;
@@ -33,7 +33,7 @@
             animation: selectable-card-animation 1s alternate infinite ease-in-out;
         }
 
-        .card-side {
+        .bga-cards_card-side {
             box-shadow: unset;
         }
     }
