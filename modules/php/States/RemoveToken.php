@@ -23,7 +23,9 @@ class RemoveToken extends GameState {
 
     public function getArgs(int $playerId): array {
         $tokens = array_values(array_filter($this->game->getPlayerTokens($playerId), fn($token) => $token->type != 2));
-        $count = $this->game->getGlobalVariable(REMOVE_TOKENS);
+        $companion = $this->game->getCompanionFromDb($this->game->companions->getCard($this->game->getSelectedCompanion($playerId)));
+        $tokenCost = array_sum(array_map(fn($condition) => -$condition - 50, array_filter($companion->effect->conditions, fn($condition) => $condition < -50 && $condition > -60)));
+        $count = $tokenCost > 0 ? $tokenCost : $this->game->getGlobalVariable(REMOVE_TOKENS);
 
         return [
             'tokens' => $tokens,
@@ -41,22 +43,32 @@ class RemoveToken extends GameState {
             throw new UserException("You can't apply that effect");
         }
 
-        $count = $this->game->getGlobalVariable(REMOVE_TOKENS) - 1;
-        $this->game->setGlobalVariable(REMOVE_TOKENS, $count);
-
-        $companion = $this->game->getCompanionFromDb($this->game->companions->getCard($companionId));
-        $this->game->applyEffect($currentPlayerId, -51, 1, $companion, 0, $tokenId);
-
-        if ($count > 0) {
-            $this->game->gamestate->setPrivateState($currentPlayerId, self::class);
-        } else {
-            $this->game->saveAppliedEffect($currentPlayerId, [1, $companionId]);
-
-            $this->game->bga->tableStats->inc('resolvedCards', 1);
-            $this->game->bga->playerStats->inc('resolvedCards', 1, $currentPlayerId);
-
-            $this->game->checkResolveCardEnd($currentPlayerId);
+        $availableTokens = array_filter($this->game->getPlayerTokens($currentPlayerId), fn($token) => $token->type != 2);
+        if (!\array_any($availableTokens, fn($token) => $token->id === $tokenId)) {
+            throw new UserException("You can't remove this token");
         }
+
+        if ($remainingEffect[2] === 'removeToken') {
+            // Pay Vorivi's cost and apply its reward together, through normal card resolution.
+            $this->game->applyCardEffect($currentPlayerId, 1, $companionId, tokenId: $tokenId);
+        } else {
+            $count = $this->game->getGlobalVariable(REMOVE_TOKENS) - 1;
+            $this->game->setGlobalVariable(REMOVE_TOKENS, $count);
+
+            $companion = $this->game->getCompanionFromDb($this->game->companions->getCard($companionId));
+            $this->game->applyEffect($currentPlayerId, -51, 1, $companion, 0, $tokenId);
+
+            if ($count > 0) {
+                $this->game->gamestate->setPrivateState($currentPlayerId, self::class);
+                return;
+            }
+            $this->game->saveAppliedEffect($currentPlayerId, [1, $companionId]);
+        }
+
+        $this->game->bga->tableStats->inc('resolvedCards', 1);
+        $this->game->bga->playerStats->inc('resolvedCards', 1, $currentPlayerId);
+
+        $this->game->checkResolveCardEnd($currentPlayerId);
     }
 
     #[PossibleAction]
@@ -65,7 +77,7 @@ class RemoveToken extends GameState {
 
         $resolveCardsForPlayer = (object)$this->game->argResolveCardsForPlayer($currentPlayerId);
         $remainingEffect = \array_find($resolveCardsForPlayer->remainingEffects, fn($remainingEffect) => $remainingEffect[0] == 1 && $remainingEffect[1] == $companionId);
-        if ($remainingEffect == null) {
+        if ($remainingEffect == null || $remainingEffect[2] === 'removeToken') {
             throw new UserException("You can't apply that effect");
         }
 

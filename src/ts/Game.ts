@@ -1581,6 +1581,11 @@ export class Game implements GlowGame {
     }
 
     public cardClick(type: number, id: number) {
+        if (this.gamedatas.gamestate.private_state?.name === 'privateKillToken' || this.gamedatas.gamestate.name === 'privateKillToken') {
+            this.killToken(type, id);
+            return;
+        }
+
         if (['resolveCards', 'multiResolveCards', 'privateResolveCards'].includes(this.gamedatas.gamestate.name)) {
             const args = this.getResolveArgs();
             const remainingEffect = args.remainingEffects.find(re => re[0] == type && re[1] == id);
@@ -1592,11 +1597,7 @@ export class Game implements GlowGame {
                 }
             }
         } else if (['move', 'multiMove', 'privateMove'].includes(this.gamedatas.gamestate.name)) {
-            if (this.gamedatas.gamestate.private_state?.name == 'privateKillToken') {
-                this.killToken(type, id);
-            } else {
-                this.discardCompanionSpell(type, id);
-            }
+            this.discardCompanionSpell(type, id);
         } else if (['swap', 'swapMulti'].includes(this.gamedatas.gamestate.name)) {
             this.swap(id);
         } else {

@@ -149,7 +149,7 @@ $this->COMPANIONS_EXPANSION1_SETS = [
     'adds' => [
       // A
       201 => new CompanionCard('Glint', -2, new Effect([5, 1], [51, 21]), 2),
-      202 => new CompanionCard('Cyld', 0, new Effect([1, 3], [51, 41])),
+      202 => new CompanionCard('Cyld', 0, new Effect([1, 3], [51, 41]), 2),
       203 => new CompanionCard('Solas', -1, new Effect([4], [51])),
       204 => new CompanionCard('Cyld', 1, new Effect([5, 5], [52])),
       // B

@@ -27,9 +27,9 @@ class PrivateKillToken extends GameState {
             throw new \TypeError('Argument "type" must be an integer');
         }
 
-        $this->game->applyDiscardCompanionSpell($currentPlayerId, $type, $id);
         $args = new \stdClass();
         $this->game->addActivableTokens($currentPlayerId, $args);
+        $this->game->applyDiscardCompanionSpell($currentPlayerId, $type, $id);
         $this->game->removePlayerToken($currentPlayerId, $args->killTokenId);
 
         $this->game->checkActivateTokenEnd($currentPlayerId);

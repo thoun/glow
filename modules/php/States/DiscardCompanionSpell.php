@@ -31,8 +31,6 @@ class DiscardCompanionSpell extends GameState {
         $route = \array_find($possibleRoutes, fn($possibleRoute) => $possibleRoute->destination == $destination && ($from == null || $possibleRoute->from == $from));
 
         $this->game->applyMove($currentPlayerId, $route);
-
-        $this->game->gamestate->nextPrivateState($currentPlayerId, PrivateMove::class);
     }
 
     #[PossibleAction]
